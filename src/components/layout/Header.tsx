@@ -24,41 +24,43 @@ const navigation = [
     icon: ShoppingCart,
     submenu: [
       { name: "Tous les produits", href: "/marketplace" },
-      { name: "Promotions", href: "/marketplace/promos" },
-      { name: "Nouveautés", href: "/marketplace/new" },
+      { name: "Rechercher", href: "/search" },
     ]
   },
   { 
     name: "Vendre", 
-    href: "/sell",
+    href: "/seller/dashboard",
     icon: Store,
     submenu: [
-      { name: "Ouvrir une boutique", href: "/sell/start" },
       { name: "Espace vendeur", href: "/seller/dashboard" },
+      { name: "Mes produits", href: "/seller/products" },
+      { name: "Commandes", href: "/seller/orders" },
+      { name: "Finances", href: "/seller/finances" },
     ]
   },
   { 
     name: "Transit Chine", 
-    href: "/transit",
+    href: "/marketplace",
     icon: Globe,
   },
   { 
     name: "Livraison", 
-    href: "/delivery",
+    href: "/courier/dashboard",
     icon: Truck,
     submenu: [
-      { name: "Suivre un colis", href: "/tracking" },
-      { name: "Devenir coursier", href: "/courier/join" },
+      { name: "Espace coursier", href: "/courier/dashboard" },
+      { name: "Missions", href: "/courier/missions" },
+      { name: "Mes revenus", href: "/courier/earnings" },
     ]
   },
   { 
     name: "Academy", 
-    href: "/academy",
+    href: "/marketplace",
     icon: GraduationCap,
   },
   { 
     name: "Investir", 
-    href: "/invest",
+    href: "/marketplace",
     icon: BarChart3,
   },
 ];
