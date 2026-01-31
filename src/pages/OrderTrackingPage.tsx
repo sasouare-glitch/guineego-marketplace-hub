@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Copy, Check, RefreshCw } from "lucide-react";
+import { ArrowLeft, Copy, Check, RefreshCw, XCircle } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { OrderTimeline, defaultOrderSteps } from "@/components/orders/OrderTimeline";
 import { OrderStatusCard } from "@/components/orders/OrderStatusCard";
 import { OrderItemsList } from "@/components/orders/OrderItemsList";
+import { CancelOrderDialog } from "@/components/orders/CancelOrderDialog";
 import { toast } from "sonner";
 
 // Mock order data
@@ -56,11 +58,17 @@ const mockOrder = {
 
 export default function OrderTrackingPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [orderStatus, setOrderStatus] = useState<"pending" | "preparing" | "picked" | "transit" | "delivered" | "cancelled">(mockOrder.status);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const orderId = id || mockOrder.id;
+
+  // Check if order can be cancelled (not delivered or already cancelled)
+  const canCancel = !["delivered", "cancelled"].includes(orderStatus);
 
   const copyOrderId = () => {
     navigator.clipboard.writeText(orderId);
@@ -76,6 +84,17 @@ export default function OrderTrackingPage() {
     setLastUpdate(new Date());
     setIsRefreshing(false);
     toast.success("Statut mis à jour");
+  };
+
+  const handleCancelOrder = async (reason: string) => {
+    setIsCancelling(true);
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setOrderStatus("cancelled");
+    setIsCancelling(false);
+    toast.success("Commande annulée", {
+      description: "Le remboursement sera effectué sous 24-48h",
+    });
   };
 
   // Auto-refresh every 30 seconds
@@ -148,16 +167,35 @@ export default function OrderTrackingPage() {
           </p>
         </motion.div>
 
+        {/* Cancelled Banner */}
+        {orderStatus === "cancelled" && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-3"
+          >
+            <XCircle className="w-5 h-5 text-destructive" />
+            <div>
+              <p className="font-medium text-destructive">Commande annulée</p>
+              <p className="text-sm text-muted-foreground">
+                Le remboursement sera effectué sous 24-48h via votre méthode de paiement.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Status Card */}
-            <OrderStatusCard
-              status={mockOrder.status}
-              estimatedTime={mockOrder.estimatedDelivery}
-              courier={mockOrder.courier}
-              currentLocation={mockOrder.currentLocation}
-            />
+            {orderStatus !== "cancelled" && (
+              <OrderStatusCard
+                status={orderStatus as "preparing" | "picked" | "transit" | "delivered"}
+                estimatedTime={mockOrder.estimatedDelivery}
+                courier={mockOrder.courier}
+                currentLocation={mockOrder.currentLocation}
+              />
+            )}
 
             {/* Timeline */}
             <Card>
@@ -220,13 +258,22 @@ export default function OrderTrackingPage() {
 
             {/* Help */}
             <Card>
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-3">
+              <CardContent className="p-4 space-y-3">
+                <p className="text-sm text-muted-foreground">
                   Un problème avec votre commande ?
                 </p>
                 <Button variant="outline" className="w-full">
                   Contacter le support
                 </Button>
+                
+                {/* Cancel Order */}
+                {canCancel && (
+                  <CancelOrderDialog
+                    orderNumber={orderId}
+                    onCancel={handleCancelOrder}
+                    isProcessing={isCancelling}
+                  />
+                )}
               </CardContent>
             </Card>
           </div>
