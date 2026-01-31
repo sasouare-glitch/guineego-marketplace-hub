@@ -56,10 +56,19 @@ function interpolate(text: string, params?: Record<string, string | number>): st
 export function createTranslator(language: Language) {
   const translation = translations[language];
 
-  return function t(key: string, params?: Record<string, string | number>): string {
+  const t = function (key: string, params?: Record<string, string | number>): string {
     const value = getNestedValue(translation, key);
     return interpolate(value, params);
   };
+
+  return t;
+}
+
+/**
+ * Get translation object directly for a specific language
+ */
+export function getTranslations(language: Language): TranslationKeys {
+  return translations[language];
 }
 
 export { translations };

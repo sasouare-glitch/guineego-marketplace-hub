@@ -36,10 +36,38 @@ export const fr = {
     settings: "Paramètres",
     logout: "Déconnexion",
     login: "Connexion",
-    register: "Inscription",
+    register: "S'inscrire",
+    buy: "Acheter",
+    sell: "Vendre",
+    transit: "Transit Chine",
+    delivery: "Livraison",
+    invest: "Investir",
   },
 
-  // Home page
+  // Header Menu
+  header: {
+    allProducts: "Tous les produits",
+    search: "Rechercher",
+    sellerSpace: "Espace vendeur",
+    myProducts: "Mes produits",
+    ordersMenu: "Commandes",
+    finances: "Finances",
+    dashboard: "Tableau de bord",
+    calculateQuote: "Calculer un devis",
+    trackPackage: "Suivi de colis",
+    myShipments: "Mes expéditions",
+    courierSpace: "Espace coursier",
+    missions: "Missions",
+    myEarnings: "Mes revenus",
+    allCourses: "Toutes les formations",
+    freeCourses: "Formations gratuites",
+    myPortfolio: "Mon portfolio",
+    opportunities: "Opportunités",
+    myInvestments: "Mes placements",
+    searchPackage: "Rechercher un colis...",
+  },
+
+  // Home page / Hero
   home: {
     heroTitle: "Livraison rapide dans tout Conakry",
     heroSubtitle: "Commandez vos produits préférés et recevez-les en moins de 2h",
@@ -48,6 +76,82 @@ export const fr = {
     features: "Fonctionnalités",
     categories: "Catégories",
     partners: "Nos partenaires",
+  },
+
+  // Hero Section
+  hero: {
+    badge: "Première marketplace de Guinée",
+    title1: "Achetez, Vendez,",
+    title2: "Connectez la Guinée",
+    description: "GuineeGo LAT réunit vendeurs, acheteurs, livreurs et investisseurs sur une seule plateforme. Transit Chine-Guinée, formation e-commerce, paiement mobile sécurisé.",
+    exploreStore: "Explorer la boutique",
+    becomeSeller: "Devenir vendeur",
+    products: "Produits",
+    sellers: "Vendeurs",
+    customers: "Clients",
+    delivery: "Livraison",
+    marketplace: "Marketplace",
+    transitChina: "Transit Chine",
+    transitDesc: "Import simplifié",
+    deliveryService: "Livraison",
+    deliveryDesc: "Conakry & intérieur",
+    secure: "Sécurisé",
+    secureDesc: "Orange & MTN Money",
+  },
+
+  // Categories Section
+  categories: {
+    title: "Parcourir par catégorie",
+    subtitle: "Découvrez nos meilleures catégories",
+    electronics: "Électronique",
+    fashion: "Mode",
+    home: "Maison",
+    beauty: "Beauté",
+    sports: "Sports",
+    auto: "Auto",
+    gifts: "Cadeaux",
+    kids: "Enfants",
+    books: "Livres",
+    food: "Alimentation",
+  },
+
+  // Features Section
+  features: {
+    title: "Pourquoi choisir GuineeGo?",
+    subtitle: "Des fonctionnalités pensées pour vous",
+    fastDelivery: "Livraison rapide",
+    fastDeliveryDesc: "Recevez vos commandes en 24h dans Conakry",
+    securePayment: "Paiement sécurisé",
+    securePaymentDesc: "Orange Money, MTN Mobile Money et plus",
+    quality: "Qualité garantie",
+    qualityDesc: "Produits vérifiés par notre équipe",
+    support: "Support 24/7",
+    supportDesc: "Une équipe à votre écoute",
+  },
+
+  // Academy Section
+  academy: {
+    title: "GuineeGo Academy",
+    subtitle: "Formez-vous au e-commerce",
+    description: "Apprenez à vendre en ligne avec nos formations gratuites et certifiantes",
+    viewCourses: "Voir les formations",
+    students: "étudiants",
+    courses: "formations",
+    certified: "certifiés",
+  },
+
+  // Partners Section
+  partners: {
+    title: "Ils nous font confiance",
+    subtitle: "Nos partenaires de confiance",
+  },
+
+  // CTA Section
+  cta: {
+    title: "Prêt à commencer?",
+    subtitle: "Rejoignez des milliers de vendeurs et acheteurs sur GuineeGo",
+    startSelling: "Commencer à vendre",
+    exploreProducts: "Explorer les produits",
   },
 
   // Marketplace
@@ -198,6 +302,28 @@ export const fr = {
     faq: "FAQ",
     careers: "Carrières",
     copyright: "Tous droits réservés",
+    description: "La première marketplace guinéenne. Achetez, vendez et expédiez en toute confiance.",
+    marketplaceTitle: "Marketplace",
+    allProducts: "Tous les produits",
+    promotions: "Promotions",
+    categories: "Catégories",
+    bestSellers: "Meilleures ventes",
+    sellersTitle: "Vendeurs",
+    becomeSeller: "Devenir vendeur",
+    sellerCenter: "Centre vendeur",
+    sellerGuide: "Guide du vendeur",
+    pricing: "Tarifs",
+    servicesTitle: "Services",
+    transitChina: "Transit Chine-Guinée",
+    academy: "GuineeGo Academy",
+    expressDelivery: "Livraison express",
+    invest: "Investir",
+    helpTitle: "Aide",
+    helpCenter: "Centre d'aide",
+    myOrders: "Mes commandes",
+    returns: "Retours & remboursements",
+    contactUs: "Nous contacter",
+    legalNotice: "Mentions légales",
   },
 
   // Time

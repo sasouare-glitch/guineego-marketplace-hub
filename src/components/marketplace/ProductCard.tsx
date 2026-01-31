@@ -96,7 +96,7 @@ export const ProductCard = ({
               }}
             >
               <ShoppingCart className="w-4 h-4" />
-              {t("marketplace.addToCart")}
+              {t.marketplace.addToCart}
             </Button>
           </div>
         )}
@@ -105,7 +105,7 @@ export const ProductCard = ({
         {!product.inStock && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <Badge variant="secondary" className="bg-white text-foreground">
-              {t("marketplace.outOfStock")}
+              {t.marketplace.outOfStock}
             </Badge>
           </div>
         )}
