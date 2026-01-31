@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
 import { NotificationProvider } from "@/hooks/useNotifications";
+import { PreferencesProvider } from "@/hooks/usePreferences";
 import React from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -46,11 +47,12 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <NotificationProvider>
-            <Toaster />
-            <Sonner />
+      <PreferencesProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <NotificationProvider>
+              <Toaster />
+              <Sonner />
             <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -100,6 +102,7 @@ const App = () => (
           </NotificationProvider>
         </WishlistProvider>
       </CartProvider>
+    </PreferencesProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

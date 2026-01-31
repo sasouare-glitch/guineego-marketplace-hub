@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export interface Product {
   id: string;
@@ -34,9 +36,8 @@ export const ProductCard = ({
   onToggleWishlist,
   isInWishlist = false 
 }: ProductCardProps) => {
-  const formatPrice = (price: number) => {
-    return price.toLocaleString('fr-GN') + ' GNF';
-  };
+  const { format } = useCurrency();
+  const { t } = useTranslation();
 
   return (
     <Card className="group overflow-hidden bg-card border-border hover:shadow-xl transition-all duration-300">
@@ -95,7 +96,7 @@ export const ProductCard = ({
               }}
             >
               <ShoppingCart className="w-4 h-4" />
-              Ajouter au panier
+              {t("marketplace.addToCart")}
             </Button>
           </div>
         )}
@@ -104,7 +105,7 @@ export const ProductCard = ({
         {!product.inStock && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <Badge variant="secondary" className="bg-white text-foreground">
-              Rupture de stock
+              {t("marketplace.outOfStock")}
             </Badge>
           </div>
         )}
@@ -147,11 +148,11 @@ export const ProductCard = ({
         {/* Price */}
         <div className="mt-2 flex items-baseline gap-2">
           <span className="font-display font-bold text-lg text-guinea-green">
-            {formatPrice(product.price)}
+            {format(product.price)}
           </span>
           {product.originalPrice && (
             <span className="text-xs text-muted-foreground line-through">
-              {formatPrice(product.originalPrice)}
+              {format(product.originalPrice)}
             </span>
           )}
         </div>
