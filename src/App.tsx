@@ -9,6 +9,10 @@ import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerProducts from "./pages/seller/SellerProducts";
 import SellerOrders from "./pages/seller/SellerOrders";
 import SellerFinances from "./pages/seller/SellerFinances";
+import CourierDashboard from "./pages/courier/CourierDashboard";
+import CourierMissions from "./pages/courier/CourierMissions";
+import CourierMissionDetail from "./pages/courier/CourierMissionDetail";
+import CourierEarnings from "./pages/courier/CourierEarnings";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +29,11 @@ const App = () => (
           <Route path="/seller/products" element={<SellerProducts />} />
           <Route path="/seller/orders" element={<SellerOrders />} />
           <Route path="/seller/finances" element={<SellerFinances />} />
+          {/* Courier Routes */}
+          <Route path="/courier/dashboard" element={<CourierDashboard />} />
+          <Route path="/courier/missions" element={<CourierMissions />} />
+          <Route path="/courier/mission/:id" element={<CourierMissionDetail />} />
+          <Route path="/courier/earnings" element={<CourierEarnings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
