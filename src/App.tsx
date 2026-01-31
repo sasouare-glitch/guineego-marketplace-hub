@@ -21,6 +21,7 @@ import ProductDetail from "./pages/ProductDetail";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
+import MyOrdersPage from "./pages/MyOrdersPage";
 import Academy from "./pages/Academy";
 import CourseDetail from "./pages/CourseDetail";
 import InvestorDashboard from "./pages/investor/InvestorDashboard";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order/:id" element={<OrderTrackingPage />} />
             <Route path="/order" element={<OrderTrackingPage />} />
+            <Route path="/orders" element={<MyOrdersPage />} />
             {/* Academy Routes */}
             <Route path="/academy" element={<Academy />} />
             <Route path="/academy/course/:id" element={<CourseDetail />} />
