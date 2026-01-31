@@ -167,6 +167,15 @@ export function Header() {
               )}
             </Link>
             
+            {/* Profile Link */}
+            <Link 
+              to="/profile" 
+              className="p-2 text-foreground/70 hover:text-primary transition-colors rounded-full hover:bg-primary/5"
+              title="Mon profil"
+            >
+              <User className="w-5 h-5" />
+            </Link>
+            
             <div className="hidden sm:flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/login">Connexion</Link>
