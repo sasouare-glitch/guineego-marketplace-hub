@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Smartphone, Store, Globe } from "lucide-react";
+import { Smartphone, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function CTASection() {
+  const { t } = useTranslation();
+
   return (
     <section className="section-padding bg-hero-gradient relative overflow-hidden">
       {/* Animated background elements */}
@@ -28,25 +31,24 @@ export function CTASection() {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white mb-6">
-              Prêt à rejoindre la révolution du e-commerce guinéen ?
+              {t.cta.title}
             </h2>
             
             <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto">
-              Des milliers de Guinéens font déjà confiance à GuineeGo LAT pour 
-              acheter, vendre et développer leur activité. Et vous ?
+              {t.cta.subtitle}
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 mb-12">
               <Button variant="glass" size="xl" asChild>
                 <Link to="/marketplace">
                   <Smartphone className="w-5 h-5" />
-                  Commencer à acheter
+                  {t.cta.startBuying}
                 </Link>
               </Button>
               <Button variant="accent" size="xl" asChild>
                 <Link to="/sell/start">
                   <Store className="w-5 h-5" />
-                  Ouvrir ma boutique
+                  {t.cta.openShop}
                 </Link>
               </Button>
             </div>
@@ -59,7 +61,7 @@ export function CTASection() {
               transition={{ delay: 0.2 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <span className="text-white/60 text-sm">Bientôt disponible sur</span>
+              <span className="text-white/60 text-sm">{t.cta.comingSoon}</span>
               <div className="flex gap-3">
                 <div className="h-10 px-4 bg-white/10 rounded-lg flex items-center gap-2 text-white">
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
