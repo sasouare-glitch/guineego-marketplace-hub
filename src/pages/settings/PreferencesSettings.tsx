@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -23,78 +22,48 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { usePreferences, type Language, type Theme, type Currency } from "@/hooks/usePreferences";
+import { useTranslation } from "@/hooks/useTranslation";
+import { useCurrency } from "@/hooks/useCurrency";
 
 const languages = [
-  { code: "fr", label: "Français", flag: "🇫🇷" },
-  { code: "en", label: "English", flag: "🇬🇧" },
-  { code: "ar", label: "العربية", flag: "🇸🇦" },
+  { code: "fr" as Language, label: "Français", flag: "🇫🇷" },
+  { code: "en" as Language, label: "English", flag: "🇬🇧" },
+  { code: "ar" as Language, label: "العربية", flag: "🇸🇦" },
 ];
 
 const currencies = [
-  { code: "GNF", label: "Franc Guinéen", symbol: "GNF" },
-  { code: "USD", label: "Dollar US", symbol: "$" },
-  { code: "EUR", label: "Euro", symbol: "€" },
-  { code: "XOF", label: "Franc CFA", symbol: "CFA" },
+  { code: "GNF" as Currency, label: "Franc Guinéen", symbol: "GNF" },
+  { code: "USD" as Currency, label: "Dollar US", symbol: "$" },
+  { code: "EUR" as Currency, label: "Euro", symbol: "€" },
+  { code: "XOF" as Currency, label: "Franc CFA", symbol: "CFA" },
 ];
 
 const themes = [
-  { id: "light", label: "Clair", icon: Sun, description: "Thème lumineux" },
-  { id: "dark", label: "Sombre", icon: Moon, description: "Thème sombre" },
-  { id: "system", label: "Système", icon: Monitor, description: "Suit les paramètres système" },
+  { id: "light" as Theme, labelKey: "settings.themeLight", icon: Sun },
+  { id: "dark" as Theme, labelKey: "settings.themeDark", icon: Moon },
+  { id: "system" as Theme, labelKey: "settings.themeSystem", icon: Monitor },
 ];
 
 export default function PreferencesSettings() {
-  const [language, setLanguage] = useState("fr");
-  const [theme, setTheme] = useState("light");
-  const [currency, setCurrency] = useState("GNF");
-  const [hasChanges, setHasChanges] = useState(false);
-
-  const handleLanguageChange = (value: string) => {
-    setLanguage(value);
-    setHasChanges(true);
-  };
-
-  const handleThemeChange = (value: string) => {
-    setTheme(value);
-    setHasChanges(true);
-    // In a real app, this would update the theme
-    if (value === "dark") {
-      document.documentElement.classList.add("dark");
-    } else if (value === "light") {
-      document.documentElement.classList.remove("dark");
-    } else {
-      // System preference
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      if (prefersDark) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }
-  };
-
-  const handleCurrencyChange = (value: string) => {
-    setCurrency(value);
-    setHasChanges(true);
-  };
+  const { preferences, setLanguage, setTheme, setCurrency, resetPreferences } = usePreferences();
+  const { t } = useTranslation();
+  const { format } = useCurrency();
 
   const handleSave = () => {
-    // In a real app, this would save to the backend
-    toast.success("Préférences enregistrées");
-    setHasChanges(false);
+    toast.success(t("common.save"));
   };
 
   const handleReset = () => {
-    setLanguage("fr");
-    setTheme("light");
-    setCurrency("GNF");
-    document.documentElement.classList.remove("dark");
-    setHasChanges(false);
+    resetPreferences();
     toast.info("Préférences réinitialisées");
   };
 
-  const selectedLanguage = languages.find((l) => l.code === language);
-  const selectedCurrency = currencies.find((c) => c.code === currency);
+  const selectedLanguage = languages.find((l) => l.code === preferences.language);
+  const selectedCurrency = currencies.find((c) => c.code === preferences.currency);
+
+  // Example price for preview
+  const examplePrice = 150000; // 150,000 GNF
 
   return (
     <div className="min-h-screen bg-background">
@@ -106,8 +75,8 @@ export default function PreferencesSettings() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Préférences</h1>
-              <p className="text-sm text-muted-foreground">Personnalisez votre expérience</p>
+              <h1 className="text-xl font-bold text-foreground">{t("settings.preferences")}</h1>
+              <p className="text-sm text-muted-foreground">{t("settings.preferencesDesc")}</p>
             </div>
           </div>
         </div>
@@ -127,15 +96,17 @@ export default function PreferencesSettings() {
                     <Globe className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Langue</CardTitle>
+                    <CardTitle className="text-lg">{t("settings.language")}</CardTitle>
                     <CardDescription>
-                      Choisissez la langue de l'interface
+                      {preferences.language === "fr" && "Choisissez la langue de l'interface"}
+                      {preferences.language === "en" && "Choose the interface language"}
+                      {preferences.language === "ar" && "اختر لغة الواجهة"}
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <Select value={language} onValueChange={handleLanguageChange}>
+                <Select value={preferences.language} onValueChange={(v) => setLanguage(v as Language)}>
                   <SelectTrigger className="w-full">
                     <SelectValue>
                       {selectedLanguage && (
@@ -171,45 +142,47 @@ export default function PreferencesSettings() {
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    {theme === "dark" ? (
+                    {preferences.theme === "dark" ? (
                       <Moon className="w-5 h-5 text-primary" />
-                    ) : theme === "system" ? (
+                    ) : preferences.theme === "system" ? (
                       <Monitor className="w-5 h-5 text-primary" />
                     ) : (
                       <Sun className="w-5 h-5 text-primary" />
                     )}
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Apparence</CardTitle>
+                    <CardTitle className="text-lg">{t("settings.theme")}</CardTitle>
                     <CardDescription>
-                      Personnalisez l'apparence de l'application
+                      {preferences.language === "fr" && "Personnalisez l'apparence de l'application"}
+                      {preferences.language === "en" && "Customize the application appearance"}
+                      {preferences.language === "ar" && "تخصيص مظهر التطبيق"}
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <RadioGroup
-                  value={theme}
-                  onValueChange={handleThemeChange}
+                  value={preferences.theme}
+                  onValueChange={(v) => setTheme(v as Theme)}
                   className="grid grid-cols-3 gap-3"
                 >
-                  {themes.map((t) => {
-                    const Icon = t.icon;
-                    const isSelected = theme === t.id;
+                  {themes.map((themeOption) => {
+                    const Icon = themeOption.icon;
+                    const isSelected = preferences.theme === themeOption.id;
                     return (
                       <Label
-                        key={t.id}
-                        htmlFor={t.id}
+                        key={themeOption.id}
+                        htmlFor={themeOption.id}
                         className={cn(
-                          "flex flex-col items-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                          "relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 cursor-pointer transition-all",
                           isSelected
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/50"
                         )}
                       >
                         <RadioGroupItem
-                          value={t.id}
-                          id={t.id}
+                          value={themeOption.id}
+                          id={themeOption.id}
                           className="sr-only"
                         />
                         <div
@@ -220,7 +193,7 @@ export default function PreferencesSettings() {
                         >
                           <Icon className="w-5 h-5" />
                         </div>
-                        <span className="text-sm font-medium">{t.label}</span>
+                        <span className="text-sm font-medium">{t(themeOption.labelKey)}</span>
                         {isSelected && (
                           <Check className="w-4 h-4 text-primary absolute top-2 right-2" />
                         )}
@@ -245,15 +218,17 @@ export default function PreferencesSettings() {
                     <Coins className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">Devise</CardTitle>
+                    <CardTitle className="text-lg">{t("settings.currency")}</CardTitle>
                     <CardDescription>
-                      Devise utilisée pour l'affichage des prix
+                      {preferences.language === "fr" && "Devise utilisée pour l'affichage des prix"}
+                      {preferences.language === "en" && "Currency used for price display"}
+                      {preferences.language === "ar" && "العملة المستخدمة لعرض الأسعار"}
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <Select value={currency} onValueChange={handleCurrencyChange}>
+                <Select value={preferences.currency} onValueChange={(v) => setCurrency(v as Currency)}>
                   <SelectTrigger className="w-full">
                     <SelectValue>
                       {selectedCurrency && (
@@ -280,7 +255,7 @@ export default function PreferencesSettings() {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Note: Les prix seront convertis approximativement. La devise de paiement reste le GNF.
+                  {t("settings.currencyNote")}
                 </p>
               </CardContent>
             </Card>
@@ -293,14 +268,13 @@ export default function PreferencesSettings() {
               onClick={handleReset}
               className="flex-1"
             >
-              Réinitialiser
+              {preferences.language === "fr" ? "Réinitialiser" : preferences.language === "en" ? "Reset" : "إعادة تعيين"}
             </Button>
             <Button
               onClick={handleSave}
               className="flex-1"
-              disabled={!hasChanges}
             >
-              {hasChanges ? "Enregistrer" : "Enregistré"}
+              {t("common.save")}
             </Button>
           </div>
 
@@ -312,18 +286,30 @@ export default function PreferencesSettings() {
           >
             <Card className="bg-secondary/30">
               <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground mb-3">Aperçu de vos préférences</p>
-                <div className="flex flex-wrap gap-2">
+                <p className="text-sm text-muted-foreground mb-3">
+                  {preferences.language === "fr" && "Aperçu de vos préférences"}
+                  {preferences.language === "en" && "Preview of your preferences"}
+                  {preferences.language === "ar" && "معاينة تفضيلاتك"}
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-background rounded-full text-sm">
                     {selectedLanguage?.flag} {selectedLanguage?.label}
                   </span>
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-background rounded-full text-sm">
-                    {theme === "dark" ? "🌙" : theme === "system" ? "💻" : "☀️"}{" "}
-                    {themes.find((t) => t.id === theme)?.label}
+                    {preferences.theme === "dark" ? "🌙" : preferences.theme === "system" ? "💻" : "☀️"}{" "}
+                    {t(`settings.theme${preferences.theme.charAt(0).toUpperCase() + preferences.theme.slice(1)}` as any)}
                   </span>
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-background rounded-full text-sm">
                     💰 {selectedCurrency?.code}
                   </span>
+                </div>
+                <div className="p-3 bg-background rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {preferences.language === "fr" && "Exemple de prix:"}
+                    {preferences.language === "en" && "Price example:"}
+                    {preferences.language === "ar" && "مثال على السعر:"}
+                  </p>
+                  <p className="text-lg font-bold text-primary">{format(examplePrice)}</p>
                 </div>
               </CardContent>
             </Card>
