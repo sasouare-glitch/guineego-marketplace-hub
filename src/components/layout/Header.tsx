@@ -12,7 +12,8 @@ import {
   GraduationCap,
   Store,
   Globe,
-  BarChart3
+  BarChart3,
+  ClipboardList
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
@@ -144,7 +145,15 @@ export function Header() {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Link 
+              to="/orders" 
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-lg hover:bg-primary/5"
+            >
+              <ClipboardList className="w-4 h-4" />
+              <span className="hidden md:inline">Mes commandes</span>
+            </Link>
+            
             <Link to="/cart" className="relative p-2 text-foreground/70 hover:text-primary transition-colors">
               <ShoppingCart className="w-5 h-5" />
               {itemCount > 0 && (
@@ -196,6 +205,14 @@ export function Header() {
                     {item.name}
                   </Link>
                 ))}
+                <Link
+                  to="/orders"
+                  className="flex items-center gap-3 px-4 py-3 text-foreground/80 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <ClipboardList className="w-5 h-5" />
+                  Mes commandes
+                </Link>
                 <div className="pt-4 px-4 flex gap-2">
                   <Button variant="outline" className="flex-1" asChild>
                     <Link to="/login">Connexion</Link>
