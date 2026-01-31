@@ -64,8 +64,13 @@ const navigation = [
   },
   { 
     name: "Investir", 
-    href: "/marketplace",
+    href: "/investor/dashboard",
     icon: BarChart3,
+    submenu: [
+      { name: "Mon portfolio", href: "/investor/dashboard" },
+      { name: "Opportunités", href: "/investor/opportunities" },
+      { name: "Mes placements", href: "/investor/investments" },
+    ]
   },
 ];
 
