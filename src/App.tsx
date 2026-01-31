@@ -38,6 +38,7 @@ import TransitTracking from "./pages/transit/TransitTracking";
 import TransitShipments from "./pages/transit/TransitShipments";
 import ProfilePage from "./pages/ProfilePage";
 import SecuritySettings from "./pages/settings/SecuritySettings";
+import NotificationSettings from "./pages/settings/NotificationSettings";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/profile" element={<ProfilePage />} />
               {/* Settings Routes */}
               <Route path="/settings/security" element={<SecuritySettings />} />
+              <Route path="/settings/notifications" element={<NotificationSettings />} />
             {/* Academy Routes */}
             <Route path="/academy" element={<Academy />} />
             <Route path="/academy/course/:id" element={<CourseDetail />} />
