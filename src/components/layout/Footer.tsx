@@ -31,7 +31,7 @@ const footerLinks = {
   ],
   aide: [
     { name: "Centre d'aide", href: "/help" },
-    { name: "Suivre ma commande", href: "/tracking" },
+    { name: "Mes commandes", href: "/orders" },
     { name: "Retours & remboursements", href: "/returns" },
     { name: "Nous contacter", href: "/contact" },
   ],
