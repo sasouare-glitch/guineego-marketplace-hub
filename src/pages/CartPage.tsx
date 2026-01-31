@@ -37,14 +37,14 @@ const CartPage = () => {
               <ShoppingBag className="w-12 h-12 text-muted-foreground" />
             </div>
             <h1 className="font-display text-2xl font-bold mb-3">
-              {t("cart.empty")}
+              {t.cart.empty}
             </h1>
             <p className="text-muted-foreground mb-6">
-              {t("cart.emptyMessage")}
+              {t.cart.emptyMessage}
             </p>
             <Button asChild size="lg">
               <Link to="/marketplace">
-                {t("nav.marketplace")}
+                {t.nav.marketplace}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
@@ -61,7 +61,7 @@ const CartPage = () => {
 
       <main className="container-tight py-6">
         <h1 className="font-display text-2xl font-bold mb-6">
-          {t("cart.title")} ({itemCount} {itemCount > 1 ? 'articles' : 'article'})
+          {t.cart.title} ({itemCount} {itemCount > 1 ? 'articles' : 'article'})
         </h1>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -84,7 +84,7 @@ const CartPage = () => {
             <div className="mt-4">
               <Button variant="ghost" asChild>
                 <Link to="/marketplace" className="text-primary">
-                  ← {t("cart.continueShopping")}
+                  ← {t.cart.continueShopping}
                 </Link>
               </Button>
             </div>
@@ -111,16 +111,16 @@ const CartPage = () => {
             {/* Summary */}
             <Card className="bg-card border-border">
               <CardHeader>
-                <CardTitle className="text-lg">{t("checkout.orderSummary")}</CardTitle>
+                <CardTitle className="text-lg">{t.checkout.orderSummary}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t("cart.subtotal")}</span>
+                    <span className="text-muted-foreground">{t.cart.subtotal}</span>
                     <span>{format(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{t("cart.delivery")}</span>
+                    <span className="text-muted-foreground">{t.cart.delivery}</span>
                     <span>{format(deliveryFee)}</span>
                   </div>
                 </div>
@@ -128,13 +128,13 @@ const CartPage = () => {
                 <Separator />
 
                 <div className="flex justify-between font-display font-bold text-lg">
-                  <span>{t("cart.total")}</span>
+                  <span>{t.cart.total}</span>
                   <span className="text-guinea-green">{format(total)}</span>
                 </div>
 
                 <Button className="w-full bg-guinea-green hover:bg-guinea-green/90 gap-2" size="lg" asChild>
                   <Link to="/checkout">
-                    {t("cart.checkout")}
+                    {t.cart.checkout}
                     <ArrowRight className="w-5 h-5" />
                   </Link>
                 </Button>

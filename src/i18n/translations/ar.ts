@@ -39,9 +39,37 @@ export const ar: TranslationKeys = {
     logout: "تسجيل الخروج",
     login: "تسجيل الدخول",
     register: "إنشاء حساب",
+    buy: "شراء",
+    sell: "بيع",
+    transit: "شحن الصين",
+    delivery: "التوصيل",
+    invest: "استثمار",
   },
 
-  // Home page
+  // Header Menu
+  header: {
+    allProducts: "جميع المنتجات",
+    search: "بحث",
+    sellerSpace: "مساحة البائع",
+    myProducts: "منتجاتي",
+    ordersMenu: "الطلبات",
+    finances: "المالية",
+    dashboard: "لوحة التحكم",
+    calculateQuote: "حساب عرض السعر",
+    trackPackage: "تتبع الطرد",
+    myShipments: "شحناتي",
+    courierSpace: "مساحة المندوب",
+    missions: "المهام",
+    myEarnings: "أرباحي",
+    allCourses: "جميع الدورات",
+    freeCourses: "دورات مجانية",
+    myPortfolio: "محفظتي",
+    opportunities: "الفرص",
+    myInvestments: "استثماراتي",
+    searchPackage: "البحث عن طرد...",
+  },
+
+  // Home page / Hero
   home: {
     heroTitle: "توصيل سريع في كوناكري",
     heroSubtitle: "اطلب منتجاتك المفضلة واستلمها في أقل من ساعتين",
@@ -50,6 +78,82 @@ export const ar: TranslationKeys = {
     features: "المميزات",
     categories: "الفئات",
     partners: "شركاؤنا",
+  },
+
+  // Hero Section
+  hero: {
+    badge: "أول سوق إلكتروني في غينيا",
+    title1: "اشترِ، بِع،",
+    title2: "اربط غينيا",
+    description: "GuineeGo LAT يجمع البائعين والمشترين والسعاة والمستثمرين على منصة واحدة. شحن الصين-غينيا، تدريب التجارة الإلكترونية، دفع موبايل آمن.",
+    exploreStore: "استكشف المتجر",
+    becomeSeller: "كن بائعاً",
+    products: "منتجات",
+    sellers: "بائعين",
+    customers: "عملاء",
+    delivery: "توصيل",
+    marketplace: "السوق",
+    transitChina: "شحن الصين",
+    transitDesc: "استيراد مبسط",
+    deliveryService: "التوصيل",
+    deliveryDesc: "كوناكري والداخل",
+    secure: "آمن",
+    secureDesc: "Orange & MTN Money",
+  },
+
+  // Categories Section
+  categories: {
+    title: "تصفح حسب الفئة",
+    subtitle: "اكتشف أفضل فئاتنا",
+    electronics: "إلكترونيات",
+    fashion: "أزياء",
+    home: "منزل",
+    beauty: "جمال",
+    sports: "رياضة",
+    auto: "سيارات",
+    gifts: "هدايا",
+    kids: "أطفال",
+    books: "كتب",
+    food: "طعام",
+  },
+
+  // Features Section
+  features: {
+    title: "لماذا تختار GuineeGo؟",
+    subtitle: "ميزات مصممة لك",
+    fastDelivery: "توصيل سريع",
+    fastDeliveryDesc: "استلم طلباتك خلال 24 ساعة في كوناكري",
+    securePayment: "دفع آمن",
+    securePaymentDesc: "Orange Money و MTN Mobile Money والمزيد",
+    quality: "جودة مضمونة",
+    qualityDesc: "منتجات تم التحقق منها من فريقنا",
+    support: "دعم 24/7",
+    supportDesc: "فريق في خدمتك",
+  },
+
+  // Academy Section
+  academy: {
+    title: "أكاديمية GuineeGo",
+    subtitle: "تعلم التجارة الإلكترونية",
+    description: "تعلم البيع عبر الإنترنت مع دوراتنا المجانية والمعتمدة",
+    viewCourses: "عرض الدورات",
+    students: "طلاب",
+    courses: "دورات",
+    certified: "معتمدين",
+  },
+
+  // Partners Section
+  partners: {
+    title: "يثقون بنا",
+    subtitle: "شركاؤنا الموثوقون",
+  },
+
+  // CTA Section
+  cta: {
+    title: "مستعد للبدء؟",
+    subtitle: "انضم إلى آلاف البائعين والمشترين على GuineeGo",
+    startSelling: "ابدأ البيع",
+    exploreProducts: "استكشف المنتجات",
   },
 
   // Marketplace
@@ -200,6 +304,28 @@ export const ar: TranslationKeys = {
     faq: "الأسئلة الشائعة",
     careers: "الوظائف",
     copyright: "جميع الحقوق محفوظة",
+    description: "أول سوق إلكتروني في غينيا. اشترِ وبِع واشحن بثقة.",
+    marketplaceTitle: "السوق",
+    allProducts: "جميع المنتجات",
+    promotions: "العروض",
+    categories: "الفئات",
+    bestSellers: "الأكثر مبيعاً",
+    sellersTitle: "البائعون",
+    becomeSeller: "كن بائعاً",
+    sellerCenter: "مركز البائع",
+    sellerGuide: "دليل البائع",
+    pricing: "الأسعار",
+    servicesTitle: "الخدمات",
+    transitChina: "شحن الصين-غينيا",
+    academy: "أكاديمية GuineeGo",
+    expressDelivery: "توصيل سريع",
+    invest: "استثمر",
+    helpTitle: "المساعدة",
+    helpCenter: "مركز المساعدة",
+    myOrders: "طلباتي",
+    returns: "المرتجعات والاسترداد",
+    contactUs: "اتصل بنا",
+    legalNotice: "إشعار قانوني",
   },
 
   // Time

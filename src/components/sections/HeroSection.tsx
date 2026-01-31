@@ -1,17 +1,20 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Play, ShoppingBag, Truck, Globe, Shield } from "lucide-react";
+import { ArrowRight, ShoppingBag, Truck, Globe, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-marketplace.jpg";
-
-const stats = [
-  { value: "10K+", label: "Produits" },
-  { value: "500+", label: "Vendeurs" },
-  { value: "50K+", label: "Clients" },
-  { value: "24h", label: "Livraison" },
-];
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function HeroSection() {
+  const { t } = useTranslation();
+
+  const stats = [
+    { value: "10K+", label: t.hero.products },
+    { value: "500+", label: t.hero.sellers },
+    { value: "50K+", label: t.hero.customers },
+    { value: "24h", label: t.hero.delivery },
+  ];
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -55,7 +58,7 @@ export function HeroSection() {
             >
               <span className="w-2 h-2 bg-guinea-green rounded-full animate-pulse" />
               <span className="text-sm font-medium text-guinea-green">
-                🇬🇳 Première marketplace de Guinée
+                🇬🇳 {t.hero.badge}
               </span>
             </motion.div>
 
@@ -66,10 +69,10 @@ export function HeroSection() {
               transition={{ delay: 0.3, duration: 0.6 }}
               className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold text-white leading-tight mb-6"
             >
-              Achetez, Vendez,
+              {t.hero.title1}
               <br />
               <span className="text-gradient-primary bg-gradient-to-r from-guinea-green via-guinea-yellow to-guinea-green bg-clip-text text-transparent">
-                Connectez la Guinée
+                {t.hero.title2}
               </span>
             </motion.h1>
 
@@ -80,9 +83,7 @@ export function HeroSection() {
               transition={{ delay: 0.4, duration: 0.6 }}
               className="text-lg text-white/70 mb-8 max-w-lg"
             >
-              GuineeGo LAT réunit vendeurs, acheteurs, livreurs et investisseurs 
-              sur une seule plateforme. Transit Chine-Guinée, formation e-commerce, 
-              paiement mobile sécurisé.
+              {t.hero.description}
             </motion.p>
 
             {/* CTA Buttons */}
@@ -95,12 +96,12 @@ export function HeroSection() {
               <Button variant="hero" size="xl" asChild>
                 <Link to="/marketplace">
                   <ShoppingBag className="w-5 h-5" />
-                  Explorer la boutique
+                  {t.hero.exploreStore}
                 </Link>
               </Button>
               <Button variant="heroOutline" size="xl" asChild>
                 <Link to="/sell/start">
-                  Devenir vendeur
+                  {t.hero.becomeSeller}
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
@@ -138,10 +139,10 @@ export function HeroSection() {
             className="hidden lg:grid grid-cols-2 gap-4"
           >
             {[
-              { icon: ShoppingBag, title: "Marketplace", desc: "10 000+ produits", color: "guinea-green" },
-              { icon: Globe, title: "Transit Chine", desc: "Import simplifié", color: "guinea-yellow" },
-              { icon: Truck, title: "Livraison", desc: "Conakry & intérieur", color: "guinea-red" },
-              { icon: Shield, title: "Sécurisé", desc: "Orange & MTN Money", color: "guinea-green" },
+              { icon: ShoppingBag, title: t.hero.marketplace, desc: "10 000+ " + t.hero.products.toLowerCase(), color: "guinea-green" },
+              { icon: Globe, title: t.hero.transitChina, desc: t.hero.transitDesc, color: "guinea-yellow" },
+              { icon: Truck, title: t.hero.deliveryService, desc: t.hero.deliveryDesc, color: "guinea-red" },
+              { icon: Shield, title: t.hero.secure, desc: t.hero.secureDesc, color: "guinea-green" },
             ].map((feature, index) => (
               <motion.div
                 key={feature.title}

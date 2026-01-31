@@ -20,75 +20,77 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
-
-const navigation = [
-  { 
-    name: "Acheter", 
-    href: "/marketplace",
-    icon: ShoppingCart,
-    submenu: [
-      { name: "Tous les produits", href: "/marketplace" },
-      { name: "Rechercher", href: "/search" },
-    ]
-  },
-  { 
-    name: "Vendre", 
-    href: "/seller/dashboard",
-    icon: Store,
-    submenu: [
-      { name: "Espace vendeur", href: "/seller/dashboard" },
-      { name: "Mes produits", href: "/seller/products" },
-      { name: "Commandes", href: "/seller/orders" },
-      { name: "Finances", href: "/seller/finances" },
-    ]
-  },
-  { 
-    name: "Transit Chine", 
-    href: "/transit/dashboard",
-    icon: Globe,
-    submenu: [
-      { name: "Tableau de bord", href: "/transit/dashboard" },
-      { name: "Calculer un devis", href: "/transit/quote" },
-      { name: "Suivi de colis", href: "/transit/tracking" },
-      { name: "Mes expéditions", href: "/transit/shipments" },
-    ]
-  },
-  { 
-    name: "Livraison", 
-    href: "/courier/dashboard",
-    icon: Truck,
-    submenu: [
-      { name: "Espace coursier", href: "/courier/dashboard" },
-      { name: "Missions", href: "/courier/missions" },
-      { name: "Mes revenus", href: "/courier/earnings" },
-    ]
-  },
-  { 
-    name: "Academy", 
-    href: "/academy",
-    icon: GraduationCap,
-    submenu: [
-      { name: "Toutes les formations", href: "/academy" },
-      { name: "Formations gratuites", href: "/academy?free=true" },
-    ]
-  },
-  { 
-    name: "Investir", 
-    href: "/investor/dashboard",
-    icon: BarChart3,
-    submenu: [
-      { name: "Mon portfolio", href: "/investor/dashboard" },
-      { name: "Opportunités", href: "/investor/opportunities" },
-      { name: "Mes placements", href: "/investor/investments" },
-    ]
-  },
-];
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const { itemCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
+  const { t } = useTranslation();
+
+  const navigation = [
+    { 
+      name: t.nav.buy, 
+      href: "/marketplace",
+      icon: ShoppingCart,
+      submenu: [
+        { name: t.header.allProducts, href: "/marketplace" },
+        { name: t.header.search, href: "/search" },
+      ]
+    },
+    { 
+      name: t.nav.sell, 
+      href: "/seller/dashboard",
+      icon: Store,
+      submenu: [
+        { name: t.header.sellerSpace, href: "/seller/dashboard" },
+        { name: t.header.myProducts, href: "/seller/products" },
+        { name: t.header.ordersMenu, href: "/seller/orders" },
+        { name: t.header.finances, href: "/seller/finances" },
+      ]
+    },
+    { 
+      name: t.nav.transit, 
+      href: "/transit/dashboard",
+      icon: Globe,
+      submenu: [
+        { name: t.header.dashboard, href: "/transit/dashboard" },
+        { name: t.header.calculateQuote, href: "/transit/quote" },
+        { name: t.header.trackPackage, href: "/transit/tracking" },
+        { name: t.header.myShipments, href: "/transit/shipments" },
+      ]
+    },
+    { 
+      name: t.nav.delivery, 
+      href: "/courier/dashboard",
+      icon: Truck,
+      submenu: [
+        { name: t.header.courierSpace, href: "/courier/dashboard" },
+        { name: t.header.missions, href: "/courier/missions" },
+        { name: t.header.myEarnings, href: "/courier/earnings" },
+      ]
+    },
+    { 
+      name: t.nav.academy, 
+      href: "/academy",
+      icon: GraduationCap,
+      submenu: [
+        { name: t.header.allCourses, href: "/academy" },
+        { name: t.header.freeCourses, href: "/academy?free=true" },
+      ]
+    },
+    { 
+      name: t.nav.invest, 
+      href: "/investor/dashboard",
+      icon: BarChart3,
+      submenu: [
+        { name: t.header.myPortfolio, href: "/investor/dashboard" },
+        { name: t.header.opportunities, href: "/investor/opportunities" },
+        { name: t.header.myInvestments, href: "/investor/investments" },
+      ]
+    },
+  ];
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
@@ -155,14 +157,14 @@ export function Header() {
               className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-lg hover:bg-primary/5"
             >
               <ClipboardList className="w-4 h-4" />
-              <span className="hidden md:inline">Mes commandes</span>
+              <span className="hidden md:inline">{t.nav.orders}</span>
             </Link>
 
             {/* Notifications */}
             <NotificationCenter />
 
             {/* Wishlist */}
-            <Link to="/wishlist" className="relative p-2 text-foreground/70 hover:text-guinea-red transition-colors" title="Mes favoris">
+            <Link to="/wishlist" className="relative p-2 text-foreground/70 hover:text-guinea-red transition-colors" title={t.nav.wishlist}>
               <Heart className="w-5 h-5" />
               {wishlistCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-guinea-red text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -184,17 +186,17 @@ export function Header() {
             <Link 
               to="/profile" 
               className="p-2 text-foreground/70 hover:text-primary transition-colors rounded-full hover:bg-primary/5"
-              title="Mon profil"
+              title={t.nav.profile}
             >
               <User className="w-5 h-5" />
             </Link>
             
             <div className="hidden sm:flex items-center gap-2">
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/login">Connexion</Link>
+                <Link to="/login">{t.nav.login}</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link to="/register">S'inscrire</Link>
+                <Link to="/register">{t.nav.register}</Link>
               </Button>
             </div>
 
@@ -237,14 +239,14 @@ export function Header() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <ClipboardList className="w-5 h-5" />
-                  Mes commandes
+                  {t.nav.orders}
                 </Link>
                 <div className="pt-4 px-4 flex gap-2">
                   <Button variant="outline" className="flex-1" asChild>
-                    <Link to="/login">Connexion</Link>
+                    <Link to="/login">{t.nav.login}</Link>
                   </Button>
                   <Button className="flex-1" asChild>
-                    <Link to="/register">S'inscrire</Link>
+                    <Link to="/register">{t.nav.register}</Link>
                   </Button>
                 </div>
               </div>

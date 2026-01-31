@@ -39,11 +39,16 @@ const currencies = [
   { code: "XOF" as Currency, label: "Franc CFA", symbol: "CFA" },
 ];
 
-const themes = [
-  { id: "light" as Theme, labelKey: "settings.themeLight", icon: Sun },
-  { id: "dark" as Theme, labelKey: "settings.themeDark", icon: Moon },
-  { id: "system" as Theme, labelKey: "settings.themeSystem", icon: Monitor },
-];
+const getThemeLabel = (theme: Theme, t: ReturnType<typeof useTranslation>["t"]) => {
+  switch (theme) {
+    case "light":
+      return t.settings.themeLight;
+    case "dark":
+      return t.settings.themeDark;
+    case "system":
+      return t.settings.themeSystem;
+  }
+};
 
 export default function PreferencesSettings() {
   const { preferences, setLanguage, setTheme, setCurrency, resetPreferences } = usePreferences();
@@ -51,7 +56,7 @@ export default function PreferencesSettings() {
   const { format } = useCurrency();
 
   const handleSave = () => {
-    toast.success(t("common.save"));
+    toast.success(t.common.save);
   };
 
   const handleReset = () => {
@@ -65,6 +70,12 @@ export default function PreferencesSettings() {
   // Example price for preview
   const examplePrice = 150000; // 150,000 GNF
 
+  const themes = [
+    { id: "light" as Theme, label: t.settings.themeLight, icon: Sun },
+    { id: "dark" as Theme, label: t.settings.themeDark, icon: Moon },
+    { id: "system" as Theme, label: t.settings.themeSystem, icon: Monitor },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -75,8 +86,8 @@ export default function PreferencesSettings() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="text-xl font-bold text-foreground">{t("settings.preferences")}</h1>
-              <p className="text-sm text-muted-foreground">{t("settings.preferencesDesc")}</p>
+              <h1 className="text-xl font-bold text-foreground">{t.settings.preferences}</h1>
+              <p className="text-sm text-muted-foreground">{t.settings.preferencesDesc}</p>
             </div>
           </div>
         </div>
@@ -96,7 +107,7 @@ export default function PreferencesSettings() {
                     <Globe className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">{t("settings.language")}</CardTitle>
+                    <CardTitle className="text-lg">{t.settings.language}</CardTitle>
                     <CardDescription>
                       {preferences.language === "fr" && "Choisissez la langue de l'interface"}
                       {preferences.language === "en" && "Choose the interface language"}
@@ -151,7 +162,7 @@ export default function PreferencesSettings() {
                     )}
                   </div>
                   <div>
-                    <CardTitle className="text-lg">{t("settings.theme")}</CardTitle>
+                    <CardTitle className="text-lg">{t.settings.theme}</CardTitle>
                     <CardDescription>
                       {preferences.language === "fr" && "Personnalisez l'apparence de l'application"}
                       {preferences.language === "en" && "Customize the application appearance"}
@@ -193,7 +204,7 @@ export default function PreferencesSettings() {
                         >
                           <Icon className="w-5 h-5" />
                         </div>
-                        <span className="text-sm font-medium">{t(themeOption.labelKey)}</span>
+                        <span className="text-sm font-medium">{themeOption.label}</span>
                         {isSelected && (
                           <Check className="w-4 h-4 text-primary absolute top-2 right-2" />
                         )}
@@ -218,7 +229,7 @@ export default function PreferencesSettings() {
                     <Coins className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle className="text-lg">{t("settings.currency")}</CardTitle>
+                    <CardTitle className="text-lg">{t.settings.currency}</CardTitle>
                     <CardDescription>
                       {preferences.language === "fr" && "Devise utilisée pour l'affichage des prix"}
                       {preferences.language === "en" && "Currency used for price display"}
@@ -255,7 +266,7 @@ export default function PreferencesSettings() {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground mt-2">
-                  {t("settings.currencyNote")}
+                  {t.settings.currencyNote}
                 </p>
               </CardContent>
             </Card>
@@ -274,7 +285,7 @@ export default function PreferencesSettings() {
               onClick={handleSave}
               className="flex-1"
             >
-              {t("common.save")}
+              {t.common.save}
             </Button>
           </div>
 
@@ -297,7 +308,7 @@ export default function PreferencesSettings() {
                   </span>
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-background rounded-full text-sm">
                     {preferences.theme === "dark" ? "🌙" : preferences.theme === "system" ? "💻" : "☀️"}{" "}
-                    {t(`settings.theme${preferences.theme.charAt(0).toUpperCase() + preferences.theme.slice(1)}` as any)}
+                    {getThemeLabel(preferences.theme, t)}
                   </span>
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-background rounded-full text-sm">
                     💰 {selectedCurrency?.code}

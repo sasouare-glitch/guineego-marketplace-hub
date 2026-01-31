@@ -9,33 +9,7 @@ import {
   Mail,
   MapPin
 } from "lucide-react";
-
-const footerLinks = {
-  marketplace: [
-    { name: "Tous les produits", href: "/marketplace" },
-    { name: "Promotions", href: "/marketplace/promos" },
-    { name: "Catégories", href: "/categories" },
-    { name: "Meilleures ventes", href: "/marketplace/bestsellers" },
-  ],
-  vendeurs: [
-    { name: "Devenir vendeur", href: "/sell/start" },
-    { name: "Centre vendeur", href: "/seller/dashboard" },
-    { name: "Guide du vendeur", href: "/seller/guide" },
-    { name: "Tarifs", href: "/seller/pricing" },
-  ],
-  services: [
-    { name: "Transit Chine-Guinée", href: "/transit" },
-    { name: "GuineeGo Academy", href: "/academy" },
-    { name: "Livraison express", href: "/delivery" },
-    { name: "Investir", href: "/invest" },
-  ],
-  aide: [
-    { name: "Centre d'aide", href: "/help" },
-    { name: "Mes commandes", href: "/orders" },
-    { name: "Retours & remboursements", href: "/returns" },
-    { name: "Nous contacter", href: "/contact" },
-  ],
-};
+import { useTranslation } from "@/hooks/useTranslation";
 
 const socialLinks = [
   { icon: Facebook, href: "https://facebook.com/guineego", label: "Facebook" },
@@ -45,6 +19,35 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { t } = useTranslation();
+
+  const footerLinks = {
+    marketplace: [
+      { name: t.footer.allProducts, href: "/marketplace" },
+      { name: t.footer.promotions, href: "/marketplace/promos" },
+      { name: t.footer.categories, href: "/categories" },
+      { name: t.footer.bestSellers, href: "/marketplace/bestsellers" },
+    ],
+    vendeurs: [
+      { name: t.footer.becomeSeller, href: "/sell/start" },
+      { name: t.footer.sellerCenter, href: "/seller/dashboard" },
+      { name: t.footer.sellerGuide, href: "/seller/guide" },
+      { name: t.footer.pricing, href: "/seller/pricing" },
+    ],
+    services: [
+      { name: t.footer.transitChina, href: "/transit" },
+      { name: t.footer.academy, href: "/academy" },
+      { name: t.footer.expressDelivery, href: "/delivery" },
+      { name: t.footer.invest, href: "/invest" },
+    ],
+    aide: [
+      { name: t.footer.helpCenter, href: "/help" },
+      { name: t.footer.myOrders, href: "/orders" },
+      { name: t.footer.returns, href: "/returns" },
+      { name: t.footer.contactUs, href: "/contact" },
+    ],
+  };
+
   return (
     <footer className="bg-dark-gradient text-white">
       {/* Main Footer */}
@@ -61,7 +64,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-white/70 mb-6 max-w-xs">
-              La première marketplace guinéenne. Achetez, vendez et expédiez en toute confiance.
+              {t.footer.description}
             </p>
             
             {/* Contact Info */}
@@ -99,7 +102,7 @@ export function Footer() {
 
           {/* Links Columns */}
           <div>
-            <h4 className="font-display font-semibold mb-4">Marketplace</h4>
+            <h4 className="font-display font-semibold mb-4">{t.footer.marketplaceTitle}</h4>
             <ul className="space-y-3">
               {footerLinks.marketplace.map((link) => (
                 <li key={link.name}>
@@ -112,7 +115,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold mb-4">Vendeurs</h4>
+            <h4 className="font-display font-semibold mb-4">{t.footer.sellersTitle}</h4>
             <ul className="space-y-3">
               {footerLinks.vendeurs.map((link) => (
                 <li key={link.name}>
@@ -125,7 +128,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold mb-4">Services</h4>
+            <h4 className="font-display font-semibold mb-4">{t.footer.servicesTitle}</h4>
             <ul className="space-y-3">
               {footerLinks.services.map((link) => (
                 <li key={link.name}>
@@ -138,7 +141,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold mb-4">Aide</h4>
+            <h4 className="font-display font-semibold mb-4">{t.footer.helpTitle}</h4>
             <ul className="space-y-3">
               {footerLinks.aide.map((link) => (
                 <li key={link.name}>
@@ -156,17 +159,17 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="container-tight py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/50 text-sm">
-            © 2024 GuineeGo LAT. Tous droits réservés.
+            © 2024 GuineeGo LAT. {t.footer.copyright}.
           </p>
           <div className="flex gap-6 text-sm">
             <Link to="/privacy" className="text-white/50 hover:text-guinea-yellow transition-colors">
-              Confidentialité
+              {t.footer.privacy}
             </Link>
             <Link to="/terms" className="text-white/50 hover:text-guinea-yellow transition-colors">
-              Conditions d'utilisation
+              {t.footer.terms}
             </Link>
             <Link to="/legal" className="text-white/50 hover:text-guinea-yellow transition-colors">
-              Mentions légales
+              {t.footer.legalNotice}
             </Link>
           </div>
         </div>
