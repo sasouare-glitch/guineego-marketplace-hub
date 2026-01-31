@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronRight, Zap, TrendingUp, Clock, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
 
 // Mock products data
 const flashSaleProducts: Product[] = [
@@ -170,6 +171,7 @@ const bestSellers: Product[] = [
 
 const Marketplace = () => {
   const { addItem } = useCart();
+  const { toggleItem, isInWishlist } = useWishlist();
 
   return (
     <div className="min-h-screen bg-background">
@@ -251,6 +253,8 @@ const Marketplace = () => {
                 key={product.id}
                 product={product}
                 onAddToCart={() => addItem(product)}
+                onToggleWishlist={() => toggleItem(product)}
+                isInWishlist={isInWishlist(product.id)}
               />
             ))}
           </div>
@@ -272,6 +276,8 @@ const Marketplace = () => {
                 key={product.id}
                 product={product}
                 onAddToCart={() => addItem(product)}
+                onToggleWishlist={() => toggleItem(product)}
+                isInWishlist={isInWishlist(product.id)}
               />
             ))}
           </div>
@@ -332,6 +338,8 @@ const Marketplace = () => {
                 key={product.id}
                 product={product}
                 onAddToCart={() => addItem(product)}
+                onToggleWishlist={() => toggleItem(product)}
+                isInWishlist={isInWishlist(product.id)}
               />
             ))}
           </div>

@@ -13,10 +13,12 @@ import {
   Store,
   Globe,
   BarChart3,
-  ClipboardList
+  ClipboardList,
+  Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 const navigation = [
@@ -86,6 +88,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const { itemCount } = useCart();
+  const { itemCount: wishlistCount } = useWishlist();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
@@ -157,6 +160,16 @@ export function Header() {
 
             {/* Notifications */}
             <NotificationCenter />
+
+            {/* Wishlist */}
+            <Link to="/wishlist" className="relative p-2 text-foreground/70 hover:text-guinea-red transition-colors" title="Mes favoris">
+              <Heart className="w-5 h-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-guinea-red text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {wishlistCount > 9 ? '9+' : wishlistCount}
+                </span>
+              )}
+            </Link>
             
             <Link to="/cart" className="relative p-2 text-foreground/70 hover:text-primary transition-colors">
               <ShoppingCart className="w-5 h-5" />

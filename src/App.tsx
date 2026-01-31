@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/hooks/useCart";
+import { WishlistProvider } from "@/hooks/useWishlist";
 import { NotificationProvider } from "@/hooks/useNotifications";
 import React from "react";
 import Index from "./pages/Index";
@@ -23,6 +24,7 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
+import WishlistPage from "./pages/WishlistPage";
 import Academy from "./pages/Academy";
 import CourseDetail from "./pages/CourseDetail";
 import InvestorDashboard from "./pages/investor/InvestorDashboard";
@@ -42,22 +44,24 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CartProvider>
-        <NotificationProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            {/* Client Marketplace Routes */}
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/order/:id" element={<OrderTrackingPage />} />
-            <Route path="/order" element={<OrderTrackingPage />} />
-            <Route path="/orders" element={<MyOrdersPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+        <WishlistProvider>
+          <NotificationProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              {/* Client Marketplace Routes */}
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/order/:id" element={<OrderTrackingPage />} />
+              <Route path="/order" element={<OrderTrackingPage />} />
+              <Route path="/orders" element={<MyOrdersPage />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             {/* Academy Routes */}
             <Route path="/academy" element={<Academy />} />
             <Route path="/academy/course/:id" element={<CourseDetail />} />
@@ -82,11 +86,12 @@ const App = () => (
             <Route path="/courier/missions" element={<CourierMissions />} />
             <Route path="/courier/mission/:id" element={<CourierMissionDetail />} />
             <Route path="/courier/earnings" element={<CourierEarnings />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-        </NotificationProvider>
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+          </NotificationProvider>
+        </WishlistProvider>
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
