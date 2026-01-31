@@ -8,6 +8,7 @@ import { ChevronRight, Zap, TrendingUp, Clock, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // Mock products data
 const flashSaleProducts: Product[] = [
@@ -172,6 +173,14 @@ const bestSellers: Product[] = [
 const Marketplace = () => {
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
+  const { t } = useTranslation();
+
+  const featuresBar = [
+    { icon: Truck, label: t.marketplace.fastDelivery, desc: t.marketplace.everywhereGuinea },
+    { icon: Zap, label: t.marketplace.securePayment, desc: "Orange & MTN Money" },
+    { icon: Clock, label: t.marketplace.support247, desc: t.marketplace.customerSupport },
+    { icon: TrendingUp, label: t.marketplace.bestPrices, desc: t.marketplace.guaranteed },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -183,16 +192,16 @@ const Marketplace = () => {
         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-guinea-green to-guinea-green/80 text-white p-6 md:p-10">
           <div className="relative z-10 max-w-lg">
             <Badge className="bg-guinea-yellow text-foreground mb-4">
-              Offre spéciale
+              {t.marketplace.specialOffer}
             </Badge>
             <h1 className="font-display text-2xl md:text-4xl font-bold mb-3">
-              Jusqu'à -50% sur l'électronique
+              {t.marketplace.upToOff.replace("{percent}", "50")}
             </h1>
             <p className="text-white/80 mb-6">
-              Profitez des meilleures offres sur smartphones, laptops et accessoires. Livraison gratuite à Conakry !
+              {t.marketplace.heroBannerDesc}
             </p>
             <Button size="lg" className="bg-white text-guinea-green hover:bg-white/90">
-              Découvrir les offres
+              {t.marketplace.discoverOffers}
               <ChevronRight className="w-5 h-5 ml-1" />
             </Button>
           </div>
@@ -208,12 +217,7 @@ const Marketplace = () => {
 
         {/* Features Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { icon: Truck, label: "Livraison rapide", desc: "Partout en Guinée" },
-            { icon: Zap, label: "Paiement sécurisé", desc: "Orange & MTN Money" },
-            { icon: Clock, label: "Support 24/7", desc: "Assistance client" },
-            { icon: TrendingUp, label: "Meilleurs prix", desc: "Garantis" },
-          ].map((feature, index) => (
+          {featuresBar.map((feature, index) => (
             <div
               key={index}
               className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border"
@@ -237,13 +241,13 @@ const Marketplace = () => {
                 <Zap className="w-5 h-5 text-guinea-red" />
               </div>
               <div>
-                <h2 className="font-display text-xl font-bold">Ventes Flash</h2>
-                <p className="text-sm text-muted-foreground">Se termine dans 2h 34m</p>
+                <h2 className="font-display text-xl font-bold">{t.marketplace.flashSales}</h2>
+                <p className="text-sm text-muted-foreground">{t.marketplace.endsIn} 2h 34m</p>
               </div>
             </div>
             <Button variant="ghost" asChild>
               <Link to="/search?sale=true" className="text-primary">
-                Voir tout <ChevronRight className="w-4 h-4 ml-1" />
+                {t.marketplace.viewAll} <ChevronRight className="w-4 h-4 ml-1" />
               </Link>
             </Button>
           </div>
@@ -263,10 +267,10 @@ const Marketplace = () => {
         {/* New Arrivals */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-xl font-bold">Nouveautés</h2>
+            <h2 className="font-display text-xl font-bold">{t.marketplace.newArrivals}</h2>
             <Button variant="ghost" asChild>
               <Link to="/search?new=true" className="text-primary">
-                Voir tout <ChevronRight className="w-4 h-4 ml-1" />
+                {t.marketplace.viewAll} <ChevronRight className="w-4 h-4 ml-1" />
               </Link>
             </Button>
           </div>
@@ -296,8 +300,8 @@ const Marketplace = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
             <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
-              <h3 className="font-display text-2xl font-bold">Mode Africaine</h3>
-              <p className="text-white/80">Découvrir la collection</p>
+              <h3 className="font-display text-2xl font-bold">{t.marketplace.africanFashion}</h3>
+              <p className="text-white/80">{t.marketplace.discoverCollection}</p>
             </div>
           </Link>
           <Link
@@ -311,8 +315,8 @@ const Marketplace = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
             <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
-              <h3 className="font-display text-2xl font-bold">Maison & Déco</h3>
-              <p className="text-white/80">Équipez votre intérieur</p>
+              <h3 className="font-display text-2xl font-bold">{t.marketplace.homeDecor}</h3>
+              <p className="text-white/80">{t.marketplace.equipYourHome}</p>
             </div>
           </Link>
         </div>
@@ -324,11 +328,11 @@ const Marketplace = () => {
               <div className="w-10 h-10 rounded-lg bg-guinea-yellow/10 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-guinea-yellow" />
               </div>
-              <h2 className="font-display text-xl font-bold">Meilleures ventes</h2>
+              <h2 className="font-display text-xl font-bold">{t.marketplace.bestSellers}</h2>
             </div>
             <Button variant="ghost" asChild>
               <Link to="/search?bestseller=true" className="text-primary">
-                Voir tout <ChevronRight className="w-4 h-4 ml-1" />
+                {t.marketplace.viewAll} <ChevronRight className="w-4 h-4 ml-1" />
               </Link>
             </Button>
           </div>
