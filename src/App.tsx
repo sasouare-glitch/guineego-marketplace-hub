@@ -19,6 +19,7 @@ import Marketplace from "./pages/Marketplace";
 import SearchPage from "./pages/SearchPage";
 import ProductDetail from "./pages/ProductDetail";
 import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import Academy from "./pages/Academy";
 import CourseDetail from "./pages/CourseDetail";
 import InvestorDashboard from "./pages/investor/InvestorDashboard";
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/search" element={<SearchPage />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
             {/* Academy Routes */}
             <Route path="/academy" element={<Academy />} />
             <Route path="/academy/course/:id" element={<CourseDetail />} />
