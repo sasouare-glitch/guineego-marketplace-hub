@@ -124,7 +124,7 @@ export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfi
         className="flex flex-col sm:flex-row gap-3 justify-center"
       >
         <Button asChild>
-          <Link to="/orders">
+          <Link to={`/order/${orderNumber}`}>
             Suivre ma commande
             <ArrowRight className="w-4 h-4 ml-2" />
           </Link>
