@@ -40,8 +40,14 @@ const navigation = [
   },
   { 
     name: "Transit Chine", 
-    href: "/marketplace",
+    href: "/transit/dashboard",
     icon: Globe,
+    submenu: [
+      { name: "Tableau de bord", href: "/transit/dashboard" },
+      { name: "Calculer un devis", href: "/transit/quote" },
+      { name: "Suivi de colis", href: "/transit/tracking" },
+      { name: "Mes expéditions", href: "/transit/shipments" },
+    ]
   },
   { 
     name: "Livraison", 

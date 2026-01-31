@@ -27,6 +27,10 @@ import InvestorOpportunities from "./pages/investor/InvestorOpportunities";
 import InvestorInvestments from "./pages/investor/InvestorInvestments";
 import OpportunityDetail from "./pages/investor/OpportunityDetail";
 import InvestmentDetail from "./pages/investor/InvestmentDetail";
+import TransitDashboard from "./pages/transit/TransitDashboard";
+import TransitQuote from "./pages/transit/TransitQuote";
+import TransitTracking from "./pages/transit/TransitTracking";
+import TransitShipments from "./pages/transit/TransitShipments";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +58,11 @@ const App = () => (
             <Route path="/investor/investments" element={<InvestorInvestments />} />
             <Route path="/investor/opportunity/:id" element={<OpportunityDetail />} />
             <Route path="/investor/investment/:id" element={<InvestmentDetail />} />
+            {/* Transit Routes */}
+            <Route path="/transit/dashboard" element={<TransitDashboard />} />
+            <Route path="/transit/quote" element={<TransitQuote />} />
+            <Route path="/transit/tracking" element={<TransitTracking />} />
+            <Route path="/transit/shipments" element={<TransitShipments />} />
             {/* Seller Dashboard Routes */}
             <Route path="/seller/dashboard" element={<SellerDashboard />} />
             <Route path="/seller/products" element={<SellerProducts />} />
