@@ -1,0 +1,124 @@
+import { Bell, Menu, User, MapPin, Power } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
+
+interface CourierHeaderProps {
+  onMenuClick: () => void;
+}
+
+export const CourierHeader = ({ onMenuClick }: CourierHeaderProps) => {
+  const [isOnline, setIsOnline] = useState(true);
+
+  return (
+    <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6">
+      {/* Menu mobile + Status */}
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
+          onClick={onMenuClick}
+        >
+          <Menu className="w-5 h-5" />
+        </Button>
+        
+        {/* Online Status Toggle */}
+        <div className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-full">
+          <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-guinea-green animate-pulse' : 'bg-muted-foreground'}`} />
+          <span className="text-sm font-medium hidden sm:inline">
+            {isOnline ? 'En ligne' : 'Hors ligne'}
+          </span>
+          <Switch 
+            checked={isOnline} 
+            onCheckedChange={setIsOnline}
+            className="data-[state=checked]:bg-guinea-green"
+          />
+        </div>
+      </div>
+
+      {/* Location */}
+      <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+        <MapPin className="w-4 h-4 text-primary" />
+        <span>Conakry, Kaloum</span>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2">
+        {/* Notifications */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="w-5 h-5" />
+              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-guinea-red text-white text-xs">
+                4
+              </Badge>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80 bg-card border-border">
+            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
+              <span className="font-medium text-guinea-green">Nouvelle mission disponible</span>
+              <span className="text-sm text-muted-foreground">Kaloum → Ratoma • 25 000 GNF</span>
+              <span className="text-xs text-muted-foreground">Il y a 2 min</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
+              <span className="font-medium">Paiement reçu</span>
+              <span className="text-sm text-muted-foreground">+45 000 GNF crédité sur votre wallet</span>
+              <span className="text-xs text-muted-foreground">Il y a 1h</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
+              <span className="font-medium text-guinea-yellow">Mission urgente</span>
+              <span className="text-sm text-muted-foreground">Bonus +10 000 GNF • Matam → Dixinn</span>
+              <span className="text-xs text-muted-foreground">Il y a 15 min</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Profile */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="w-4 h-4 text-primary" />
+              </div>
+              <span className="hidden md:inline font-medium">Mamadou B.</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56 bg-card border-border">
+            <DropdownMenuLabel>
+              <div>
+                <p className="font-medium">Mamadou Bah</p>
+                <p className="text-sm text-muted-foreground">coursier@guineego.com</p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <User className="w-4 h-4 mr-2" />
+              Mon profil
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <MapPin className="w-4 h-4 mr-2" />
+              Mes zones
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-guinea-red">
+              <Power className="w-4 h-4 mr-2" />
+              Déconnexion
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </header>
+  );
+};
