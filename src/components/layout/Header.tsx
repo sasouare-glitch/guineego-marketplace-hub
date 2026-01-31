@@ -55,8 +55,12 @@ const navigation = [
   },
   { 
     name: "Academy", 
-    href: "/marketplace",
+    href: "/academy",
     icon: GraduationCap,
+    submenu: [
+      { name: "Toutes les formations", href: "/academy" },
+      { name: "Formations gratuites", href: "/academy?free=true" },
+    ]
   },
   { 
     name: "Investir", 
