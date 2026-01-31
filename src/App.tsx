@@ -21,6 +21,11 @@ import ProductDetail from "./pages/ProductDetail";
 import CartPage from "./pages/CartPage";
 import Academy from "./pages/Academy";
 import CourseDetail from "./pages/CourseDetail";
+import InvestorDashboard from "./pages/investor/InvestorDashboard";
+import InvestorOpportunities from "./pages/investor/InvestorOpportunities";
+import InvestorInvestments from "./pages/investor/InvestorInvestments";
+import OpportunityDetail from "./pages/investor/OpportunityDetail";
+import InvestmentDetail from "./pages/investor/InvestmentDetail";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +46,12 @@ const App = () => (
             {/* Academy Routes */}
             <Route path="/academy" element={<Academy />} />
             <Route path="/academy/course/:id" element={<CourseDetail />} />
+            {/* Investor Routes */}
+            <Route path="/investor/dashboard" element={<InvestorDashboard />} />
+            <Route path="/investor/opportunities" element={<InvestorOpportunities />} />
+            <Route path="/investor/investments" element={<InvestorInvestments />} />
+            <Route path="/investor/opportunity/:id" element={<OpportunityDetail />} />
+            <Route path="/investor/investment/:id" element={<InvestmentDetail />} />
             {/* Seller Dashboard Routes */}
             <Route path="/seller/dashboard" element={<SellerDashboard />} />
             <Route path="/seller/products" element={<SellerProducts />} />
