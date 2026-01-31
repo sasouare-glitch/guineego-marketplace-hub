@@ -33,6 +33,7 @@ import TransitDashboard from "./pages/transit/TransitDashboard";
 import TransitQuote from "./pages/transit/TransitQuote";
 import TransitTracking from "./pages/transit/TransitTracking";
 import TransitShipments from "./pages/transit/TransitShipments";
+import ProfilePage from "./pages/ProfilePage";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/order/:id" element={<OrderTrackingPage />} />
             <Route path="/order" element={<OrderTrackingPage />} />
             <Route path="/orders" element={<MyOrdersPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             {/* Academy Routes */}
             <Route path="/academy" element={<Academy />} />
             <Route path="/academy/course/:id" element={<CourseDetail />} />
