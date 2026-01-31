@@ -1,0 +1,176 @@
+import { Link } from "react-router-dom";
+import { 
+  Package, 
+  Facebook, 
+  Instagram, 
+  Twitter, 
+  Youtube,
+  Phone,
+  Mail,
+  MapPin
+} from "lucide-react";
+
+const footerLinks = {
+  marketplace: [
+    { name: "Tous les produits", href: "/marketplace" },
+    { name: "Promotions", href: "/marketplace/promos" },
+    { name: "Catégories", href: "/categories" },
+    { name: "Meilleures ventes", href: "/marketplace/bestsellers" },
+  ],
+  vendeurs: [
+    { name: "Devenir vendeur", href: "/sell/start" },
+    { name: "Centre vendeur", href: "/seller/dashboard" },
+    { name: "Guide du vendeur", href: "/seller/guide" },
+    { name: "Tarifs", href: "/seller/pricing" },
+  ],
+  services: [
+    { name: "Transit Chine-Guinée", href: "/transit" },
+    { name: "GuineeGo Academy", href: "/academy" },
+    { name: "Livraison express", href: "/delivery" },
+    { name: "Investir", href: "/invest" },
+  ],
+  aide: [
+    { name: "Centre d'aide", href: "/help" },
+    { name: "Suivre ma commande", href: "/tracking" },
+    { name: "Retours & remboursements", href: "/returns" },
+    { name: "Nous contacter", href: "/contact" },
+  ],
+};
+
+const socialLinks = [
+  { icon: Facebook, href: "https://facebook.com/guineego", label: "Facebook" },
+  { icon: Instagram, href: "https://instagram.com/guineego", label: "Instagram" },
+  { icon: Twitter, href: "https://twitter.com/guineego", label: "Twitter" },
+  { icon: Youtube, href: "https://youtube.com/guineego", label: "Youtube" },
+];
+
+export function Footer() {
+  return (
+    <footer className="bg-dark-gradient text-white">
+      {/* Main Footer */}
+      <div className="container-tight section-padding">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+          {/* Brand Column */}
+          <div className="col-span-2 lg:col-span-2">
+            <Link to="/" className="flex items-center gap-2 mb-6">
+              <div className="w-10 h-10 bg-primary-gradient rounded-xl flex items-center justify-center">
+                <Package className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <span className="font-display text-xl font-bold">
+                GuineeGo<span className="text-guinea-yellow"> LAT</span>
+              </span>
+            </Link>
+            <p className="text-white/70 mb-6 max-w-xs">
+              La première marketplace guinéenne. Achetez, vendez et expédiez en toute confiance.
+            </p>
+            
+            {/* Contact Info */}
+            <div className="space-y-3">
+              <a href="tel:+224623456789" className="flex items-center gap-3 text-white/70 hover:text-guinea-yellow transition-colors">
+                <Phone className="w-4 h-4" />
+                <span>+224 623 456 789</span>
+              </a>
+              <a href="mailto:contact@guineego.com" className="flex items-center gap-3 text-white/70 hover:text-guinea-yellow transition-colors">
+                <Mail className="w-4 h-4" />
+                <span>contact@guineego.com</span>
+              </a>
+              <div className="flex items-start gap-3 text-white/70">
+                <MapPin className="w-4 h-4 mt-1" />
+                <span>Kaloum, Conakry, Guinée</span>
+              </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="flex gap-3 mt-6">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-white/70 hover:bg-guinea-yellow hover:text-foreground transition-all"
+                  aria-label={social.label}
+                >
+                  <social.icon className="w-5 h-5" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Links Columns */}
+          <div>
+            <h4 className="font-display font-semibold mb-4">Marketplace</h4>
+            <ul className="space-y-3">
+              {footerLinks.marketplace.map((link) => (
+                <li key={link.name}>
+                  <Link to={link.href} className="text-white/70 hover:text-guinea-yellow transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-display font-semibold mb-4">Vendeurs</h4>
+            <ul className="space-y-3">
+              {footerLinks.vendeurs.map((link) => (
+                <li key={link.name}>
+                  <Link to={link.href} className="text-white/70 hover:text-guinea-yellow transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-display font-semibold mb-4">Services</h4>
+            <ul className="space-y-3">
+              {footerLinks.services.map((link) => (
+                <li key={link.name}>
+                  <Link to={link.href} className="text-white/70 hover:text-guinea-yellow transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-display font-semibold mb-4">Aide</h4>
+            <ul className="space-y-3">
+              {footerLinks.aide.map((link) => (
+                <li key={link.name}>
+                  <Link to={link.href} className="text-white/70 hover:text-guinea-yellow transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="border-t border-white/10">
+        <div className="container-tight py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-white/50 text-sm">
+            © 2024 GuineeGo LAT. Tous droits réservés.
+          </p>
+          <div className="flex gap-6 text-sm">
+            <Link to="/privacy" className="text-white/50 hover:text-guinea-yellow transition-colors">
+              Confidentialité
+            </Link>
+            <Link to="/terms" className="text-white/50 hover:text-guinea-yellow transition-colors">
+              Conditions d'utilisation
+            </Link>
+            <Link to="/legal" className="text-white/50 hover:text-guinea-yellow transition-colors">
+              Mentions légales
+            </Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
