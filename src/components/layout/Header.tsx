@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 const navigation = [
   { 
@@ -153,6 +154,9 @@ export function Header() {
               <ClipboardList className="w-4 h-4" />
               <span className="hidden md:inline">Mes commandes</span>
             </Link>
+
+            {/* Notifications */}
+            <NotificationCenter />
             
             <Link to="/cart" className="relative p-2 text-foreground/70 hover:text-primary transition-colors">
               <ShoppingCart className="w-5 h-5" />
