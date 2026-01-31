@@ -132,9 +132,11 @@ const CartPage = () => {
                   <span className="text-guinea-green">{formatPrice(total)}</span>
                 </div>
 
-                <Button className="w-full bg-guinea-green hover:bg-guinea-green/90 gap-2" size="lg">
-                  Passer la commande
-                  <ArrowRight className="w-5 h-5" />
+                <Button className="w-full bg-guinea-green hover:bg-guinea-green/90 gap-2" size="lg" asChild>
+                  <Link to="/checkout">
+                    Passer la commande
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
                 </Button>
 
                 {/* Payment Methods */}
