@@ -61,7 +61,7 @@ const CartPage = () => {
 
       <main className="container-tight py-6">
         <h1 className="font-display text-2xl font-bold mb-6">
-          {t.cart.title} ({itemCount} {itemCount > 1 ? 'articles' : 'article'})
+          {t.cart.title} ({itemCount} {itemCount > 1 ? t.cart.articles : t.cart.article})
         </h1>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -97,13 +97,13 @@ const CartPage = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Tag className="w-4 h-4" />
-                  Code promo
+                  {t.cart.promoCode}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
-                  <Input placeholder="Entrez votre code" className="flex-1" />
-                  <Button variant="outline">Appliquer</Button>
+                  <Input placeholder={t.cart.enterCode} className="flex-1" />
+                  <Button variant="outline">{t.cart.apply}</Button>
                 </div>
               </CardContent>
             </Card>
@@ -142,7 +142,7 @@ const CartPage = () => {
                 {/* Payment Methods */}
                 <div className="pt-4 space-y-3">
                   <p className="text-xs text-muted-foreground text-center">
-                    Modes de paiement acceptés
+                    {t.cart.acceptedPayments}
                   </p>
                   <div className="flex justify-center gap-3">
                     <Badge variant="outline" className="gap-1">
@@ -164,15 +164,15 @@ const CartPage = () => {
                 <div className="flex items-center gap-3 text-sm">
                   <Truck className="w-5 h-5 text-primary flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Livraison rapide</p>
-                    <p className="text-muted-foreground text-xs">2-4 jours à Conakry</p>
+                    <p className="font-medium">{t.cart.fastDelivery}</p>
+                    <p className="text-muted-foreground text-xs">{t.cart.deliveryDays}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Shield className="w-5 h-5 text-primary flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Paiement sécurisé</p>
-                    <p className="text-muted-foreground text-xs">Transactions chiffrées</p>
+                    <p className="font-medium">{t.cart.securePayment}</p>
+                    <p className="text-muted-foreground text-xs">{t.cart.encryptedTransactions}</p>
                   </div>
                 </div>
               </CardContent>

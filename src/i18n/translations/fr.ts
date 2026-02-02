@@ -247,6 +247,46 @@ export const fr = {
     freeDeliveryFrom: "Livraison gratuite à partir de",
     backToCart: "Retour au panier",
     discoverProducts: "Découvrir les produits",
+    articles: "articles",
+    article: "article",
+    promoCode: "Code promo",
+    enterCode: "Entrez votre code",
+    apply: "Appliquer",
+    acceptedPayments: "Modes de paiement acceptés",
+    fastDelivery: "Livraison rapide",
+    deliveryDays: "2-4 jours à Conakry",
+    securePayment: "Paiement sécurisé",
+    encryptedTransactions: "Transactions chiffrées",
+  },
+
+  // Wishlist
+  wishlist: {
+    title: "Mes favoris",
+    backToHome: "Retour à l'accueil",
+    empty: "Votre liste de favoris est vide",
+    noFavorites: "Aucun favori pour le moment",
+    emptyMessage: "Explorez notre marketplace et cliquez sur le cœur pour sauvegarder vos produits préférés",
+    productsSaved: "produit sauvegardé",
+    productsSavedPlural: "produits sauvegardés",
+    deleteAll: "Tout supprimer",
+    addAllToCart: "Tout ajouter au panier",
+    exploreMarketplace: "Explorer la marketplace",
+  },
+
+  // Search
+  search: {
+    placeholder: "Rechercher des produits...",
+    productsFound: "produits trouvés",
+    noResults: "Aucun produit trouvé",
+    tryDifferent: "Essayez de modifier vos critères de recherche",
+    clearFilters: "Effacer les filtres",
+    filters: "Filtres",
+    sortBy: "Trier par",
+    relevance: "Pertinence",
+    priceAsc: "Prix croissant",
+    priceDesc: "Prix décroissant",
+    bestRating: "Meilleures notes",
+    newest: "Nouveautés",
   },
 
   // Checkout
@@ -397,14 +437,6 @@ export const fr = {
     currencyNote: "Les prix seront convertis approximativement",
   },
 
-  // Wishlist
-  wishlist: {
-    title: "Mes favoris",
-    empty: "Aucun favori",
-    emptyMessage: "Ajoutez des produits à vos favoris pour les retrouver facilement",
-    addAllToCart: "Tout ajouter au panier",
-    clearAll: "Tout supprimer",
-  },
 
   // Notifications
   notifications: {

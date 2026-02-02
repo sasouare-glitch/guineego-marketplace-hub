@@ -249,6 +249,46 @@ export const ar: TranslationKeys = {
     freeDeliveryFrom: "توصيل مجاني من",
     backToCart: "العودة للسلة",
     discoverProducts: "اكتشف المنتجات",
+    articles: "منتجات",
+    article: "منتج",
+    promoCode: "كود الخصم",
+    enterCode: "أدخل الكود",
+    apply: "تطبيق",
+    acceptedPayments: "طرق الدفع المقبولة",
+    fastDelivery: "توصيل سريع",
+    deliveryDays: "2-4 أيام في كوناكري",
+    securePayment: "دفع آمن",
+    encryptedTransactions: "معاملات مشفرة",
+  },
+
+  // Wishlist
+  wishlist: {
+    title: "المفضلة",
+    backToHome: "العودة للرئيسية",
+    empty: "قائمة المفضلة فارغة",
+    noFavorites: "لا توجد مفضلات حالياً",
+    emptyMessage: "استكشف المتجر وانقر على القلب لحفظ منتجاتك المفضلة",
+    productsSaved: "منتج محفوظ",
+    productsSavedPlural: "منتجات محفوظة",
+    deleteAll: "حذف الكل",
+    addAllToCart: "إضافة الكل للسلة",
+    exploreMarketplace: "استكشف المتجر",
+  },
+
+  // Search
+  search: {
+    placeholder: "البحث عن منتجات...",
+    productsFound: "منتجات موجودة",
+    noResults: "لم يتم العثور على منتجات",
+    tryDifferent: "جرب تعديل معايير البحث",
+    clearFilters: "مسح الفلاتر",
+    filters: "الفلاتر",
+    sortBy: "ترتيب حسب",
+    relevance: "الصلة",
+    priceAsc: "السعر: من الأقل للأعلى",
+    priceDesc: "السعر: من الأعلى للأقل",
+    bestRating: "أفضل تقييم",
+    newest: "الأحدث",
   },
 
   // Checkout
@@ -399,14 +439,6 @@ export const ar: TranslationKeys = {
     currencyNote: "سيتم تحويل الأسعار تقريبياً",
   },
 
-  // Wishlist
-  wishlist: {
-    title: "المفضلة",
-    empty: "لا توجد مفضلات",
-    emptyMessage: "أضف منتجات إلى مفضلتك لتجدها بسهولة",
-    addAllToCart: "أضف الكل للسلة",
-    clearAll: "مسح الكل",
-  },
 
   // Notifications
   notifications: {
