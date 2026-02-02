@@ -249,6 +249,46 @@ export const en: TranslationKeys = {
     freeDeliveryFrom: "Free delivery from",
     backToCart: "Back to cart",
     discoverProducts: "Discover products",
+    articles: "items",
+    article: "item",
+    promoCode: "Promo code",
+    enterCode: "Enter your code",
+    apply: "Apply",
+    acceptedPayments: "Accepted payment methods",
+    fastDelivery: "Fast delivery",
+    deliveryDays: "2-4 days in Conakry",
+    securePayment: "Secure payment",
+    encryptedTransactions: "Encrypted transactions",
+  },
+
+  // Wishlist
+  wishlist: {
+    title: "My favorites",
+    backToHome: "Back to home",
+    empty: "Your wishlist is empty",
+    noFavorites: "No favorites yet",
+    emptyMessage: "Explore our marketplace and click the heart to save your favorite products",
+    productsSaved: "product saved",
+    productsSavedPlural: "products saved",
+    deleteAll: "Delete all",
+    addAllToCart: "Add all to cart",
+    exploreMarketplace: "Explore marketplace",
+  },
+
+  // Search
+  search: {
+    placeholder: "Search products...",
+    productsFound: "products found",
+    noResults: "No products found",
+    tryDifferent: "Try modifying your search criteria",
+    clearFilters: "Clear filters",
+    filters: "Filters",
+    sortBy: "Sort by",
+    relevance: "Relevance",
+    priceAsc: "Price: Low to High",
+    priceDesc: "Price: High to Low",
+    bestRating: "Best rating",
+    newest: "Newest",
   },
 
   // Checkout
@@ -399,14 +439,6 @@ export const en: TranslationKeys = {
     currencyNote: "Prices will be approximately converted",
   },
 
-  // Wishlist
-  wishlist: {
-    title: "My wishlist",
-    empty: "No favorites",
-    emptyMessage: "Add products to your wishlist to find them easily",
-    addAllToCart: "Add all to cart",
-    clearAll: "Clear all",
-  },
 
   // Notifications
   notifications: {

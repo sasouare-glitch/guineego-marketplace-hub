@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search as SearchIcon, SlidersHorizontal, Grid3X3, List, X } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // All products for search
 const allProducts: Product[] = [
@@ -221,6 +222,7 @@ const defaultFilters: FilterState = {
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addItem } = useCart();
+  const { t } = useTranslation();
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [filters, setFilters] = useState<FilterState>(() => {
@@ -306,7 +308,7 @@ const SearchPage = () => {
             <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Rechercher des produits..."
+              placeholder={t.search.placeholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-12 pr-4 h-12 text-base"
@@ -342,7 +344,7 @@ const SearchPage = () => {
             {/* Toolbar */}
             <div className="flex items-center justify-between mb-4 gap-4">
               <p className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">{filteredProducts.length}</span> produits trouvés
+                <span className="font-medium text-foreground">{filteredProducts.length}</span> {t.search.productsFound}
               </p>
 
               <div className="flex items-center gap-2">
@@ -351,12 +353,12 @@ const SearchPage = () => {
                   <SheetTrigger asChild>
                     <Button variant="outline" size="sm" className="lg:hidden gap-2">
                       <SlidersHorizontal className="w-4 h-4" />
-                      Filtres
+                      {t.search.filters}
                     </Button>
                   </SheetTrigger>
                   <SheetContent side="left" className="w-80 bg-card">
                     <SheetHeader>
-                      <SheetTitle>Filtres</SheetTitle>
+                      <SheetTitle>{t.search.filters}</SheetTitle>
                     </SheetHeader>
                     <div className="mt-6">
                       <SearchFilters
@@ -376,14 +378,14 @@ const SearchPage = () => {
                 {/* Sort */}
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="w-[160px]">
-                    <SelectValue placeholder="Trier par" />
+                    <SelectValue placeholder={t.search.sortBy} />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-border">
-                    <SelectItem value="relevance">Pertinence</SelectItem>
-                    <SelectItem value="price-asc">Prix croissant</SelectItem>
-                    <SelectItem value="price-desc">Prix décroissant</SelectItem>
-                    <SelectItem value="rating">Meilleures notes</SelectItem>
-                    <SelectItem value="newest">Nouveautés</SelectItem>
+                    <SelectItem value="relevance">{t.search.relevance}</SelectItem>
+                    <SelectItem value="price-asc">{t.search.priceAsc}</SelectItem>
+                    <SelectItem value="price-desc">{t.search.priceDesc}</SelectItem>
+                    <SelectItem value="rating">{t.search.bestRating}</SelectItem>
+                    <SelectItem value="newest">{t.search.newest}</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -428,11 +430,11 @@ const SearchPage = () => {
               </div>
             ) : (
               <div className="text-center py-16">
-                <p className="text-lg font-medium mb-2">Aucun produit trouvé</p>
+                <p className="text-lg font-medium mb-2">{t.search.noResults}</p>
                 <p className="text-muted-foreground mb-6">
-                  Essayez de modifier vos critères de recherche
+                  {t.search.tryDifferent}
                 </p>
-                <Button onClick={clearFilters}>Effacer les filtres</Button>
+                <Button onClick={clearFilters}>{t.search.clearFilters}</Button>
               </div>
             )}
           </div>

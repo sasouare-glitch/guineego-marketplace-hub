@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/marketplace/ProductCard";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCart } from "@/hooks/useCart";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function WishlistPage() {
   const { items, removeItem, clearWishlist, toggleItem, isInWishlist } = useWishlist();
   const { addItem: addToCart } = useCart();
+  const { t } = useTranslation();
 
   const handleAddAllToCart = () => {
     items.forEach((product) => {
@@ -31,7 +33,7 @@ export default function WishlistPage() {
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
-          Retour à l'accueil
+          {t.wishlist.backToHome}
         </Link>
 
         {/* Page Header */}
@@ -44,12 +46,12 @@ export default function WishlistPage() {
             <div>
               <h1 className="text-2xl font-display font-bold text-foreground mb-2 flex items-center gap-2">
                 <Heart className="w-6 h-6 text-guinea-red" />
-                Mes favoris
+                {t.wishlist.title}
               </h1>
               <p className="text-muted-foreground">
                 {items.length === 0
-                  ? "Votre liste de favoris est vide"
-                  : `${items.length} produit${items.length > 1 ? "s" : ""} sauvegardé${items.length > 1 ? "s" : ""}`}
+                  ? t.wishlist.empty
+                  : `${items.length} ${items.length > 1 ? t.wishlist.productsSavedPlural : t.wishlist.productsSaved}`}
               </p>
             </div>
 
@@ -62,11 +64,11 @@ export default function WishlistPage() {
                   className="text-destructive hover:text-destructive"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Tout supprimer
+                  {t.wishlist.deleteAll}
                 </Button>
                 <Button size="sm" onClick={handleAddAllToCart}>
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  Tout ajouter au panier
+                  {t.wishlist.addAllToCart}
                 </Button>
               </div>
             )}
@@ -83,13 +85,13 @@ export default function WishlistPage() {
               <Heart className="w-12 h-12 text-muted-foreground" />
             </div>
             <h2 className="text-xl font-semibold text-foreground mb-2">
-              Aucun favori pour le moment
+              {t.wishlist.noFavorites}
             </h2>
             <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Explorez notre marketplace et cliquez sur le cœur pour sauvegarder vos produits préférés
+              {t.wishlist.emptyMessage}
             </p>
             <Button asChild>
-              <Link to="/marketplace">Explorer la marketplace</Link>
+              <Link to="/marketplace">{t.wishlist.exploreMarketplace}</Link>
             </Button>
           </motion.div>
         ) : (
