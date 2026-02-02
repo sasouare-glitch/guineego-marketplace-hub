@@ -1,18 +1,17 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Smartphone, CreditCard, Wallet, Check, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface PaymentMethod {
   id: string;
   name: string;
   icon: string;
   type: "mobile" | "card" | "wallet";
-  description: string;
+  descriptionKey: string;
   fees?: string;
 }
 
@@ -29,32 +28,32 @@ const paymentMethods: PaymentMethod[] = [
     name: "Orange Money",
     icon: "🟠",
     type: "mobile",
-    description: "Payez avec votre compte Orange Money",
-    fees: "Gratuit"
+    descriptionKey: "orangeMoney",
+    fees: "free"
   },
   {
     id: "mtn_money",
     name: "MTN Mobile Money",
     icon: "🟡",
     type: "mobile",
-    description: "Payez avec votre compte MTN MoMo",
-    fees: "Gratuit"
+    descriptionKey: "mtnMoney",
+    fees: "free"
   },
   {
     id: "wallet",
-    name: "Portefeuille GuineeGo",
+    name: "GuineeGo Wallet",
     icon: "💚",
     type: "wallet",
-    description: "Utilisez votre solde GuineeGo",
-    fees: "Solde: 2 500 000 GNF"
+    descriptionKey: "wallet",
+    fees: "balance"
   },
   {
     id: "card",
-    name: "Carte bancaire",
+    name: "Visa / Mastercard",
     icon: "💳",
     type: "card",
-    description: "Visa, Mastercard",
-    fees: "+2% frais"
+    descriptionKey: "card",
+    fees: "+2%"
   }
 ];
 
@@ -64,7 +63,21 @@ export const PaymentForm = ({
   phoneNumber, 
   onPhoneChange 
 }: PaymentFormProps) => {
+  const { t } = useTranslation();
   const selectedPayment = paymentMethods.find(m => m.id === selectedMethod);
+
+  const getDescription = (method: PaymentMethod) => {
+    if (method.id === "orange_money") return "Orange Money";
+    if (method.id === "mtn_money") return "MTN Mobile Money";
+    if (method.id === "wallet") return t.checkout.yourBalance;
+    return "Visa, Mastercard";
+  };
+
+  const getFeeLabel = (fee: string) => {
+    if (fee === "free") return t.checkout.free;
+    if (fee === "balance") return "2 500 000 GNF";
+    return fee;
+  };
 
   return (
     <motion.div
@@ -74,10 +87,10 @@ export const PaymentForm = ({
     >
       <div>
         <h2 className="text-xl font-display font-bold text-foreground mb-2">
-          Mode de paiement
+          {t.checkout.paymentMethod}
         </h2>
         <p className="text-muted-foreground">
-          Choisissez comment vous souhaitez payer
+          {t.checkout.choosePaymentMethod}
         </p>
       </div>
 
@@ -105,17 +118,17 @@ export const PaymentForm = ({
                     <span className="text-2xl">{method.icon}</span>
                     <span className="font-semibold text-foreground">{method.name}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{method.description}</p>
+                  <p className="text-sm text-muted-foreground">{getDescription(method)}</p>
                   {method.fees && (
                     <span className={cn(
                       "inline-block mt-2 text-xs px-2 py-0.5 rounded-full",
-                      method.fees === "Gratuit" 
+                      method.fees === "free" 
                         ? "bg-guinea-green/10 text-guinea-green" 
                         : method.fees.startsWith("+") 
                           ? "bg-guinea-yellow/10 text-guinea-yellow"
                           : "bg-secondary text-muted-foreground"
                     )}>
-                      {method.fees}
+                      {getFeeLabel(method.fees)}
                     </span>
                   )}
                 </div>
@@ -137,26 +150,26 @@ export const PaymentForm = ({
               {selectedPayment.icon}
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">Paiement {selectedPayment.name}</h3>
-              <p className="text-sm text-muted-foreground">Entrez votre numéro de téléphone</p>
+              <h3 className="font-semibold text-foreground">{t.checkout.payWith} {selectedPayment.name}</h3>
+              <p className="text-sm text-muted-foreground">{t.checkout.enterPhoneNumber}</p>
             </div>
           </div>
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="mobilePhone">Numéro de téléphone</Label>
+              <Label htmlFor="mobilePhone">{t.checkout.phoneNumber}</Label>
               <div className="relative mt-1.5">
                 <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input 
                   id="mobilePhone"
-                  placeholder={selectedMethod === "orange_money" ? "6XX XX XX XX" : "6XX XX XX XX"}
+                  placeholder="6XX XX XX XX"
                   value={phoneNumber}
                   onChange={(e) => onPhoneChange(e.target.value)}
                   className="pl-10"
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-1.5">
-                Vous recevrez une demande de paiement sur ce numéro
+                {t.checkout.receivePaymentRequest}
               </p>
             </div>
 
@@ -164,12 +177,12 @@ export const PaymentForm = ({
               <div className="flex gap-3">
                 <AlertCircle className="w-5 h-5 text-guinea-yellow flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-medium text-foreground">Comment ça marche ?</p>
+                  <p className="font-medium text-foreground">{t.checkout.howItWorks}</p>
                   <ol className="mt-2 space-y-1 text-muted-foreground">
-                    <li>1. Confirmez votre commande</li>
-                    <li>2. Vous recevrez un SMS avec un code USSD</li>
-                    <li>3. Composez le code pour valider le paiement</li>
-                    <li>4. Votre commande sera confirmée automatiquement</li>
+                    <li>1. {t.checkout.step1Payment}</li>
+                    <li>2. {t.checkout.step2Payment}</li>
+                    <li>3. {t.checkout.step3Payment}</li>
+                    <li>4. {t.checkout.step4Payment}</li>
                   </ol>
                 </div>
               </div>
@@ -191,7 +204,7 @@ export const PaymentForm = ({
                 <Wallet className="w-6 h-6 text-guinea-green" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">Votre solde GuineeGo</h3>
+                <h3 className="font-semibold text-foreground">{t.checkout.yourBalance}</h3>
                 <p className="text-2xl font-bold text-guinea-green">2 500 000 GNF</p>
               </div>
             </div>
@@ -209,16 +222,16 @@ export const PaymentForm = ({
         >
           <div className="flex items-center gap-3 mb-4">
             <CreditCard className="w-6 h-6 text-muted-foreground" />
-            <h3 className="font-semibold text-foreground">Carte bancaire</h3>
+            <h3 className="font-semibold text-foreground">{t.checkout.paymentMethod}</h3>
           </div>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="cardNumber">Numéro de carte</Label>
+              <Label htmlFor="cardNumber">{t.checkout.cardNumber}</Label>
               <Input id="cardNumber" placeholder="1234 5678 9012 3456" className="mt-1.5" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="expiry">Date d'expiration</Label>
+                <Label htmlFor="expiry">{t.checkout.expiryDate}</Label>
                 <Input id="expiry" placeholder="MM/AA" className="mt-1.5" />
               </div>
               <div>
@@ -227,7 +240,7 @@ export const PaymentForm = ({
               </div>
             </div>
             <div>
-              <Label htmlFor="cardName">Nom sur la carte</Label>
+              <Label htmlFor="cardName">{t.checkout.cardName}</Label>
               <Input id="cardName" placeholder="MAMADOU DIALLO" className="mt-1.5" />
             </div>
           </div>

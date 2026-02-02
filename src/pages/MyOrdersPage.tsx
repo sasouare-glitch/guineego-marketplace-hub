@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Package, Search, Filter } from "lucide-react";
+import { ArrowLeft, Package, Search } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OrderHistoryCard, OrderData } from "@/components/orders/OrderHistoryCard";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // Mock orders data
 const mockOrders: OrderData[] = [
@@ -111,6 +112,7 @@ const mockOrders: OrderData[] = [
 export default function MyOrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const { t } = useTranslation();
 
   const filteredOrders = mockOrders.filter((order) => {
     const matchesSearch =
@@ -150,7 +152,7 @@ export default function MyOrdersPage() {
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
-          Retour au marketplace
+          {t.orders.backToMarketplace}
         </Link>
 
         {/* Page Header */}
@@ -160,10 +162,10 @@ export default function MyOrdersPage() {
           className="mb-8"
         >
           <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-            Mes commandes
+            {t.orders.title}
           </h1>
           <p className="text-muted-foreground">
-            Consultez et suivez toutes vos commandes
+            {t.orders.viewAndTrack}
           </p>
         </motion.div>
 
@@ -177,7 +179,7 @@ export default function MyOrdersPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher une commande..."
+              placeholder={t.orders.searchOrder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -189,16 +191,16 @@ export default function MyOrdersPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="all">
-              Toutes ({orderCounts.all})
+              {t.orders.allOrders} ({orderCounts.all})
             </TabsTrigger>
             <TabsTrigger value="active">
-              En cours ({orderCounts.active})
+              {t.orders.activeOrders} ({orderCounts.active})
             </TabsTrigger>
             <TabsTrigger value="delivered">
-              Livrées ({orderCounts.delivered})
+              {t.orders.deliveredOrders} ({orderCounts.delivered})
             </TabsTrigger>
             <TabsTrigger value="cancelled">
-              Annulées ({orderCounts.cancelled})
+              {t.orders.cancelledOrders} ({orderCounts.cancelled})
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -220,15 +222,15 @@ export default function MyOrdersPage() {
               <Package className="w-10 h-10 text-muted-foreground" />
             </div>
             <h2 className="text-xl font-display font-bold text-foreground mb-2">
-              Aucune commande trouvée
+              {t.orders.noOrderFound}
             </h2>
             <p className="text-muted-foreground mb-6">
               {searchQuery
-                ? "Aucune commande ne correspond à votre recherche"
-                : "Vous n'avez pas encore passé de commande"}
+                ? t.orders.noMatchingOrder
+                : t.orders.noOrdersMessage}
             </p>
             <Button asChild>
-              <Link to="/marketplace">Découvrir les produits</Link>
+              <Link to="/marketplace">{t.cart.discoverProducts}</Link>
             </Button>
           </motion.div>
         )}

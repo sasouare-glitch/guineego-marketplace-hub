@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Plus, Check, Home, Building, Edit, Trash2 } from "lucide-react";
+import { Plus, Check, Home, Building, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Address {
   id: string;
@@ -71,6 +72,7 @@ const communes = [
 ];
 
 export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormProps) => {
+  const { t } = useTranslation();
   const [addresses, setAddresses] = useState<Address[]>(savedAddresses);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newAddress, setNewAddress] = useState<Partial<Address>>({
@@ -78,11 +80,17 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
     city: "Conakry"
   });
 
+  const getAddressLabel = (type: "home" | "work" | "other") => {
+    if (type === "home") return t.checkout.homeAddress;
+    if (type === "work") return t.checkout.workAddress;
+    return t.checkout.otherAddress;
+  };
+
   const handleAddAddress = () => {
     if (newAddress.fullName && newAddress.phone && newAddress.address && newAddress.commune) {
       const address: Address = {
         id: Date.now().toString(),
-        label: newAddress.type === "home" ? "Domicile" : newAddress.type === "work" ? "Bureau" : "Autre",
+        label: getAddressLabel(newAddress.type || "home"),
         type: newAddress.type || "home",
         fullName: newAddress.fullName,
         phone: newAddress.phone,
@@ -107,10 +115,10 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
     >
       <div>
         <h2 className="text-xl font-display font-bold text-foreground mb-2">
-          Adresse de livraison
+          {t.checkout.deliveryAddress}
         </h2>
         <p className="text-muted-foreground">
-          Sélectionnez une adresse existante ou ajoutez-en une nouvelle
+          {t.checkout.selectAddressOrNew}
         </p>
       </div>
 
@@ -142,7 +150,7 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
                     <span className="font-semibold text-foreground">{address.label}</span>
                     {address.isDefault && (
                       <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                        Par défaut
+                        {t.checkout.default}
                       </span>
                     )}
                   </div>
@@ -173,19 +181,19 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
         <DialogTrigger asChild>
           <Button variant="outline" className="w-full gap-2">
             <Plus className="w-4 h-4" />
-            Ajouter une nouvelle adresse
+            {t.checkout.addNewAddress}
           </Button>
         </DialogTrigger>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Nouvelle adresse</DialogTitle>
+            <DialogTitle>{t.checkout.newAddress}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
             {/* Address Type */}
             <div className="flex gap-2">
               {[
-                { value: "home", label: "Domicile", icon: Home },
-                { value: "work", label: "Bureau", icon: Building }
+                { value: "home", label: t.checkout.homeAddress, icon: Home },
+                { value: "work", label: t.checkout.workAddress, icon: Building }
               ].map((type) => (
                 <button
                   key={type.value}
@@ -206,7 +214,7 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
 
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <Label htmlFor="fullName">Nom complet</Label>
+                <Label htmlFor="fullName">{t.checkout.fullName}</Label>
                 <Input 
                   id="fullName"
                   placeholder="Mamadou Diallo"
@@ -215,7 +223,7 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
                 />
               </div>
               <div className="col-span-2">
-                <Label htmlFor="phone">Téléphone</Label>
+                <Label htmlFor="phone">{t.checkout.phone}</Label>
                 <Input 
                   id="phone"
                   placeholder="+224 6XX XXX XXX"
@@ -224,7 +232,7 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
                 />
               </div>
               <div className="col-span-2">
-                <Label htmlFor="address">Adresse</Label>
+                <Label htmlFor="address">{t.checkout.address}</Label>
                 <Input 
                   id="address"
                   placeholder="Quartier, Rue, N°"
@@ -233,13 +241,13 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
                 />
               </div>
               <div>
-                <Label htmlFor="commune">Commune</Label>
+                <Label htmlFor="commune">{t.checkout.commune}</Label>
                 <Select 
                   value={newAddress.commune} 
                   onValueChange={(value) => setNewAddress({ ...newAddress, commune: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner" />
+                    <SelectValue placeholder={t.checkout.select} />
                   </SelectTrigger>
                   <SelectContent>
                     {communes.map((commune) => (
@@ -249,7 +257,7 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
                 </Select>
               </div>
               <div>
-                <Label htmlFor="city">Ville</Label>
+                <Label htmlFor="city">{t.checkout.city}</Label>
                 <Input 
                   id="city"
                   value={newAddress.city || "Conakry"}
@@ -257,10 +265,10 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
                 />
               </div>
               <div className="col-span-2">
-                <Label htmlFor="instructions">Instructions (optionnel)</Label>
+                <Label htmlFor="instructions">{t.checkout.instructions}</Label>
                 <Textarea 
                   id="instructions"
-                  placeholder="Point de repère, indications..."
+                  placeholder={t.checkout.instructionsPlaceholder}
                   value={newAddress.instructions || ""}
                   onChange={(e) => setNewAddress({ ...newAddress, instructions: e.target.value })}
                   rows={2}
@@ -270,7 +278,7 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
 
             <Button onClick={handleAddAddress} className="w-full">
               <Check className="w-4 h-4 mr-2" />
-              Enregistrer l'adresse
+              {t.checkout.saveAddress}
             </Button>
           </div>
         </DialogContent>

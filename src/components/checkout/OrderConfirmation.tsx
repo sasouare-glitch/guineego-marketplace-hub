@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
-import { CheckCircle, Package, Truck, MapPin, Clock, ArrowRight } from "lucide-react";
+import { CheckCircle, Package, Truck, Clock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface OrderConfirmationProps {
   orderNumber: string;
@@ -10,6 +11,8 @@ interface OrderConfirmationProps {
 }
 
 export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfirmationProps) => {
+  const { t } = useTranslation();
+
   useEffect(() => {
     // Simple celebration effect without external dependency
     console.log("🎉 Order confirmed!");
@@ -37,10 +40,10 @@ export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfi
         transition={{ delay: 0.3 }}
       >
         <h2 className="text-2xl font-display font-bold text-foreground mb-2">
-          Commande confirmée ! 🎉
+          {t.checkout.orderConfirmedTitle} 🎉
         </h2>
         <p className="text-muted-foreground mb-6">
-          Merci pour votre commande. Vous recevrez un SMS de confirmation.
+          {t.checkout.thankYouOrder}
         </p>
       </motion.div>
 
@@ -53,7 +56,7 @@ export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfi
       >
         <div className="space-y-4">
           <div className="flex items-center justify-between pb-4 border-b border-border">
-            <span className="text-muted-foreground">N° de commande</span>
+            <span className="text-muted-foreground">{t.checkout.orderNumber}</span>
             <span className="font-mono font-bold text-foreground">{orderNumber}</span>
           </div>
           
@@ -62,8 +65,8 @@ export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfi
               <Package className="w-5 h-5 text-guinea-green" />
             </div>
             <div className="text-left">
-              <p className="font-medium text-foreground">Préparation en cours</p>
-              <p className="text-sm text-muted-foreground">Votre colis est en préparation</p>
+              <p className="font-medium text-foreground">{t.checkout.preparingOrder}</p>
+              <p className="text-sm text-muted-foreground">{t.checkout.packagePreparing}</p>
             </div>
           </div>
 
@@ -72,7 +75,7 @@ export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfi
               <Truck className="w-5 h-5 text-muted-foreground" />
             </div>
             <div className="text-left">
-              <p className="font-medium text-foreground">Livraison estimée</p>
+              <p className="font-medium text-foreground">{t.checkout.estimatedDelivery}</p>
               <p className="text-sm text-guinea-green font-medium">{estimatedDelivery}</p>
             </div>
           </div>
@@ -86,14 +89,14 @@ export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfi
         transition={{ delay: 0.5 }}
         className="bg-secondary/50 rounded-2xl p-6 max-w-md mx-auto mb-8"
       >
-        <h3 className="font-semibold text-foreground mb-4 text-left">Suivi de commande</h3>
+        <h3 className="font-semibold text-foreground mb-4 text-left">{t.checkout.orderTracking}</h3>
         <div className="relative">
           <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
           {[
-            { status: "Commande confirmée", time: "Maintenant", active: true },
-            { status: "En préparation", time: "Bientôt", active: false },
-            { status: "En livraison", time: "-", active: false },
-            { status: "Livrée", time: "-", active: false }
+            { status: t.checkout.confirmed, time: t.checkout.now, active: true },
+            { status: t.checkout.preparing, time: t.checkout.soon, active: false },
+            { status: t.checkout.inDelivery, time: "-", active: false },
+            { status: t.checkout.delivered, time: "-", active: false }
           ].map((step, index) => (
             <div key={index} className="relative flex items-start gap-4 pb-4 last:pb-0">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center z-10 ${
@@ -125,12 +128,12 @@ export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfi
       >
         <Button asChild>
           <Link to={`/order/${orderNumber}`}>
-            Suivre ma commande
+            {t.checkout.trackOrder}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link to="/marketplace">Continuer mes achats</Link>
+          <Link to="/marketplace">{t.cart.continueShopping}</Link>
         </Button>
       </motion.div>
     </motion.div>

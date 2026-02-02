@@ -4,6 +4,7 @@ import { Package, ChevronRight, Clock, CheckCircle, Truck, XCircle } from "lucid
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export interface OrderData {
   id: string;
@@ -24,35 +25,37 @@ interface OrderHistoryCardProps {
   index: number;
 }
 
-const statusConfig = {
-  pending: {
-    label: "En attente",
-    color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-    icon: Clock,
-  },
-  preparing: {
-    label: "En préparation",
-    color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-    icon: Package,
-  },
-  transit: {
-    label: "En livraison",
-    color: "bg-primary/10 text-primary border-primary/20",
-    icon: Truck,
-  },
-  delivered: {
-    label: "Livrée",
-    color: "bg-green-500/10 text-green-600 border-green-500/20",
-    icon: CheckCircle,
-  },
-  cancelled: {
-    label: "Annulée",
-    color: "bg-red-500/10 text-red-600 border-red-500/20",
-    icon: XCircle,
-  },
-};
-
 export function OrderHistoryCard({ order, index }: OrderHistoryCardProps) {
+  const { t, language } = useTranslation();
+
+  const statusConfig = {
+    pending: {
+      label: t.orders.statusPending,
+      color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+      icon: Clock,
+    },
+    preparing: {
+      label: t.orders.statusPreparing,
+      color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+      icon: Package,
+    },
+    transit: {
+      label: t.orders.statusTransit,
+      color: "bg-primary/10 text-primary border-primary/20",
+      icon: Truck,
+    },
+    delivered: {
+      label: t.orders.statusDelivered,
+      color: "bg-green-500/10 text-green-600 border-green-500/20",
+      icon: CheckCircle,
+    },
+    cancelled: {
+      label: t.orders.statusCancelled,
+      color: "bg-red-500/10 text-red-600 border-red-500/20",
+      icon: XCircle,
+    },
+  };
+
   const config = statusConfig[order.status];
   const StatusIcon = config.icon;
 
@@ -61,7 +64,8 @@ export function OrderHistoryCard({ order, index }: OrderHistoryCardProps) {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("fr-FR", {
+    const locale = language === "ar" ? "ar-SA" : language === "en" ? "en-US" : "fr-FR";
+    return new Date(dateString).toLocaleDateString(locale, {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -89,7 +93,7 @@ export function OrderHistoryCard({ order, index }: OrderHistoryCardProps) {
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {formatDate(order.createdAt)} • {order.itemCount} article{order.itemCount > 1 ? "s" : ""}
+                  {formatDate(order.createdAt)} • {order.itemCount} {order.itemCount > 1 ? t.orders.articles : t.orders.article}
                 </p>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
@@ -117,14 +121,14 @@ export function OrderHistoryCard({ order, index }: OrderHistoryCardProps) {
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-foreground truncate">
                   {order.items[0].name}
-                  {order.items.length > 1 && ` et ${order.items.length - 1} autre${order.items.length > 2 ? "s" : ""}`}
+                  {order.items.length > 1 && ` ${t.orders.andOther} ${order.items.length - 1} ${order.items.length > 2 ? t.orders.others : t.orders.other}`}
                 </p>
               </div>
             </div>
 
             {/* Total */}
             <div className="flex items-center justify-between pt-3 border-t border-border">
-              <span className="text-sm text-muted-foreground">Total</span>
+              <span className="text-sm text-muted-foreground">{t.orders.total}</span>
               <span className="font-semibold text-primary">{formatPrice(order.total)}</span>
             </div>
           </CardContent>
