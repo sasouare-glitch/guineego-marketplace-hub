@@ -11,22 +11,24 @@ import { PaymentForm } from "@/components/checkout/PaymentForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
 import { useCart } from "@/hooks/useCart";
-
-const steps = [
-  { id: 1, name: "Adresse", description: "Livraison" },
-  { id: 2, name: "Paiement", description: "Méthode" },
-  { id: 3, name: "Confirmation", description: "Commande" },
-];
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { items, clearCart } = useCart();
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAddress, setSelectedAddress] = useState<string | null>("1");
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+
+  const steps = [
+    { id: 1, name: t.checkout.step1, description: t.checkout.deliveryAddress },
+    { id: 2, name: t.checkout.step2, description: t.checkout.paymentMethod },
+    { id: 3, name: t.checkout.step3, description: t.checkout.orderConfirmed },
+  ];
 
   const canProceed = () => {
     if (currentStep === 1) return selectedAddress !== null;
@@ -72,13 +74,13 @@ export default function CheckoutPage() {
               <ShoppingBag className="w-10 h-10 text-muted-foreground" />
             </div>
             <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-              Votre panier est vide
+              {t.checkout.cartEmpty}
             </h1>
             <p className="text-muted-foreground mb-6">
-              Ajoutez des produits pour passer commande
+              {t.checkout.addProductsToOrder}
             </p>
             <Button asChild>
-              <Link to="/marketplace">Découvrir les produits</Link>
+              <Link to="/marketplace">{t.cart.discoverProducts}</Link>
             </Button>
           </div>
         </main>
@@ -99,12 +101,12 @@ export default function CheckoutPage() {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour au panier
+            {t.cart.backToCart}
           </Link>
         )}
 
         <h1 className="text-3xl font-display font-bold text-foreground mb-8">
-          {currentStep === 3 ? "Commande confirmée" : "Finaliser la commande"}
+          {currentStep === 3 ? t.checkout.orderConfirmed : t.checkout.title}
         </h1>
 
         {/* Stepper */}
@@ -152,7 +154,7 @@ export default function CheckoutPage() {
                 >
                   <OrderConfirmation 
                     orderNumber={orderNumber}
-                    estimatedDelivery="Demain, 14h - 18h"
+                    estimatedDelivery={t.time.today + ", 14h - 18h"}
                   />
                 </motion.div>
               )}
@@ -167,7 +169,7 @@ export default function CheckoutPage() {
                   disabled={currentStep === 1}
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Retour
+                  {t.common.back}
                 </Button>
                 <Button 
                   onClick={handleNext}
@@ -176,16 +178,16 @@ export default function CheckoutPage() {
                   {isProcessing ? (
                     <>
                       <span className="animate-spin mr-2">⏳</span>
-                      Traitement...
+                      {t.checkout.processing}
                     </>
                   ) : currentStep === 2 ? (
                     <>
-                      Confirmer et payer
+                      {t.checkout.confirmAndPay}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                   ) : (
                     <>
-                      Continuer
+                      {t.checkout.continue}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                   )}

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
+import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
 
 // Mock product data
@@ -87,6 +88,7 @@ Caractéristiques principales :
 const ProductDetail = () => {
   const { id } = useParams();
   const { addItem } = useCart();
+  const { t } = useTranslation();
   
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(product.colors[0].id);
@@ -115,7 +117,7 @@ const ProductDetail = () => {
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
-    toast.success("Lien copié !");
+    toast.success(t.common.linkCopied);
   };
 
   return (
@@ -125,7 +127,7 @@ const ProductDetail = () => {
       <main className="container-tight py-6">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link to="/marketplace" className="hover:text-foreground">Accueil</Link>
+          <Link to="/marketplace" className="hover:text-foreground">{t.nav.home}</Link>
           <span>/</span>
           <Link to="/search?category=electronics" className="hover:text-foreground">{product.category}</Link>
           <span>/</span>
@@ -211,7 +213,7 @@ const ProductDetail = () => {
                   ))}
                   <span className="ml-1 font-medium">{product.rating}</span>
                 </div>
-                <span className="text-muted-foreground">({product.reviewCount} avis)</span>
+                <span className="text-muted-foreground">({product.reviewCount} {t.product.reviews.toLowerCase()})</span>
               </div>
             </div>
 
@@ -230,7 +232,7 @@ const ProductDetail = () => {
             {/* Color Selection */}
             <div>
               <p className="font-medium mb-3">
-                Couleur: <span className="text-muted-foreground">{product.colors.find(c => c.id === selectedColor)?.name}</span>
+                {t.product.color}: <span className="text-muted-foreground">{product.colors.find(c => c.id === selectedColor)?.name}</span>
               </p>
               <div className="flex gap-2">
                 {product.colors.map((color) => (
@@ -250,7 +252,7 @@ const ProductDetail = () => {
 
             {/* Storage Selection */}
             <div>
-              <p className="font-medium mb-3">Stockage</p>
+              <p className="font-medium mb-3">{t.product.storage}</p>
               <div className="flex flex-wrap gap-2">
                 {product.storage.map((size) => (
                   <Button
@@ -266,7 +268,7 @@ const ProductDetail = () => {
 
             {/* Quantity */}
             <div>
-              <p className="font-medium mb-3">Quantité</p>
+              <p className="font-medium mb-3">{t.product.quantity}</p>
               <div className="flex items-center gap-4">
                 <div className="flex items-center border border-border rounded-lg">
                   <Button
@@ -288,7 +290,7 @@ const ProductDetail = () => {
                   </Button>
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {product.stockCount} disponibles
+                  {product.stockCount} {t.common.available}
                 </span>
               </div>
             </div>
@@ -301,7 +303,7 @@ const ProductDetail = () => {
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="w-5 h-5" />
-                Ajouter au panier
+                {t.marketplace.addToCart}
               </Button>
               <Button
                 size="lg"
@@ -320,18 +322,18 @@ const ProductDetail = () => {
             <div className="grid grid-cols-3 gap-4 py-4 border-y border-border">
               <div className="text-center">
                 <Truck className="w-6 h-6 mx-auto text-primary mb-1" />
-                <p className="text-xs font-medium">Livraison rapide</p>
-                <p className="text-xs text-muted-foreground">2-4 jours</p>
+                <p className="text-xs font-medium">{t.product.fastDelivery}</p>
+                <p className="text-xs text-muted-foreground">{t.product.deliveryDays}</p>
               </div>
               <div className="text-center">
                 <Shield className="w-6 h-6 mx-auto text-primary mb-1" />
-                <p className="text-xs font-medium">Garantie</p>
-                <p className="text-xs text-muted-foreground">12 mois</p>
+                <p className="text-xs font-medium">{t.product.warranty}</p>
+                <p className="text-xs text-muted-foreground">{t.product.warrantyMonths}</p>
               </div>
               <div className="text-center">
                 <RotateCcw className="w-6 h-6 mx-auto text-primary mb-1" />
-                <p className="text-xs font-medium">Retour gratuit</p>
-                <p className="text-xs text-muted-foreground">7 jours</p>
+                <p className="text-xs font-medium">{t.product.freeReturn}</p>
+                <p className="text-xs text-muted-foreground">{t.product.returnDays}</p>
               </div>
             </div>
 
@@ -351,13 +353,13 @@ const ProductDetail = () => {
                           {product.seller.rating}
                         </span>
                         <span>•</span>
-                        <span>{product.seller.productCount} produits</span>
+                        <span>{product.seller.productCount} {t.product.sellerProducts}</span>
                       </div>
                     </div>
                   </div>
                   <Button variant="outline" size="sm" className="gap-2">
                     <MessageCircle className="w-4 h-4" />
-                    Contacter
+                    {t.common.contact}
                   </Button>
                 </div>
               </CardContent>
@@ -372,19 +374,19 @@ const ProductDetail = () => {
               value="description"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
             >
-              Description
+              {t.product.description}
             </TabsTrigger>
             <TabsTrigger 
               value="specifications"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
             >
-              Caractéristiques
+              {t.product.specifications}
             </TabsTrigger>
             <TabsTrigger 
               value="reviews"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
             >
-              Avis ({product.reviewCount})
+              {t.product.reviews} ({product.reviewCount})
             </TabsTrigger>
           </TabsList>
 

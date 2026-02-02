@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PersonalInfoCard } from "@/components/profile/PersonalInfoCard";
 import { SavedAddressesCard, Address } from "@/components/profile/SavedAddressesCard";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface UserInfo {
   firstName: string;
@@ -56,6 +57,7 @@ const mockAddresses: Address[] = [
 export default function ProfilePage() {
   const [user, setUser] = useState<UserInfo>(mockUser);
   const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,7 +70,7 @@ export default function ProfilePage() {
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
-          Retour à l'accueil
+          {t.profile.backToHome}
         </Link>
 
         {/* Page Header */}
@@ -78,10 +80,10 @@ export default function ProfilePage() {
           className="mb-8"
         >
           <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-            Mon profil
+            {t.profile.title}
           </h1>
           <p className="text-muted-foreground">
-            Gérez vos informations personnelles et vos adresses
+            {t.profile.manageInfo}
           </p>
         </motion.div>
 
@@ -105,7 +107,7 @@ export default function ProfilePage() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Paramètres</CardTitle>
+                  <CardTitle className="text-lg">{t.settings.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <Button
@@ -115,7 +117,7 @@ export default function ProfilePage() {
                   >
                     <Link to="/settings/notifications">
                       <Bell className="w-4 h-4 mr-3" />
-                      Notifications
+                      {t.settings.notifications}
                     </Link>
                   </Button>
                   <Button
@@ -125,7 +127,7 @@ export default function ProfilePage() {
                   >
                     <Link to="/settings/security">
                       <Shield className="w-4 h-4 mr-3" />
-                      Sécurité
+                      {t.settings.security}
                     </Link>
                   </Button>
                   <Button
@@ -135,7 +137,7 @@ export default function ProfilePage() {
                   >
                     <Link to="/settings/preferences">
                       <Settings className="w-4 h-4 mr-3" />
-                      Préférences
+                      {t.settings.preferences}
                     </Link>
                   </Button>
                   <Separator className="my-2" />
@@ -144,7 +146,7 @@ export default function ProfilePage() {
                     className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     <LogOut className="w-4 h-4 mr-3" />
-                    Déconnexion
+                    {t.nav.logout}
                   </Button>
                 </CardContent>
               </Card>
@@ -158,24 +160,24 @@ export default function ProfilePage() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Activité</CardTitle>
+                  <CardTitle className="text-lg">{t.profile.activity}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Commandes</span>
+                    <span className="text-muted-foreground">{t.profile.totalOrders}</span>
                     <span className="font-semibold text-foreground">12</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">En cours</span>
+                    <span className="text-muted-foreground">{t.profile.inProgress}</span>
                     <span className="font-semibold text-primary">2</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Livrées</span>
+                    <span className="text-muted-foreground">{t.orders.statusDelivered}</span>
                     <span className="font-semibold text-foreground">10</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Membre depuis</span>
+                    <span className="text-muted-foreground">{t.profile.memberSince}</span>
                     <span className="font-semibold text-foreground">Jan 2024</span>
                   </div>
                 </CardContent>
@@ -191,10 +193,10 @@ export default function ProfilePage() {
               <Card>
                 <CardContent className="p-4">
                   <p className="text-sm text-muted-foreground mb-3">
-                    Besoin d'aide avec votre compte ?
+                    {t.profile.needHelp}
                   </p>
                   <Button variant="outline" className="w-full" asChild>
-                    <Link to="/help">Contacter le support</Link>
+                    <Link to="/help">{t.profile.contactSupport}</Link>
                   </Button>
                 </CardContent>
               </Card>

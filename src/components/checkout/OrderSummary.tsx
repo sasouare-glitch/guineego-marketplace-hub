@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Package, Truck, Clock, Shield } from "lucide-react";
+import { Truck, Shield } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface OrderSummaryProps {
   deliveryFee?: number;
@@ -8,6 +9,7 @@ interface OrderSummaryProps {
 
 export const OrderSummary = ({ deliveryFee = 25000 }: OrderSummaryProps) => {
   const { items, subtotal } = useCart();
+  const { t } = useTranslation();
   const total = subtotal + deliveryFee;
 
   return (
@@ -17,7 +19,7 @@ export const OrderSummary = ({ deliveryFee = 25000 }: OrderSummaryProps) => {
       className="bg-card rounded-2xl border border-border overflow-hidden sticky top-24"
     >
       <div className="p-6 border-b border-border">
-        <h3 className="font-display font-semibold text-foreground">Récapitulatif</h3>
+        <h3 className="font-display font-semibold text-foreground">{t.checkout.orderSummary}</h3>
       </div>
 
       {/* Cart Items */}
@@ -34,7 +36,7 @@ export const OrderSummary = ({ deliveryFee = 25000 }: OrderSummaryProps) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-foreground text-sm line-clamp-2">{item.name}</p>
-                <p className="text-xs text-muted-foreground mt-1">Qté: {item.quantity}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t.product.quantity}: {item.quantity}</p>
                 <p className="text-sm font-semibold text-primary mt-1">
                   {(item.price * item.quantity).toLocaleString()} GNF
                 </p>
@@ -47,16 +49,16 @@ export const OrderSummary = ({ deliveryFee = 25000 }: OrderSummaryProps) => {
       {/* Price Breakdown */}
       <div className="p-6 space-y-3">
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Sous-total ({items.length} articles)</span>
+          <span className="text-muted-foreground">{t.cart.subtotal} ({items.length} {t.checkout.items})</span>
           <span className="font-medium text-foreground">{subtotal.toLocaleString()} GNF</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Livraison</span>
+          <span className="text-muted-foreground">{t.cart.delivery}</span>
           <span className="font-medium text-foreground">{deliveryFee.toLocaleString()} GNF</span>
         </div>
         <div className="h-px bg-border my-4" />
         <div className="flex justify-between">
-          <span className="font-semibold text-foreground">Total</span>
+          <span className="font-semibold text-foreground">{t.cart.total}</span>
           <span className="text-xl font-bold text-primary">{total.toLocaleString()} GNF</span>
         </div>
       </div>
@@ -68,8 +70,8 @@ export const OrderSummary = ({ deliveryFee = 25000 }: OrderSummaryProps) => {
             <Truck className="w-4 h-4 text-guinea-green" />
           </div>
           <div>
-            <p className="font-medium text-foreground">Livraison express</p>
-            <p className="text-xs text-muted-foreground">Sous 24-48h à Conakry</p>
+            <p className="font-medium text-foreground">{t.checkout.expressDelivery}</p>
+            <p className="text-xs text-muted-foreground">{t.checkout.deliveryTime}</p>
           </div>
         </div>
         <div className="flex items-center gap-3 text-sm">
@@ -77,8 +79,8 @@ export const OrderSummary = ({ deliveryFee = 25000 }: OrderSummaryProps) => {
             <Shield className="w-4 h-4 text-guinea-yellow" />
           </div>
           <div>
-            <p className="font-medium text-foreground">Paiement sécurisé</p>
-            <p className="text-xs text-muted-foreground">Données cryptées</p>
+            <p className="font-medium text-foreground">{t.checkout.securePayment}</p>
+            <p className="text-xs text-muted-foreground">{t.checkout.encryptedData}</p>
           </div>
         </div>
       </div>
