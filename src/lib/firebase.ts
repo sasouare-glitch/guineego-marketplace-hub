@@ -9,14 +9,15 @@ import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
-// Configuration Firebase - Remplacez par vos valeurs
+// Configuration Firebase GuineeGo
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "demo-project.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "demo-project.appspot.com",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:123456789:web:abc123"
+  apiKey: "AIzaSyCsvYHumm9Nad6VAFT3CYoQZ2KTO7YHkt4",
+  authDomain: "guineego.firebaseapp.com",
+  projectId: "guineego",
+  storageBucket: "guineego.firebasestorage.app",
+  messagingSenderId: "1002625910773",
+  appId: "1:1002625910773:web:9f503619289e2750fac2bc",
+  measurementId: "G-2G8MMS1VBJ"
 };
 
 // Initialisation de l'app Firebase
