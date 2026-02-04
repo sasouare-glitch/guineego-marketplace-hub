@@ -20,6 +20,7 @@ import CourierDashboard from "./pages/courier/CourierDashboard";
 import CourierMissions from "./pages/courier/CourierMissions";
 import CourierMissionDetail from "./pages/courier/CourierMissionDetail";
 import CourierEarnings from "./pages/courier/CourierEarnings";
+import CourierMobileHome from "./pages/courier/CourierMobileHome";
 import Marketplace from "./pages/Marketplace";
 import SearchPage from "./pages/SearchPage";
 import ProductDetail from "./pages/ProductDetail";
@@ -208,6 +209,12 @@ const App = () => (
                     } />
                     
                     {/* Courier Routes (Protected - courier role) */}
+                    {/* Mobile-first courier interface */}
+                    <Route path="/courier" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierMobileHome />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/courier/dashboard" element={
                       <ProtectedRoute requiredRoles={['courier', 'admin']}>
                         <CourierDashboard />
