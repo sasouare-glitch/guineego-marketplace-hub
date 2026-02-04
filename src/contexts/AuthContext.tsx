@@ -100,23 +100,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const [profile, claims] = await Promise.all([
-          loadUserProfile(user),
-          loadUserClaims(user)
-        ]);
-        
-        // Mettre à jour lastLoginAt
-        await updateDoc(doc(db, 'users', user.uid), {
-          'metadata.lastLoginAt': serverTimestamp()
-        }).catch(() => {});
-        
-        setState({
-          user,
-          profile,
-          claims,
-          loading: false,
-          error: null
-        });
+        try {
+          const [profile, claims] = await Promise.all([
+            loadUserProfile(user),
+            loadUserClaims(user)
+          ]);
+          
+          // Mettre à jour lastLoginAt seulement si le profil existe
+          if (profile) {
+            updateDoc(doc(db, 'users', user.uid), {
+              'metadata.lastLoginAt': serverTimestamp()
+            }).catch(() => {});
+          }
+          
+          setState({
+            user,
+            profile,
+            claims,
+            loading: false,
+            error: null
+          });
+        } catch (error) {
+          console.error('Error loading user data:', error);
+          setState({
+            user,
+            profile: null,
+            claims: null,
+            loading: false,
+            error: null
+          });
+        }
       } else {
         setState({
           user: null,
