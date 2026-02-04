@@ -24,7 +24,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePreferences } from "@/hooks/usePreferences";
-import { useAuth } from "@/lib/firebase/auth";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +39,8 @@ export function Header() {
   const { itemCount: wishlistCount } = useWishlist();
   const { t, language } = useTranslation();
   const { setLanguage } = usePreferences();
-  const { isAdmin, user } = useAuth();
+  const { hasRole, user } = useAuth();
+  const isAdmin = hasRole('admin');
 
   const languages = [
     { code: "fr" as const, label: "Français", flag: "🇫🇷" },
