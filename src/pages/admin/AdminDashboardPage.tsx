@@ -4,17 +4,12 @@
  */
 
 import { AdminDashboard } from '@/components/dashboard/AdminDashboard';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 
 export default function AdminDashboardPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <AdminDashboard />
-      </main>
-      <Footer />
-    </div>
+    <AdminLayout title="Dashboard" description="Vue d'ensemble des performances">
+      <AdminDashboard />
+    </AdminLayout>
   );
 }
