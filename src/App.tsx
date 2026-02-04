@@ -49,6 +49,8 @@ import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import AccessDeniedPage from "./pages/auth/AccessDeniedPage";
+// Admin Pages
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 // Mobile Components
 import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
 import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";
@@ -221,6 +223,13 @@ const App = () => (
                     <Route path="/courier/earnings" element={
                       <ProtectedRoute requiredRoles={['courier', 'admin']}>
                         <CourierEarnings />
+                      </ProtectedRoute>
+                    } />
+                    
+                    {/* Admin Routes (Protected - admin role only) */}
+                    <Route path="/admin/dashboard" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminDashboardPage />
                       </ProtectedRoute>
                     } />
                     
