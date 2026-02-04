@@ -15,7 +15,8 @@ import {
   BarChart3,
   ClipboardList,
   Heart,
-  Languages
+  Languages,
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
@@ -23,6 +24,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePreferences } from "@/hooks/usePreferences";
+import { useAuth } from "@/lib/firebase/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +39,7 @@ export function Header() {
   const { itemCount: wishlistCount } = useWishlist();
   const { t, language } = useTranslation();
   const { setLanguage } = usePreferences();
+  const { isAdmin, user } = useAuth();
 
   const languages = [
     { code: "fr" as const, label: "Français", flag: "🇫🇷" },
@@ -192,6 +195,18 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Admin Dashboard Link */}
+            {isAdmin && (
+              <Link 
+                to="/admin/dashboard" 
+                className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors rounded-lg hover:bg-primary/10"
+                title="Dashboard Admin"
+              >
+                <Shield className="w-4 h-4" />
+                <span className="hidden md:inline">Admin</span>
+              </Link>
+            )}
+
             <Link 
               to="/orders" 
               className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-lg hover:bg-primary/5"
@@ -281,6 +296,16 @@ export function Header() {
                   <ClipboardList className="w-5 h-5" />
                   {t.nav.orders}
                 </Link>
+                {isAdmin && (
+                  <Link
+                    to="/admin/dashboard"
+                    className="flex items-center gap-3 px-4 py-3 text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Shield className="w-5 h-5" />
+                    Dashboard Admin
+                  </Link>
+                )}
                 <div className="pt-4 px-4 flex gap-2">
                   <Button variant="outline" className="flex-1" asChild>
                     <Link to="/login">{t.nav.login}</Link>
