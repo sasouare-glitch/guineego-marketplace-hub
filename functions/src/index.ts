@@ -99,3 +99,27 @@ export {
   rejectWithdrawal,
   getWithdrawalHistory 
 } from './payments/withdrawals';
+
+// ============================================
+// ANALYTICS FUNCTIONS
+// ============================================
+export { 
+  calculateEcomPerformance,
+  dailyRevenueReport,
+  calculateCourierPerformance,
+  calculateCloserPerformance
+} from './analytics/kpiCalculations';
+
+export { 
+  logAnalyticsEvent,
+  onOrderEvent,
+  onDeliveryEvent,
+  onProductEvent,
+  onUserCreated
+} from './analytics/eventTracking';
+
+export { 
+  dailyBigQueryExport,
+  generateAccountingExport,
+  dailyReconciliation
+} from './analytics/bigQuerySync';
