@@ -43,11 +43,15 @@ import ProfilePage from "./pages/ProfilePage";
 import SecuritySettings from "./pages/settings/SecuritySettings";
 import NotificationSettings from "./pages/settings/NotificationSettings";
 import PreferencesSettings from "./pages/settings/PreferencesSettings";
+import InstallApp from "./pages/InstallApp";
 // Auth Pages
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import AccessDeniedPage from "./pages/auth/AccessDeniedPage";
+// Mobile Components
+import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
+import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +66,9 @@ const App = () => (
                 <NotificationProvider>
                   <Toaster />
                   <Sonner />
+                  {/* PWA Update Banner */}
+                  <UpdateBanner />
+                  
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<Index />} />
@@ -69,6 +76,7 @@ const App = () => (
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/access-denied" element={<AccessDeniedPage />} />
+                    <Route path="/install" element={<InstallApp />} />
                     
                     {/* Client Marketplace Routes (Public) */}
                     <Route path="/marketplace" element={<Marketplace />} />
@@ -219,6 +227,11 @@ const App = () => (
                     {/* Catch-all Route */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  
+                  {/* Mobile Navigation Components */}
+                  <MobileBottomNav />
+                  <MobileFAB />
+                  <InstallPrompt />
                 </NotificationProvider>
               </WishlistProvider>
             </CartProvider>
