@@ -51,6 +51,9 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import AccessDeniedPage from "./pages/auth/AccessDeniedPage";
 // Admin Pages
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 // Mobile Components
 import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
 import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";
@@ -230,6 +233,21 @@ const App = () => (
                     <Route path="/admin/dashboard" element={
                       <ProtectedRoute requiredRoles={['admin']}>
                         <AdminDashboardPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/admin/users" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminUsersPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/admin/orders" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminOrdersPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/admin/settings" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminSettingsPage />
                       </ProtectedRoute>
                     } />
                     
