@@ -52,6 +52,7 @@ export function Header() {
     { code: "fr" as const, label: "Français", flag: "🇫🇷" },
     { code: "en" as const, label: "English", flag: "🇬🇧" },
     { code: "ar" as const, label: "العربية", flag: "🇸🇦" },
+    { code: "zh" as const, label: "中文", flag: "🇨🇳" },
   ];
 
   const navigation = [
