@@ -67,3 +67,35 @@ export { processPayment } from './payments/processPayment';
 export { processOMWebhook, processMTNWebhook } from './payments/webhooks';
 export { createPayout } from './payments/createPayout';
 export { onPaymentCompleted } from './payments/paymentTriggers';
+
+// Seller Payouts
+export { transferToEcommercant, onDeliveryConfirmed } from './payments/transferToEcommercant';
+
+// Fee Calculations
+export { 
+  calculateDeliveryFee, 
+  calculateTransitQuote as calculateTransitFee,
+  calculateCourierPayment 
+} from './payments/calculateFees';
+
+// Courier Payments
+export { 
+  payCourier, 
+  onMissionDelivered, 
+  batchCourierPayout 
+} from './payments/courierPayments';
+
+// Investor Payouts
+export { 
+  processInvestorReturns, 
+  scheduledInvestorReturns,
+  processInvestmentMaturity 
+} from './payments/investorPayouts';
+
+// Withdrawals
+export { 
+  requestWithdrawal, 
+  approveWithdrawal, 
+  rejectWithdrawal,
+  getWithdrawalHistory 
+} from './payments/withdrawals';
