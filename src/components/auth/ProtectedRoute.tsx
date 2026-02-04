@@ -24,13 +24,25 @@ export function ProtectedRoute({
     );
   }
 
-  // Rediriger si non authentifié
+  // Rediriger vers login si non authentifié
   if (!user) {
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // Vérifier les rôles si spécifiés
+  // Vérifier les rôles si spécifiés (seulement si l'utilisateur est connecté)
   if (requiredRoles && requiredRoles.length > 0) {
+    // Attendre que les claims soient chargés
+    if (!claims) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Vérification des permissions...</p>
+          </div>
+        </div>
+      );
+    }
+
     if (!hasAnyRole(requiredRoles)) {
       // Afficher le fallback ou rediriger vers accès refusé
       if (fallback) {
