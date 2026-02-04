@@ -17,7 +17,7 @@ import {
   ConfirmationResult
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db, googleProvider, facebookProvider } from '@/lib/firebase';
+import { auth, db, googleProvider, facebookProvider } from '@/lib/firebase/config';
 import { 
   AuthContextType, 
   AuthState, 
