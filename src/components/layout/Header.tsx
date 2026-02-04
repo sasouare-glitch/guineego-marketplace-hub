@@ -16,7 +16,10 @@ import {
   ClipboardList,
   Heart,
   Languages,
-  Shield
+  Shield,
+  LogOut,
+  Settings,
+  Wallet
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
@@ -29,8 +32,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -39,8 +44,9 @@ export function Header() {
   const { itemCount: wishlistCount } = useWishlist();
   const { t, language } = useTranslation();
   const { setLanguage } = usePreferences();
-  const { hasRole, user } = useAuth();
+  const { hasRole, user, profile, signOut } = useAuth();
   const isAdmin = hasRole('admin');
+  const isLoggedIn = !!user;
 
   const languages = [
     { code: "fr" as const, label: "Français", flag: "🇫🇷" },
@@ -238,23 +244,84 @@ export function Header() {
               )}
             </Link>
             
-            {/* Profile Link */}
-            <Link 
-              to="/profile" 
-              className="p-2 text-foreground/70 hover:text-primary transition-colors rounded-full hover:bg-primary/5"
-              title={t.nav.profile}
-            >
-              <User className="w-5 h-5" />
-            </Link>
-            
-            <div className="hidden sm:flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/login">{t.nav.login}</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link to="/register">{t.nav.register}</Link>
-              </Button>
-            </div>
+            {/* Profile Menu or Login/Register */}
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 p-1.5 rounded-full hover:bg-primary/5 transition-colors">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={profile?.photoURL || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+                        {profile?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <ChevronDown className="w-3 h-3 text-muted-foreground hidden sm:block" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-3 py-2 border-b border-border">
+                    <p className="font-medium text-foreground truncate">
+                      {profile?.displayName || 'Utilisateur'}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {user?.email}
+                    </p>
+                  </div>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link to="/profile" className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Mon profil
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link to="/orders" className="flex items-center gap-2">
+                      <ClipboardList className="w-4 h-4" />
+                      Mes commandes
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link to="/wishlist" className="flex items-center gap-2">
+                      <Heart className="w-4 h-4" />
+                      Ma wishlist
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link to="/settings/preferences" className="flex items-center gap-2">
+                      <Settings className="w-4 h-4" />
+                      Paramètres
+                    </Link>
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild className="cursor-pointer">
+                        <Link to="/admin/dashboard" className="flex items-center gap-2 text-primary">
+                          <Shield className="w-4 h-4" />
+                          Dashboard Admin
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    className="cursor-pointer text-destructive focus:text-destructive"
+                    onClick={() => signOut()}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Déconnexion
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/login">{t.nav.login}</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link to="/register">{t.nav.register}</Link>
+                </Button>
+              </div>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -307,14 +374,62 @@ export function Header() {
                     Dashboard Admin
                   </Link>
                 )}
-                <div className="pt-4 px-4 flex gap-2">
-                  <Button variant="outline" className="flex-1" asChild>
-                    <Link to="/login">{t.nav.login}</Link>
-                  </Button>
-                  <Button className="flex-1" asChild>
-                    <Link to="/register">{t.nav.register}</Link>
-                  </Button>
-                </div>
+                {isLoggedIn ? (
+                  <div className="pt-4 px-4 space-y-2">
+                    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={profile?.photoURL || undefined} />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          {profile?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground truncate">
+                          {profile?.displayName || 'Utilisateur'}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {user?.email}
+                        </p>
+                      </div>
+                    </div>
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-3 px-4 py-3 text-foreground/80 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <User className="w-5 h-5" />
+                      Mon profil
+                    </Link>
+                    <Link
+                      to="/settings/preferences"
+                      className="flex items-center gap-3 px-4 py-3 text-foreground/80 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Settings className="w-5 h-5" />
+                      Paramètres
+                    </Link>
+                    <Button 
+                      variant="outline" 
+                      className="w-full text-destructive border-destructive/30 hover:bg-destructive/10"
+                      onClick={() => {
+                        signOut();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Déconnexion
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="pt-4 px-4 flex gap-2">
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link to="/login">{t.nav.login}</Link>
+                    </Button>
+                    <Button className="flex-1" asChild>
+                      <Link to="/register">{t.nav.register}</Link>
+                    </Button>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
