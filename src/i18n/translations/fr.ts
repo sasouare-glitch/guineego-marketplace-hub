@@ -47,6 +47,26 @@ export const fr = {
     invest: "Investir",
   },
 
+  // Authentication
+  auth: {
+    login: "Se connecter",
+    loginDescription: "Connectez-vous à votre compte GuineeGo",
+    register: "S'inscrire",
+    registerDescription: "Rejoignez la marketplace GuineeGo",
+    logout: "Déconnexion",
+    password: "Mot de passe",
+    confirmPassword: "Confirmer le mot de passe",
+    forgotPassword: "Mot de passe oublié ?",
+    resetPassword: "Réinitialiser le mot de passe",
+    orContinueWith: "Ou continuer avec",
+    noAccount: "Pas encore de compte ?",
+    alreadyHaveAccount: "Déjà un compte ?",
+    fullName: "Nom complet",
+    rememberMe: "Se souvenir de moi",
+    verifyEmail: "Vérifier l'email",
+    verifyPhone: "Vérifier le téléphone",
+  },
+
   // Header Menu
   header: {
     allProducts: "Tous les produits",

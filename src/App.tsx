@@ -7,6 +7,8 @@ import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
 import { NotificationProvider } from "@/hooks/useNotifications";
 import { PreferencesProvider } from "@/hooks/usePreferences";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import React from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -41,6 +43,11 @@ import ProfilePage from "./pages/ProfilePage";
 import SecuritySettings from "./pages/settings/SecuritySettings";
 import NotificationSettings from "./pages/settings/NotificationSettings";
 import PreferencesSettings from "./pages/settings/PreferencesSettings";
+// Auth Pages
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import AccessDeniedPage from "./pages/auth/AccessDeniedPage";
 
 const queryClient = new QueryClient();
 
@@ -48,61 +55,176 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <PreferencesProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <NotificationProvider>
-              <Toaster />
-              <Sonner />
-            <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              {/* Client Marketplace Routes */}
-              <Route path="/marketplace" element={<Marketplace />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/order/:id" element={<OrderTrackingPage />} />
-              <Route path="/order" element={<OrderTrackingPage />} />
-              <Route path="/orders" element={<MyOrdersPage />} />
-              <Route path="/wishlist" element={<WishlistPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              {/* Settings Routes */}
-              <Route path="/settings/security" element={<SecuritySettings />} />
-              <Route path="/settings/notifications" element={<NotificationSettings />} />
-              <Route path="/settings/preferences" element={<PreferencesSettings />} />
-            {/* Academy Routes */}
-            <Route path="/academy" element={<Academy />} />
-            <Route path="/academy/course/:id" element={<CourseDetail />} />
-            {/* Investor Routes */}
-            <Route path="/investor/dashboard" element={<InvestorDashboard />} />
-            <Route path="/investor/opportunities" element={<InvestorOpportunities />} />
-            <Route path="/investor/investments" element={<InvestorInvestments />} />
-            <Route path="/investor/opportunity/:id" element={<OpportunityDetail />} />
-            <Route path="/investor/investment/:id" element={<InvestmentDetail />} />
-            {/* Transit Routes */}
-            <Route path="/transit/dashboard" element={<TransitDashboard />} />
-            <Route path="/transit/quote" element={<TransitQuote />} />
-            <Route path="/transit/tracking" element={<TransitTracking />} />
-            <Route path="/transit/shipments" element={<TransitShipments />} />
-            {/* Seller Dashboard Routes */}
-            <Route path="/seller/dashboard" element={<SellerDashboard />} />
-            <Route path="/seller/products" element={<SellerProducts />} />
-            <Route path="/seller/orders" element={<SellerOrders />} />
-            <Route path="/seller/finances" element={<SellerFinances />} />
-            {/* Courier Routes */}
-            <Route path="/courier/dashboard" element={<CourierDashboard />} />
-            <Route path="/courier/missions" element={<CourierMissions />} />
-            <Route path="/courier/mission/:id" element={<CourierMissionDetail />} />
-            <Route path="/courier/earnings" element={<CourierEarnings />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-          </NotificationProvider>
-        </WishlistProvider>
-      </CartProvider>
-    </PreferencesProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <NotificationProvider>
+                  <Toaster />
+                  <Sonner />
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route path="/" element={<Index />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/access-denied" element={<AccessDeniedPage />} />
+                    
+                    {/* Client Marketplace Routes (Public) */}
+                    <Route path="/marketplace" element={<Marketplace />} />
+                    <Route path="/search" element={<SearchPage />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/academy" element={<Academy />} />
+                    <Route path="/academy/course/:id" element={<CourseDetail />} />
+                    
+                    {/* Protected Client Routes */}
+                    <Route path="/cart" element={<CartPage />} />
+                    <Route path="/checkout" element={
+                      <ProtectedRoute>
+                        <CheckoutPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/order/:id" element={
+                      <ProtectedRoute>
+                        <OrderTrackingPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/order" element={
+                      <ProtectedRoute>
+                        <OrderTrackingPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/orders" element={
+                      <ProtectedRoute>
+                        <MyOrdersPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/profile" element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    } />
+                    
+                    {/* Settings Routes (Protected) */}
+                    <Route path="/settings/security" element={
+                      <ProtectedRoute>
+                        <SecuritySettings />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/settings/notifications" element={
+                      <ProtectedRoute>
+                        <NotificationSettings />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/settings/preferences" element={
+                      <ProtectedRoute>
+                        <PreferencesSettings />
+                      </ProtectedRoute>
+                    } />
+                    
+                    {/* Investor Routes (Protected - investor role) */}
+                    <Route path="/investor/dashboard" element={
+                      <ProtectedRoute requiredRoles={['investor', 'admin']}>
+                        <InvestorDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/investor/opportunities" element={
+                      <ProtectedRoute requiredRoles={['investor', 'admin']}>
+                        <InvestorOpportunities />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/investor/investments" element={
+                      <ProtectedRoute requiredRoles={['investor', 'admin']}>
+                        <InvestorInvestments />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/investor/opportunity/:id" element={
+                      <ProtectedRoute requiredRoles={['investor', 'admin']}>
+                        <OpportunityDetail />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/investor/investment/:id" element={
+                      <ProtectedRoute requiredRoles={['investor', 'admin']}>
+                        <InvestmentDetail />
+                      </ProtectedRoute>
+                    } />
+                    
+                    {/* Transit Routes (Protected) */}
+                    <Route path="/transit/dashboard" element={
+                      <ProtectedRoute>
+                        <TransitDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/transit/quote" element={
+                      <ProtectedRoute>
+                        <TransitQuote />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/transit/tracking" element={
+                      <ProtectedRoute>
+                        <TransitTracking />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/transit/shipments" element={
+                      <ProtectedRoute>
+                        <TransitShipments />
+                      </ProtectedRoute>
+                    } />
+                    
+                    {/* Seller Dashboard Routes (Protected - ecommerce role) */}
+                    <Route path="/seller/dashboard" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/seller/products" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerProducts />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/seller/orders" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerOrders />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/seller/finances" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerFinances />
+                      </ProtectedRoute>
+                    } />
+                    
+                    {/* Courier Routes (Protected - courier role) */}
+                    <Route path="/courier/dashboard" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/courier/missions" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierMissions />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/courier/mission/:id" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierMissionDetail />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/courier/earnings" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierEarnings />
+                      </ProtectedRoute>
+                    } />
+                    
+                    {/* Catch-all Route */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </NotificationProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </PreferencesProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

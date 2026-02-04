@@ -49,6 +49,26 @@ export const en: TranslationKeys = {
     invest: "Invest",
   },
 
+  // Authentication
+  auth: {
+    login: "Login",
+    loginDescription: "Sign in to your GuineeGo account",
+    register: "Sign up",
+    registerDescription: "Join the GuineeGo marketplace",
+    logout: "Logout",
+    password: "Password",
+    confirmPassword: "Confirm password",
+    forgotPassword: "Forgot password?",
+    resetPassword: "Reset password",
+    orContinueWith: "Or continue with",
+    noAccount: "Don't have an account?",
+    alreadyHaveAccount: "Already have an account?",
+    fullName: "Full name",
+    rememberMe: "Remember me",
+    verifyEmail: "Verify email",
+    verifyPhone: "Verify phone",
+  },
+
   // Header Menu
   header: {
     allProducts: "All products",
