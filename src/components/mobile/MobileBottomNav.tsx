@@ -20,9 +20,10 @@ import {
   GraduationCap,
   Truck
 } from 'lucide-react';
-import { useAuth, type UserRole } from '@/lib/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/hooks/useCart';
 import { cn } from '@/lib/utils';
+import type { UserRole } from '@/types/auth';
 
 interface NavItem {
   path: string;
@@ -84,7 +85,7 @@ const quickAccessByRole: Partial<Record<UserRole, NavItem[]>> = {
 export default function MobileBottomNav() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { profile } = useAuth();
+  const { profile, claims } = useAuth();
   const { items, itemCount } = useCart();
 
   // Don't show on certain pages
@@ -93,7 +94,7 @@ export default function MobileBottomNav() {
     return null;
   }
 
-  const role: UserRole = profile?.role || 'customer';
+  const role: UserRole = claims?.role || 'customer';
   const navItems = navByRole[role];
   const cartCount = itemCount;
 
@@ -160,8 +161,8 @@ export default function MobileBottomNav() {
  */
 export function MobileFAB() {
   const navigate = useNavigate();
-  const { profile } = useAuth();
-  const role: UserRole = profile?.role || 'customer';
+  const { claims } = useAuth();
+  const role: UserRole = claims?.role || 'customer';
 
   const fabConfig: Record<UserRole, { icon: typeof Home; path: string; label: string } | null> = {
     customer: null,
