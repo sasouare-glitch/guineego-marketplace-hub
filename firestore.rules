@@ -39,7 +39,9 @@ service cloud.firestore {
     // ============================================
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId);
+      // Permettre la création si l'utilisateur crée son propre document
+      // isOwner vérifie que request.auth.uid == userId
+      allow create: if isAuthenticated() && request.auth.uid == userId;
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
     }
