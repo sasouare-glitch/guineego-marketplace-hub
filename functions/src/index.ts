@@ -14,6 +14,7 @@ admin.initializeApp();
 export { createUserWithRole } from './auth/createUserWithRole';
 export { updateUserRole } from './auth/updateUserRole';
 export { getUserClaims } from './auth/getUserClaims';
+export { bootstrapAdmin } from './auth/bootstrapAdmin';
 
 // ============================================
 // PRODUCTS FUNCTIONS
