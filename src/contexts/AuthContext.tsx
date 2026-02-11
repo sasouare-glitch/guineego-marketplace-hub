@@ -73,16 +73,36 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  // Charger les Custom Claims
+  // Charger les Custom Claims (avec fallback Firestore)
   const loadUserClaims = useCallback(async (user: User): Promise<UserClaims | null> => {
     try {
       const tokenResult = await getIdTokenResult(user, true);
       const claims = tokenResult.claims;
       
-      // Extraire les claims personnalisés avec valeurs par défaut
+      let role = (claims.role as UserRole) || null;
+      let roles = (claims.roles as UserRole[]) || null;
+
+      // Fallback: si pas de rôle dans les Custom Claims, vérifier Firestore
+      if (!role || role === 'customer') {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            if (userData.role && userData.role !== 'customer') {
+              role = userData.role as UserRole;
+            }
+            if (userData.roles && Array.isArray(userData.roles)) {
+              roles = userData.roles as UserRole[];
+            }
+          }
+        } catch (e) {
+          console.warn('Fallback Firestore role check failed:', e);
+        }
+      }
+
       return {
-        role: (claims.role as UserRole) || 'customer',
-        roles: (claims.roles as UserRole[]) || ['customer'],
+        role: role || 'customer',
+        roles: roles || [role || 'customer'],
         ecomId: claims.ecomId as string | undefined,
         courierId: claims.courierId as string | undefined,
         closerId: claims.closerId as string | undefined,
