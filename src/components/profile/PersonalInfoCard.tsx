@@ -7,6 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { updateProfile as firebaseUpdateProfile } from "firebase/auth";
 
 interface UserInfo {
   firstName: string;
@@ -18,21 +22,46 @@ interface UserInfo {
 
 interface PersonalInfoCardProps {
   user: UserInfo;
-  onSave: (user: UserInfo) => void;
+  onSave?: (user: UserInfo) => void;
 }
 
 export function PersonalInfoCard({ user, onSave }: PersonalInfoCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(user);
   const [isSaving, setIsSaving] = useState(false);
+  const { user: firebaseUser } = useAuth();
 
   const handleSave = async () => {
+    if (!firebaseUser) return;
     setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    onSave(formData);
-    setIsEditing(false);
-    setIsSaving(false);
-    toast.success("Profil mis à jour");
+    try {
+      // Update Firestore profile
+      await updateDoc(doc(db, 'users', firebaseUser.uid), {
+        displayName: `${formData.firstName} ${formData.lastName}`,
+        phone: formData.phone,
+        profile: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          language: 'fr',
+          currency: 'GNF',
+        },
+        'metadata.updatedAt': serverTimestamp(),
+      });
+
+      // Update Firebase Auth displayName
+      await firebaseUpdateProfile(firebaseUser, {
+        displayName: `${formData.firstName} ${formData.lastName}`,
+      });
+
+      onSave?.(formData);
+      setIsEditing(false);
+      toast.success("Profil mis à jour avec succès");
+    } catch (error: any) {
+      console.error('Error saving profile:', error);
+      toast.error("Erreur lors de la mise à jour du profil");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
