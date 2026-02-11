@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Settings, Shield, Bell, LogOut } from "lucide-react";
 import { Header } from "@/components/layout/Header";
@@ -10,8 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { PersonalInfoCard } from "@/components/profile/PersonalInfoCard";
 import { SavedAddressesCard, Address } from "@/components/profile/SavedAddressesCard";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useAuth } from "@/contexts/AuthContext";
 
-interface UserInfo {
+export interface UserInfo {
   firstName: string;
   lastName: string;
   email: string;
@@ -19,45 +20,22 @@ interface UserInfo {
   avatar?: string;
 }
 
-// Mock user data
-const mockUser = {
-  firstName: "Mamadou",
-  lastName: "Diallo",
-  email: "mamadou.diallo@email.com",
-  phone: "+224 622 123 456",
-  avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200" as string | undefined,
-};
-
-const mockAddresses: Address[] = [
-  {
-    id: "1",
-    label: "Domicile",
-    type: "home",
-    name: "Mamadou Diallo",
-    phone: "+224 622 123 456",
-    street: "Quartier Cosa, Rue KA-012",
-    commune: "Ratoma",
-    city: "Conakry",
-    landmark: "Près de la pharmacie centrale",
-    isDefault: true,
-  },
-  {
-    id: "2",
-    label: "Bureau",
-    type: "work",
-    name: "Mamadou Diallo",
-    phone: "+224 622 123 456",
-    street: "Immeuble Kaloum Center, 3ème étage",
-    commune: "Kaloum",
-    city: "Conakry",
-    isDefault: false,
-  },
-];
+const defaultAddresses: Address[] = [];
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<UserInfo>(mockUser);
-  const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
+  const { user: firebaseUser, profile, signOut } = useAuth();
+  const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const user: UserInfo = {
+    firstName: profile?.profile?.firstName || firebaseUser?.displayName?.split(' ')[0] || '',
+    lastName: profile?.profile?.lastName || firebaseUser?.displayName?.split(' ').slice(1).join(' ') || '',
+    email: firebaseUser?.email || '',
+    phone: firebaseUser?.phoneNumber || profile?.phone || '',
+    avatar: firebaseUser?.photoURL || undefined,
+  };
+
+  const [addresses, setAddresses] = useState<Address[]>(defaultAddresses);
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,7 +68,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            <PersonalInfoCard user={user} onSave={setUser} />
+            <PersonalInfoCard user={user} />
             <SavedAddressesCard
               addresses={addresses}
               onAddressesChange={setAddresses}
@@ -144,6 +122,10 @@ export default function ProfilePage() {
                   <Button
                     variant="ghost"
                     className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                    onClick={async () => {
+                      await signOut();
+                      navigate('/');
+                    }}
                   >
                     <LogOut className="w-4 h-4 mr-3" />
                     {t.nav.logout}
