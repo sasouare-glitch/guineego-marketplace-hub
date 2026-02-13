@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, Phone, Camera } from "lucide-react";
+import { User, Mail, Phone, Camera, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { updateProfile as firebaseUpdateProfile } from "firebase/auth";
+import { uploadAvatar } from "@/lib/firebase/storage";
 
 interface UserInfo {
   firstName: string;
@@ -29,7 +30,46 @@ export function PersonalInfoCard({ user, onSave }: PersonalInfoCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(user);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user: firebaseUser } = useAuth();
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !firebaseUser) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Veuillez sélectionner une image");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 5 Mo");
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    try {
+      const result = await uploadAvatar(file, firebaseUser.uid);
+      
+      // Update Firebase Auth photoURL
+      await firebaseUpdateProfile(firebaseUser, { photoURL: result.url });
+      
+      // Update Firestore
+      await updateDoc(doc(db, 'users', firebaseUser.uid), {
+        photoURL: result.url,
+        'metadata.updatedAt': serverTimestamp(),
+      });
+
+      setFormData(prev => ({ ...prev, avatar: result.url }));
+      toast.success("Photo de profil mise à jour");
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      toast.error("Erreur lors de l'upload de la photo");
+    } finally {
+      setIsUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const handleSave = async () => {
     if (!firebaseUser) return;
@@ -93,11 +133,26 @@ export function PersonalInfoCard({ user, onSave }: PersonalInfoCardProps) {
                   {formData.firstName.charAt(0)}{formData.lastName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
-              {isEditing && (
-                <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors">
-                  <Camera className="w-4 h-4" />
-                </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+              {isUploadingAvatar && (
+                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
+                  <Loader2 className="w-6 h-6 text-white animate-spin" />
+                </div>
               )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingAvatar}
+                className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors"
+              >
+                <Camera className="w-4 h-4" />
+              </button>
             </div>
             <div>
               <h3 className="font-semibold text-foreground">
