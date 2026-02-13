@@ -74,6 +74,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   // Charger les Custom Claims (avec fallback Firestore)
+  // Déterminer le rôle basé sur l'email
+  const determineUserRole = (email: string | null | undefined): UserRole => {
+    if (email === 'sasouare@gmail.com') {
+      return 'admin';
+    }
+    return 'customer';
+  };
+
+  // Charger les Custom Claims (avec fallback Firestore)
   const loadUserClaims = useCallback(async (user: User): Promise<UserClaims | null> => {
     try {
       const tokenResult = await getIdTokenResult(user, true);
@@ -175,12 +184,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await firebaseUpdateProfile(user, { displayName });
       
       // Créer le document utilisateur dans Firestore
+      const role = determineUserRole(user.email);
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
         displayName,
-        role: 'customer',
-        roles: ['customer'],
+        role,
+        roles: [role],
         profile: {
           firstName: displayName.split(' ')[0] || '',
           lastName: displayName.split(' ').slice(1).join(' ') || '',
@@ -218,12 +228,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Auto-créer le document Firestore si absent (ex: compte créé via Firebase Console)
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       if (!userDoc.exists()) {
+        const role = determineUserRole(user.email);
         await setDoc(doc(db, 'users', user.uid), {
           uid: user.uid,
           email: user.email,
           displayName: user.displayName || email?.split('@')[0] || '',
-          role: 'customer',
-          roles: ['customer'],
+          role,
+          roles: [role],
           profile: {
             firstName: user.displayName?.split(' ')[0] || '',
             lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
@@ -282,13 +293,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Créer le profil si nouveau
       const userDoc = await getDoc(doc(db, 'users', result.user.uid));
       if (!userDoc.exists()) {
+        const role = determineUserRole(result.user.email);
         await setDoc(doc(db, 'users', result.user.uid), {
           uid: result.user.uid,
           email: result.user.email,
           displayName: result.user.displayName,
           photoURL: result.user.photoURL,
-          role: 'customer',
-          roles: ['customer'],
+          role,
+          roles: [role],
           profile: {
             firstName: result.user.displayName?.split(' ')[0] || '',
             lastName: result.user.displayName?.split(' ').slice(1).join(' ') || '',
@@ -316,13 +328,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       const userDoc = await getDoc(doc(db, 'users', result.user.uid));
       if (!userDoc.exists()) {
+        const role = determineUserRole(result.user.email);
         await setDoc(doc(db, 'users', result.user.uid), {
           uid: result.user.uid,
           email: result.user.email,
           displayName: result.user.displayName,
           photoURL: result.user.photoURL,
-          role: 'customer',
-          roles: ['customer'],
+          role,
+          roles: [role],
           profile: {
             firstName: result.user.displayName?.split(' ')[0] || '',
             lastName: result.user.displayName?.split(' ').slice(1).join(' ') || '',
@@ -368,11 +381,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Créer le profil si nouveau
       const userDoc = await getDoc(doc(db, 'users', result.user.uid));
       if (!userDoc.exists()) {
+        const role = determineUserRole(result.user.phoneNumber);
         await setDoc(doc(db, 'users', result.user.uid), {
           uid: result.user.uid,
           phone: result.user.phoneNumber,
-          role: 'customer',
-          roles: ['customer'],
+          role,
+          roles: [role],
           profile: {
             language: 'fr',
             currency: 'GNF'
