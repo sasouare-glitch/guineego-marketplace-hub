@@ -26,6 +26,15 @@ import {
   UserRole 
 } from '@/types/auth';
 
+// Déterminer le rôle basé sur l'email (admin auto-attribué)
+const ADMIN_EMAILS = ['sasouare@gmail.com'];
+const determineUserRole = (email: string | null | undefined): UserRole => {
+  if (email && ADMIN_EMAILS.includes(email.toLowerCase())) {
+    return 'admin';
+  }
+  return 'customer';
+};
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function useAuth(): AuthContextType {
@@ -74,14 +83,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   // Charger les Custom Claims (avec fallback Firestore)
-  // Déterminer le rôle basé sur l'email
-  const determineUserRole = (email: string | null | undefined): UserRole => {
-    if (email === 'sasouare@gmail.com') {
-      return 'admin';
-    }
-    return 'customer';
-  };
-
   // Charger les Custom Claims (avec fallback Firestore)
   const loadUserClaims = useCallback(async (user: User): Promise<UserClaims | null> => {
     try {
