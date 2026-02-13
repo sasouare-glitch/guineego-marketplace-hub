@@ -213,7 +213,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (email: string, password: string) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
-      await signInWithEmailAndPassword(auth, email, password);
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      
+      // Auto-créer le document Firestore si absent (ex: compte créé via Firebase Console)
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName || email?.split('@')[0] || '',
+          role: 'customer',
+          roles: ['customer'],
+          profile: {
+            firstName: user.displayName?.split(' ')[0] || '',
+            lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+            language: 'fr',
+            currency: 'GNF'
+          },
+          metadata: {
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            lastLoginAt: serverTimestamp()
+          }
+        });
+      }
     } catch (error) {
       setState(prev => ({ ...prev, loading: false, error: error as Error }));
       throw error;
