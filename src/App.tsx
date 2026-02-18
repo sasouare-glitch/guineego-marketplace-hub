@@ -16,6 +16,8 @@ import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerProducts from "./pages/seller/SellerProducts";
 import SellerOrders from "./pages/seller/SellerOrders";
 import SellerFinances from "./pages/seller/SellerFinances";
+import SellerAnalytics from "./pages/seller/SellerAnalytics";
+import SellerCustomers from "./pages/seller/SellerCustomers";
 import CourierDashboard from "./pages/courier/CourierDashboard";
 import CourierMissions from "./pages/courier/CourierMissions";
 import CourierMissionDetail from "./pages/courier/CourierMissionDetail";
@@ -221,6 +223,16 @@ const App = () => (
                     <Route path="/seller/finances" element={
                       <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
                         <SellerFinances />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/seller/analytics" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerAnalytics />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/seller/customers" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerCustomers />
                       </ProtectedRoute>
                     } />
                     
