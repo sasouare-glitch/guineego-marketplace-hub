@@ -18,8 +18,15 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.token.role == role;
     }
     
+    // Liste des emails admin de confiance (bypass custom claims)
+    function isAdminEmail() {
+      return isAuthenticated() && request.auth.token.email in [
+        'sasouare@gmail.com'
+      ];
+    }
+    
     function isAdmin() {
-      return hasRole('admin');
+      return hasRole('admin') || isAdminEmail();
     }
     
     function isSeller() {
