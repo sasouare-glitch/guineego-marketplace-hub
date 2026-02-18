@@ -56,6 +56,7 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import AdminProductsPage from "./pages/admin/AdminProductsPage";
 // Mobile Components
 import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
 import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";
@@ -261,6 +262,11 @@ const App = () => (
                     <Route path="/admin/settings" element={
                       <ProtectedRoute requiredRoles={['admin']}>
                         <AdminSettingsPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/admin/products" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminProductsPage />
                       </ProtectedRoute>
                     } />
                     
