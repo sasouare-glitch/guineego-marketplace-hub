@@ -452,13 +452,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Vérifier si l'utilisateur a un rôle
+  // Les emails admin ont toujours tous les droits, quelle que soit l'état des claims
   const hasRole = (role: UserRole): boolean => {
+    if (state.user?.email && ADMIN_EMAILS.includes(state.user.email.toLowerCase())) {
+      return true;
+    }
     if (!state.claims) return false;
     return state.claims.role === role || (state.claims.roles?.includes(role) ?? false);
   };
 
   // Vérifier si l'utilisateur a un des rôles
   const hasAnyRole = (roles: UserRole[]): boolean => {
+    if (state.user?.email && ADMIN_EMAILS.includes(state.user.email.toLowerCase())) {
+      return true;
+    }
     if (!state.claims) return false;
     return roles.some(role => hasRole(role));
   };
