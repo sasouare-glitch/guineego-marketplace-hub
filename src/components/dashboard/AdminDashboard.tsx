@@ -57,10 +57,6 @@ export function AdminDashboard() {
   
   const [period, setPeriod] = useState<'7' | '30'>('7');
 
-  if (loading) {
-    return <DashboardSkeleton />;
-  }
-
   const selectedRolling = period === '7' ? rolling?.rolling7 : rolling?.rolling30;
 
   // Prepare chart data
