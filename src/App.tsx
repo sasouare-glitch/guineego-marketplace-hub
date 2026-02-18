@@ -58,6 +58,9 @@ import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminSellersPage from "./pages/admin/AdminSellersPage";
+import AdminDeliveriesPage from "./pages/admin/AdminDeliveriesPage";
+import AdminTransitPage from "./pages/admin/AdminTransitPage";
+import AdminAcademyPage from "./pages/admin/AdminAcademyPage";
 // Mobile Components
 import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
 import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";
@@ -270,13 +273,28 @@ const App = () => (
                         <AdminProductsPage />
                       </ProtectedRoute>
                     } />
-                    <Route path="/admin/sellers" element={
-                      <ProtectedRoute requiredRoles={['admin']}>
-                        <AdminSellersPage />
-                      </ProtectedRoute>
-                    } />
-                    
-                    {/* Catch-all Route */}
+                     <Route path="/admin/sellers" element={
+                       <ProtectedRoute requiredRoles={['admin']}>
+                         <AdminSellersPage />
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/admin/deliveries" element={
+                       <ProtectedRoute requiredRoles={['admin']}>
+                         <AdminDeliveriesPage />
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/admin/transit" element={
+                       <ProtectedRoute requiredRoles={['admin']}>
+                         <AdminTransitPage />
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/admin/academy" element={
+                       <ProtectedRoute requiredRoles={['admin']}>
+                         <AdminAcademyPage />
+                       </ProtectedRoute>
+                     } />
+                     
+                     {/* Catch-all Route */}
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                   
