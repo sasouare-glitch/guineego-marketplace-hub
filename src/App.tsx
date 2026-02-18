@@ -43,6 +43,7 @@ import TransitQuote from "./pages/transit/TransitQuote";
 import TransitTracking from "./pages/transit/TransitTracking";
 import TransitShipments from "./pages/transit/TransitShipments";
 import TransitInvoices from "./pages/transit/TransitInvoices";
+import TransitSettings from "./pages/transit/TransitSettings";
 import ProfilePage from "./pages/ProfilePage";
 import SecuritySettings from "./pages/settings/SecuritySettings";
 import NotificationSettings from "./pages/settings/NotificationSettings";
@@ -201,6 +202,11 @@ const App = () => (
                     <Route path="/transit/invoices" element={
                       <ProtectedRoute>
                         <TransitInvoices />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/transit/settings" element={
+                      <ProtectedRoute>
+                        <TransitSettings />
                       </ProtectedRoute>
                     } />
                     
