@@ -82,10 +82,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  // Charger les Custom Claims (avec fallback Firestore)
-  // Charger les Custom Claims (avec fallback Firestore)
+  // Charger les Custom Claims (avec fallback Firestore + email admin override)
   const loadUserClaims = useCallback(async (user: User): Promise<UserClaims | null> => {
     try {
+      // Priorité absolue : si l'email est dans la liste admin, role = admin
+      if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+        // Mettre à jour Firestore si le rôle n'est pas encore admin
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists() && userDoc.data().role !== 'admin') {
+            await updateDoc(doc(db, 'users', user.uid), {
+              role: 'admin',
+              roles: ['admin'],
+              'metadata.updatedAt': serverTimestamp()
+            });
+          }
+        } catch (e) {
+          console.warn('Could not update admin role in Firestore:', e);
+        }
+
+        const tokenResult = await getIdTokenResult(user, true);
+        const claims = tokenResult.claims;
+        return {
+          role: 'admin',
+          roles: ['admin'],
+          ecomId: claims.ecomId as string | undefined,
+          courierId: claims.courierId as string | undefined,
+          closerId: claims.closerId as string | undefined,
+          investorId: claims.investorId as string | undefined,
+          emailVerified: user.emailVerified,
+          phoneVerified: !!user.phoneNumber
+        };
+      }
+
       const tokenResult = await getIdTokenResult(user, true);
       const claims = tokenResult.claims;
       
