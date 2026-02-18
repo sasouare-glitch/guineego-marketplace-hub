@@ -3,6 +3,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRouteProps } from '@/types/auth';
 import { Loader2 } from 'lucide-react';
 
+// Emails with unconditional admin access (mirrors AuthContext logic)
+const ADMIN_EMAILS = ['sasouare@gmail.com'];
+
 export function ProtectedRoute({ 
   children, 
   requiredRoles,
@@ -31,6 +34,12 @@ export function ProtectedRoute({
 
   // Vérifier les rôles si spécifiés (seulement si l'utilisateur est connecté)
   if (requiredRoles && requiredRoles.length > 0) {
+    // Bypass immédiat pour les emails admin prioritaires
+    const isAdminEmail = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
+    if (isAdminEmail) {
+      return <>{children}</>;
+    }
+
     // Attendre que les claims soient chargés
     if (!claims) {
       return (
