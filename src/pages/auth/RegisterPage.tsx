@@ -78,7 +78,13 @@ export default function RegisterPage() {
       await signInWithGoogle();
       navigate('/', { replace: true });
     } catch (err: any) {
-      setError('Erreur de connexion avec Google');
+      const googleErrors: Record<string, string> = {
+        'auth/popup-blocked': 'Le popup a été bloqué. Autorisez les popups pour ce site.',
+        'auth/popup-closed-by-user': 'Le popup a été fermé avant la fin de la connexion.',
+        'auth/cancelled-popup-request': 'Connexion annulée, veuillez réessayer.',
+        'auth/unauthorized-domain': 'Ce domaine n\'est pas autorisé. Contactez l\'administrateur.',
+      };
+      setError(googleErrors[err.code] || 'Erreur de connexion avec Google: ' + (err.message || ''));
     }
   };
 
