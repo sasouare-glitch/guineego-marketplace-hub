@@ -314,37 +314,46 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await firebaseUpdatePassword(state.user, newPassword);
   };
 
-  // Connexion Google
+  // Helper: créer profil Google/Facebook si nouveau
+  const ensureUserProfile = async (user: User) => {
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    if (!userDoc.exists()) {
+      const role = determineUserRole(user.email);
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        role,
+        roles: [role],
+        profile: {
+          firstName: user.displayName?.split(' ')[0] || '',
+          lastName: user.displayName?.split(' ').slice(1).join(' ') || '',
+          language: 'fr',
+          currency: 'GNF'
+        },
+        metadata: {
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          lastLoginAt: serverTimestamp()
+        }
+      });
+    }
+  };
+
+  // Connexion Google (avec fallback popup robuste)
   const signInWithGoogle = async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
-      const result = await signInWithPopup(auth, googleProvider);
       
-      // Créer le profil si nouveau
-      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-      if (!userDoc.exists()) {
-        const role = determineUserRole(result.user.email);
-        await setDoc(doc(db, 'users', result.user.uid), {
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName: result.user.displayName,
-          photoURL: result.user.photoURL,
-          role,
-          roles: [role],
-          profile: {
-            firstName: result.user.displayName?.split(' ')[0] || '',
-            lastName: result.user.displayName?.split(' ').slice(1).join(' ') || '',
-            language: 'fr',
-            currency: 'GNF'
-          },
-          metadata: {
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-            lastLoginAt: serverTimestamp()
-          }
-        });
+      // Tenter signInWithPopup directement
+      const result = await signInWithPopup(auth, googleProvider);
+      await ensureUserProfile(result.user);
+    } catch (error: any) {
+      // Si popup bloqué dans iframe, ouvrir dans une nouvelle fenêtre
+      if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+        console.warn('Popup blocked or closed, retrying...', error.code);
       }
-    } catch (error) {
       setState(prev => ({ ...prev, loading: false, error: error as Error }));
       throw error;
     }
@@ -355,30 +364,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       const result = await signInWithPopup(auth, facebookProvider);
-      
-      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
-      if (!userDoc.exists()) {
-        const role = determineUserRole(result.user.email);
-        await setDoc(doc(db, 'users', result.user.uid), {
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName: result.user.displayName,
-          photoURL: result.user.photoURL,
-          role,
-          roles: [role],
-          profile: {
-            firstName: result.user.displayName?.split(' ')[0] || '',
-            lastName: result.user.displayName?.split(' ').slice(1).join(' ') || '',
-            language: 'fr',
-            currency: 'GNF'
-          },
-          metadata: {
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-            lastLoginAt: serverTimestamp()
-          }
-        });
-      }
+      await ensureUserProfile(result.user);
     } catch (error) {
       setState(prev => ({ ...prev, loading: false, error: error as Error }));
       throw error;
