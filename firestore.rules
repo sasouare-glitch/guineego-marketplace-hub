@@ -57,14 +57,14 @@ service cloud.firestore {
     // PRODUCTS COLLECTION
     // ============================================
     match /products/{productId} {
-      // Anyone can read active products
+      // Anyone can read active products; admin and sellers can read all
       allow read: if resource.data.status == 'active' || isSeller() || isAdmin();
       
-      // Only sellers can create products
-      allow create: if isSeller() && request.resource.data.sellerId == request.auth.token.ecommerceId;
+      // Admin can create any product; sellers can create their own
+      allow create: if isAdmin() || (isSeller() && request.resource.data.sellerId == request.auth.token.ecommerceId);
       
-      // Sellers can only update their own products
-      allow update: if (isSeller() && resource.data.sellerId == request.auth.token.ecommerceId) || isAdmin();
+      // Admin can update any product; sellers can update their own
+      allow update: if isAdmin() || (isSeller() && resource.data.sellerId == request.auth.token.ecommerceId);
       
       // Only admin can delete
       allow delete: if isAdmin();
@@ -74,22 +74,31 @@ service cloud.firestore {
     // ORDERS COLLECTION
     // ============================================
     match /orders/{orderId} {
-      // Customers can read their own orders
-      // Sellers can read orders containing their products
-      // Closers/Couriers can read assigned orders
-      allow read: if isOwner(resource.data.customerId) 
+      // Customers, sellers, closers, couriers can read relevant orders; admin reads all
+      allow read: if isAdmin()
+                  || isOwner(resource.data.customerId) 
                   || (isSeller() && request.auth.token.ecommerceId in resource.data.sellerIds)
                   || (isCloser() && resource.data.assignedCloser == request.auth.uid)
-                  || (isCourier() && resource.data.assignedCourier == request.auth.uid)
-                  || isAdmin();
+                  || (isCourier() && resource.data.assignedCourier == request.auth.uid);
       
-      // Orders are created via Cloud Functions only
-      allow create: if false;
+      // Admin can create orders directly
+      allow create: if isAdmin();
       
-      // Status updates via Cloud Functions, but allow limited client updates
+      // Admin can update any order
       allow update: if isAdmin();
       
       allow delete: if false;
+    }
+    
+    // ============================================
+    // ECOMMERCES COLLECTION (Sellers)
+    // ============================================
+    match /ecommerces/{ecommerceId} {
+      // Admin can read/write all; sellers can read/update their own
+      allow read: if isAdmin() || (isSeller() && request.auth.token.ecommerceId == ecommerceId);
+      allow create: if isAdmin();
+      allow update: if isAdmin() || (isSeller() && request.auth.token.ecommerceId == ecommerceId);
+      allow delete: if isAdmin();
     }
     
     // ============================================
