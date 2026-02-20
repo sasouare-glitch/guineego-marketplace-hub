@@ -34,13 +34,18 @@ export function ProtectedRoute({
 
   // Vérifier les rôles si spécifiés (seulement si l'utilisateur est connecté)
   if (requiredRoles && requiredRoles.length > 0) {
-    // Bypass immédiat pour les emails admin prioritaires
-    const isAdminEmail = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
-    if (isAdminEmail) {
+    // Bypass immédiat et inconditionnel pour les emails admin prioritaires
+    const userEmail = user?.email?.toLowerCase();
+    if (userEmail && ADMIN_EMAILS.includes(userEmail)) {
       return <>{children}</>;
     }
 
-    // Attendre que les claims soient chargés
+    // hasAnyRole dans AuthContext a aussi le bypass admin, mais on vérifie ici en plus
+    if (hasAnyRole(requiredRoles)) {
+      return <>{children}</>;
+    }
+
+    // Attendre que les claims soient chargés avant de refuser l'accès
     if (!claims) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background">
@@ -52,13 +57,11 @@ export function ProtectedRoute({
       );
     }
 
-    if (!hasAnyRole(requiredRoles)) {
-      // Afficher le fallback ou rediriger vers accès refusé
-      if (fallback) {
-        return <>{fallback}</>;
-      }
-      return <Navigate to="/access-denied" replace />;
+    // À ce stade, claims chargés mais rôle insuffisant
+    if (fallback) {
+      return <>{fallback}</>;
     }
+    return <Navigate to="/access-denied" replace />;
   }
 
   return <>{children}</>;
