@@ -16,56 +16,46 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Search, MoreHorizontal, Filter, Eye, Store,
-  CheckCircle, XCircle, Clock, TrendingUp, ShoppingBag, Star
+  CheckCircle, XCircle, Clock, TrendingUp, ShoppingBag, Star,
+  Edit, Trash2, ShieldCheck, Ban, PlayCircle
 } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
+import { toast } from 'sonner';
 
-const mockSellers = [
-  {
-    id: 'ECO-001', name: 'TechStore GN', owner: 'Mamadou Diallo',
-    email: 'contact@techstore.gn', phone: '621 00 00 01',
-    category: 'Électronique', status: 'active', verified: true,
-    products: 48, totalSales: 312, revenue: 145000000, rating: 4.7,
-    joinedAt: '2024-01-10',
-  },
-  {
-    id: 'ECO-002', name: 'Mode Conakry', owner: 'Fatoumata Bah',
-    email: 'mode@conakry.gn', phone: '622 00 00 02',
-    category: 'Mode & Vêtements', status: 'active', verified: true,
-    products: 126, totalSales: 890, revenue: 78500000, rating: 4.5,
-    joinedAt: '2024-01-15',
-  },
-  {
-    id: 'ECO-003', name: 'ElectroGN', owner: 'Ibrahima Sow',
-    email: 'info@electrogn.com', phone: '623 00 00 03',
-    category: 'Électronique', status: 'pending', verified: false,
-    products: 34, totalSales: 56, revenue: 32000000, rating: 4.2,
-    joinedAt: '2024-02-01',
-  },
-  {
-    id: 'ECO-004', name: 'BeautyGN', owner: 'Aissatou Camara',
-    email: 'beauty@gn.com', phone: '624 00 00 04',
-    category: 'Beauté & Santé', status: 'active', verified: true,
-    products: 72, totalSales: 1240, revenue: 55800000, rating: 4.9,
-    joinedAt: '2024-01-20',
-  },
-  {
-    id: 'ECO-005', name: 'Style Guinée', owner: 'Oumar Barry',
-    email: 'style@guinee.gn', phone: '625 00 00 05',
-    category: 'Mode & Vêtements', status: 'suspended', verified: true,
-    products: 19, totalSales: 88, revenue: 12400000, rating: 3.8,
-    joinedAt: '2024-03-05',
-  },
-  {
-    id: 'ECO-006', name: 'AgroGN', owner: 'Kadiatou Diallo',
-    email: 'agro@gn.com', phone: '626 00 00 06',
-    category: 'Alimentation', status: 'pending', verified: false,
-    products: 8, totalSales: 0, revenue: 0, rating: 0,
-    joinedAt: '2024-04-10',
-  },
+interface MockSeller {
+  id: string;
+  name: string;
+  owner: string;
+  email: string;
+  phone: string;
+  category: string;
+  status: 'active' | 'pending' | 'suspended';
+  verified: boolean;
+  products: number;
+  totalSales: number;
+  revenue: number;
+  rating: number;
+  joinedAt: string;
+}
+
+const initialSellers: MockSeller[] = [
+  { id: 'ECO-001', name: 'TechStore GN', owner: 'Mamadou Diallo', email: 'contact@techstore.gn', phone: '621 00 00 01', category: 'Électronique', status: 'active', verified: true, products: 48, totalSales: 312, revenue: 145000000, rating: 4.7, joinedAt: '2024-01-10' },
+  { id: 'ECO-002', name: 'Mode Conakry', owner: 'Fatoumata Bah', email: 'mode@conakry.gn', phone: '622 00 00 02', category: 'Mode & Vêtements', status: 'active', verified: true, products: 126, totalSales: 890, revenue: 78500000, rating: 4.5, joinedAt: '2024-01-15' },
+  { id: 'ECO-003', name: 'ElectroGN', owner: 'Ibrahima Sow', email: 'info@electrogn.com', phone: '623 00 00 03', category: 'Électronique', status: 'pending', verified: false, products: 34, totalSales: 56, revenue: 32000000, rating: 4.2, joinedAt: '2024-02-01' },
+  { id: 'ECO-004', name: 'BeautyGN', owner: 'Aissatou Camara', email: 'beauty@gn.com', phone: '624 00 00 04', category: 'Beauté & Santé', status: 'active', verified: true, products: 72, totalSales: 1240, revenue: 55800000, rating: 4.9, joinedAt: '2024-01-20' },
+  { id: 'ECO-005', name: 'Style Guinée', owner: 'Oumar Barry', email: 'style@guinee.gn', phone: '625 00 00 05', category: 'Mode & Vêtements', status: 'suspended', verified: true, products: 19, totalSales: 88, revenue: 12400000, rating: 3.8, joinedAt: '2024-03-05' },
+  { id: 'ECO-006', name: 'AgroGN', owner: 'Kadiatou Diallo', email: 'agro@gn.com', phone: '626 00 00 06', category: 'Alimentation', status: 'pending', verified: false, products: 8, totalSales: 0, revenue: 0, rating: 0, joinedAt: '2024-04-10' },
 ];
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
@@ -75,11 +65,16 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function AdminSellersPage() {
+  const [sellers, setSellers] = useState<MockSeller[]>(initialSellers);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const { format } = useCurrency();
 
-  const filtered = mockSellers.filter(s => {
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
+  const [editDialog, setEditDialog] = useState<{ open: boolean; seller: MockSeller | null }>({ open: false, seller: null });
+  const [editForm, setEditForm] = useState({ name: '', owner: '', email: '', category: '' });
+
+  const filtered = sellers.filter(s => {
     const matchSearch =
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -91,22 +86,72 @@ export default function AdminSellersPage() {
     return matchSearch && matchTab;
   });
 
-  const totalActive    = mockSellers.filter(s => s.status === 'active').length;
-  const totalPending   = mockSellers.filter(s => s.status === 'pending').length;
-  const totalSuspended = mockSellers.filter(s => s.status === 'suspended').length;
-  const totalRevenue   = mockSellers.reduce((sum, s) => sum + s.revenue, 0);
+  const totalActive    = sellers.filter(s => s.status === 'active').length;
+  const totalPending   = sellers.filter(s => s.status === 'pending').length;
+  const totalSuspended = sellers.filter(s => s.status === 'suspended').length;
+  const totalRevenue   = sellers.reduce((sum, s) => sum + s.revenue, 0);
+
+  const handleSuspend = (seller: MockSeller) => {
+    setConfirmDialog({
+      open: true,
+      title: 'Suspendre ce vendeur ?',
+      description: `Le compte de "${seller.name}" sera suspendu. Ses produits ne seront plus visibles et il ne pourra plus recevoir de commandes.`,
+      action: () => {
+        setSellers(prev => prev.map(s => s.id === seller.id ? { ...s, status: 'suspended' as const } : s));
+        toast.success(`Vendeur "${seller.name}" suspendu`);
+      }
+    });
+  };
+
+  const handleReactivate = (seller: MockSeller) => {
+    setSellers(prev => prev.map(s => s.id === seller.id ? { ...s, status: 'active' as const } : s));
+    toast.success(`Vendeur "${seller.name}" réactivé`);
+  };
+
+  const handleApprove = (seller: MockSeller) => {
+    setSellers(prev => prev.map(s => s.id === seller.id ? { ...s, status: 'active' as const, verified: true } : s));
+    toast.success(`Vendeur "${seller.name}" approuvé et vérifié`);
+  };
+
+  const handleVerify = (seller: MockSeller) => {
+    setSellers(prev => prev.map(s => s.id === seller.id ? { ...s, verified: true } : s));
+    toast.success(`Compte "${seller.name}" vérifié`);
+  };
+
+  const handleDelete = (seller: MockSeller) => {
+    setConfirmDialog({
+      open: true,
+      title: 'Supprimer ce vendeur ?',
+      description: `Cette action est irréversible. Le compte de "${seller.name}" et tous ses produits seront supprimés.`,
+      action: () => {
+        setSellers(prev => prev.filter(s => s.id !== seller.id));
+        toast.success(`Vendeur "${seller.name}" supprimé`);
+      }
+    });
+  };
+
+  const handleEdit = (seller: MockSeller) => {
+    setEditForm({ name: seller.name, owner: seller.owner, email: seller.email, category: seller.category });
+    setEditDialog({ open: true, seller });
+  };
+
+  const handleSaveEdit = () => {
+    if (!editDialog.seller) return;
+    setSellers(prev => prev.map(s => s.id === editDialog.seller!.id ? { ...s, ...editForm } : s));
+    toast.success('Vendeur modifié avec succès');
+    setEditDialog({ open: false, seller: null });
+  };
 
   return (
     <AdminLayout title="Vendeurs" description="Gestion des e-commerçants partenaires">
       <div className="space-y-6">
-
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-2">
                 <Store className="w-5 h-5 text-muted-foreground" />
-                <p className="text-2xl font-bold">{mockSellers.length}</p>
+                <p className="text-2xl font-bold">{sellers.length}</p>
               </div>
               <p className="text-sm text-muted-foreground mt-1">Total vendeurs</p>
             </CardContent>
@@ -167,7 +212,7 @@ export default function AdminSellersPage() {
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
               <TabsList>
-                <TabsTrigger value="all">Tous ({mockSellers.length})</TabsTrigger>
+                <TabsTrigger value="all">Tous ({sellers.length})</TabsTrigger>
                 <TabsTrigger value="active">Actifs ({totalActive})</TabsTrigger>
                 <TabsTrigger value="pending">En attente ({totalPending})</TabsTrigger>
                 <TabsTrigger value="suspended">Suspendus ({totalSuspended})</TabsTrigger>
@@ -258,19 +303,37 @@ export default function AdminSellersPage() {
                               <Eye className="w-4 h-4 mr-2" />
                               Voir profil
                             </DropdownMenuItem>
-                            <DropdownMenuItem>Voir produits</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEdit(seller)}>
+                              <Edit className="w-4 h-4 mr-2" />
+                              Modifier
+                            </DropdownMenuItem>
                             {!seller.verified && (
-                              <DropdownMenuItem>Vérifier le compte</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleVerify(seller)}>
+                                <ShieldCheck className="w-4 h-4 mr-2" />
+                                Vérifier le compte
+                              </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
                             {seller.status === 'active' ? (
-                              <DropdownMenuItem className="text-destructive">Suspendre</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleSuspend(seller)} className="text-destructive">
+                                <Ban className="w-4 h-4 mr-2" />
+                                Suspendre
+                              </DropdownMenuItem>
                             ) : seller.status === 'suspended' ? (
-                              <DropdownMenuItem>Réactiver</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleReactivate(seller)}>
+                                <PlayCircle className="w-4 h-4 mr-2" />
+                                Réactiver
+                              </DropdownMenuItem>
                             ) : (
-                              <DropdownMenuItem>Approuver</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleApprove(seller)}>
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Approuver
+                              </DropdownMenuItem>
                             )}
-                            <DropdownMenuItem className="text-destructive">Supprimer</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(seller)}>
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Supprimer
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -282,6 +345,52 @@ export default function AdminSellersPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmDialog.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDialog.action}>Confirmer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialog.open} onOpenChange={(open) => setEditDialog(prev => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier le vendeur</DialogTitle>
+            <DialogDescription>Modifiez les informations de "{editDialog.seller?.name}"</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Nom de la boutique</Label>
+              <Input value={editForm.name} onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Propriétaire</Label>
+              <Input value={editForm.owner} onChange={(e) => setEditForm(prev => ({ ...prev, owner: e.target.value }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input value={editForm.email} onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Catégorie</Label>
+              <Input value={editForm.category} onChange={(e) => setEditForm(prev => ({ ...prev, category: e.target.value }))} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialog({ open: false, seller: null })}>Annuler</Button>
+            <Button onClick={handleSaveEdit}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }
