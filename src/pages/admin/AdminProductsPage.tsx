@@ -1,5 +1,5 @@
 /**
- * Admin Products Page - Product Catalog Management
+ * Admin Products Page - Product Catalog Management (Firestore)
  */
 
 import { useState } from 'react';
@@ -26,33 +26,31 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Search, MoreHorizontal, Filter, Eye, Package, 
-  CheckCircle, XCircle, AlertTriangle, Plus, Star, Edit, Trash2, Power, StarOff
+  CheckCircle, XCircle, AlertTriangle, Star, Edit, Trash2, Power, StarOff, Loader2
 } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
 import { toast } from 'sonner';
+import { useRealtimeCollection } from '@/lib/firebase/queries';
+import { updateDocument, deleteDocument } from '@/lib/firebase/mutations';
+import type { FirestoreDoc } from '@/lib/firebase/queries';
 
-interface MockProduct {
-  id: string;
+interface Product extends FirestoreDoc {
   name: string;
   category: string;
-  seller: string;
+  sellerId: string;
+  sellerName?: string;
+  basePrice: number;
   price: number;
-  stock: number;
+  images: string[];
+  thumbnail?: string;
+  totalStock: number;
   status: 'active' | 'inactive' | 'out_of_stock';
   featured: boolean;
-  rating: number;
-  sales: number;
-  image: string;
+  avgRating: number;
+  totalReviews: number;
+  totalSales: number;
+  tags?: string[];
 }
-
-const initialProducts: MockProduct[] = [
-  { id: 'PRD-001', name: 'iPhone 15 Pro Max 256GB', category: 'Téléphones', seller: 'TechStore GN', price: 8500000, stock: 12, status: 'active', featured: true, rating: 4.8, sales: 34, image: '📱' },
-  { id: 'PRD-002', name: 'Robe Bazin Brodée Femme', category: 'Mode', seller: 'Mode Conakry', price: 350000, stock: 45, status: 'active', featured: false, rating: 4.5, sales: 128, image: '👗' },
-  { id: 'PRD-003', name: 'Samsung 65" QLED 4K', category: 'Électronique', seller: 'ElectroGN', price: 5200000, stock: 0, status: 'out_of_stock', featured: false, rating: 4.7, sales: 8, image: '📺' },
-  { id: 'PRD-004', name: 'Crème Karité Naturelle 500ml', category: 'Beauté', seller: 'BeautyGN', price: 45000, stock: 200, status: 'active', featured: true, rating: 4.9, sales: 312, image: '🧴' },
-  { id: 'PRD-005', name: 'Laptop HP Pavilion 15"', category: 'Informatique', seller: 'TechStore GN', price: 4800000, stock: 3, status: 'active', featured: false, rating: 4.3, sales: 17, image: '💻' },
-  { id: 'PRD-006', name: 'Chaussures Cuir Homme', category: 'Mode', seller: 'Style Guinée', price: 280000, stock: 0, status: 'inactive', featured: false, rating: 4.1, sales: 56, image: '👞' },
-];
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   active: { label: 'Actif', variant: 'default' },
@@ -61,21 +59,22 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<MockProduct[]>(initialProducts);
+  const { data: products, loading, error } = useRealtimeCollection<Product>('products');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const { format } = useCurrency();
 
   // Dialog states
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
-  const [editDialog, setEditDialog] = useState<{ open: boolean; product: MockProduct | null }>({ open: false, product: null });
+  const [editDialog, setEditDialog] = useState<{ open: boolean; product: Product | null }>({ open: false, product: null });
   const [editForm, setEditForm] = useState({ name: '', price: '', category: '' });
+  const [saving, setSaving] = useState(false);
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = 
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.seller.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase());
+      product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.sellerName || product.sellerId || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTab = 
       activeTab === 'all' || 
       product.status === activeTab ||
@@ -88,52 +87,70 @@ export default function AdminProductsPage() {
   const totalInactive = products.filter(p => p.status === 'inactive').length;
   const totalFeatured = products.filter(p => p.featured).length;
 
-  // Actions
-  const handleToggleFeatured = (product: MockProduct) => {
-    setProducts(prev => prev.map(p => p.id === product.id ? { ...p, featured: !p.featured } : p));
-    toast.success(product.featured ? `"${product.name}" retiré de la vedette` : `"${product.name}" mis en vedette`);
+  // Firestore Actions
+  const handleToggleFeatured = async (product: Product) => {
+    try {
+      await updateDocument('products', product.id, { featured: !product.featured });
+      toast.success(product.featured ? `"${product.name}" retiré de la vedette` : `"${product.name}" mis en vedette`);
+    } catch (err) {
+      toast.error('Erreur lors de la mise à jour');
+    }
   };
 
-  const handleToggleStatus = (product: MockProduct) => {
+  const handleToggleStatus = (product: Product) => {
     const newStatus = product.status === 'active' ? 'inactive' : 'active';
     setConfirmDialog({
       open: true,
       title: newStatus === 'inactive' ? 'Désactiver ce produit ?' : 'Activer ce produit ?',
-      description: `Le produit "${product.name}" sera ${newStatus === 'inactive' ? 'masqué du catalogue et ne sera plus visible par les clients' : 'visible dans le catalogue'}.`,
-      action: () => {
-        setProducts(prev => prev.map(p => p.id === product.id ? { ...p, status: newStatus } : p));
-        toast.success(`Produit ${newStatus === 'active' ? 'activé' : 'désactivé'} avec succès`);
+      description: `Le produit "${product.name}" sera ${newStatus === 'inactive' ? 'masqué du catalogue' : 'visible dans le catalogue'}.`,
+      action: async () => {
+        try {
+          await updateDocument('products', product.id, { status: newStatus });
+          toast.success(`Produit ${newStatus === 'active' ? 'activé' : 'désactivé'} avec succès`);
+        } catch (err) {
+          toast.error('Erreur lors de la mise à jour');
+        }
       }
     });
   };
 
-  const handleDelete = (product: MockProduct) => {
+  const handleDelete = (product: Product) => {
     setConfirmDialog({
       open: true,
       title: 'Supprimer ce produit ?',
-      description: `Cette action est irréversible. Le produit "${product.name}" sera définitivement supprimé du catalogue.`,
-      action: () => {
-        setProducts(prev => prev.filter(p => p.id !== product.id));
-        toast.success(`Produit "${product.name}" supprimé`);
+      description: `Cette action est irréversible. Le produit "${product.name}" sera définitivement supprimé.`,
+      action: async () => {
+        try {
+          await deleteDocument('products', product.id);
+          toast.success(`Produit "${product.name}" supprimé`);
+        } catch (err) {
+          toast.error('Erreur lors de la suppression');
+        }
       }
     });
   };
 
-  const handleEdit = (product: MockProduct) => {
+  const handleEdit = (product: Product) => {
     setEditForm({ name: product.name, price: String(product.price), category: product.category });
     setEditDialog({ open: true, product });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editDialog.product) return;
-    setProducts(prev => prev.map(p => p.id === editDialog.product!.id ? {
-      ...p,
-      name: editForm.name,
-      price: Number(editForm.price),
-      category: editForm.category,
-    } : p));
-    toast.success('Produit modifié avec succès');
-    setEditDialog({ open: false, product: null });
+    setSaving(true);
+    try {
+      await updateDocument('products', editDialog.product.id, {
+        name: editForm.name,
+        price: Number(editForm.price),
+        category: editForm.category,
+      });
+      toast.success('Produit modifié avec succès');
+      setEditDialog({ open: false, product: null });
+    } catch (err) {
+      toast.error('Erreur lors de la modification');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -202,116 +219,129 @@ export default function AdminProductsPage() {
               </TabsList>
             </Tabs>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Produit</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Vendeur</TableHead>
-                  <TableHead>Prix</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Note</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProducts.length === 0 ? (
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : error ? (
+              <div className="text-center py-10 text-destructive">
+                <p>Erreur lors du chargement des produits</p>
+                <p className="text-sm text-muted-foreground mt-1">{error.message}</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
-                      <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                      <p>Aucun produit trouvé</p>
-                    </TableCell>
+                    <TableHead>Produit</TableHead>
+                    <TableHead>Catégorie</TableHead>
+                    <TableHead>Vendeur</TableHead>
+                    <TableHead>Prix</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead>Note</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead className="w-12"></TableHead>
                   </TableRow>
-                ) : (
-                  filteredProducts.map((product) => {
-                    const status = statusConfig[product.status];
-                    return (
-                      <TableRow key={product.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-xl shrink-0">
-                              {product.image}
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
+                        <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                        <p>Aucun produit trouvé</p>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredProducts.map((product) => {
+                      const status = statusConfig[product.status] || statusConfig.active;
+                      return (
+                        <TableRow key={product.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                                {product.thumbnail ? (
+                                  <img src={product.thumbnail} alt="" className="w-full h-full object-cover" />
+                                ) : '📦'}
+                              </div>
+                              <div>
+                                <p className="font-medium line-clamp-1 max-w-[180px]">{product.name}</p>
+                                <p className="text-xs text-muted-foreground font-mono">{product.id.slice(0, 12)}</p>
+                              </div>
+                              {product.featured && (
+                                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 shrink-0" />
+                              )}
                             </div>
-                            <div>
-                              <p className="font-medium line-clamp-1 max-w-[180px]">{product.name}</p>
-                              <p className="text-xs text-muted-foreground font-mono">{product.id}</p>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs">{product.category}</Badge>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{product.sellerName || product.sellerId}</TableCell>
+                          <TableCell className="font-medium">{format(product.price)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              {product.totalStock === 0 ? (
+                                <XCircle className="w-4 h-4 text-destructive" />
+                              ) : product.totalStock < 5 ? (
+                                <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                              ) : (
+                                <CheckCircle className="w-4 h-4 text-green-500" />
+                              )}
+                              <span className={product.totalStock === 0 ? 'text-destructive font-medium' : product.totalStock < 5 ? 'text-yellow-600 font-medium' : ''}>
+                                {product.totalStock}
+                              </span>
                             </div>
-                            {product.featured && (
-                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500 shrink-0" />
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs">{product.category}</Badge>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{product.seller}</TableCell>
-                        <TableCell className="font-medium">{format(product.price)}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            {product.stock === 0 ? (
-                              <XCircle className="w-4 h-4 text-destructive" />
-                            ) : product.stock < 5 ? (
-                              <AlertTriangle className="w-4 h-4 text-yellow-500" />
-                            ) : (
-                              <CheckCircle className="w-4 h-4 text-green-500" />
-                            )}
-                            <span className={product.stock === 0 ? 'text-destructive font-medium' : product.stock < 5 ? 'text-yellow-600 font-medium' : ''}>
-                              {product.stock}
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                            <span className="text-sm font-medium">{product.rating}</span>
-                            <span className="text-xs text-muted-foreground">({product.sales})</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={status.variant}>{status.label}</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Eye className="w-4 h-4 mr-2" />
-                                Voir produit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleEdit(product)}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                Modifier
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleToggleFeatured(product)}>
-                                {product.featured ? (
-                                  <><StarOff className="w-4 h-4 mr-2" />Retirer de la vedette</>
-                                ) : (
-                                  <><Star className="w-4 h-4 mr-2" />Mettre en vedette</>
-                                )}
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleToggleStatus(product)}>
-                                <Power className="w-4 h-4 mr-2" />
-                                {product.status === 'active' ? 'Désactiver' : 'Activer'}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(product)}>
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Supprimer
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                              <span className="text-sm font-medium">{product.avgRating?.toFixed(1) || '—'}</span>
+                              <span className="text-xs text-muted-foreground">({product.totalSales || 0})</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={status.variant}>{status.label}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem>
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  Voir produit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleEdit(product)}>
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Modifier
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleToggleFeatured(product)}>
+                                  {product.featured ? (
+                                    <><StarOff className="w-4 h-4 mr-2" />Retirer de la vedette</>
+                                  ) : (
+                                    <><Star className="w-4 h-4 mr-2" />Mettre en vedette</>
+                                  )}
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleToggleStatus(product)}>
+                                  <Power className="w-4 h-4 mr-2" />
+                                  {product.status === 'active' ? 'Désactiver' : 'Activer'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(product)}>
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Supprimer
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -353,7 +383,10 @@ export default function AdminProductsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialog({ open: false, product: null })}>Annuler</Button>
-            <Button onClick={handleSaveEdit}>Enregistrer</Button>
+            <Button onClick={handleSaveEdit} disabled={saving}>
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Enregistrer
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
