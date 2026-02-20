@@ -1,5 +1,5 @@
 /**
- * Admin Sellers Page - Seller / E-commerçant Management
+ * Admin Sellers Page - Seller / E-commerçant Management (Firestore)
  */
 
 import { useState } from 'react';
@@ -28,17 +28,19 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Search, MoreHorizontal, Filter, Eye, Store,
   CheckCircle, XCircle, Clock, TrendingUp, ShoppingBag, Star,
-  Edit, Trash2, ShieldCheck, Ban, PlayCircle
+  Edit, Trash2, ShieldCheck, Ban, PlayCircle, Loader2
 } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
 import { toast } from 'sonner';
+import { useRealtimeCollection } from '@/lib/firebase/queries';
+import { updateDocument, deleteDocument } from '@/lib/firebase/mutations';
+import type { FirestoreDoc } from '@/lib/firebase/queries';
 
-interface MockSeller {
-  id: string;
+interface Seller extends FirestoreDoc {
   name: string;
   owner: string;
   email: string;
-  phone: string;
+  phone?: string;
   category: string;
   status: 'active' | 'pending' | 'suspended';
   verified: boolean;
@@ -46,17 +48,8 @@ interface MockSeller {
   totalSales: number;
   revenue: number;
   rating: number;
-  joinedAt: string;
+  joinedAt?: string;
 }
-
-const initialSellers: MockSeller[] = [
-  { id: 'ECO-001', name: 'TechStore GN', owner: 'Mamadou Diallo', email: 'contact@techstore.gn', phone: '621 00 00 01', category: 'Électronique', status: 'active', verified: true, products: 48, totalSales: 312, revenue: 145000000, rating: 4.7, joinedAt: '2024-01-10' },
-  { id: 'ECO-002', name: 'Mode Conakry', owner: 'Fatoumata Bah', email: 'mode@conakry.gn', phone: '622 00 00 02', category: 'Mode & Vêtements', status: 'active', verified: true, products: 126, totalSales: 890, revenue: 78500000, rating: 4.5, joinedAt: '2024-01-15' },
-  { id: 'ECO-003', name: 'ElectroGN', owner: 'Ibrahima Sow', email: 'info@electrogn.com', phone: '623 00 00 03', category: 'Électronique', status: 'pending', verified: false, products: 34, totalSales: 56, revenue: 32000000, rating: 4.2, joinedAt: '2024-02-01' },
-  { id: 'ECO-004', name: 'BeautyGN', owner: 'Aissatou Camara', email: 'beauty@gn.com', phone: '624 00 00 04', category: 'Beauté & Santé', status: 'active', verified: true, products: 72, totalSales: 1240, revenue: 55800000, rating: 4.9, joinedAt: '2024-01-20' },
-  { id: 'ECO-005', name: 'Style Guinée', owner: 'Oumar Barry', email: 'style@guinee.gn', phone: '625 00 00 05', category: 'Mode & Vêtements', status: 'suspended', verified: true, products: 19, totalSales: 88, revenue: 12400000, rating: 3.8, joinedAt: '2024-03-05' },
-  { id: 'ECO-006', name: 'AgroGN', owner: 'Kadiatou Diallo', email: 'agro@gn.com', phone: '626 00 00 06', category: 'Alimentation', status: 'pending', verified: false, products: 8, totalSales: 0, revenue: 0, rating: 0, joinedAt: '2024-04-10' },
-];
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
   active:    { label: 'Actif',    variant: 'default',     icon: CheckCircle },
@@ -65,20 +58,21 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function AdminSellersPage() {
-  const [sellers, setSellers] = useState<MockSeller[]>(initialSellers);
+  const { data: sellers, loading, error } = useRealtimeCollection<Seller>('ecommerces');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const { format } = useCurrency();
 
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
-  const [editDialog, setEditDialog] = useState<{ open: boolean; seller: MockSeller | null }>({ open: false, seller: null });
+  const [editDialog, setEditDialog] = useState<{ open: boolean; seller: Seller | null }>({ open: false, seller: null });
   const [editForm, setEditForm] = useState({ name: '', owner: '', email: '', category: '' });
+  const [saving, setSaving] = useState(false);
 
   const filtered = sellers.filter(s => {
     const matchSearch =
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.owner.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.email.toLowerCase().includes(searchQuery.toLowerCase());
+      (s.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s.owner || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (s.email || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchTab =
       activeTab === 'all' ||
       s.status === activeTab ||
@@ -89,57 +83,71 @@ export default function AdminSellersPage() {
   const totalActive    = sellers.filter(s => s.status === 'active').length;
   const totalPending   = sellers.filter(s => s.status === 'pending').length;
   const totalSuspended = sellers.filter(s => s.status === 'suspended').length;
-  const totalRevenue   = sellers.reduce((sum, s) => sum + s.revenue, 0);
+  const totalRevenue   = sellers.reduce((sum, s) => sum + (s.revenue || 0), 0);
 
-  const handleSuspend = (seller: MockSeller) => {
+  const handleSuspend = (seller: Seller) => {
     setConfirmDialog({
       open: true,
       title: 'Suspendre ce vendeur ?',
-      description: `Le compte de "${seller.name}" sera suspendu. Ses produits ne seront plus visibles et il ne pourra plus recevoir de commandes.`,
-      action: () => {
-        setSellers(prev => prev.map(s => s.id === seller.id ? { ...s, status: 'suspended' as const } : s));
-        toast.success(`Vendeur "${seller.name}" suspendu`);
+      description: `Le compte de "${seller.name}" sera suspendu. Ses produits ne seront plus visibles.`,
+      action: async () => {
+        try {
+          await updateDocument('ecommerces', seller.id, { status: 'suspended' });
+          toast.success(`Vendeur "${seller.name}" suspendu`);
+        } catch { toast.error('Erreur lors de la suspension'); }
       }
     });
   };
 
-  const handleReactivate = (seller: MockSeller) => {
-    setSellers(prev => prev.map(s => s.id === seller.id ? { ...s, status: 'active' as const } : s));
-    toast.success(`Vendeur "${seller.name}" réactivé`);
+  const handleReactivate = async (seller: Seller) => {
+    try {
+      await updateDocument('ecommerces', seller.id, { status: 'active' });
+      toast.success(`Vendeur "${seller.name}" réactivé`);
+    } catch { toast.error('Erreur lors de la réactivation'); }
   };
 
-  const handleApprove = (seller: MockSeller) => {
-    setSellers(prev => prev.map(s => s.id === seller.id ? { ...s, status: 'active' as const, verified: true } : s));
-    toast.success(`Vendeur "${seller.name}" approuvé et vérifié`);
+  const handleApprove = async (seller: Seller) => {
+    try {
+      await updateDocument('ecommerces', seller.id, { status: 'active', verified: true });
+      toast.success(`Vendeur "${seller.name}" approuvé et vérifié`);
+    } catch { toast.error('Erreur lors de l\'approbation'); }
   };
 
-  const handleVerify = (seller: MockSeller) => {
-    setSellers(prev => prev.map(s => s.id === seller.id ? { ...s, verified: true } : s));
-    toast.success(`Compte "${seller.name}" vérifié`);
+  const handleVerify = async (seller: Seller) => {
+    try {
+      await updateDocument('ecommerces', seller.id, { verified: true });
+      toast.success(`Compte "${seller.name}" vérifié`);
+    } catch { toast.error('Erreur lors de la vérification'); }
   };
 
-  const handleDelete = (seller: MockSeller) => {
+  const handleDelete = (seller: Seller) => {
     setConfirmDialog({
       open: true,
       title: 'Supprimer ce vendeur ?',
-      description: `Cette action est irréversible. Le compte de "${seller.name}" et tous ses produits seront supprimés.`,
-      action: () => {
-        setSellers(prev => prev.filter(s => s.id !== seller.id));
-        toast.success(`Vendeur "${seller.name}" supprimé`);
+      description: `Cette action est irréversible. Le compte de "${seller.name}" sera supprimé.`,
+      action: async () => {
+        try {
+          await deleteDocument('ecommerces', seller.id);
+          toast.success(`Vendeur "${seller.name}" supprimé`);
+        } catch { toast.error('Erreur lors de la suppression'); }
       }
     });
   };
 
-  const handleEdit = (seller: MockSeller) => {
+  const handleEdit = (seller: Seller) => {
     setEditForm({ name: seller.name, owner: seller.owner, email: seller.email, category: seller.category });
     setEditDialog({ open: true, seller });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editDialog.seller) return;
-    setSellers(prev => prev.map(s => s.id === editDialog.seller!.id ? { ...s, ...editForm } : s));
-    toast.success('Vendeur modifié avec succès');
-    setEditDialog({ open: false, seller: null });
+    setSaving(true);
+    try {
+      await updateDocument('ecommerces', editDialog.seller.id, editForm);
+      toast.success('Vendeur modifié avec succès');
+      setEditDialog({ open: false, seller: null });
+    } catch { toast.error('Erreur lors de la modification'); }
+    finally { setSaving(false); }
   };
 
   return (
@@ -219,129 +227,139 @@ export default function AdminSellersPage() {
               </TabsList>
             </Tabs>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Boutique</TableHead>
-                  <TableHead>Catégorie</TableHead>
-                  <TableHead>Produits</TableHead>
-                  <TableHead>Ventes</TableHead>
-                  <TableHead>Chiffre d'affaires</TableHead>
-                  <TableHead>Note</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.length === 0 ? (
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : error ? (
+              <div className="text-center py-10 text-destructive">
+                <p>Erreur lors du chargement</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
-                      <Store className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                      <p>Aucun vendeur trouvé</p>
-                    </TableCell>
+                    <TableHead>Boutique</TableHead>
+                    <TableHead>Catégorie</TableHead>
+                    <TableHead>Produits</TableHead>
+                    <TableHead>Ventes</TableHead>
+                    <TableHead>Chiffre d'affaires</TableHead>
+                    <TableHead>Note</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead className="w-12"></TableHead>
                   </TableRow>
-                ) : filtered.map((seller) => {
-                  const status = statusConfig[seller.status];
-                  const StatusIcon = status.icon;
-                  const initials = seller.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-                  return (
-                    <TableRow key={seller.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="w-9 h-9 shrink-0">
-                            <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
-                              {initials}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <p className="font-medium">{seller.name}</p>
-                              {seller.verified && (
-                                <CheckCircle className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground">{seller.owner}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">{seller.category}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-sm">
-                          <ShoppingBag className="w-4 h-4 text-muted-foreground" />
-                          {seller.products}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{seller.totalSales.toLocaleString('fr-FR')}</TableCell>
-                      <TableCell className="font-medium">{format(seller.revenue)}</TableCell>
-                      <TableCell>
-                        {seller.rating > 0 ? (
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
-                            <span className="text-sm font-medium">{seller.rating}</span>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={status.variant} className="gap-1">
-                          <StatusIcon className="w-3 h-3" />
-                          {status.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="w-4 h-4 mr-2" />
-                              Voir profil
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEdit(seller)}>
-                              <Edit className="w-4 h-4 mr-2" />
-                              Modifier
-                            </DropdownMenuItem>
-                            {!seller.verified && (
-                              <DropdownMenuItem onClick={() => handleVerify(seller)}>
-                                <ShieldCheck className="w-4 h-4 mr-2" />
-                                Vérifier le compte
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            {seller.status === 'active' ? (
-                              <DropdownMenuItem onClick={() => handleSuspend(seller)} className="text-destructive">
-                                <Ban className="w-4 h-4 mr-2" />
-                                Suspendre
-                              </DropdownMenuItem>
-                            ) : seller.status === 'suspended' ? (
-                              <DropdownMenuItem onClick={() => handleReactivate(seller)}>
-                                <PlayCircle className="w-4 h-4 mr-2" />
-                                Réactiver
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem onClick={() => handleApprove(seller)}>
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Approuver
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(seller)}>
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                </TableHeader>
+                <TableBody>
+                  {filtered.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
+                        <Store className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                        <p>Aucun vendeur trouvé</p>
                       </TableCell>
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                  ) : filtered.map((seller) => {
+                    const status = statusConfig[seller.status] || statusConfig.pending;
+                    const StatusIcon = status.icon;
+                    const initials = (seller.name || '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+                    return (
+                      <TableRow key={seller.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-9 h-9 shrink-0">
+                              <AvatarFallback className="text-xs bg-primary/10 text-primary font-semibold">
+                                {initials}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-medium">{seller.name}</p>
+                                {seller.verified && (
+                                  <CheckCircle className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground">{seller.owner}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-xs">{seller.category}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-sm">
+                            <ShoppingBag className="w-4 h-4 text-muted-foreground" />
+                            {seller.products || 0}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">{(seller.totalSales || 0).toLocaleString('fr-FR')}</TableCell>
+                        <TableCell className="font-medium">{format(seller.revenue || 0)}</TableCell>
+                        <TableCell>
+                          {(seller.rating || 0) > 0 ? (
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                              <span className="text-sm font-medium">{seller.rating}</span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={status.variant} className="gap-1">
+                            <StatusIcon className="w-3 h-3" />
+                            {status.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Voir profil
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEdit(seller)}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Modifier
+                              </DropdownMenuItem>
+                              {!seller.verified && (
+                                <DropdownMenuItem onClick={() => handleVerify(seller)}>
+                                  <ShieldCheck className="w-4 h-4 mr-2" />
+                                  Vérifier le compte
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
+                              {seller.status === 'active' ? (
+                                <DropdownMenuItem onClick={() => handleSuspend(seller)} className="text-destructive">
+                                  <Ban className="w-4 h-4 mr-2" />
+                                  Suspendre
+                                </DropdownMenuItem>
+                              ) : seller.status === 'suspended' ? (
+                                <DropdownMenuItem onClick={() => handleReactivate(seller)}>
+                                  <PlayCircle className="w-4 h-4 mr-2" />
+                                  Réactiver
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem onClick={() => handleApprove(seller)}>
+                                  <CheckCircle className="w-4 h-4 mr-2" />
+                                  Approuver
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(seller)}>
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Supprimer
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -387,7 +405,10 @@ export default function AdminSellersPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialog({ open: false, seller: null })}>Annuler</Button>
-            <Button onClick={handleSaveEdit}>Enregistrer</Button>
+            <Button onClick={handleSaveEdit} disabled={saving}>
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Enregistrer
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

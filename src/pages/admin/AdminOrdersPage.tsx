@@ -1,5 +1,5 @@
 /**
- * Admin Orders Page - Order Management
+ * Admin Orders Page - Order Management (Firestore)
  */
 
 import { useState } from 'react';
@@ -27,28 +27,26 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, MoreHorizontal, Filter, Eye, Package, Truck, CheckCircle, XCircle, Edit, Trash2 } from 'lucide-react';
+import { Search, MoreHorizontal, Filter, Eye, Package, Truck, CheckCircle, XCircle, Edit, Loader2 } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
 import { toast } from 'sonner';
+import { useRealtimeCollection } from '@/lib/firebase/queries';
+import { updateDocument } from '@/lib/firebase/mutations';
+import type { FirestoreDoc } from '@/lib/firebase/queries';
+import { Timestamp } from 'firebase/firestore';
 
 type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled';
 
-interface MockOrder {
-  id: string;
-  customer: string;
-  seller: string;
+interface Order extends FirestoreDoc {
+  orderNumber?: string;
+  customerName?: string;
+  customerId?: string;
+  sellerName?: string;
+  sellerId?: string;
   total: number;
   status: OrderStatus;
-  date: string;
+  items?: any[];
 }
-
-const initialOrders: MockOrder[] = [
-  { id: 'GGO-12345678', customer: 'Mamadou D.', seller: 'TechStore GN', total: 450000, status: 'pending', date: '2024-01-20' },
-  { id: 'GGO-12345679', customer: 'Fatoumata B.', seller: 'Mode Conakry', total: 125000, status: 'confirmed', date: '2024-01-20' },
-  { id: 'GGO-12345680', customer: 'Ibrahima S.', seller: 'ElectroGN', total: 890000, status: 'shipping', date: '2024-01-19' },
-  { id: 'GGO-12345681', customer: 'Aissatou C.', seller: 'BeautyGN', total: 75000, status: 'delivered', date: '2024-01-18' },
-  { id: 'GGO-12345682', customer: 'Oumar B.', seller: 'TechStore GN', total: 320000, status: 'cancelled', date: '2024-01-17' },
-];
 
 const statusConfig: Record<OrderStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
   pending: { label: 'En attente', variant: 'secondary', icon: Package },
@@ -61,17 +59,18 @@ const statusConfig: Record<OrderStatus, { label: string; variant: 'default' | 's
 const statusFlow: OrderStatus[] = ['pending', 'confirmed', 'shipping', 'delivered'];
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<MockOrder[]>(initialOrders);
+  const { data: orders, loading, error } = useRealtimeCollection<Order>('orders');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const { format } = useCurrency();
 
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
-  const [statusDialog, setStatusDialog] = useState<{ open: boolean; order: MockOrder | null; newStatus: OrderStatus | '' }>({ open: false, order: null, newStatus: '' });
+  const [statusDialog, setStatusDialog] = useState<{ open: boolean; order: Order | null; newStatus: OrderStatus | '' }>({ open: false, order: null, newStatus: '' });
+  const [saving, setSaving] = useState(false);
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = (order.orderNumber || order.id).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (order.customerName || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTab = activeTab === 'all' || order.status === activeTab;
     return matchesSearch && matchesTab;
   });
@@ -84,27 +83,39 @@ export default function AdminOrdersPage() {
     cancelled: orders.filter(o => o.status === 'cancelled').length,
   };
 
-  const handleCancel = (order: MockOrder) => {
+  const handleCancel = (order: Order) => {
     setConfirmDialog({
       open: true,
       title: 'Annuler cette commande ?',
-      description: `La commande "${order.id}" de ${order.customer} sera annulée. Le client sera notifié et un remboursement sera initié.`,
-      action: () => {
-        setOrders(prev => prev.map(o => o.id === order.id ? { ...o, status: 'cancelled' as const } : o));
-        toast.success(`Commande ${order.id} annulée`);
+      description: `La commande "${order.orderNumber || order.id}" sera annulée.`,
+      action: async () => {
+        try {
+          await updateDocument('orders', order.id, { status: 'cancelled' });
+          toast.success(`Commande ${order.orderNumber || order.id} annulée`);
+        } catch { toast.error('Erreur lors de l\'annulation'); }
       }
     });
   };
 
-  const handleOpenStatusDialog = (order: MockOrder) => {
+  const handleOpenStatusDialog = (order: Order) => {
     setStatusDialog({ open: true, order, newStatus: '' });
   };
 
-  const handleUpdateStatus = () => {
+  const handleUpdateStatus = async () => {
     if (!statusDialog.order || !statusDialog.newStatus) return;
-    setOrders(prev => prev.map(o => o.id === statusDialog.order!.id ? { ...o, status: statusDialog.newStatus as OrderStatus } : o));
-    toast.success(`Commande ${statusDialog.order.id} → ${statusConfig[statusDialog.newStatus as OrderStatus].label}`);
-    setStatusDialog({ open: false, order: null, newStatus: '' });
+    setSaving(true);
+    try {
+      await updateDocument('orders', statusDialog.order.id, { status: statusDialog.newStatus });
+      toast.success(`Commande ${statusDialog.order.orderNumber || statusDialog.order.id} → ${statusConfig[statusDialog.newStatus as OrderStatus].label}`);
+      setStatusDialog({ open: false, order: null, newStatus: '' });
+    } catch { toast.error('Erreur lors de la mise à jour'); }
+    finally { setSaving(false); }
+  };
+
+  const formatDate = (ts: any) => {
+    if (!ts) return '—';
+    const date = ts instanceof Timestamp ? ts.toDate() : new Date(ts);
+    return date.toLocaleDateString('fr-FR');
   };
 
   return (
@@ -179,77 +190,87 @@ export default function AdminOrdersPage() {
               </TabsList>
             </Tabs>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID Commande</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Vendeur</TableHead>
-                  <TableHead>Montant</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredOrders.length === 0 ? (
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : error ? (
+              <div className="text-center py-10 text-destructive">
+                <p>Erreur lors du chargement</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
-                      <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                      <p>Aucune commande trouvée</p>
-                    </TableCell>
+                    <TableHead>ID Commande</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Vendeur</TableHead>
+                    <TableHead>Montant</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="w-12"></TableHead>
                   </TableRow>
-                ) : filteredOrders.map((order) => {
-                  const status = statusConfig[order.status];
-                  const StatusIcon = status.icon;
-                  return (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-mono font-medium">{order.id}</TableCell>
-                      <TableCell>{order.customer}</TableCell>
-                      <TableCell className="text-muted-foreground">{order.seller}</TableCell>
-                      <TableCell className="font-medium">{format(order.total)}</TableCell>
-                      <TableCell>
-                        <Badge variant={status.variant} className="gap-1">
-                          <StatusIcon className="w-3 h-3" />
-                          {status.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(order.date).toLocaleDateString('fr-FR')}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="w-4 h-4 mr-2" />
-                              Voir détails
-                            </DropdownMenuItem>
-                            {order.status !== 'cancelled' && order.status !== 'delivered' && (
-                              <DropdownMenuItem onClick={() => handleOpenStatusDialog(order)}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                Mettre à jour statut
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator />
-                            {order.status !== 'cancelled' && order.status !== 'delivered' && (
-                              <DropdownMenuItem className="text-destructive" onClick={() => handleCancel(order)}>
-                                <XCircle className="w-4 h-4 mr-2" />
-                                Annuler
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                </TableHeader>
+                <TableBody>
+                  {filteredOrders.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                        <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                        <p>Aucune commande trouvée</p>
                       </TableCell>
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                  ) : filteredOrders.map((order) => {
+                    const status = statusConfig[order.status] || statusConfig.pending;
+                    const StatusIcon = status.icon;
+                    return (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-mono font-medium">{order.orderNumber || order.id.slice(0, 12)}</TableCell>
+                        <TableCell>{order.customerName || order.customerId || '—'}</TableCell>
+                        <TableCell className="text-muted-foreground">{order.sellerName || order.sellerId || '—'}</TableCell>
+                        <TableCell className="font-medium">{format(order.total || 0)}</TableCell>
+                        <TableCell>
+                          <Badge variant={status.variant} className="gap-1">
+                            <StatusIcon className="w-3 h-3" />
+                            {status.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatDate(order.createdAt)}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>
+                                <Eye className="w-4 h-4 mr-2" />
+                                Voir détails
+                              </DropdownMenuItem>
+                              {order.status !== 'cancelled' && order.status !== 'delivered' && (
+                                <DropdownMenuItem onClick={() => handleOpenStatusDialog(order)}>
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Mettre à jour statut
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
+                              {order.status !== 'cancelled' && order.status !== 'delivered' && (
+                                <DropdownMenuItem className="text-destructive" onClick={() => handleCancel(order)}>
+                                  <XCircle className="w-4 h-4 mr-2" />
+                                  Annuler
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -273,7 +294,7 @@ export default function AdminOrdersPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Mettre à jour le statut</DialogTitle>
-            <DialogDescription>Commande {statusDialog.order?.id} — {statusDialog.order?.customer}</DialogDescription>
+            <DialogDescription>Commande {statusDialog.order?.orderNumber || statusDialog.order?.id}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -294,7 +315,10 @@ export default function AdminOrdersPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setStatusDialog({ open: false, order: null, newStatus: '' })}>Annuler</Button>
-            <Button onClick={handleUpdateStatus} disabled={!statusDialog.newStatus}>Mettre à jour</Button>
+            <Button onClick={handleUpdateStatus} disabled={!statusDialog.newStatus || saving}>
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Mettre à jour
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
