@@ -69,6 +69,45 @@ export default function AdminProductsPage() {
   const [editDialog, setEditDialog] = useState<{ open: boolean; product: Product | null }>({ open: false, product: null });
   const [editForm, setEditForm] = useState({ name: '', price: '', category: '' });
   const [saving, setSaving] = useState(false);
+  const [addDialog, setAddDialog] = useState(false);
+  const [addForm, setAddForm] = useState({ name: '', price: '', category: '', description: '', stock: '' });
+
+  const handleAddProduct = async () => {
+    if (!addForm.name || !addForm.price || !addForm.category) {
+      toast.error('Nom, prix et catégorie sont requis');
+      return;
+    }
+    setSaving(true);
+    try {
+      const { addDocument } = await import('@/lib/firebase/mutations');
+      await addDocument('products', {
+        name: addForm.name,
+        description: addForm.description || '',
+        category: addForm.category,
+        basePrice: Number(addForm.price),
+        price: Number(addForm.price),
+        images: [],
+        thumbnail: '',
+        variants: [{ sku: 'DEFAULT', name: 'Standard', price: Number(addForm.price), stock: Number(addForm.stock) || 0 }],
+        totalStock: Number(addForm.stock) || 0,
+        sellerId: 'admin',
+        tags: [],
+        specifications: {},
+        avgRating: 0,
+        totalReviews: 0,
+        totalSales: 0,
+        status: 'active',
+        featured: false,
+      });
+      toast.success('Produit ajouté avec succès');
+      setAddDialog(false);
+      setAddForm({ name: '', price: '', category: '', description: '', stock: '' });
+    } catch (err) {
+      toast.error('Erreur lors de l\'ajout du produit');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = 
@@ -204,6 +243,10 @@ export default function AdminProductsPage() {
                 </div>
                 <Button variant="outline" size="icon">
                   <Filter className="w-4 h-4" />
+                </Button>
+                <Button onClick={() => setAddDialog(true)}>
+                  <Package className="w-4 h-4 mr-2" />
+                  Ajouter
                 </Button>
               </div>
             </div>
@@ -386,6 +429,47 @@ export default function AdminProductsPage() {
             <Button onClick={handleSaveEdit} disabled={saving}>
               {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Product Dialog */}
+      <Dialog open={addDialog} onOpenChange={setAddDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter un produit</DialogTitle>
+            <DialogDescription>Créez un nouveau produit dans le catalogue</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Nom du produit *</Label>
+              <Input value={addForm.name} onChange={(e) => setAddForm(prev => ({ ...prev, name: e.target.value }))} placeholder="Ex: iPhone 15 Pro" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input value={addForm.description} onChange={(e) => setAddForm(prev => ({ ...prev, description: e.target.value }))} placeholder="Description du produit" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Prix (GNF) *</Label>
+                <Input type="number" value={addForm.price} onChange={(e) => setAddForm(prev => ({ ...prev, price: e.target.value }))} placeholder="0" />
+              </div>
+              <div className="space-y-2">
+                <Label>Stock initial</Label>
+                <Input type="number" value={addForm.stock} onChange={(e) => setAddForm(prev => ({ ...prev, stock: e.target.value }))} placeholder="0" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Catégorie *</Label>
+              <Input value={addForm.category} onChange={(e) => setAddForm(prev => ({ ...prev, category: e.target.value }))} placeholder="Ex: Électronique" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddDialog(false)}>Annuler</Button>
+            <Button onClick={handleAddProduct} disabled={saving}>
+              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Ajouter
             </Button>
           </DialogFooter>
         </DialogContent>
