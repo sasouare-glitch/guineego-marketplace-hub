@@ -6,9 +6,6 @@ import { FeaturesSection } from "@/components/sections/FeaturesSection";
 import { AcademySection } from "@/components/sections/AcademySection";
 import { PartnersSection } from "@/components/sections/PartnersSection";
 import { CTASection } from "@/components/sections/CTASection";
-import * as functions from "firebase-functions";
-import * as admin from "firebase-admin";
-admin.initializeApp();
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
