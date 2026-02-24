@@ -14,6 +14,10 @@ import {
   Grid3X3,
   List,
   ChevronDown,
+  Power,
+  PowerOff,
+  BarChart3,
+  Loader2,
 } from "lucide-react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { Button } from "@/components/ui/button";
@@ -33,84 +37,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  stock: number;
-  status: "active" | "draft" | "out_of_stock";
-  sales: number;
-  image?: string;
-}
-
-const products: Product[] = [
-  {
-    id: "1",
-    name: "iPhone 15 Pro Max 256GB",
-    category: "Téléphones",
-    price: 12500000,
-    stock: 2,
-    status: "active",
-    sales: 45,
-  },
-  {
-    id: "2",
-    name: "Samsung Galaxy S24 Ultra",
-    category: "Téléphones",
-    price: 9800000,
-    stock: 3,
-    status: "active",
-    sales: 32,
-  },
-  {
-    id: "3",
-    name: "MacBook Air M3 13\"",
-    category: "Ordinateurs",
-    price: 15000000,
-    stock: 1,
-    status: "out_of_stock",
-    sales: 18,
-  },
-  {
-    id: "4",
-    name: "AirPods Pro 2ème génération",
-    category: "Accessoires",
-    price: 2500000,
-    stock: 15,
-    status: "active",
-    sales: 89,
-  },
-  {
-    id: "5",
-    name: "iPad Pro 11\" M4",
-    category: "Tablettes",
-    price: 11000000,
-    stock: 0,
-    status: "out_of_stock",
-    sales: 12,
-  },
-  {
-    id: "6",
-    name: "Chargeur USB-C 20W Apple",
-    category: "Accessoires",
-    price: 350000,
-    stock: 50,
-    status: "active",
-    sales: 156,
-  },
-  {
-    id: "7",
-    name: "Coque iPhone 15 MagSafe",
-    category: "Accessoires",
-    price: 450000,
-    stock: 0,
-    status: "draft",
-    sales: 0,
-  },
-];
+import { useSellerProducts, type SellerProduct } from "@/hooks/useSellerProducts";
+import { AddProductDialog } from "@/components/seller/AddProductDialog";
+import { EditStockDialog } from "@/components/seller/EditStockDialog";
 
 const statusConfig = {
   active: {
@@ -132,10 +72,15 @@ const formatPrice = (price: number) => {
 };
 
 export default function SellerProducts() {
+  const { products, loading, addProduct, updateProductStatus, updateStock, deleteProduct } = useSellerProducts();
+  
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [stockDialog, setStockDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
@@ -150,6 +95,13 @@ export default function SellerProducts() {
 
   const categories = [...new Set(products.map((p) => p.category))];
 
+  const handleDeleteConfirm = async () => {
+    if (deleteDialog.product) {
+      await deleteProduct(deleteDialog.product.id);
+      setDeleteDialog({ open: false, product: null });
+    }
+  };
+
   return (
     <SellerLayout>
       <div className="space-y-6">
@@ -161,7 +113,7 @@ export default function SellerProducts() {
           >
             <h1 className="text-2xl font-bold text-foreground">Produits</h1>
             <p className="text-muted-foreground">
-              Gérez votre catalogue de {products.length} produits
+              Gérez votre catalogue de {products.length} produit{products.length !== 1 ? 's' : ''}
             </p>
           </motion.div>
 
@@ -170,11 +122,9 @@ export default function SellerProducts() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Button asChild>
-              <Link to="/seller/products/new" className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Ajouter un produit
-              </Link>
+            <Button onClick={() => setAddDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Ajouter un produit
             </Button>
           </motion.div>
         </div>
@@ -252,8 +202,16 @@ export default function SellerProducts() {
           </div>
         </motion.div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="bg-card rounded-xl border border-border p-12 text-center">
+            <Loader2 className="w-8 h-8 text-primary mx-auto mb-4 animate-spin" />
+            <p className="text-muted-foreground">Chargement des produits...</p>
+          </div>
+        )}
+
         {/* Products List */}
-        {viewMode === "list" ? (
+        {!loading && viewMode === "list" && filteredProducts.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -289,7 +247,7 @@ export default function SellerProducts() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {filteredProducts.map((product) => {
-                    const status = statusConfig[product.status];
+                    const status = statusConfig[product.status] || statusConfig.draft;
                     return (
                       <tr
                         key={product.id}
@@ -297,9 +255,13 @@ export default function SellerProducts() {
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                              <Package className="w-6 h-6 text-muted-foreground" />
-                            </div>
+                            {product.thumbnail && product.thumbnail !== '/placeholder.svg' ? (
+                              <img src={product.thumbnail} alt={product.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                            ) : (
+                              <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Package className="w-6 h-6 text-muted-foreground" />
+                              </div>
+                            )}
                             <span className="font-medium text-foreground line-clamp-1">
                               {product.name}
                             </span>
@@ -312,26 +274,25 @@ export default function SellerProducts() {
                         </td>
                         <td className="px-6 py-4">
                           <span className="font-medium text-foreground">
-                            {formatPrice(product.price)}
+                            {formatPrice(product.price || product.basePrice)}
                           </span>
                         </td>
                         <td className="px-6 py-4 hidden sm:table-cell">
-                          <span
+                          <button
+                            onClick={() => setStockDialog({ open: true, product })}
                             className={cn(
-                              "font-medium",
-                              product.stock === 0 && "text-destructive",
-                              product.stock > 0 &&
-                                product.stock <= 5 &&
-                                "text-accent",
-                              product.stock > 5 && "text-foreground"
+                              "font-medium cursor-pointer hover:underline",
+                              product.totalStock === 0 && "text-destructive",
+                              product.totalStock > 0 && product.totalStock <= 5 && "text-accent",
+                              product.totalStock > 5 && "text-foreground"
                             )}
                           >
-                            {product.stock}
-                          </span>
+                            {product.totalStock}
+                          </button>
                         </td>
                         <td className="px-6 py-4 hidden lg:table-cell">
                           <span className="text-sm text-muted-foreground">
-                            {product.sales} vendus
+                            {product.totalSales || 0} vendus
                           </span>
                         </td>
                         <td className="px-6 py-4">
@@ -350,30 +311,35 @@ export default function SellerProducts() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <Link
-                                  to={`/seller/products/${product.id}`}
+                              <DropdownMenuItem
+                                className="flex items-center gap-2"
+                                onClick={() => setStockDialog({ open: true, product })}
+                              >
+                                <BarChart3 className="w-4 h-4" />
+                                Gérer le stock
+                              </DropdownMenuItem>
+                              {product.status === 'active' ? (
+                                <DropdownMenuItem
                                   className="flex items-center gap-2"
+                                  onClick={() => updateProductStatus(product.id, 'draft')}
                                 >
-                                  <Eye className="w-4 h-4" />
-                                  Voir
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link
-                                  to={`/seller/products/${product.id}/edit`}
+                                  <PowerOff className="w-4 h-4" />
+                                  Retirer de la vente
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem
                                   className="flex items-center gap-2"
+                                  onClick={() => updateProductStatus(product.id, 'active')}
                                 >
-                                  <Edit2 className="w-4 h-4" />
-                                  Modifier
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="flex items-center gap-2">
-                                <Copy className="w-4 h-4" />
-                                Dupliquer
-                              </DropdownMenuItem>
+                                  <Power className="w-4 h-4" />
+                                  Mettre en vente
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive flex items-center gap-2">
+                              <DropdownMenuItem
+                                className="text-destructive flex items-center gap-2"
+                                onClick={() => setDeleteDialog({ open: true, product })}
+                              >
                                 <Trash2 className="w-4 h-4" />
                                 Supprimer
                               </DropdownMenuItem>
@@ -387,7 +353,10 @@ export default function SellerProducts() {
               </table>
             </div>
           </motion.div>
-        ) : (
+        )}
+
+        {/* Grid View */}
+        {!loading && viewMode === "grid" && filteredProducts.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -395,14 +364,18 @@ export default function SellerProducts() {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
           >
             {filteredProducts.map((product) => {
-              const status = statusConfig[product.status];
+              const status = statusConfig[product.status] || statusConfig.draft;
               return (
                 <div
                   key={product.id}
                   className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow"
                 >
                   <div className="aspect-square bg-muted flex items-center justify-center relative">
-                    <Package className="w-16 h-16 text-muted-foreground" />
+                    {product.thumbnail && product.thumbnail !== '/placeholder.svg' ? (
+                      <img src={product.thumbnail} alt={product.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Package className="w-16 h-16 text-muted-foreground" />
+                    )}
                     <Badge
                       variant="outline"
                       className={cn("absolute top-3 right-3", status.variant)}
@@ -421,25 +394,41 @@ export default function SellerProducts() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-primary">
-                        {formatPrice(product.price)}
+                        {formatPrice(product.price || product.basePrice)}
                       </span>
-                      <span
+                      <button
+                        onClick={() => setStockDialog({ open: true, product })}
                         className={cn(
-                          "text-sm",
-                          product.stock === 0 && "text-destructive",
-                          product.stock > 0 && "text-muted-foreground"
+                          "text-sm cursor-pointer hover:underline",
+                          product.totalStock === 0 && "text-destructive",
+                          product.totalStock > 0 && "text-muted-foreground"
                         )}
                       >
-                        Stock: {product.stock}
-                      </span>
+                        Stock: {product.totalStock}
+                      </button>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <Link to={`/seller/products/${product.id}/edit`}>
-                          <Edit2 className="w-3 h-3 mr-1" />
-                          Modifier
-                        </Link>
-                      </Button>
+                      {product.status === 'active' ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => updateProductStatus(product.id, 'draft')}
+                        >
+                          <PowerOff className="w-3 h-3 mr-1" />
+                          Retirer
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => updateProductStatus(product.id, 'active')}
+                        >
+                          <Power className="w-3 h-3 mr-1" />
+                          Activer
+                        </Button>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="outline" size="icon" className="h-8 w-8">
@@ -447,16 +436,18 @@ export default function SellerProducts() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem className="flex items-center gap-2">
-                            <Eye className="w-4 h-4" />
-                            Voir
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="flex items-center gap-2">
-                            <Copy className="w-4 h-4" />
-                            Dupliquer
+                          <DropdownMenuItem
+                            className="flex items-center gap-2"
+                            onClick={() => setStockDialog({ open: true, product })}
+                          >
+                            <BarChart3 className="w-4 h-4" />
+                            Gérer le stock
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive flex items-center gap-2">
+                          <DropdownMenuItem
+                            className="text-destructive flex items-center gap-2"
+                            onClick={() => setDeleteDialog({ open: true, product })}
+                          >
                             <Trash2 className="w-4 h-4" />
                             Supprimer
                           </DropdownMenuItem>
@@ -471,24 +462,60 @@ export default function SellerProducts() {
         )}
 
         {/* Empty State */}
-        {filteredProducts.length === 0 && (
+        {!loading && filteredProducts.length === 0 && (
           <div className="bg-card rounded-xl border border-border p-12 text-center">
             <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">
-              Aucun produit trouvé
+              {products.length === 0 ? "Aucun produit" : "Aucun produit trouvé"}
             </h3>
             <p className="text-muted-foreground mb-4">
-              Essayez de modifier vos filtres ou ajoutez un nouveau produit
+              {products.length === 0
+                ? "Commencez par ajouter votre premier produit"
+                : "Essayez de modifier vos filtres"}
             </p>
-            <Button asChild>
-              <Link to="/seller/products/new">
-                <Plus className="w-4 h-4 mr-2" />
-                Ajouter un produit
-              </Link>
+            <Button onClick={() => setAddDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Ajouter un produit
             </Button>
           </div>
         )}
       </div>
+
+      {/* Add Product Dialog */}
+      <AddProductDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        onSubmit={addProduct}
+      />
+
+      {/* Edit Stock Dialog */}
+      {stockDialog.product && (
+        <EditStockDialog
+          open={stockDialog.open}
+          onOpenChange={(open) => setStockDialog({ open, product: open ? stockDialog.product : null })}
+          productName={stockDialog.product.name}
+          currentStock={stockDialog.product.totalStock}
+          onSubmit={(newStock) => updateStock(stockDialog.product!.id, newStock)}
+        />
+      )}
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ open, product: open ? deleteDialog.product : null })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer ce produit ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Le produit « {deleteDialog.product?.name} » sera définitivement supprimé.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SellerLayout>
   );
 }
