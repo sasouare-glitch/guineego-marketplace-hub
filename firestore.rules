@@ -15,7 +15,10 @@ service cloud.firestore {
     }
     
     function hasRole(role) {
-      return isAuthenticated() && request.auth.token.role == role;
+      return isAuthenticated() && (
+        request.auth.token.role == role || 
+        (request.auth.token.roles is list && role in request.auth.token.roles)
+      );
     }
     
     // Liste des emails admin de confiance (bypass custom claims)
@@ -25,12 +28,19 @@ service cloud.firestore {
       ];
     }
     
+    // Liste des emails vendeur de confiance (bypass custom claims)
+    function isSellerEmail() {
+      return isAuthenticated() && request.auth.token.email in [
+        'souareahamedsalim@gmail.com'
+      ];
+    }
+    
     function isAdmin() {
       return hasRole('admin') || isAdminEmail();
     }
     
     function isSeller() {
-      return hasRole('ecommerce') || isAdmin();
+      return hasRole('ecommerce') || isSellerEmail() || isAdmin();
     }
     
     function isCourier() {
