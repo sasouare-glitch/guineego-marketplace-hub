@@ -5,7 +5,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { verifySeller } from '../utils/auth';
+import { verifyAuth, type UserRole } from '../utils/auth';
 
 const db = admin.firestore();
 
@@ -36,31 +36,39 @@ interface CreateProductData {
 export const createProduct = functions
   .region('europe-west1')
   .https.onCall(async (data: CreateProductData, context) => {
-    // Verify seller
-    const claims = verifySeller(context);
-    const sellerId = claims.ecommerceId;
+    const uid = verifyAuth(context);
+    const token = (context.auth?.token || {}) as any;
 
-    if (!sellerId) {
-      throw new functions.https.HttpsError(
-        'failed-precondition',
-        'Profil vendeur non configuré'
-      );
+    // Seller/admin verification: prefer token claims, fallback to Firestore /users/{uid}
+    const tokenRole = token.role as UserRole | undefined;
+    const tokenRoles = Array.isArray(token.roles) ? (token.roles as UserRole[]) : [];
+
+    let allowed = tokenRole === 'admin' || tokenRole === 'ecommerce' || tokenRoles.includes('admin') || tokenRoles.includes('ecommerce');
+
+    if (!allowed) {
+      const userDoc = await db.collection('users').doc(uid).get();
+      const userData = userDoc.exists ? userDoc.data() : null;
+      const docRole = (userData?.role as UserRole | undefined) || undefined;
+      const docRoles = Array.isArray(userData?.roles) ? (userData?.roles as UserRole[]) : [];
+      allowed = docRole === 'admin' || docRole === 'ecommerce' || docRoles.includes('admin') || docRoles.includes('ecommerce');
     }
 
-    // Validate required fields
-    if (!data.name || !data.description || !data.category || !data.basePrice) {
+    if (!allowed) {
+      throw new functions.https.HttpsError('permission-denied', 'Accès refusé (vendeur requis)');
+    }
+
+    // Seller ID: accept either business id (ecommerceId/ecomId) or fallback to UID
+    const sellerId: string = token.ecommerceId || token.ecomId || uid;
+
+    // Validate required fields (description/images can be empty on the UI)
+    if (!data.name || !data.category || !data.basePrice) {
       throw new functions.https.HttpsError(
         'invalid-argument',
-        'Nom, description, catégorie et prix sont requis'
+        'Nom, catégorie et prix sont requis'
       );
     }
 
-    if (!data.images || data.images.length === 0) {
-      throw new functions.https.HttpsError(
-        'invalid-argument',
-        'Au moins une image est requise'
-      );
-    }
+    const images = Array.isArray(data.images) && data.images.length > 0 ? data.images : ['/placeholder.svg'];
 
     try {
       const productRef = db.collection('products').doc();
@@ -84,13 +92,13 @@ export const createProduct = functions
       const product = {
         id: productRef.id,
         name: data.name,
-        description: data.description,
+        description: data.description || '',
         category: data.category,
         subcategory: data.subcategory || null,
         basePrice: data.basePrice,
         price: data.basePrice, // Current display price
-        images: data.images,
-        thumbnail: data.images[0],
+        images,
+        thumbnail: images[0],
         variants,
         totalStock,
         sellerId,
@@ -108,10 +116,18 @@ export const createProduct = functions
 
       await productRef.set(product);
 
-      // Update seller's product count
-      await db.collection('ecommerces').doc(sellerId).update({
-        totalProducts: admin.firestore.FieldValue.increment(1)
-      });
+      // Update seller's product count (best-effort)
+      try {
+        const ecomRef = db.collection('ecommerces').doc(sellerId);
+        const ecomDoc = await ecomRef.get();
+        if (ecomDoc.exists) {
+          await ecomRef.update({
+            totalProducts: admin.firestore.FieldValue.increment(1)
+          });
+        }
+      } catch (e) {
+        console.warn('Could not update ecommerces totalProducts:', e);
+      }
 
       return {
         success: true,

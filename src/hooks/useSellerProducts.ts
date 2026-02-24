@@ -17,7 +17,7 @@ import {
   serverTimestamp,
   Timestamp
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -114,38 +114,67 @@ export function useSellerProducts() {
   const addProduct = async (data: NewProductData) => {
     if (!sellerScopeId) throw new Error('Non authentifié');
 
-    try {
-      const productData = {
-        name: data.name,
-        description: data.description,
-        category: data.category,
-        subcategory: data.subcategory || null,
-        basePrice: data.basePrice,
+    const productData = {
+      name: data.name,
+      description: data.description,
+      category: data.category,
+      subcategory: data.subcategory || null,
+      basePrice: data.basePrice,
+      price: data.basePrice,
+      images: data.images.length > 0 ? data.images : ['/placeholder.svg'],
+      thumbnail: data.images[0] || '/placeholder.svg',
+      variants: [{
+        sku: `DEFAULT`,
+        name: 'Standard',
         price: data.basePrice,
-        images: data.images.length > 0 ? data.images : ['/placeholder.svg'],
-        thumbnail: data.images[0] || '/placeholder.svg',
-        variants: [{
-          sku: `DEFAULT`,
-          name: 'Standard',
-          price: data.basePrice,
-          stock: 0
-        }],
-        totalStock: 0,
-        sellerId: sellerScopeId,
-        tags: data.tags || [],
-        specifications: {},
-        avgRating: 0,
-        totalReviews: 0,
-        totalSales: 0,
-        status: 'active' as const,
-        featured: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      };
+        stock: 0
+      }],
+      totalStock: 0,
+      sellerId: sellerScopeId,
+      tags: data.tags || [],
+      specifications: {},
+      avgRating: 0,
+      totalReviews: 0,
+      totalSales: 0,
+      status: 'active' as const,
+      featured: false,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
 
+    try {
+      // Primary path: direct Firestore write (works when rules allow it)
       await addDoc(collection(db, 'products'), productData);
       toast.success('Produit ajouté avec succès');
-    } catch (err) {
+      return;
+    } catch (err: any) {
+      // Fallback path: Cloud Function (works even if rules block client writes)
+      if (err?.code === 'permission-denied') {
+        try {
+          const fn = callFunction<
+            Omit<NewProductData, 'images'> & { images: string[] },
+            { success: boolean; productId?: string; message?: string }
+          >('createProduct');
+
+          await fn({
+            name: data.name,
+            description: data.description,
+            category: data.category,
+            subcategory: data.subcategory,
+            basePrice: data.basePrice,
+            images: data.images.length > 0 ? data.images : ['/placeholder.svg'],
+            tags: data.tags || [],
+          });
+
+          toast.success('Produit ajouté avec succès');
+          return;
+        } catch (fnErr) {
+          console.error('Cloud Function createProduct failed:', fnErr);
+          toast.error("Erreur lors de l'ajout du produit");
+          throw fnErr;
+        }
+      }
+
       console.error('Error adding product:', err);
       toast.error("Erreur lors de l'ajout du produit");
       throw err;
