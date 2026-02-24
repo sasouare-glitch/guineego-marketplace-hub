@@ -32,11 +32,15 @@ export function ProtectedRoute({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
+  // Bypass immédiat et inconditionnel pour les emails admin prioritaires
+  // Placé AVANT toute vérification de claims/rôles pour éviter les race conditions
+  const userEmail = user?.email?.toLowerCase();
+  const isAdminEmail = userEmail && ADMIN_EMAILS.includes(userEmail);
+
   // Vérifier les rôles si spécifiés (seulement si l'utilisateur est connecté)
   if (requiredRoles && requiredRoles.length > 0) {
-    // Bypass immédiat et inconditionnel pour les emails admin prioritaires
-    const userEmail = user?.email?.toLowerCase();
-    if (userEmail && ADMIN_EMAILS.includes(userEmail)) {
+    // Admin email bypass - accès immédiat sans attendre les claims
+    if (isAdminEmail) {
       return <>{children}</>;
     }
 
