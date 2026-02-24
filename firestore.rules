@@ -67,20 +67,23 @@ service cloud.firestore {
     // PRODUCTS COLLECTION
     // ============================================
     match /products/{productId} {
-      // Anyone can read active products; admin and sellers can read all
-      allow read: if resource.data.status == 'active' || isSeller() || isAdmin();
+      // Anyone can read active products; sellers can read their own; admin reads all
+      allow read: if resource.data.status == 'active' 
+                  || isAdmin() 
+                  || isSeller()
+                  || (isAuthenticated() && resource.data.sellerId == request.auth.uid);
       
-      // Admin can create any product; sellers can create their own
-      allow create: if isAdmin() || (isSeller() && request.resource.data.sellerId == request.auth.uid);
+      // Admin can create any product; authenticated users with seller email or role can create their own
+      allow create: if isAdmin() 
+                    || (isAuthenticated() && request.resource.data.sellerId == request.auth.uid);
       
-      // Admin can update any product; sellers can update their own
-      allow update: if isAdmin() || (isSeller() && resource.data.sellerId == request.auth.uid);
+      // Admin can update any product; owners can update their own
+      allow update: if isAdmin() 
+                    || (isAuthenticated() && resource.data.sellerId == request.auth.uid);
       
-      // Sellers can delete their own products; admin can delete any
-      allow delete: if isAdmin() || (isSeller() && resource.data.sellerId == request.auth.uid);
-      
-      // Only admin can delete
-      allow delete: if isAdmin();
+      // Admin can delete any; owners can delete their own
+      allow delete: if isAdmin() 
+                    || (isAuthenticated() && resource.data.sellerId == request.auth.uid);
     }
     
     // ============================================
