@@ -28,19 +28,12 @@ service cloud.firestore {
       ];
     }
     
-    // Liste des emails vendeur de confiance (bypass custom claims)
-    function isSellerEmail() {
-      return isAuthenticated() && request.auth.token.email in [
-        'souareahamedsalim@gmail.com'
-      ];
-    }
-    
     function isAdmin() {
       return hasRole('admin') || isAdminEmail();
     }
     
     function isSeller() {
-      return hasRole('ecommerce') || isSellerEmail() || isAdmin();
+      return hasRole('ecommerce') || isAdmin();
     }
     
     function isCourier() {
