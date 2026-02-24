@@ -28,7 +28,7 @@ interface SellerHeaderProps {
 }
 
 export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHeaderProps) {
-  const { user: firebaseUser, profile } = useAuth();
+  const { user: firebaseUser, profile, signOut } = useAuth();
 
   const displayName = profile?.profile
     ? `${profile.profile.firstName} ${profile.profile.lastName}`.trim()
@@ -160,7 +160,7 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
                   Retour au site
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive flex items-center gap-2">
+              <DropdownMenuItem className="text-destructive flex items-center gap-2" onClick={() => signOut()}>
                 <LogOut className="h-4 w-4" />
                 Déconnexion
               </DropdownMenuItem>
