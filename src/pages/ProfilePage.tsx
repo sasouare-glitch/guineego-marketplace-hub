@@ -160,7 +160,11 @@ export default function ProfilePage() {
                   <Separator />
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">{t.profile.memberSince}</span>
-                    <span className="font-semibold text-foreground">Jan 2024</span>
+                    <span className="font-semibold text-foreground">
+                      {firebaseUser?.metadata?.creationTime
+                        ? new Date(firebaseUser.metadata.creationTime).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })
+                        : '—'}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
