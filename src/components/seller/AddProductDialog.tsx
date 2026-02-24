@@ -88,14 +88,24 @@ export function AddProductDialog({ open, onOpenChange, onSubmit }: AddProductDia
         setUploadProgress(0);
         const total = images.length;
 
-        for (let i = 0; i < images.length; i++) {
-          const result = await uploadProductImage(
-            images[i].file,
-            tempId,
-            i,
-            (p) => setUploadProgress(((i + p / 100) / total) * 100)
-          );
-          imageUrls.push(result.url);
+        try {
+          for (let i = 0; i < images.length; i++) {
+            const uploadPromise = uploadProductImage(
+              images[i].file,
+              tempId,
+              i,
+              (p) => setUploadProgress(((i + p / 100) / total) * 100)
+            );
+            // Timeout after 30s per image
+            const timeoutPromise = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('Upload timeout')), 30000)
+            );
+            const result = await Promise.race([uploadPromise, timeoutPromise]);
+            imageUrls.push(result.url);
+          }
+        } catch (uploadError) {
+          console.warn('Image upload failed, continuing without images:', uploadError);
+          imageUrls = [];
         }
         setUploadingImages(false);
       }
