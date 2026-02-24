@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
   Bell,
   Search,
@@ -10,6 +9,7 @@ import {
   HelpCircle,
   Menu,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,6 +28,18 @@ interface SellerHeaderProps {
 }
 
 export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHeaderProps) {
+  const { user: firebaseUser, profile } = useAuth();
+
+  const displayName = profile?.profile
+    ? `${profile.profile.firstName} ${profile.profile.lastName}`.trim()
+    : firebaseUser?.displayName || 'Vendeur';
+  const initials = displayName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
   return (
     <header
       className={`fixed top-0 right-0 z-30 h-16 bg-background/80 backdrop-blur-lg border-b border-border transition-all duration-300 ${
@@ -117,11 +129,11 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2 px-2">
-                <div className="w-8 h-8 bg-primary-gradient rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-primary-foreground">AD</span>
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-primary-foreground">{initials}</span>
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium">Amadou Diallo</p>
+                  <p className="text-sm font-medium">{displayName}</p>
                   <p className="text-xs text-muted-foreground">Vendeur Pro</p>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
