@@ -61,10 +61,13 @@ service cloud.firestore {
       allow read: if resource.data.status == 'active' || isSeller() || isAdmin();
       
       // Admin can create any product; sellers can create their own
-      allow create: if isAdmin() || (isSeller() && request.resource.data.sellerId == request.auth.token.ecommerceId);
+      allow create: if isAdmin() || (isSeller() && request.resource.data.sellerId == request.auth.uid);
       
       // Admin can update any product; sellers can update their own
-      allow update: if isAdmin() || (isSeller() && resource.data.sellerId == request.auth.token.ecommerceId);
+      allow update: if isAdmin() || (isSeller() && resource.data.sellerId == request.auth.uid);
+      
+      // Sellers can delete their own products; admin can delete any
+      allow delete: if isAdmin() || (isSeller() && resource.data.sellerId == request.auth.uid);
       
       // Only admin can delete
       allow delete: if isAdmin();
