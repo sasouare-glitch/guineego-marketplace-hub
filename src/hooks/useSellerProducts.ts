@@ -69,11 +69,14 @@ export function useSellerProducts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // The seller ID is the user's UID
-  const sellerId = user?.uid;
+  // Seller scope id: prefer ecomId custom claim if present, fallback to UID
+  const sellerScopeId = useMemo(
+    () => claims?.ecomId || user?.uid || null,
+    [claims?.ecomId, user?.uid]
+  );
 
   useEffect(() => {
-    if (!sellerId) {
+    if (!sellerScopeId) {
       setProducts([]);
       setLoading(false);
       return;
@@ -82,7 +85,7 @@ export function useSellerProducts() {
     setLoading(true);
     const q = query(
       collection(db, 'products'),
-      where('sellerId', '==', sellerId),
+      where('sellerId', '==', sellerScopeId),
       orderBy('createdAt', 'desc')
     );
 
@@ -105,11 +108,11 @@ export function useSellerProducts() {
     );
 
     return () => unsubscribe();
-  }, [sellerId]);
+  }, [sellerScopeId]);
 
   // Add a new product
   const addProduct = async (data: NewProductData) => {
-    if (!sellerId) throw new Error('Non authentifié');
+    if (!sellerScopeId) throw new Error('Non authentifié');
 
     try {
       const productData = {
@@ -128,7 +131,7 @@ export function useSellerProducts() {
           stock: 0
         }],
         totalStock: 0,
-        sellerId,
+        sellerId: sellerScopeId,
         tags: data.tags || [],
         specifications: {},
         avgRating: 0,

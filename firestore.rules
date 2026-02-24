@@ -13,6 +13,15 @@ service cloud.firestore {
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
+
+    // Seller scope id can be either the Firebase UID or a business seller id stored in custom claims
+    function isSellerScopeId(id) {
+      return isAuthenticated() && (
+        id == request.auth.uid ||
+        id == request.auth.token.ecommerceId ||
+        id == request.auth.token.ecomId
+      );
+    }
     
     function hasRole(role) {
       return isAuthenticated() && (
@@ -67,22 +76,22 @@ service cloud.firestore {
     // ============================================
     match /products/{productId} {
       // Anyone can read active products; sellers can read their own; admin reads all
-      allow read: if resource.data.status == 'active' 
-                  || isAdmin() 
+      allow read: if resource.data.status == 'active'
+                  || isAdmin()
                   || isSeller()
-                  || (isAuthenticated() && resource.data.sellerId == request.auth.uid);
+                  || isSellerScopeId(resource.data.sellerId);
       
-      // Admin can create any product; authenticated users with seller email or role can create their own
-      allow create: if isAdmin() 
-                    || (isAuthenticated() && request.resource.data.sellerId == request.auth.uid);
+      // Admin can create any product; sellers can create products under their own scope id
+      allow create: if isAdmin()
+                    || isSellerScopeId(request.resource.data.sellerId);
       
       // Admin can update any product; owners can update their own
-      allow update: if isAdmin() 
-                    || (isAuthenticated() && resource.data.sellerId == request.auth.uid);
+      allow update: if isAdmin()
+                    || isSellerScopeId(resource.data.sellerId);
       
       // Admin can delete any; owners can delete their own
-      allow delete: if isAdmin() 
-                    || (isAuthenticated() && resource.data.sellerId == request.auth.uid);
+      allow delete: if isAdmin()
+                    || isSellerScopeId(resource.data.sellerId);
     }
     
     // ============================================
