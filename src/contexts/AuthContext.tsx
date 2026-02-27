@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import {
   User,
   createUserWithEmailAndPassword,
@@ -16,7 +16,7 @@ import {
   signInWithPhoneNumber,
   ConfirmationResult
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider, facebookProvider } from '@/lib/firebase/config';
 import { 
   AuthContextType, 
@@ -437,6 +437,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setState(prev => ({ ...prev, profile }));
   };
 
+  // Force-refresh des claims (peut être appelé manuellement)
+  const refreshClaims = useCallback(async () => {
+    if (!state.user) return;
+    const [profile, claims] = await Promise.all([
+      loadUserProfile(state.user),
+      loadUserClaims(state.user)
+    ]);
+    setState(prev => ({ ...prev, profile, claims }));
+  }, [state.user, loadUserProfile, loadUserClaims]);
+
+  // Écouter les changements du document utilisateur pour auto-refresh des claims
+  useEffect(() => {
+    if (!state.user) return;
+    const unsubscribe = onSnapshot(doc(db, 'users', state.user.uid), (snap) => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      const currentRole = state.claims?.role;
+      // Si le rôle a changé dans Firestore, rafraîchir les claims
+      if (data.role && data.role !== currentRole) {
+        console.log('[AuthContext] Role changed in Firestore, refreshing claims…');
+        refreshClaims();
+      }
+    });
+    return () => unsubscribe();
+    // Only re-subscribe when user changes, not on every claims change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.user?.uid]);
+
   // Vérifier si l'utilisateur a un rôle
   // Les emails admin ont toujours tous les droits, quelle que soit l'état des claims
   const hasRole = (role: UserRole): boolean => {
@@ -469,7 +497,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     verifyOTP,
     updateProfile: updateUserProfile,
     hasRole,
-    hasAnyRole
+    hasAnyRole,
+    refreshClaims
   };
 
   return (
