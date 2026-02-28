@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,10 +7,49 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Store, Bell, CreditCard, Globe, Shield } from "lucide-react";
+import { Store, Bell, CreditCard, Globe } from "lucide-react";
+import { toast } from "sonner";
 
 const SellerSettingsPage = () => {
+  const [storeInfo, setStoreInfo] = useState({
+    name: "",
+    phone: "",
+    description: "",
+    address: "",
+  });
+
+  const [payment, setPayment] = useState({
+    method: "orange",
+    phone: "",
+  });
+
+  const [saving, setSaving] = useState<string | null>(null);
+
+  const handleSaveStoreInfo = async () => {
+    setSaving("store");
+    try {
+      // Simulate save — replace with Firestore write when backend is connected
+      await new Promise((r) => setTimeout(r, 800));
+      toast.success("Informations de la boutique enregistrées !");
+    } catch {
+      toast.error("Erreur lors de l'enregistrement");
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const handleUpdatePayment = async () => {
+    setSaving("payment");
+    try {
+      await new Promise((r) => setTimeout(r, 800));
+      toast.success("Méthode de paiement mise à jour !");
+    } catch {
+      toast.error("Erreur lors de la mise à jour");
+    } finally {
+      setSaving(null);
+    }
+  };
+
   return (
     <SellerLayout>
       <div className="space-y-6">
@@ -29,22 +69,45 @@ const SellerSettingsPage = () => {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="storeName">Nom de la boutique</Label>
-                  <Input id="storeName" placeholder="Ma Boutique" />
+                  <Input
+                    id="storeName"
+                    placeholder="Ma Boutique"
+                    value={storeInfo.name}
+                    onChange={(e) => setStoreInfo((s) => ({ ...s, name: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="storePhone">Téléphone</Label>
-                  <Input id="storePhone" placeholder="+224 6XX XX XX XX" />
+                  <Input
+                    id="storePhone"
+                    placeholder="+224 6XX XX XX XX"
+                    value={storeInfo.phone}
+                    onChange={(e) => setStoreInfo((s) => ({ ...s, phone: e.target.value }))}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="storeDesc">Description</Label>
-                <Textarea id="storeDesc" placeholder="Décrivez votre boutique..." rows={3} />
+                <Textarea
+                  id="storeDesc"
+                  placeholder="Décrivez votre boutique..."
+                  rows={3}
+                  value={storeInfo.description}
+                  onChange={(e) => setStoreInfo((s) => ({ ...s, description: e.target.value }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="storeAddress">Adresse</Label>
-                <Input id="storeAddress" placeholder="Commune, Quartier" />
+                <Input
+                  id="storeAddress"
+                  placeholder="Commune, Quartier"
+                  value={storeInfo.address}
+                  onChange={(e) => setStoreInfo((s) => ({ ...s, address: e.target.value }))}
+                />
               </div>
-              <Button>Enregistrer</Button>
+              <Button onClick={handleSaveStoreInfo} disabled={saving === "store"}>
+                {saving === "store" ? "Enregistrement..." : "Enregistrer"}
+              </Button>
             </CardContent>
           </Card>
 
@@ -87,7 +150,7 @@ const SellerSettingsPage = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Méthode de retrait</Label>
-                <Select defaultValue="orange">
+                <Select value={payment.method} onValueChange={(v) => setPayment((s) => ({ ...s, method: v }))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -100,9 +163,16 @@ const SellerSettingsPage = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="withdrawPhone">Numéro de retrait</Label>
-                <Input id="withdrawPhone" placeholder="+224 6XX XX XX XX" />
+                <Input
+                  id="withdrawPhone"
+                  placeholder="+224 6XX XX XX XX"
+                  value={payment.phone}
+                  onChange={(e) => setPayment((s) => ({ ...s, phone: e.target.value }))}
+                />
               </div>
-              <Button>Mettre à jour</Button>
+              <Button onClick={handleUpdatePayment} disabled={saving === "payment"}>
+                {saving === "payment" ? "Mise à jour..." : "Mettre à jour"}
+              </Button>
             </CardContent>
           </Card>
 
