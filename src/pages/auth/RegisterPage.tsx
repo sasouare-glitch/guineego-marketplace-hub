@@ -68,7 +68,7 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError(null);
-      await signUp(data.email, data.password, data.displayName);
+      await signUp(data.email, data.password, data.displayName, data.role);
       setSuccess(true);
       setTimeout(() => navigate('/'), 2000);
     } catch (err: any) {
