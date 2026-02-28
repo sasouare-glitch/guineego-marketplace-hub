@@ -70,7 +70,14 @@ export default function RegisterPage() {
       setError(null);
       await signUp(data.email, data.password, data.displayName, data.role);
       setSuccess(true);
-      setTimeout(() => navigate('/'), 2000);
+      const dashboardRoutes: Record<string, string> = {
+        ecommerce: '/seller',
+        courier: '/courier',
+        investor: '/investor',
+        customer: '/',
+      };
+      const destination = dashboardRoutes[data.role] || '/';
+      setTimeout(() => navigate(destination, { replace: true }), 2000);
     } catch (err: any) {
       const errorMessages: Record<string, string> = {
         'auth/email-already-in-use': 'Cet email est déjà utilisé',
