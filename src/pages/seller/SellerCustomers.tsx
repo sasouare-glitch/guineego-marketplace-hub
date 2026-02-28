@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Users, UserCheck, RepeatIcon, TrendingUp, Search, Filter,
   ChevronDown, Star, ShoppingBag, Phone, Mail, MapPin, Calendar,
+  Loader2, RefreshCw,
 } from "lucide-react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { StatCard } from "@/components/seller/StatCard";
@@ -13,27 +14,7 @@ import { cn } from "@/lib/utils";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-
-// --- Mock Data ---
-const customers = [
-  { id: 1, name: "Mamadou Diallo", email: "m.diallo@email.com", phone: "+224 622 11 22 33", city: "Conakry", orders: 14, totalSpent: 2800000, lastOrder: "2026-02-15", segment: "VIP", note: 4.9 },
-  { id: 2, name: "Fatoumata Bah", email: "f.bah@email.com", phone: "+224 666 44 55 66", city: "Kindia", orders: 8, totalSpent: 1200000, lastOrder: "2026-02-12", segment: "Fidèle", note: 4.7 },
-  { id: 3, name: "Ibrahima Sow", email: "i.sow@email.com", phone: "+224 628 77 88 99", city: "Labé", orders: 3, totalSpent: 480000, lastOrder: "2026-01-28", segment: "Nouveau", note: 4.5 },
-  { id: 4, name: "Aissatou Camara", email: "a.camara@email.com", phone: "+224 664 12 34 56", city: "Conakry", orders: 22, totalSpent: 5600000, lastOrder: "2026-02-17", segment: "VIP", note: 5.0 },
-  { id: 5, name: "Oumar Konaté", email: "o.konate@email.com", phone: "+224 621 98 76 54", city: "Boké", orders: 6, totalSpent: 840000, lastOrder: "2026-02-01", segment: "Fidèle", note: 4.3 },
-  { id: 6, name: "Mariama Traoré", email: "m.traore@email.com", phone: "+224 655 23 45 67", city: "Conakry", orders: 1, totalSpent: 95000, lastOrder: "2026-02-10", segment: "Nouveau", note: 4.0 },
-  { id: 7, name: "Alpha Baldé", email: "a.balde@email.com", phone: "+224 629 34 56 78", city: "Mamou", orders: 11, totalSpent: 1950000, lastOrder: "2026-02-14", segment: "Fidèle", note: 4.8 },
-  { id: 8, name: "Kadiatou Barry", email: "k.barry@email.com", phone: "+224 660 87 65 43", city: "Conakry", orders: 5, totalSpent: 720000, lastOrder: "2026-01-22", segment: "À risque", note: 4.2 },
-];
-
-const retentionData = [
-  { month: "Sep", nouveaux: 18, fideles: 32, vip: 8 },
-  { month: "Oct", nouveaux: 22, fideles: 35, vip: 10 },
-  { month: "Nov", nouveaux: 28, fideles: 38, vip: 12 },
-  { month: "Déc", nouveaux: 35, fideles: 42, vip: 15 },
-  { month: "Jan", nouveaux: 20, fideles: 45, vip: 17 },
-  { month: "Fév", nouveaux: 24, fideles: 48, vip: 19 },
-];
+import { useSellerCustomers, type SellerCustomer, type CustomerSegment } from "@/hooks/useSellerCustomers";
 
 const segmentConfig: Record<string, { color: string; bg: string }> = {
   VIP: { color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800" },
@@ -44,16 +25,65 @@ const segmentConfig: Record<string, { color: string; bg: string }> = {
 
 const segments = ["Tous", "VIP", "Fidèle", "Nouveau", "À risque"];
 
+function formatGNF(value: number): string {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M GNF`;
+  if (value >= 1_000) return `${Math.round(value / 1_000)}K GNF`;
+  return `${value.toLocaleString("fr-GN")} GNF`;
+}
+
 export default function SellerCustomers() {
+  const { customers, stats, loading, error, seedDemoData } = useSellerCustomers();
   const [search, setSearch] = useState("");
   const [activeSegment, setActiveSegment] = useState("Tous");
-  const [selectedCustomer, setSelectedCustomer] = useState<typeof customers[0] | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<SellerCustomer | null>(null);
+  const [seeding, setSeeding] = useState(false);
+
+  // Auto-seed demo data if collection is empty after load
+  useEffect(() => {
+    if (!loading && customers.length === 0 && !seeding) {
+      setSeeding(true);
+      seedDemoData().finally(() => setSeeding(false));
+    }
+  }, [loading, customers.length]);
 
   const filtered = customers.filter((c) => {
-    const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase());
+    const matchSearch =
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.email.toLowerCase().includes(search.toLowerCase());
     const matchSegment = activeSegment === "Tous" || c.segment === activeSegment;
     return matchSearch && matchSegment;
   });
+
+  // Build chart data from real customers grouped by month
+  const retentionData = (() => {
+    const months: Record<string, { nouveaux: number; fideles: number; vip: number }> = {};
+    customers.forEach((c) => {
+      const d = c.createdAt;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      if (!months[key]) months[key] = { nouveaux: 0, fideles: 0, vip: 0 };
+      if (c.segment === "VIP") months[key].vip++;
+      else if (c.segment === "Fidèle") months[key].fideles++;
+      else months[key].nouveaux++;
+    });
+    return Object.entries(months)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-6)
+      .map(([key, vals]) => ({
+        month: new Date(key + "-01").toLocaleDateString("fr-FR", { month: "short" }),
+        ...vals,
+      }));
+  })();
+
+  if (loading || seeding) {
+    return (
+      <SellerLayout>
+        <div className="flex items-center justify-center h-64 gap-3">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+          <span className="text-muted-foreground">Chargement des clients...</span>
+        </div>
+      </SellerLayout>
+    );
+  }
 
   return (
     <SellerLayout>
@@ -66,10 +96,10 @@ export default function SellerCustomers() {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Total clients" value="214" change={12} changeLabel="vs mois dernier" icon={Users} iconColor="primary" delay={0} />
-          <StatCard title="Clients VIP" value="19" change={26.7} changeLabel="ce mois" icon={Star} iconColor="accent" delay={0.1} />
-          <StatCard title="Taux de rétention" value="72%" change={4.5} changeLabel="vs mois dernier" icon={RepeatIcon} iconColor="primary" delay={0.15} />
-          <StatCard title="Valeur moy. client" value="187K GNF" change={8.2} changeLabel="vs mois dernier" icon={TrendingUp} iconColor="muted" delay={0.2} />
+          <StatCard title="Total clients" value={String(stats.total)} change={0} changeLabel="total" icon={Users} iconColor="primary" delay={0} />
+          <StatCard title="Clients VIP" value={String(stats.vip)} change={0} changeLabel="segment" icon={Star} iconColor="accent" delay={0.1} />
+          <StatCard title="Taux de rétention" value={`${stats.retentionRate}%`} change={0} changeLabel="clients récurrents" icon={RepeatIcon} iconColor="primary" delay={0.15} />
+          <StatCard title="Valeur moy. client" value={formatGNF(stats.avgCustomerValue)} change={0} changeLabel="moyenne" icon={TrendingUp} iconColor="muted" delay={0.2} />
         </div>
 
         {/* Retention Chart + Segment Breakdown */}
@@ -81,17 +111,23 @@ export default function SellerCustomers() {
             <h3 className="text-lg font-semibold text-foreground mb-1">Évolution de la base clients</h3>
             <p className="text-sm text-muted-foreground mb-6">Répartition mensuelle par segment</p>
             <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={retentionData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="month" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={{ stroke: "hsl(var(--border))" }} />
-                  <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={{ stroke: "hsl(var(--border))" }} />
-                  <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} />
-                  <Bar dataKey="nouveaux" name="Nouveaux" stackId="a" fill="hsl(var(--accent))" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="fideles" name="Fidèles" stackId="a" fill="hsl(var(--primary))" />
-                  <Bar dataKey="vip" name="VIP" stackId="a" fill="hsl(45 100% 51%)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {retentionData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={retentionData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={{ stroke: "hsl(var(--border))" }} />
+                    <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} axisLine={{ stroke: "hsl(var(--border))" }} />
+                    <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} />
+                    <Bar dataKey="nouveaux" name="Nouveaux" stackId="a" fill="hsl(var(--accent))" radius={[0, 0, 0, 0]} />
+                    <Bar dataKey="fideles" name="Fidèles" stackId="a" fill="hsl(var(--primary))" />
+                    <Bar dataKey="vip" name="VIP" stackId="a" fill="hsl(45 100% 51%)" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                  Pas encore de données pour le graphique
+                </div>
+              )}
             </div>
           </motion.div>
 
@@ -102,10 +138,10 @@ export default function SellerCustomers() {
           >
             <h3 className="text-lg font-semibold text-foreground">Par segment</h3>
             {[
-              { label: "VIP", count: 19, pct: 9, desc: "≥ 10 commandes" },
-              { label: "Fidèle", count: 87, pct: 41, desc: "3–9 commandes" },
-              { label: "Nouveau", count: 89, pct: 42, desc: "1–2 commandes" },
-              { label: "À risque", count: 19, pct: 8, desc: "Inactif 60j+" },
+              { label: "VIP", count: stats.vip, pct: stats.total > 0 ? Math.round((stats.vip / stats.total) * 100) : 0, desc: "≥ 10 commandes" },
+              { label: "Fidèle", count: stats.fidele, pct: stats.total > 0 ? Math.round((stats.fidele / stats.total) * 100) : 0, desc: "3–9 commandes" },
+              { label: "Nouveau", count: stats.nouveau, pct: stats.total > 0 ? Math.round((stats.nouveau / stats.total) * 100) : 0, desc: "1–2 commandes" },
+              { label: "À risque", count: stats.aRisque, pct: stats.total > 0 ? Math.round((stats.aRisque / stats.total) * 100) : 0, desc: "Inactif 60j+" },
             ].map((seg) => {
               const conf = segmentConfig[seg.label];
               return (
@@ -215,13 +251,15 @@ export default function SellerCustomers() {
                       <td className="px-6 py-4 text-right hidden xl:table-cell">
                         <div className="flex items-center justify-end gap-1 text-muted-foreground">
                           <Calendar className="w-3.5 h-3.5" />
-                          <span className="text-sm">{new Date(customer.lastOrder).toLocaleDateString("fr-FR")}</span>
+                          <span className="text-sm">
+                            {customer.lastOrderAt ? customer.lastOrderAt.toLocaleDateString("fr-FR") : "—"}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                          <span className="text-sm font-medium text-foreground">{customer.note}</span>
+                          <span className="text-sm font-medium text-foreground">{customer.rating}</span>
                         </div>
                       </td>
                     </tr>
@@ -256,7 +294,7 @@ export default function SellerCustomers() {
                       <Phone className="w-4 h-4" /> {selectedCustomer.phone}
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4" /> {selectedCustomer.city}, Guinée
+                      <MapPin className="w-4 h-4" /> {selectedCustomer.city}, {selectedCustomer.country}
                     </div>
                   </div>
                 </div>
@@ -269,7 +307,7 @@ export default function SellerCustomers() {
                     </div>
                     <div className="bg-card rounded-lg p-3 border border-border">
                       <p className="text-xs text-muted-foreground">Total dépensé</p>
-                      <p className="text-lg font-bold text-primary">{(selectedCustomer.totalSpent / 1000000).toFixed(2)}M GNF</p>
+                      <p className="text-lg font-bold text-primary">{formatGNF(selectedCustomer.totalSpent)}</p>
                     </div>
                   </div>
                 </div>
