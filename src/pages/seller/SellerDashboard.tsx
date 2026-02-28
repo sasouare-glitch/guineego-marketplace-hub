@@ -1,3 +1,4 @@
+import { WelcomeBanner } from "@/components/onboarding/WelcomeBanner";
 import { motion } from "framer-motion";
 import {
   Wallet,
@@ -17,6 +18,15 @@ export default function SellerDashboard() {
   return (
     <SellerLayout>
       <div className="space-y-6">
+        <WelcomeBanner
+          role="ecommerce"
+          title="Bienvenue sur votre espace vendeur"
+          description="Commencez par ajouter vos premiers produits et personnaliser votre boutique pour attirer vos clients."
+          steps={[
+            { label: "Ajouter un produit", href: "/seller/products" },
+            { label: "Mon profil boutique", href: "/seller/profile" },
+          ]}
+        />
         {/* Page Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

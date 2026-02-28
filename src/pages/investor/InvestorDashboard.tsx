@@ -1,3 +1,4 @@
+import { WelcomeBanner } from "@/components/onboarding/WelcomeBanner";
 import { motion } from "framer-motion";
 import { InvestorLayout } from "@/components/investor/InvestorLayout";
 import { PortfolioStats } from "@/components/investor/PortfolioStats";
@@ -62,6 +63,15 @@ export default function InvestorDashboard() {
       subtitle="Vue d'ensemble de vos investissements"
     >
       <div className="space-y-6">
+        <WelcomeBanner
+          role="investor"
+          title="Bienvenue dans votre espace investisseur"
+          description="Explorez les opportunités d'investissement et commencez à faire fructifier votre capital avec GuineeGo."
+          steps={[
+            { label: "Voir les opportunités", href: "/investor/opportunities" },
+            { label: "Mes investissements", href: "/investor/investments" },
+          ]}
+        />
         {/* Stats */}
         <PortfolioStats />
 
