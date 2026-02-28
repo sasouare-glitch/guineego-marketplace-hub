@@ -12,6 +12,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import React from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import SellStartPage from "./pages/SellStartPage";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerProducts from "./pages/seller/SellerProducts";
 import SellerOrders from "./pages/seller/SellerOrders";
@@ -106,6 +107,7 @@ const App = () => (
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/academy" element={<Academy />} />
                     <Route path="/academy/course/:id" element={<CourseDetail />} />
+                    <Route path="/sell/start" element={<SellStartPage />} />
                     
                     {/* Protected Client Routes */}
                     <Route path="/cart" element={<CartPage />} />
