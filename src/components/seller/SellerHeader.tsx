@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Bell,
@@ -8,8 +9,10 @@ import {
   Settings,
   HelpCircle,
   Menu,
+  Store,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { fetchDocument } from "@/lib/firebase/queries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,6 +32,16 @@ interface SellerHeaderProps {
 
 export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHeaderProps) {
   const { user: firebaseUser, profile, signOut } = useAuth();
+  const [storeName, setStoreName] = useState<string>("");
+
+  useEffect(() => {
+    if (!firebaseUser) return;
+    fetchDocument<{ id: string; storeInfo?: { name?: string } }>("seller_settings", firebaseUser.uid)
+      .then((data) => {
+        if (data?.storeInfo?.name) setStoreName(data.storeInfo.name);
+      })
+      .catch(() => {});
+  }, [firebaseUser]);
 
   const displayName = profile?.profile
     ? `${profile.profile.firstName} ${profile.profile.lastName}`.trim()
@@ -134,7 +147,10 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
                 </div>
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium">{displayName}</p>
-                  <p className="text-xs text-muted-foreground">Vendeur Pro</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Store className="h-3 w-3" />
+                    {storeName || "Vendeur Pro"}
+                  </p>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>
