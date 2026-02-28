@@ -24,7 +24,7 @@ import {
   limit,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { useAuth } from '@/lib/firebase/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ============================================
 // TYPES
