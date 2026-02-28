@@ -13,9 +13,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, TrendingUp, UserCircle } from 'lucide-react';
+
+const roleOptions = [
+  { value: 'customer', label: 'Client / Acheteur', description: 'Acheter des produits sur la marketplace', icon: UserCircle },
+  { value: 'ecommerce', label: 'Vendeur / E-commerçant', description: 'Vendre vos produits en ligne', icon: ShoppingBag },
+  { value: 'courier', label: 'Livreur / Coursier', description: 'Effectuer des livraisons', icon: Truck },
+  { value: 'investor', label: 'Investisseur', description: 'Investir dans des opportunités', icon: TrendingUp },
+] as const;
 
 const registerSchema = z.object({
+  role: z.enum(['customer', 'ecommerce', 'courier', 'investor'], { required_error: 'Veuillez choisir votre profil' }),
   displayName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Email invalide'),
   password: z.string()
@@ -144,6 +153,41 @@ export default function RegisterPage() {
             )}
             
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {/* Sélection du rôle obligatoire */}
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">Je suis un(e) <span className="text-destructive">*</span></Label>
+                <RadioGroup
+                  value={watch('role') || ''}
+                  onValueChange={(val) => setValue('role', val as any, { shouldValidate: true })}
+                  className="grid grid-cols-2 gap-3"
+                >
+                  {roleOptions.map((option) => {
+                    const Icon = option.icon;
+                    const isSelected = watch('role') === option.value;
+                    return (
+                      <Label
+                        key={option.value}
+                        htmlFor={`role-${option.value}`}
+                        className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 cursor-pointer transition-all text-center ${
+                          isSelected
+                            ? 'border-primary bg-primary/5 shadow-sm'
+                            : 'border-muted hover:border-primary/40'
+                        }`}
+                      >
+                        <RadioGroupItem value={option.value} id={`role-${option.value}`} className="sr-only" />
+                        <Icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                        <span className={`text-sm font-medium leading-tight ${isSelected ? 'text-primary' : ''}`}>{option.label}</span>
+                        <span className="text-[10px] text-muted-foreground leading-tight">{option.description}</span>
+                      </Label>
+                    );
+                  })}
+                </RadioGroup>
+                {errors.role && (
+                  <p className="text-sm text-destructive">{errors.role.message}</p>
+                )}
+              </div>
+
+              <Separator />
               <div className="space-y-2">
                 <Label htmlFor="displayName">{t.auth?.fullName || 'Nom complet'}</Label>
                 <div className="relative">
