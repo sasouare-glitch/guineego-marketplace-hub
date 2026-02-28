@@ -220,6 +220,7 @@ const App = () => (
                     } />
                     
                     {/* Seller Dashboard Routes (Protected - ecommerce role) */}
+                    <Route path="/seller" element={<Navigate to="/seller/dashboard" replace />} />
                     <Route path="/seller/dashboard" element={
                       <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
                         <SellerDashboard />
