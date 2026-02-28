@@ -3,213 +3,17 @@ import { useSearchParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CategoryBar } from "@/components/marketplace/CategoryBar";
-import { ProductCard, Product } from "@/components/marketplace/ProductCard";
+import { ProductCard } from "@/components/marketplace/ProductCard";
 import { SearchFilters, FilterState } from "@/components/marketplace/SearchFilters";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Search as SearchIcon, SlidersHorizontal, Grid3X3, List, X } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useTranslation } from "@/hooks/useTranslation";
-
-// All products for search
-const allProducts: Product[] = [
-  {
-    id: "1",
-    name: "iPhone 13 Pro Max 256GB - Graphite",
-    price: 8500000,
-    originalPrice: 11000000,
-    image: "https://images.unsplash.com/photo-1632661674596-df8be59a8a35?w=400",
-    rating: 4.8,
-    reviewCount: 234,
-    seller: "TechShop GN",
-    category: "electronics",
-    inStock: true,
-    discount: 23,
-    isBestSeller: true,
-  },
-  {
-    id: "2",
-    name: "Samsung Galaxy S23 Ultra 512GB",
-    price: 7200000,
-    originalPrice: 9000000,
-    image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400",
-    rating: 4.7,
-    reviewCount: 189,
-    seller: "MobilePlus",
-    category: "electronics",
-    inStock: true,
-    discount: 20,
-  },
-  {
-    id: "3",
-    name: "MacBook Air M2 13 pouces",
-    price: 12500000,
-    originalPrice: 15000000,
-    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
-    rating: 4.9,
-    reviewCount: 156,
-    seller: "TechShop GN",
-    category: "electronics",
-    inStock: true,
-    discount: 17,
-    isNew: true,
-  },
-  {
-    id: "4",
-    name: "AirPods Pro 2ème génération",
-    price: 1800000,
-    originalPrice: 2200000,
-    image: "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=400",
-    rating: 4.6,
-    reviewCount: 312,
-    seller: "AudioWorld",
-    category: "electronics",
-    inStock: true,
-    discount: 18,
-  },
-  {
-    id: "5",
-    name: "Robe traditionnelle africaine brodée",
-    price: 450000,
-    image: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=400",
-    rating: 4.5,
-    reviewCount: 78,
-    seller: "Mode Africaine",
-    category: "fashion",
-    inStock: true,
-    isNew: true,
-  },
-  {
-    id: "6",
-    name: "Montre connectée Huawei Watch GT3",
-    price: 980000,
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
-    rating: 4.4,
-    reviewCount: 92,
-    seller: "TechShop GN",
-    category: "electronics",
-    inStock: true,
-    isNew: true,
-  },
-  {
-    id: "7",
-    name: "Sac à main en cuir authentique",
-    price: 320000,
-    image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400",
-    rating: 4.3,
-    reviewCount: 45,
-    seller: "Luxe Boutique",
-    category: "fashion",
-    inStock: true,
-    isNew: true,
-  },
-  {
-    id: "8",
-    name: "Parfum Homme - Collection Premium",
-    price: 280000,
-    image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400",
-    rating: 4.7,
-    reviewCount: 134,
-    seller: "Beauty World",
-    category: "beauty",
-    inStock: true,
-    isNew: true,
-  },
-  {
-    id: "9",
-    name: "Ensemble cuisine 10 pièces inox",
-    price: 650000,
-    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400",
-    rating: 4.6,
-    reviewCount: 267,
-    seller: "Home Plus",
-    category: "home",
-    inStock: true,
-    isBestSeller: true,
-  },
-  {
-    id: "10",
-    name: "Tapis persan 200x300cm",
-    price: 1200000,
-    image: "https://images.unsplash.com/photo-1600166898405-da9535204843?w=400",
-    rating: 4.8,
-    reviewCount: 89,
-    seller: "Déco Maison",
-    category: "home",
-    inStock: true,
-    isBestSeller: true,
-  },
-  {
-    id: "11",
-    name: "Chaussures sport Nike Air Max",
-    price: 750000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400",
-    rating: 4.5,
-    reviewCount: 423,
-    seller: "Sport Zone",
-    category: "sports",
-    inStock: true,
-    isBestSeller: true,
-  },
-  {
-    id: "12",
-    name: "Coffret maquillage professionnel",
-    price: 180000,
-    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400",
-    rating: 4.4,
-    reviewCount: 198,
-    seller: "Beauty World",
-    category: "beauty",
-    inStock: true,
-    isBestSeller: true,
-  },
-  {
-    id: "13",
-    name: "Télévision LED 55 pouces 4K",
-    price: 4500000,
-    image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400",
-    rating: 4.5,
-    reviewCount: 67,
-    seller: "TechShop GN",
-    category: "electronics",
-    inStock: false,
-  },
-  {
-    id: "14",
-    name: "Cafetière automatique Delonghi",
-    price: 890000,
-    image: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400",
-    rating: 4.6,
-    reviewCount: 145,
-    seller: "Home Plus",
-    category: "home",
-    inStock: true,
-  },
-  {
-    id: "15",
-    name: "Baskets running Adidas Ultraboost",
-    price: 680000,
-    image: "https://images.unsplash.com/photo-1556906781-9a412961c28c?w=400",
-    rating: 4.7,
-    reviewCount: 289,
-    seller: "Sport Zone",
-    category: "sports",
-    inStock: true,
-  },
-  {
-    id: "16",
-    name: "Set de valises voyage 3 pièces",
-    price: 520000,
-    image: "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?w=400",
-    rating: 4.3,
-    reviewCount: 56,
-    seller: "Travel Store",
-    category: "fashion",
-    inStock: true,
-  },
-];
+import { useAllProducts } from "@/hooks/useAllProducts";
 
 const defaultFilters: FilterState = {
   categories: [],
@@ -223,6 +27,7 @@ const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addItem } = useCart();
   const { t } = useTranslation();
+  const { products: allProducts, loading } = useAllProducts();
   
   const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [filters, setFilters] = useState<FilterState>(() => {
@@ -283,7 +88,7 @@ const SearchPage = () => {
     }
 
     return result;
-  }, [searchTerm, filters, sortBy]);
+  }, [allProducts, searchTerm, filters, sortBy]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -412,7 +217,17 @@ const SearchPage = () => {
             </div>
 
             {/* Product Grid */}
-            {filteredProducts.length > 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="space-y-3">
+                    <Skeleton className="h-48 w-full rounded-xl" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div
                 className={
                   viewMode === "grid"
