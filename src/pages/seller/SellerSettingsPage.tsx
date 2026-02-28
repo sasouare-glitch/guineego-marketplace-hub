@@ -272,26 +272,30 @@ const SellerSettingsPage = () => {
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>Langue</Label>
-                  <Select value={preferences.language} onValueChange={(v) => setPreferences((s) => ({ ...s, language: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="fr">Français</SelectItem>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="ar">العربية</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="settingsLanguage">Langue</Label>
+                  <select
+                    id="settingsLanguage"
+                    className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={preferences.language}
+                    onChange={(e) => setPreferences((s) => ({ ...s, language: e.target.value }))}
+                  >
+                    <option value="fr">Français</option>
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                  </select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Devise</Label>
-                  <Select value={preferences.currency} onValueChange={(v) => setPreferences((s) => ({ ...s, currency: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="GNF">GNF - Franc guinéen</SelectItem>
-                      <SelectItem value="USD">USD - Dollar</SelectItem>
-                      <SelectItem value="EUR">EUR - Euro</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="settingsCurrency">Devise</Label>
+                  <select
+                    id="settingsCurrency"
+                    className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={preferences.currency}
+                    onChange={(e) => setPreferences((s) => ({ ...s, currency: e.target.value }))}
+                  >
+                    <option value="GNF">GNF - Franc guinéen</option>
+                    <option value="USD">USD - Dollar</option>
+                    <option value="EUR">EUR - Euro</option>
+                  </select>
                 </div>
               </div>
               <Button onClick={handleSavePreferences} disabled={saving === "preferences"}>
