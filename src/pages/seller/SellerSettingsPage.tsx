@@ -23,6 +23,13 @@ const SellerSettingsPage = () => {
     phone: "",
   });
 
+  const [notifications, setNotifications] = useState({
+    newOrders: true,
+    lowStock: true,
+    clientMessages: true,
+    weeklyReports: true,
+  });
+
   const [saving, setSaving] = useState<string | null>(null);
 
   const handleSaveStoreInfo = async () => {
@@ -38,7 +45,23 @@ const SellerSettingsPage = () => {
     }
   };
 
+  const handleSaveNotifications = async () => {
+    setSaving("notifications");
+    try {
+      await new Promise((r) => setTimeout(r, 800));
+      toast.success("Préférences de notification mises à jour !");
+    } catch {
+      toast.error("Erreur lors de la mise à jour");
+    } finally {
+      setSaving(null);
+    }
+  };
+
   const handleUpdatePayment = async () => {
+    if (!payment.phone.trim()) {
+      toast.error("Veuillez saisir un numéro de retrait");
+      return;
+    }
     setSaving("payment");
     try {
       await new Promise((r) => setTimeout(r, 800));
@@ -122,19 +145,27 @@ const SellerSettingsPage = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {[
-                { label: "Nouvelles commandes", desc: "Recevoir une alerte pour chaque commande" },
-                { label: "Stock faible", desc: "Alerte quand un produit est en rupture" },
-                { label: "Messages clients", desc: "Notification des messages reçus" },
-                { label: "Rapports hebdomadaires", desc: "Résumé des ventes par email" },
+                { key: "newOrders" as const, label: "Nouvelles commandes", desc: "Recevoir une alerte pour chaque commande" },
+                { key: "lowStock" as const, label: "Stock faible", desc: "Alerte quand un produit est en rupture" },
+                { key: "clientMessages" as const, label: "Messages clients", desc: "Notification des messages reçus" },
+                { key: "weeklyReports" as const, label: "Rapports hebdomadaires", desc: "Résumé des ventes par email" },
               ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between">
+                <div key={item.key} className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-foreground">{item.label}</p>
                     <p className="text-xs text-muted-foreground">{item.desc}</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={notifications[item.key]}
+                    onCheckedChange={(checked) =>
+                      setNotifications((s) => ({ ...s, [item.key]: checked }))
+                    }
+                  />
                 </div>
               ))}
+              <Button onClick={handleSaveNotifications} disabled={saving === "notifications"}>
+                {saving === "notifications" ? "Mise à jour..." : "Enregistrer les préférences"}
+              </Button>
             </CardContent>
           </Card>
 
