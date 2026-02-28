@@ -231,5 +231,15 @@ service cloud.firestore {
       allow update: if isOwner(resource.data.userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
       allow create, delete: if false;
     }
+    
+    // ============================================
+    // SELLER SETTINGS (owner-only)
+    // ============================================
+    match /seller_settings/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isSeller();
+      allow update: if isOwner(userId) && isSeller();
+      allow delete: if isAdmin();
+    }
   }
 }
