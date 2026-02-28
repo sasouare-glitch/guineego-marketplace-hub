@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CartProvider } from "@/hooks/useCart";
 import { WishlistProvider } from "@/hooks/useWishlist";
 import { NotificationProvider } from "@/hooks/useNotifications";
@@ -100,6 +100,11 @@ const App = () => (
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/access-denied" element={<AccessDeniedPage />} />
                     <Route path="/install" element={<InstallApp />} />
+                    
+                    {/* Auth redirects to avoid duplicate routes */}
+                    <Route path="/auth/login" element={<Navigate to="/login" replace />} />
+                    <Route path="/auth/register" element={<Navigate to="/register" replace />} />
+                    <Route path="/auth/forgot-password" element={<Navigate to="/forgot-password" replace />} />
                     
                     {/* Client Marketplace Routes (Public) */}
                     <Route path="/marketplace" element={<Marketplace />} />
