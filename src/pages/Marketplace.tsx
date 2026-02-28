@@ -4,176 +4,35 @@ import { CategoryBar } from "@/components/marketplace/CategoryBar";
 import { ProductCard, Product } from "@/components/marketplace/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, Zap, TrendingUp, Clock, Truck } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronRight, Zap, TrendingUp, Clock, Truck, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useMarketplaceProducts } from "@/hooks/useMarketplaceProducts";
 
-// Mock products data
-const flashSaleProducts: Product[] = [
-  {
-    id: "1",
-    name: "iPhone 13 Pro Max 256GB - Graphite",
-    price: 8500000,
-    originalPrice: 11000000,
-    image: "https://images.unsplash.com/photo-1632661674596-df8be59a8a35?w=400",
-    rating: 4.8,
-    reviewCount: 234,
-    seller: "TechShop GN",
-    category: "electronics",
-    inStock: true,
-    discount: 23,
-    isBestSeller: true,
-  },
-  {
-    id: "2",
-    name: "Samsung Galaxy S23 Ultra 512GB",
-    price: 7200000,
-    originalPrice: 9000000,
-    image: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400",
-    rating: 4.7,
-    reviewCount: 189,
-    seller: "MobilePlus",
-    category: "electronics",
-    inStock: true,
-    discount: 20,
-  },
-  {
-    id: "3",
-    name: "MacBook Air M2 13 pouces",
-    price: 12500000,
-    originalPrice: 15000000,
-    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
-    rating: 4.9,
-    reviewCount: 156,
-    seller: "TechShop GN",
-    category: "electronics",
-    inStock: true,
-    discount: 17,
-    isNew: true,
-  },
-  {
-    id: "4",
-    name: "AirPods Pro 2ème génération",
-    price: 1800000,
-    originalPrice: 2200000,
-    image: "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=400",
-    rating: 4.6,
-    reviewCount: 312,
-    seller: "AudioWorld",
-    category: "electronics",
-    inStock: true,
-    discount: 18,
-  },
-];
-
-const newArrivals: Product[] = [
-  {
-    id: "5",
-    name: "Robe traditionnelle africaine brodée",
-    price: 450000,
-    image: "https://images.unsplash.com/photo-1590735213920-68192a487bc2?w=400",
-    rating: 4.5,
-    reviewCount: 78,
-    seller: "Mode Africaine",
-    category: "fashion",
-    inStock: true,
-    isNew: true,
-  },
-  {
-    id: "6",
-    name: "Montre connectée Huawei Watch GT3",
-    price: 980000,
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
-    rating: 4.4,
-    reviewCount: 92,
-    seller: "TechShop GN",
-    category: "electronics",
-    inStock: true,
-    isNew: true,
-  },
-  {
-    id: "7",
-    name: "Sac à main en cuir authentique",
-    price: 320000,
-    image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400",
-    rating: 4.3,
-    reviewCount: 45,
-    seller: "Luxe Boutique",
-    category: "fashion",
-    inStock: true,
-    isNew: true,
-  },
-  {
-    id: "8",
-    name: "Parfum Homme - Collection Premium",
-    price: 280000,
-    image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400",
-    rating: 4.7,
-    reviewCount: 134,
-    seller: "Beauty World",
-    category: "beauty",
-    inStock: true,
-    isNew: true,
-  },
-];
-
-const bestSellers: Product[] = [
-  {
-    id: "9",
-    name: "Ensemble cuisine 10 pièces inox",
-    price: 650000,
-    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400",
-    rating: 4.6,
-    reviewCount: 267,
-    seller: "Home Plus",
-    category: "home",
-    inStock: true,
-    isBestSeller: true,
-  },
-  {
-    id: "10",
-    name: "Tapis persan 200x300cm",
-    price: 1200000,
-    image: "https://images.unsplash.com/photo-1600166898405-da9535204843?w=400",
-    rating: 4.8,
-    reviewCount: 89,
-    seller: "Déco Maison",
-    category: "home",
-    inStock: true,
-    isBestSeller: true,
-  },
-  {
-    id: "11",
-    name: "Chaussures sport Nike Air Max",
-    price: 750000,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400",
-    rating: 4.5,
-    reviewCount: 423,
-    seller: "Sport Zone",
-    category: "sports",
-    inStock: true,
-    isBestSeller: true,
-  },
-  {
-    id: "12",
-    name: "Coffret maquillage professionnel",
-    price: 180000,
-    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400",
-    rating: 4.4,
-    reviewCount: 198,
-    seller: "Beauty World",
-    category: "beauty",
-    inStock: true,
-    isBestSeller: true,
-  },
-];
+const ProductGridSkeleton = () => (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {[...Array(4)].map((_, i) => (
+      <div key={i} className="rounded-xl border border-border bg-card overflow-hidden">
+        <Skeleton className="aspect-square w-full" />
+        <div className="p-3 space-y-2">
+          <Skeleton className="h-3 w-1/2" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-3 w-1/3" />
+          <Skeleton className="h-5 w-2/5" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 const Marketplace = () => {
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
   const { t } = useTranslation();
+  const { flashSaleProducts, newArrivals, bestSellers, loading } = useMarketplaceProducts();
 
   const featuresBar = [
     { icon: Truck, label: t.marketplace.fastDelivery, desc: t.marketplace.everywhereGuinea },
@@ -181,6 +40,30 @@ const Marketplace = () => {
     { icon: Clock, label: t.marketplace.support247, desc: t.marketplace.customerSupport },
     { icon: TrendingUp, label: t.marketplace.bestPrices, desc: t.marketplace.guaranteed },
   ];
+
+  const renderProductGrid = (products: Product[], isLoading: boolean) => {
+    if (isLoading) return <ProductGridSkeleton />;
+    if (products.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>Aucun produit disponible pour le moment.</p>
+        </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onAddToCart={() => addItem(product)}
+            onToggleWishlist={() => toggleItem(product)}
+            isInWishlist={isInWishlist(product.id)}
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -251,17 +134,7 @@ const Marketplace = () => {
               </Link>
             </Button>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {flashSaleProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={() => addItem(product)}
-                onToggleWishlist={() => toggleItem(product)}
-                isInWishlist={isInWishlist(product.id)}
-              />
-            ))}
-          </div>
+          {renderProductGrid(flashSaleProducts as Product[], loading)}
         </section>
 
         {/* New Arrivals */}
@@ -274,17 +147,7 @@ const Marketplace = () => {
               </Link>
             </Button>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {newArrivals.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={() => addItem(product)}
-                onToggleWishlist={() => toggleItem(product)}
-                isInWishlist={isInWishlist(product.id)}
-              />
-            ))}
-          </div>
+          {renderProductGrid(newArrivals as Product[], loading)}
         </section>
 
         {/* Category Banner */}
@@ -336,17 +199,7 @@ const Marketplace = () => {
               </Link>
             </Button>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {bestSellers.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={() => addItem(product)}
-                onToggleWishlist={() => toggleItem(product)}
-                isInWishlist={isInWishlist(product.id)}
-              />
-            ))}
-          </div>
+          {renderProductGrid(bestSellers as Product[], loading)}
         </section>
       </main>
 
