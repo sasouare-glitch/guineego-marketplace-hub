@@ -232,22 +232,23 @@ const SellerSettingsPage = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>Méthode de retrait</Label>
-                <Select value={payment.method} onValueChange={(v) => setPayment((s) => ({ ...s, method: v }))}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="orange">Orange Money</SelectItem>
-                    <SelectItem value="mtn">MTN Mobile Money</SelectItem>
-                    <SelectItem value="bank">Virement bancaire</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="withdrawMethod">Méthode de retrait</Label>
+                <select
+                  id="withdrawMethod"
+                  className="flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={payment.method}
+                  onChange={(e) => setPayment((s) => ({ ...s, method: e.target.value }))}
+                >
+                  <option value="orange">Orange Money</option>
+                  <option value="mtn">MTN Mobile Money</option>
+                  <option value="bank">Virement bancaire</option>
+                </select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="withdrawPhone">Numéro de retrait</Label>
                 <Input
                   id="withdrawPhone"
+                  type="tel"
                   placeholder="+224 6XX XX XX XX"
                   value={payment.phone}
                   onChange={(e) => setPayment((s) => ({ ...s, phone: e.target.value }))}
