@@ -22,6 +22,7 @@ import SellerCustomers from "./pages/seller/SellerCustomers";
 import SellerProfilePage from "./pages/seller/SellerProfilePage";
 import SellerSettingsPage from "./pages/seller/SellerSettingsPage";
 import SellerNotificationsPage from "./pages/seller/SellerNotificationsPage";
+import SellerMessagesPage from "./pages/seller/SellerMessagesPage";
 import CourierDashboard from "./pages/courier/CourierDashboard";
 import CourierMissions from "./pages/courier/CourierMissions";
 import CourierMissionDetail from "./pages/courier/CourierMissionDetail";
@@ -260,6 +261,11 @@ const App = () => (
                     <Route path="/seller/notifications" element={
                       <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
                         <SellerNotificationsPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/seller/messages" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerMessagesPage />
                       </ProtectedRoute>
                     } />
                     <Route path="/seller/settings" element={
