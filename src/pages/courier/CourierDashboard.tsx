@@ -1,3 +1,4 @@
+import { WelcomeBanner } from "@/components/onboarding/WelcomeBanner";
 import { CourierLayout } from "@/components/courier/CourierLayout";
 import { CourierStats } from "@/components/courier/CourierStats";
 import { EarningsChart } from "@/components/courier/EarningsChart";
@@ -58,6 +59,15 @@ const CourierDashboard = () => {
   return (
     <CourierLayout>
       <div className="space-y-6">
+        <WelcomeBanner
+          role="courier"
+          title="Bienvenue dans votre espace livreur"
+          description="Activez votre statut en ligne pour recevoir vos premières missions de livraison et commencer à gagner."
+          steps={[
+            { label: "Voir les missions", href: "/courier/missions" },
+            { label: "Mes revenus", href: "/courier/earnings" },
+          ]}
+        />
         {/* Header */}
         <div>
           <h1 className="text-2xl font-display font-bold">Bonjour, Mamadou 👋</h1>
