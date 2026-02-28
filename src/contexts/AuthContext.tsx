@@ -204,7 +204,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [loadUserProfile, loadUserClaims]);
 
   // Inscription par email
-  const signUp = async (email: string, password: string, displayName: string) => {
+  const signUp = async (email: string, password: string, displayName: string, role?: UserRole) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
@@ -214,13 +214,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await firebaseUpdateProfile(user, { displayName });
       
       // Créer le document utilisateur dans Firestore
-      const role = determineUserRole(user.email);
+      const finalRole = role || determineUserRole(user.email);
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
         displayName,
-        role,
-        roles: [role],
+        role: finalRole,
+        roles: [finalRole],
         profile: {
           firstName: displayName.split(' ')[0] || '',
           lastName: displayName.split(' ').slice(1).join(' ') || '',
