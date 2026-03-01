@@ -58,8 +58,8 @@ export interface Withdrawal {
   amount: number;
   fee: number;
   netAmount: number;
-  method: 'orange_money' | 'mtn_money';
-  phone: string;
+  method: 'orange_money' | 'mtn_money' | 'cash';
+  phone?: string;
   status: 'pending' | 'approved' | 'completed' | 'rejected';
   rejectionReason?: string;
   createdAt: Date;
@@ -68,8 +68,8 @@ export interface Withdrawal {
 
 interface WithdrawalRequest {
   amount: number;
-  method: 'orange_money' | 'mtn_money';
-  phone: string;
+  method: 'orange_money' | 'mtn_money' | 'cash';
+  phone?: string;
   note?: string;
 }
 

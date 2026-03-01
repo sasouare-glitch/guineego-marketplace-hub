@@ -231,7 +231,7 @@ export default function SellerFinances() {
                     <RadioGroup
                       value={withdrawalMethod}
                       onValueChange={setWithdrawalMethod}
-                      className="grid grid-cols-2 gap-4"
+                      className="grid grid-cols-3 gap-4"
                     >
                       <div>
                         <RadioGroupItem
@@ -259,6 +259,20 @@ export default function SellerFinances() {
                         >
                           <Smartphone className="mb-2 h-6 w-6 text-[#FFCC00]" />
                           <span className="text-sm font-medium">MTN Money</span>
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem
+                          value="cash"
+                          id="cash"
+                          className="peer sr-only"
+                        />
+                        <Label
+                          htmlFor="cash"
+                          className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                        >
+                          <Wallet className="mb-2 h-6 w-6 text-primary" />
+                          <span className="text-sm font-medium">Cash</span>
                         </Label>
                       </div>
                     </RadioGroup>
