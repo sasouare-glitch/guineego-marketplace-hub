@@ -397,7 +397,7 @@ const ProductDetail = () => {
 
           <TabsContent value="specifications" className="mt-6">
             <div className="grid sm:grid-cols-2 gap-4">
-              {product.specifications.map((spec, index) => (
+              {(Array.isArray(product.specifications) ? product.specifications : Object.entries(product.specifications || {}).map(([label, value]) => ({ label, value: String(value) }))).map((spec, index) => (
                 <div key={index} className="flex justify-between py-2 border-b border-border">
                   <span className="text-muted-foreground">{spec.label}</span>
                   <span className="font-medium">{spec.value}</span>
@@ -408,7 +408,7 @@ const ProductDetail = () => {
 
           <TabsContent value="reviews" className="mt-6">
             <div className="space-y-6">
-              {product.reviews.map((review) => (
+              {(Array.isArray(product.reviews) ? product.reviews : []).map((review) => (
                 <div key={review.id} className="border-b border-border pb-6 last:border-0">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
