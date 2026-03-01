@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
 import { toast } from 'sonner';
-import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { updateDocument, deleteDocument } from '@/lib/firebase/mutations';
 
@@ -94,27 +94,67 @@ export default function AdminSellersPage() {
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const userDocs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as SellerUser));
 
-      // Enrich with seller profile data from 'sellers' collection
+      // Enrich with real Firestore data: seller_settings, sellers, products count, orders revenue
       const enriched = await Promise.all(userDocs.map(async (user) => {
+        const sellerId = user.ecomId || user.id;
+        let shopName = '';
+        let category = '';
+        let avgRating = 0;
+        let statusFromSeller = '';
+
+        // 1. Try seller_settings for shop name
         try {
-          const sellerDoc = await getDoc(doc(db, 'sellers', user.id));
-          if (sellerDoc.exists()) {
-            const sd = sellerDoc.data();
-            user.sellerStats = {
-              shopName: sd.shopName,
-              totalProducts: sd.stats?.totalProducts || 0,
-              totalOrders: sd.stats?.totalOrders || 0,
-              totalRevenue: sd.stats?.totalRevenue || 0,
-              avgRating: sd.stats?.avgRating || 0,
-              category: sd.category,
-            };
-            // Use seller status if available
-            if (sd.status) user.status = sd.status;
+          const settingsSnap = await getDoc(doc(db, 'seller_settings', sellerId));
+          if (settingsSnap.exists()) {
+            const name = settingsSnap.data()?.storeInfo?.name;
+            if (name) shopName = name;
           }
-        } catch (e) {
-          // Seller profile may not exist yet
-        }
-        // Default status
+        } catch {}
+
+        // 2. Fallback to sellers collection
+        try {
+          const sellerSnap = await getDoc(doc(db, 'sellers', sellerId));
+          if (sellerSnap.exists()) {
+            const sd = sellerSnap.data();
+            if (!shopName) shopName = sd.storeName || sd.shopName || sd.businessName || '';
+            avgRating = sd.stats?.avgRating || sd.avgRating || 0;
+            category = sd.category || '';
+            if (sd.status) statusFromSeller = sd.status;
+          }
+        } catch {}
+
+        // 3. Count real products from products collection
+        let totalProducts = 0;
+        try {
+          const prodQuery = query(collection(db, 'products'), where('sellerId', '==', sellerId));
+          const prodSnap = await getDocs(prodQuery);
+          totalProducts = prodSnap.size;
+        } catch {}
+
+        // 4. Sum revenue from orders collection
+        let totalRevenue = 0;
+        let totalOrders = 0;
+        try {
+          const ordersQuery = query(collection(db, 'orders'), where('sellerId', '==', sellerId));
+          const ordersSnap = await getDocs(ordersQuery);
+          totalOrders = ordersSnap.size;
+          ordersSnap.docs.forEach(d => {
+            const data = d.data();
+            if (data.status !== 'cancelled') {
+              totalRevenue += data.total || data.totalAmount || 0;
+            }
+          });
+        } catch {}
+
+        user.sellerStats = {
+          shopName: shopName || undefined,
+          totalProducts,
+          totalOrders,
+          totalRevenue,
+          avgRating,
+          category,
+        };
+        if (statusFromSeller) user.status = statusFromSeller as any;
         if (!user.status) user.status = 'active';
         return user;
       }));
