@@ -25,14 +25,9 @@ interface SearchFiltersProps {
   onClearFilters: () => void;
 }
 
-const categories = [
-  { id: "electronics", label: "Électronique", count: 234 },
-  { id: "fashion", label: "Mode & Vêtements", count: 456 },
-  { id: "home", label: "Maison & Jardin", count: 189 },
-  { id: "beauty", label: "Beauté & Santé", count: 167 },
-  { id: "sports", label: "Sports & Loisirs", count: 98 },
-  { id: "auto", label: "Auto & Moto", count: 76 },
-];
+import { CATEGORIES } from "@/constants/categories";
+
+const categories = CATEGORIES.map((c) => ({ id: c.id, label: c.label }));
 
 const sellers = [
   { id: "techshop", label: "TechShop GN", count: 45 },
@@ -124,7 +119,7 @@ export const SearchFilters = ({ filters, onFiltersChange, onClearFilters }: Sear
                   {category.label}
                 </label>
               </div>
-              <span className="text-xs text-muted-foreground">({category.count})</span>
+              
             </div>
           ))}
         </CollapsibleContent>
