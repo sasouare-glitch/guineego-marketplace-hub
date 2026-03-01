@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Heart, 
   Share2, 
@@ -19,89 +20,45 @@ import {
   ChevronLeft,
   ChevronRight,
   Store,
-  MessageCircle
+  MessageCircle,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useProductDetail } from "@/hooks/useProductDetail";
 import { toast } from "sonner";
-
-// Mock product data
-const product = {
-  id: "1",
-  name: "iPhone 13 Pro Max 256GB - Graphite",
-  price: 8500000,
-  originalPrice: 11000000,
-  discount: 23,
-  images: [
-    "https://images.unsplash.com/photo-1632661674596-df8be59a8a35?w=800",
-    "https://images.unsplash.com/photo-1591337676887-a217a6970a8a?w=800",
-    "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=800",
-    "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=800",
-  ],
-  rating: 4.8,
-  reviewCount: 234,
-  seller: {
-    name: "TechShop GN",
-    rating: 4.9,
-    productCount: 156,
-    responseTime: "< 1 heure",
-  },
-  category: "Électronique",
-  inStock: true,
-  stockCount: 12,
-  isBestSeller: true,
-  colors: [
-    { id: "graphite", name: "Graphite", hex: "#1c1c1e" },
-    { id: "gold", name: "Or", hex: "#fad7a0" },
-    { id: "silver", name: "Argent", hex: "#e5e5e5" },
-    { id: "blue", name: "Bleu Sierra", hex: "#6699cc" },
-  ],
-  storage: ["128GB", "256GB", "512GB", "1TB"],
-  description: `L'iPhone 13 Pro Max est le smartphone le plus puissant d'Apple. Équipé de la puce A15 Bionic, il offre des performances exceptionnelles pour tous vos usages.
-
-Caractéristiques principales :
-• Écran Super Retina XDR 6,7 pouces avec ProMotion 120Hz
-• Système de caméra pro avec téléobjectif 3x
-• Mode Cinématique pour des vidéos professionnelles
-• Autonomie jusqu'à 28 heures de lecture vidéo
-• 5G ultra-rapide pour téléchargements et streaming`,
-  specifications: [
-    { label: "Écran", value: "6,7 pouces Super Retina XDR" },
-    { label: "Processeur", value: "A15 Bionic" },
-    { label: "RAM", value: "6 Go" },
-    { label: "Stockage", value: "256 Go" },
-    { label: "Caméra arrière", value: "Triple 12MP" },
-    { label: "Caméra avant", value: "12MP TrueDepth" },
-    { label: "Batterie", value: "4352 mAh" },
-    { label: "5G", value: "Oui" },
-    { label: "Face ID", value: "Oui" },
-    { label: "Résistance eau", value: "IP68" },
-  ],
-  reviews: [
-    { id: 1, author: "Mamadou D.", rating: 5, date: "Il y a 2 jours", comment: "Excellent téléphone, livraison rapide. Je recommande vivement TechShop GN !" },
-    { id: 2, author: "Fatoumata B.", rating: 4, date: "Il y a 1 semaine", comment: "Très bon produit, conforme à la description. Juste un peu cher mais qualité au rendez-vous." },
-    { id: 3, author: "Ibrahim S.", rating: 5, date: "Il y a 2 semaines", comment: "La qualité Apple au meilleur prix en Guinée. Merci GuineeGo !" },
-  ],
-};
 
 const ProductDetail = () => {
   const { id } = useParams();
   const { addItem } = useCart();
   const { t } = useTranslation();
+  const { product, loading } = useProductDetail(id);
   
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState(product.colors[0].id);
-  const [selectedStorage, setSelectedStorage] = useState(product.storage[1]);
+  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedStorage, setSelectedStorage] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+
+  // Set defaults when product loads
+  const colors = product?.colors || [];
+  const storage = product?.storage || [];
+  if (product && !selectedColor && colors.length > 0) {
+    // will set on next render
+  }
+  if (product && !selectedStorage && storage.length > 0) {
+    // will set on next render
+  }
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('fr-GN') + ' GNF';
   };
 
   const handleAddToCart = () => {
-    const variant = `${product.colors.find(c => c.id === selectedColor)?.name}, ${selectedStorage}`;
+    if (!product) return;
+    const colorName = colors.find(c => c.id === selectedColor)?.name;
+    const variant = [colorName, selectedStorage].filter(Boolean).join(', ') || undefined;
     addItem({
       id: product.id,
       name: product.name,
@@ -119,6 +76,44 @@ const ProductDetail = () => {
     navigator.clipboard.writeText(window.location.href);
     toast.success(t.common.linkCopied);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container-tight py-6">
+          <div className="grid lg:grid-cols-2 gap-8">
+            <Skeleton className="aspect-square rounded-2xl" />
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-3/4" />
+              <Skeleton className="h-6 w-1/2" />
+              <Skeleton className="h-12 w-1/3" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container-tight py-20 text-center">
+          <h1 className="text-2xl font-bold mb-4">Produit introuvable</h1>
+          <Link to="/marketplace">
+            <Button>Retour au marketplace</Button>
+          </Link>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const effectiveColor = selectedColor || (colors[0]?.id ?? '');
+  const effectiveStorage = selectedStorage || (storage[0] ?? '');
 
   return (
     <div className="min-h-screen bg-background">
@@ -230,18 +225,19 @@ const ProductDetail = () => {
             </div>
 
             {/* Color Selection */}
+            {colors.length > 0 && (
             <div>
               <p className="font-medium mb-3">
-                {t.product.color}: <span className="text-muted-foreground">{product.colors.find(c => c.id === selectedColor)?.name}</span>
+                {t.product.color}: <span className="text-muted-foreground">{colors.find(c => c.id === effectiveColor)?.name}</span>
               </p>
               <div className="flex gap-2">
-                {product.colors.map((color) => (
+                {colors.map((color) => (
                   <button
                     key={color.id}
                     onClick={() => setSelectedColor(color.id)}
                     className={cn(
                       "w-10 h-10 rounded-full border-2 transition-all",
-                      selectedColor === color.id ? "border-primary ring-2 ring-primary/20" : "border-border"
+                      effectiveColor === color.id ? "border-primary ring-2 ring-primary/20" : "border-border"
                     )}
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
@@ -249,15 +245,17 @@ const ProductDetail = () => {
                 ))}
               </div>
             </div>
+            )}
 
             {/* Storage Selection */}
+            {storage.length > 0 && (
             <div>
               <p className="font-medium mb-3">{t.product.storage}</p>
               <div className="flex flex-wrap gap-2">
-                {product.storage.map((size) => (
+                {storage.map((size) => (
                   <Button
                     key={size}
-                    variant={selectedStorage === size ? "default" : "outline"}
+                    variant={effectiveStorage === size ? "default" : "outline"}
                     onClick={() => setSelectedStorage(size)}
                   >
                     {size}
@@ -265,6 +263,7 @@ const ProductDetail = () => {
                 ))}
               </div>
             </div>
+            )}
 
             {/* Quantity */}
             <div>
