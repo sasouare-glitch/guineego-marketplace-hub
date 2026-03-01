@@ -50,6 +50,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useSellerProducts, type SellerProduct } from "@/hooks/useSellerProducts";
 import { AddProductDialog } from "@/components/seller/AddProductDialog";
+import { EditProductDialog } from "@/components/seller/EditProductDialog";
 import { EditStockDialog } from "@/components/seller/EditStockDialog";
 
 const statusConfig = {
@@ -72,7 +73,7 @@ const formatPrice = (price: number) => {
 };
 
 export default function SellerProducts() {
-  const { products, loading, addProduct, updateProductStatus, updateStock, deleteProduct } = useSellerProducts();
+  const { products, loading, addProduct, updateProductStatus, updateStock, updateProduct, deleteProduct } = useSellerProducts();
   
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [searchQuery, setSearchQuery] = useState("");
@@ -80,6 +81,7 @@ export default function SellerProducts() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [stockDialog, setStockDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
+  const [editDialog, setEditDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
 
   const filteredProducts = products.filter((product) => {
@@ -313,6 +315,13 @@ export default function SellerProducts() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
                                 className="flex items-center gap-2"
+                                onClick={() => setEditDialog({ open: true, product })}
+                              >
+                                <Edit2 className="w-4 h-4" />
+                                Modifier
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="flex items-center gap-2"
                                 onClick={() => setStockDialog({ open: true, product })}
                               >
                                 <BarChart3 className="w-4 h-4" />
@@ -438,6 +447,13 @@ export default function SellerProducts() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             className="flex items-center gap-2"
+                            onClick={() => setEditDialog({ open: true, product })}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                            Modifier
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="flex items-center gap-2"
                             onClick={() => setStockDialog({ open: true, product })}
                           >
                             <BarChart3 className="w-4 h-4" />
@@ -487,6 +503,16 @@ export default function SellerProducts() {
         onOpenChange={setAddDialogOpen}
         onSubmit={addProduct}
       />
+
+      {/* Edit Product Dialog */}
+      {editDialog.product && (
+        <EditProductDialog
+          open={editDialog.open}
+          onOpenChange={(open) => setEditDialog({ open, product: open ? editDialog.product : null })}
+          product={editDialog.product}
+          onSubmit={updateProduct}
+        />
+      )}
 
       {/* Edit Stock Dialog */}
       {stockDialog.product && (
