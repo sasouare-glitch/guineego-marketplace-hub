@@ -2,7 +2,7 @@
  * Admin Products Page - Product Catalog Management (Firestore)
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,8 +29,12 @@ import {
 } from '@/components/ui/select';
 import { 
   Search, MoreHorizontal, Filter, Eye, Package, 
-  CheckCircle, XCircle, AlertTriangle, Star, Edit, Trash2, Power, StarOff, Loader2
+  CheckCircle, XCircle, AlertTriangle, Star, Edit, Trash2, Power, StarOff, Loader2,
+  ImagePlus, X, Upload
 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
+import { uploadProductImage } from '@/lib/firebase/storage';
 import { CATEGORY_NAMES } from '@/constants/categories';
 import { EditProductDialog } from '@/components/seller/EditProductDialog';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -74,7 +78,11 @@ export default function AdminProductsPage() {
   const [editDialog, setEditDialog] = useState<{ open: boolean; product: Product | null }>({ open: false, product: null });
   const [saving, setSaving] = useState(false);
   const [addDialog, setAddDialog] = useState(false);
-  const [addForm, setAddForm] = useState({ name: '', price: '', category: '', description: '', stock: '' });
+  const [addForm, setAddForm] = useState({ name: '', price: '', category: '', description: '', stock: '', tags: '' });
+  const [addImages, setAddImages] = useState<{ file: File; preview: string }[]>([]);
+  const [addUploading, setAddUploading] = useState(false);
+  const [addUploadProgress, setAddUploadProgress] = useState(0);
+  const addFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddProduct = async () => {
     if (!addForm.name || !addForm.price || !addForm.category) {
@@ -84,18 +92,19 @@ export default function AdminProductsPage() {
     setSaving(true);
     try {
       const { addDocument } = await import('@/lib/firebase/mutations');
-      await addDocument('products', {
+      // First create the product to get an ID
+      const docRef = await addDocument('products', {
         name: addForm.name,
         description: addForm.description || '',
         category: addForm.category,
         basePrice: Number(addForm.price),
         price: Number(addForm.price),
-        images: [],
-        thumbnail: '',
+        images: ['/placeholder.svg'],
+        thumbnail: '/placeholder.svg',
         variants: [{ sku: 'DEFAULT', name: 'Standard', price: Number(addForm.price), stock: Number(addForm.stock) || 0 }],
         totalStock: Number(addForm.stock) || 0,
         sellerId: 'admin',
-        tags: [],
+        tags: addForm.tags ? addForm.tags.split(',').map(s => s.trim()) : [],
         specifications: {},
         avgRating: 0,
         totalReviews: 0,
@@ -103,13 +112,42 @@ export default function AdminProductsPage() {
         status: 'active',
         featured: false,
       });
+
+      // Upload images if any
+      if (addImages.length > 0 && docRef) {
+        setAddUploading(true);
+        setAddUploadProgress(0);
+        const productId = typeof docRef === 'string' ? docRef : (docRef as any).id || 'unknown';
+        const uploadedUrls: string[] = [];
+        for (let i = 0; i < addImages.length; i++) {
+          try {
+            const result = await uploadProductImage(
+              addImages[i].file, productId, i,
+              (p) => setAddUploadProgress(((i + p / 100) / addImages.length) * 100)
+            );
+            uploadedUrls.push(result.url);
+          } catch { /* skip failed */ }
+        }
+        if (uploadedUrls.length > 0) {
+          await updateDocument('products', productId, {
+            images: uploadedUrls,
+            thumbnail: uploadedUrls[0],
+          });
+        }
+        setAddUploading(false);
+      }
+
       toast.success('Produit ajouté avec succès');
       setAddDialog(false);
-      setAddForm({ name: '', price: '', category: '', description: '', stock: '' });
+      setAddForm({ name: '', price: '', category: '', description: '', stock: '', tags: '' });
+      addImages.forEach(img => URL.revokeObjectURL(img.preview));
+      setAddImages([]);
     } catch (err) {
       toast.error('Erreur lors de l\'ajout du produit');
     } finally {
       setSaving(false);
+      setAddUploading(false);
+      setAddUploadProgress(0);
     }
   };
 
@@ -405,8 +443,8 @@ export default function AdminProductsPage() {
       )}
 
       {/* Add Product Dialog */}
-      <Dialog open={addDialog} onOpenChange={setAddDialog}>
-        <DialogContent>
+      <Dialog open={addDialog} onOpenChange={(open) => { setAddDialog(open); if (!open) { addImages.forEach(img => URL.revokeObjectURL(img.preview)); setAddImages([]); } }}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Ajouter un produit</DialogTitle>
             <DialogDescription>Créez un nouveau produit dans le catalogue</DialogDescription>
@@ -418,37 +456,97 @@ export default function AdminProductsPage() {
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
-              <Input value={addForm.description} onChange={(e) => setAddForm(prev => ({ ...prev, description: e.target.value }))} placeholder="Description du produit" />
+              <Textarea value={addForm.description} onChange={(e) => setAddForm(prev => ({ ...prev, description: e.target.value }))} placeholder="Description du produit" rows={3} />
             </div>
             <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Catégorie *</Label>
+                <Select value={addForm.category} onValueChange={(v) => setAddForm(prev => ({ ...prev, category: v }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisir..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORY_NAMES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label>Prix (GNF) *</Label>
                 <Input type="number" value={addForm.price} onChange={(e) => setAddForm(prev => ({ ...prev, price: e.target.value }))} placeholder="0" />
               </div>
-              <div className="space-y-2">
-                <Label>Stock initial</Label>
-                <Input type="number" value={addForm.stock} onChange={(e) => setAddForm(prev => ({ ...prev, stock: e.target.value }))} placeholder="0" />
-              </div>
             </div>
             <div className="space-y-2">
-              <Label>Catégorie *</Label>
-              <Select value={addForm.category} onValueChange={(v) => setAddForm(prev => ({ ...prev, category: v }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORY_NAMES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Stock initial</Label>
+              <Input type="number" value={addForm.stock} onChange={(e) => setAddForm(prev => ({ ...prev, stock: e.target.value }))} placeholder="0" />
+            </div>
+
+            {/* Images */}
+            <div className="space-y-2">
+              <Label>Images du produit (max 5)</Label>
+              <div className="grid grid-cols-5 gap-2">
+                {addImages.map((img, idx) => (
+                  <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-border group">
+                    <img src={img.preview} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setAddImages(prev => { URL.revokeObjectURL(prev[idx].preview); return prev.filter((_, i) => i !== idx); })}
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+                {addImages.length < 5 && (
+                  <button
+                    type="button"
+                    onClick={() => addFileInputRef.current?.click()}
+                    className="aspect-square rounded-lg border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center gap-1 hover:border-primary/50 hover:bg-accent/50 transition-colors cursor-pointer"
+                  >
+                    <ImagePlus className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-[10px] text-muted-foreground">Ajouter</span>
+                  </button>
+                )}
+              </div>
+              <input
+                ref={addFileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  if (addImages.length + files.length > 5) return;
+                  setAddImages(prev => [...prev, ...files.map(f => ({ file: f, preview: URL.createObjectURL(f) }))]);
+                  if (addFileInputRef.current) addFileInputRef.current.value = '';
+                }}
+              />
+            </div>
+
+            {addUploading && (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Upload className="w-4 h-4 animate-pulse" />
+                  <span>Upload des images...</span>
+                </div>
+                <Progress value={addUploadProgress} className="h-2" />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Tags (séparés par des virgules)</Label>
+              <Input value={addForm.tags} onChange={(e) => setAddForm(prev => ({ ...prev, tags: e.target.value }))} placeholder="promo, nouveau, tendance" />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddDialog(false)}>Annuler</Button>
-            <Button onClick={handleAddProduct} disabled={saving}>
-              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Ajouter
+            <Button onClick={handleAddProduct} disabled={saving || addUploading}>
+              {addUploading ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upload...</>
+              ) : saving ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Ajout...</>
+              ) : 'Ajouter'}
             </Button>
           </DialogFooter>
         </DialogContent>
