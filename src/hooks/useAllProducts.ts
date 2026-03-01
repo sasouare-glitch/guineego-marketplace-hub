@@ -58,6 +58,8 @@ export function useAllProducts() {
   useEffect(() => {
     const q = query(collection(db, 'products'), where('status', '==', 'active'));
     const unsub = onSnapshot(q, async (snap) => {
+      // Clear cache on each snapshot so seller name changes propagate
+      storeNameCache.clear();
       const raw = snap.docs.map(mapDocBasic);
       // Resolve store names for products that don't already have sellerName
       const enriched = await Promise.all(
