@@ -21,12 +21,7 @@ import {
 import { ImagePlus, X, Upload, Loader2 } from "lucide-react";
 import { uploadProductImage } from "@/lib/firebase/storage";
 import type { NewProductData } from "@/hooks/useSellerProducts";
-
-const CATEGORIES = [
-  "Téléphones", "Ordinateurs", "Tablettes", "Accessoires",
-  "Mode", "Maison", "Beauté", "Alimentation",
-  "Électroménager", "Sports", "Autres",
-];
+import { CATEGORY_NAMES } from "@/constants/categories";
 
 interface ImagePreview {
   file: File;
@@ -170,7 +165,7 @@ export function AddProductDialog({ open, onOpenChange, onSubmit }: AddProductDia
                   <SelectValue placeholder="Choisir..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {CATEGORIES.map((cat) => (
+                  {CATEGORY_NAMES.map((cat) => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>

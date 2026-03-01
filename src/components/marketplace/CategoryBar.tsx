@@ -1,21 +1,9 @@
 import { useRef } from "react";
-import { ChevronLeft, ChevronRight, Smartphone, Shirt, Home, Sparkles, Dumbbell, Car, Gift, Baby, Book, Utensils } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
-const categories = [
-  { id: "electronics", label: "Électronique", icon: Smartphone },
-  { id: "fashion", label: "Mode", icon: Shirt },
-  { id: "home", label: "Maison", icon: Home },
-  { id: "beauty", label: "Beauté", icon: Sparkles },
-  { id: "sports", label: "Sports", icon: Dumbbell },
-  { id: "auto", label: "Auto", icon: Car },
-  { id: "gifts", label: "Cadeaux", icon: Gift },
-  { id: "kids", label: "Enfants", icon: Baby },
-  { id: "books", label: "Livres", icon: Book },
-  { id: "food", label: "Alimentation", icon: Utensils },
-];
+import { CATEGORIES } from "@/constants/categories";
 
 interface CategoryBarProps {
   activeCategory?: string;
@@ -38,7 +26,6 @@ export const CategoryBar = ({ activeCategory }: CategoryBarProps) => {
     <div className="relative bg-card border-b border-border">
       <div className="container-tight">
         <div className="relative flex items-center">
-          {/* Left Arrow */}
           <Button
             variant="ghost"
             size="icon"
@@ -48,13 +35,12 @@ export const CategoryBar = ({ activeCategory }: CategoryBarProps) => {
             <ChevronLeft className="w-5 h-5" />
           </Button>
 
-          {/* Categories */}
           <div
             ref={scrollRef}
             className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-2 px-2 sm:px-10"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {categories.map((category) => {
+            {CATEGORIES.map((category) => {
               const Icon = category.icon;
               const isActive = activeCategory === category.id;
 
@@ -77,7 +63,6 @@ export const CategoryBar = ({ activeCategory }: CategoryBarProps) => {
             })}
           </div>
 
-          {/* Right Arrow */}
           <Button
             variant="ghost"
             size="icon"
