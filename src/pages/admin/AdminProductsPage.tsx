@@ -24,10 +24,15 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { 
   Search, MoreHorizontal, Filter, Eye, Package, 
   CheckCircle, XCircle, AlertTriangle, Star, Edit, Trash2, Power, StarOff, Loader2
 } from 'lucide-react';
+import { CATEGORY_NAMES } from '@/constants/categories';
+import { EditProductDialog } from '@/components/seller/EditProductDialog';
 import { useCurrency } from '@/hooks/useCurrency';
 import { toast } from 'sonner';
 import { useRealtimeCollection } from '@/lib/firebase/queries';
@@ -67,7 +72,6 @@ export default function AdminProductsPage() {
   // Dialog states
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
   const [editDialog, setEditDialog] = useState<{ open: boolean; product: Product | null }>({ open: false, product: null });
-  const [editForm, setEditForm] = useState({ name: '', price: '', category: '' });
   const [saving, setSaving] = useState(false);
   const [addDialog, setAddDialog] = useState(false);
   const [addForm, setAddForm] = useState({ name: '', price: '', category: '', description: '', stock: '' });
@@ -170,26 +174,13 @@ export default function AdminProductsPage() {
   };
 
   const handleEdit = (product: Product) => {
-    setEditForm({ name: product.name, price: String(product.price), category: product.category });
     setEditDialog({ open: true, product });
   };
 
-  const handleSaveEdit = async () => {
-    if (!editDialog.product) return;
-    setSaving(true);
-    try {
-      await updateDocument('products', editDialog.product.id, {
-        name: editForm.name,
-        price: Number(editForm.price),
-        category: editForm.category,
-      });
-      toast.success('Produit modifié avec succès');
-      setEditDialog({ open: false, product: null });
-    } catch (err) {
-      toast.error('Erreur lors de la modification');
-    } finally {
-      setSaving(false);
-    }
+  const handleSaveEdit = async (productId: string, data: Record<string, any>) => {
+    await updateDocument('products', productId, data);
+    toast.success('Produit modifié avec succès');
+    setEditDialog({ open: false, product: null });
   };
 
   return (
@@ -403,36 +394,15 @@ export default function AdminProductsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Edit Dialog */}
-      <Dialog open={editDialog.open} onOpenChange={(open) => setEditDialog(prev => ({ ...prev, open }))}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Modifier le produit</DialogTitle>
-            <DialogDescription>Modifiez les informations du produit "{editDialog.product?.name}"</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Nom du produit</Label>
-              <Input value={editForm.name} onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Prix (GNF)</Label>
-              <Input type="number" value={editForm.price} onChange={(e) => setEditForm(prev => ({ ...prev, price: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Catégorie</Label>
-              <Input value={editForm.category} onChange={(e) => setEditForm(prev => ({ ...prev, category: e.target.value }))} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialog({ open: false, product: null })}>Annuler</Button>
-            <Button onClick={handleSaveEdit} disabled={saving}>
-              {saving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-              Enregistrer
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Edit Dialog with images & categories */}
+      {editDialog.product && (
+        <EditProductDialog
+          open={editDialog.open}
+          onOpenChange={(open) => setEditDialog(prev => ({ ...prev, open }))}
+          product={editDialog.product as any}
+          onSubmit={handleSaveEdit}
+        />
+      )}
 
       {/* Add Product Dialog */}
       <Dialog open={addDialog} onOpenChange={setAddDialog}>
@@ -462,7 +432,16 @@ export default function AdminProductsPage() {
             </div>
             <div className="space-y-2">
               <Label>Catégorie *</Label>
-              <Input value={addForm.category} onChange={(e) => setAddForm(prev => ({ ...prev, category: e.target.value }))} placeholder="Ex: Électronique" />
+              <Select value={addForm.category} onValueChange={(v) => setAddForm(prev => ({ ...prev, category: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORY_NAMES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
