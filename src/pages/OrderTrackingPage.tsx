@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Copy, Check, RefreshCw, XCircle } from "lucide-react";
+import { ArrowLeft, Copy, Check, RefreshCw, XCircle, Loader2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -12,48 +12,15 @@ import { OrderStatusCard } from "@/components/orders/OrderStatusCard";
 import { OrderItemsList } from "@/components/orders/OrderItemsList";
 import { CancelOrderDialog } from "@/components/orders/CancelOrderDialog";
 import { toast } from "sonner";
+import { useRealtimeOrder } from "@/hooks/useRealtimeOrder";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Mock order data
-const mockOrder = {
-  id: "GGO-12345678",
-  status: "picked" as const,
-  createdAt: "2024-01-15T10:30:00",
-  estimatedDelivery: "14:00 - 16:00",
-  address: {
-    name: "Mamadou Diallo",
-    street: "Quartier Almamya, Rue KA-020",
-    commune: "Kaloum",
-    city: "Conakry",
-    phone: "+224 622 123 456",
-  },
-  courier: {
-    name: "Ibrahima Sow",
-    phone: "+224 628 987 654",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100",
-    rating: 4.8,
-  },
-  currentLocation: "Marché Madina",
-  items: [
-    {
-      id: "1",
-      name: "iPhone 15 Pro Max",
-      quantity: 1,
-      price: 18500000,
-      image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=200",
-      variant: "256 Go - Noir",
-    },
-    {
-      id: "2",
-      name: "Coque de protection",
-      quantity: 2,
-      price: 150000,
-      image: "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=200",
-    },
-  ],
-  subtotal: 18800000,
-  deliveryFee: 25000,
-  total: 18825000,
-  paymentMethod: "Orange Money",
+const paymentMethodLabels: Record<string, string> = {
+  orange_money: "Orange Money",
+  mtn_money: "MTN Money",
+  card: "Carte bancaire",
+  wallet: "Portefeuille",
+  cash: "Espèces",
 };
 
 export default function OrderTrackingPage() {
@@ -62,13 +29,12 @@ export default function OrderTrackingPage() {
   const [copied, setCopied] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [orderStatus, setOrderStatus] = useState<"pending" | "preparing" | "picked" | "transit" | "delivered" | "cancelled">(mockOrder.status);
   const [isCancelling, setIsCancelling] = useState(false);
 
-  const orderId = id || mockOrder.id;
+  const orderId = id || "";
+  const { order, loading, error, currentStatus, canCancel } = useRealtimeOrder(orderId);
 
-  // Check if order can be cancelled (not delivered or already cancelled)
-  const canCancel = !["delivered", "cancelled"].includes(orderStatus);
+  const orderStatus = currentStatus || "pending";
 
   const copyOrderId = () => {
     navigator.clipboard.writeText(orderId);
@@ -79,7 +45,6 @@ export default function OrderTrackingPage() {
 
   const refreshStatus = async () => {
     setIsRefreshing(true);
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setLastUpdate(new Date());
     setIsRefreshing(false);
@@ -88,16 +53,13 @@ export default function OrderTrackingPage() {
 
   const handleCancelOrder = async (reason: string) => {
     setIsCancelling(true);
-    // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    setOrderStatus("cancelled");
     setIsCancelling(false);
     toast.success("Commande annulée", {
       description: "Le remboursement sera effectué sous 24-48h",
     });
   };
 
-  // Auto-refresh every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setLastUpdate(new Date());
@@ -105,13 +67,49 @@ export default function OrderTrackingPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("fr-FR", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+  const formatDate = (date: any) => {
+    if (!date) return "—";
+    const d = date?.toDate ? date.toDate() : new Date(date);
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
   };
+
+  const items = (order?.items || []).map((item, i) => ({
+    id: item.productId || String(i),
+    name: item.name,
+    quantity: item.quantity,
+    price: item.price,
+    image: item.thumbnail || "/placeholder.svg",
+    variant: item.variantSku || undefined,
+  }));
+
+  const pricing = order?.pricing;
+  const address = order?.shippingAddress;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container-tight pt-24 pb-16 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </main>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container-tight pt-24 pb-16 text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">Commande introuvable</h1>
+          <p className="text-muted-foreground mb-6">La commande {orderId} n'existe pas.</p>
+          <Link to="/marketplace">
+            <Button>Retour au marketplace</Button>
+          </Link>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -191,9 +189,9 @@ export default function OrderTrackingPage() {
             {orderStatus !== "cancelled" && (
               <OrderStatusCard
                 status={orderStatus as "preparing" | "picked" | "transit" | "delivered"}
-                estimatedTime={mockOrder.estimatedDelivery}
-                courier={mockOrder.courier}
-                currentLocation={mockOrder.currentLocation}
+                estimatedTime="—"
+                courier={undefined as any}
+                currentLocation="—"
               />
             )}
 
@@ -214,12 +212,12 @@ export default function OrderTrackingPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
-                  <p className="font-medium text-foreground">{mockOrder.address.name}</p>
-                  <p className="text-muted-foreground">{mockOrder.address.street}</p>
+                  <p className="font-medium text-foreground">{address?.fullName || "—"}</p>
+                  <p className="text-muted-foreground">{address?.address || "—"}</p>
                   <p className="text-muted-foreground">
-                    {mockOrder.address.commune}, {mockOrder.address.city}
+                    {address?.commune || "—"}, {address?.quartier || ""}
                   </p>
-                  <p className="text-muted-foreground">{mockOrder.address.phone}</p>
+                  <p className="text-muted-foreground">{address?.phone || "—"}</p>
                 </div>
               </CardContent>
             </Card>
@@ -229,10 +227,10 @@ export default function OrderTrackingPage() {
           <div className="space-y-6">
             {/* Order Items */}
             <OrderItemsList
-              items={mockOrder.items}
-              subtotal={mockOrder.subtotal}
-              deliveryFee={mockOrder.deliveryFee}
-              total={mockOrder.total}
+              items={items}
+              subtotal={pricing?.subtotal || 0}
+              deliveryFee={pricing?.shippingFee || 0}
+              total={pricing?.total || 0}
             />
 
             {/* Order Info */}
@@ -243,15 +241,17 @@ export default function OrderTrackingPage() {
               <CardContent className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Date de commande</span>
-                  <span className="text-foreground">{formatDate(mockOrder.createdAt)}</span>
+                  <span className="text-foreground">{formatDate(order.createdAt)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Paiement</span>
-                  <span className="text-foreground">{mockOrder.paymentMethod}</span>
+                  <span className="text-foreground">{paymentMethodLabels[order.paymentMethod] || order.paymentMethod}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Livraison estimée</span>
-                  <span className="text-foreground">{mockOrder.estimatedDelivery}</span>
+                  <span className="text-muted-foreground">Statut paiement</span>
+                  <Badge variant={order.paymentStatus === 'paid' ? 'default' : 'secondary'}>
+                    {order.paymentStatus === 'paid' ? 'Payé' : 'En attente'}
+                  </Badge>
                 </div>
               </CardContent>
             </Card>
@@ -266,7 +266,6 @@ export default function OrderTrackingPage() {
                   Contacter le support
                 </Button>
                 
-                {/* Cancel Order */}
                 {canCancel && (
                   <CancelOrderDialog
                     orderNumber={orderId}
