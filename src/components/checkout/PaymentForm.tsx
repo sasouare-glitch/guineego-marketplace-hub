@@ -10,7 +10,7 @@ interface PaymentMethod {
   id: string;
   name: string;
   icon: string;
-  type: "mobile" | "card" | "wallet";
+  type: "mobile" | "card" | "wallet" | "cash";
   descriptionKey: string;
   fees?: string;
 }
@@ -48,6 +48,14 @@ const paymentMethods: PaymentMethod[] = [
     fees: "balance"
   },
   {
+    id: "cash",
+    name: "Cash à la livraison",
+    icon: "💵",
+    type: "cash",
+    descriptionKey: "cash",
+    fees: "free"
+  },
+  {
     id: "card",
     name: "Visa / Mastercard",
     icon: "💳",
@@ -70,6 +78,7 @@ export const PaymentForm = ({
     if (method.id === "orange_money") return "Orange Money";
     if (method.id === "mtn_money") return "MTN Mobile Money";
     if (method.id === "wallet") return t.checkout.yourBalance;
+    if (method.id === "cash") return "Payez en espèces à la réception";
     return "Visa, Mastercard";
   };
 
@@ -209,6 +218,30 @@ export const PaymentForm = ({
               </div>
             </div>
             <Check className="w-6 h-6 text-guinea-green" />
+          </div>
+        </motion.div>
+      )}
+
+      {/* Cash Info */}
+      {selectedPayment && selectedPayment.type === "cash" && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          className="bg-primary/5 border border-primary/20 rounded-2xl p-6"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-2xl">
+              💵
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Paiement à la livraison</h3>
+              <p className="text-sm text-muted-foreground">Payez en espèces au livreur</p>
+            </div>
+          </div>
+          <div className="bg-muted/50 rounded-xl p-4 text-sm text-muted-foreground space-y-1">
+            <p>• Préparez le montant exact si possible</p>
+            <p>• Le livreur vous remettra un reçu</p>
+            <p>• Vérifiez votre commande avant de payer</p>
           </div>
         </motion.div>
       )}

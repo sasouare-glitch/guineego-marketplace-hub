@@ -37,6 +37,7 @@ export default function CheckoutPage() {
       if (selectedPayment === "orange_money" || selectedPayment === "mtn_money") {
         return phoneNumber.length >= 9;
       }
+      if (selectedPayment === "cash") return true;
       return true;
     }
     return true;
