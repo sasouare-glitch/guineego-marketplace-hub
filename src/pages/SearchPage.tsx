@@ -43,8 +43,8 @@ const SearchPage = () => {
 
   const filteredProducts = useMemo(() => {
     let result = allProducts.filter((product) => {
-      // Search term
-      if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+      // Search term (ignore if less than 2 chars)
+      if (searchTerm.length >= 2 && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
         return false;
       }
 
