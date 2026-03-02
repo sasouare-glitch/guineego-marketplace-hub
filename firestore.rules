@@ -233,6 +233,29 @@ service cloud.firestore {
     }
     
     // ============================================
+    // REVIEWS COLLECTION
+    // ============================================
+    match /reviews/{reviewId} {
+      // Anyone can read approved reviews; admin reads all
+      allow read: if resource.data.status == 'approved' || isAdmin() || isOwner(resource.data.userId);
+      
+      // Authenticated users can create reviews for products they may have purchased
+      allow create: if isAuthenticated() 
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.rating >= 1 
+                    && request.resource.data.rating <= 5
+                    && request.resource.data.comment is string
+                    && request.resource.data.comment.size() <= 1000;
+      
+      // Users can update their own pending reviews; admin can update any (moderation)
+      allow update: if isAdmin() 
+                    || (isOwner(resource.data.userId) && resource.data.status == 'pending');
+      
+      // Only admin can delete reviews
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
     // SELLER SETTINGS (owner-only)
     // ============================================
     match /seller_settings/{userId} {

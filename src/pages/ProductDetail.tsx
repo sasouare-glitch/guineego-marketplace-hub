@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
+import { ReviewList } from "@/components/reviews/ReviewList";
+import { useProductReviews } from "@/hooks/useProductReviews";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,7 +37,7 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const { t } = useTranslation();
   const { product, loading } = useProductDetail(id);
-  
+  const { reviews: firestoreReviews, loading: reviewsLoading, submitReview, userHasReviewed } = useProductReviews(id);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState('');
   const [selectedStorage, setSelectedStorage] = useState('');
@@ -385,7 +388,7 @@ const ProductDetail = () => {
               value="reviews"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
             >
-              {t.product.reviews} ({product.reviewCount})
+              {t.product.reviews} ({firestoreReviews.length || product.reviewCount})
             </TabsTrigger>
           </TabsList>
 
@@ -407,36 +410,9 @@ const ProductDetail = () => {
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-6">
-            <div className="space-y-6">
-              {(Array.isArray(product.reviews) ? product.reviews : []).map((review) => (
-                <div key={review.id} className="border-b border-border pb-6 last:border-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                        <span className="text-sm font-medium text-primary">
-                          {review.author.charAt(0)}
-                        </span>
-                      </div>
-                      <span className="font-medium">{review.author}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">{review.date}</span>
-                  </div>
-                  <div className="flex items-center gap-1 mb-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={cn(
-                          "w-4 h-4",
-                          i < review.rating
-                            ? "fill-guinea-yellow text-guinea-yellow"
-                            : "text-muted"
-                        )}
-                      />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground">{review.comment}</p>
-                </div>
-              ))}
+            <div className="space-y-8">
+              <ReviewForm onSubmit={submitReview} disabled={userHasReviewed || !product} />
+              <ReviewList reviews={firestoreReviews} loading={reviewsLoading} />
             </div>
           </TabsContent>
         </Tabs>
