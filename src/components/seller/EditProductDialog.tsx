@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImagePlus, X, Upload, Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ImagePlus, X, Upload, Loader2, Zap, Sparkles, TrendingUp } from "lucide-react";
 import { uploadProductImage } from "@/lib/firebase/storage";
 import type { SellerProduct } from "@/hooks/useSellerProducts";
 import { CATEGORY_NAMES } from "@/constants/categories";
@@ -47,17 +48,26 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit }: Edi
     description: "",
     category: "",
     basePrice: "",
+    originalPrice: "",
     tags: "",
+    isFlashSale: false,
+    isNew: false,
+    isBestSeller: false,
   });
 
   useEffect(() => {
     if (open && product) {
+      const hasDiscount = (product as any).discount > 0 || ((product as any).originalPrice && (product as any).originalPrice > (product.basePrice || product.price || 0));
       setForm({
         name: product.name || "",
         description: product.description || "",
         category: product.category || "",
         basePrice: String(product.basePrice || product.price || ""),
+        originalPrice: (product as any).originalPrice ? String((product as any).originalPrice) : "",
         tags: (product.tags || []).join(", "),
+        isFlashSale: hasDiscount,
+        isNew: (product as any).isNew ?? false,
+        isBestSeller: (product as any).isBestSeller ?? false,
       });
       // Load existing images
       const existingImages: ImagePreview[] = (product.images || [])
@@ -125,16 +135,26 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit }: Edi
 
       const allImages = [...existingUrls, ...newUrls];
 
+      const basePrice = Number(form.basePrice);
+      const originalPrice = form.originalPrice ? Number(form.originalPrice) : undefined;
+      const discount = form.isFlashSale && originalPrice && originalPrice > basePrice
+        ? Math.round(((originalPrice - basePrice) / originalPrice) * 100)
+        : 0;
+
       await onSubmit(product.id, {
         name: form.name,
         description: form.description,
         category: form.category,
-        basePrice: Number(form.basePrice),
-        price: Number(form.basePrice),
+        basePrice,
+        price: basePrice,
         images: allImages.length > 0 ? allImages : ["/placeholder.svg"],
         thumbnail: allImages[0] || "/placeholder.svg",
         tags: form.tags ? form.tags.split(",").map((s) => s.trim()) : [],
-      });
+        originalPrice: originalPrice || null,
+        discount,
+        isNew: form.isNew,
+        isBestSeller: form.isBestSeller,
+      } as any);
       onOpenChange(false);
     } catch {
       // error handled in hook
@@ -247,6 +267,72 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit }: Edi
               <Progress value={uploadProgress} className="h-2" />
             </div>
           )}
+
+          {/* Marketplace Options */}
+          <div className="space-y-3 rounded-lg border border-border p-4">
+            <Label className="text-sm font-semibold">Options Marketplace</Label>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-destructive" />
+                <div>
+                  <p className="text-sm font-medium">Vente Flash</p>
+                  <p className="text-xs text-muted-foreground">Afficher dans les promotions</p>
+                </div>
+              </div>
+              <Switch
+                checked={form.isFlashSale}
+                onCheckedChange={(v) => setForm((f) => ({ ...f, isFlashSale: v }))}
+              />
+            </div>
+
+            {form.isFlashSale && (
+              <div className="space-y-2 pl-6">
+                <Label htmlFor="edit-originalPrice">Prix original (GNF) *</Label>
+                <Input
+                  id="edit-originalPrice"
+                  type="number"
+                  min="0"
+                  value={form.originalPrice}
+                  onChange={(e) => setForm((f) => ({ ...f, originalPrice: e.target.value }))}
+                  placeholder="Ex: 800000 (prix avant remise)"
+                />
+                {form.originalPrice && form.basePrice && Number(form.originalPrice) > Number(form.basePrice) && (
+                  <p className="text-xs text-destructive font-medium">
+                    Remise : {Math.round(((Number(form.originalPrice) - Number(form.basePrice)) / Number(form.originalPrice)) * 100)}%
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Nouveauté</p>
+                  <p className="text-xs text-muted-foreground">Afficher dans les nouveautés</p>
+                </div>
+              </div>
+              <Switch
+                checked={form.isNew}
+                onCheckedChange={(v) => setForm((f) => ({ ...f, isNew: v }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-chart-4" />
+                <div>
+                  <p className="text-sm font-medium">Best-seller</p>
+                  <p className="text-xs text-muted-foreground">Afficher dans les meilleures ventes</p>
+                </div>
+              </div>
+              <Switch
+                checked={form.isBestSeller}
+                onCheckedChange={(v) => setForm((f) => ({ ...f, isBestSeller: v }))}
+              />
+            </div>
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="edit-tags">Tags (séparés par des virgules)</Label>

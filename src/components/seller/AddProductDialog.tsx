@@ -18,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImagePlus, X, Upload, Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ImagePlus, X, Upload, Loader2, Zap, Sparkles, TrendingUp } from "lucide-react";
 import { uploadProductImage } from "@/lib/firebase/storage";
 import type { NewProductData } from "@/hooks/useSellerProducts";
 import { CATEGORY_NAMES } from "@/constants/categories";
@@ -45,7 +46,11 @@ export function AddProductDialog({ open, onOpenChange, onSubmit }: AddProductDia
     description: "",
     category: "",
     basePrice: "",
+    originalPrice: "",
     tags: "",
+    isFlashSale: false,
+    isNew: false,
+    isBestSeller: false,
   });
 
   const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,19 +110,29 @@ export function AddProductDialog({ open, onOpenChange, onSubmit }: AddProductDia
         setUploadingImages(false);
       }
 
+      const basePrice = Number(form.basePrice);
+      const originalPrice = form.originalPrice ? Number(form.originalPrice) : undefined;
+      const discount = form.isFlashSale && originalPrice && originalPrice > basePrice
+        ? Math.round(((originalPrice - basePrice) / originalPrice) * 100)
+        : undefined;
+
       await onSubmit({
         name: form.name,
         description: form.description,
         category: form.category,
-        basePrice: Number(form.basePrice),
+        basePrice,
         images: imageUrls,
         tags: form.tags ? form.tags.split(",").map((s) => s.trim()) : [],
-      });
+        ...(originalPrice ? { originalPrice } : {}),
+        ...(discount ? { discount } : {}),
+        isNew: form.isNew,
+        isBestSeller: form.isBestSeller,
+      } as any);
 
       // Cleanup
       images.forEach((img) => URL.revokeObjectURL(img.preview));
       setImages([]);
-      setForm({ name: "", description: "", category: "", basePrice: "", tags: "" });
+      setForm({ name: "", description: "", category: "", basePrice: "", originalPrice: "", tags: "", isFlashSale: false, isNew: false, isBestSeller: false });
       setUploadProgress(0);
       onOpenChange(false);
     } catch {
@@ -233,6 +248,72 @@ export function AddProductDialog({ open, onOpenChange, onSubmit }: AddProductDia
               <Progress value={uploadProgress} className="h-2" />
             </div>
           )}
+
+          {/* Marketplace Options */}
+          <div className="space-y-3 rounded-lg border border-border p-4">
+            <Label className="text-sm font-semibold">Options Marketplace</Label>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-destructive" />
+                <div>
+                  <p className="text-sm font-medium">Vente Flash</p>
+                  <p className="text-xs text-muted-foreground">Afficher dans les promotions</p>
+                </div>
+              </div>
+              <Switch
+                checked={form.isFlashSale}
+                onCheckedChange={(v) => setForm((f) => ({ ...f, isFlashSale: v }))}
+              />
+            </div>
+
+            {form.isFlashSale && (
+              <div className="space-y-2 pl-6">
+                <Label htmlFor="originalPrice">Prix original (GNF) *</Label>
+                <Input
+                  id="originalPrice"
+                  type="number"
+                  min="0"
+                  value={form.originalPrice}
+                  onChange={(e) => setForm((f) => ({ ...f, originalPrice: e.target.value }))}
+                  placeholder="Ex: 800000 (prix avant remise)"
+                />
+                {form.originalPrice && form.basePrice && Number(form.originalPrice) > Number(form.basePrice) && (
+                  <p className="text-xs text-destructive font-medium">
+                    Remise : {Math.round(((Number(form.originalPrice) - Number(form.basePrice)) / Number(form.originalPrice)) * 100)}%
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Nouveauté</p>
+                  <p className="text-xs text-muted-foreground">Afficher dans les nouveautés</p>
+                </div>
+              </div>
+              <Switch
+                checked={form.isNew}
+                onCheckedChange={(v) => setForm((f) => ({ ...f, isNew: v }))}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-chart-4" />
+                <div>
+                  <p className="text-sm font-medium">Best-seller</p>
+                  <p className="text-xs text-muted-foreground">Afficher dans les meilleures ventes</p>
+                </div>
+              </div>
+              <Switch
+                checked={form.isBestSeller}
+                onCheckedChange={(v) => setForm((f) => ({ ...f, isBestSeller: v }))}
+              />
+            </div>
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="tags">Tags (séparés par des virgules)</Label>
