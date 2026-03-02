@@ -67,7 +67,7 @@ export const SearchFilters = ({ filters, onFiltersChange, onClearFilters }: Sear
     filters.sellers.length + 
     (filters.rating ? 1 : 0) + 
     (filters.inStock ? 1 : 0) +
-    (filters.priceRange[0] > 0 || filters.priceRange[1] < 5000000 ? 1 : 0);
+    (filters.priceRange[0] > 0 || filters.priceRange[1] < 100000000 ? 1 : 0);
 
   const formatPrice = (price: number) => {
     if (price >= 1000000) return `${(price / 1000000).toFixed(1)}M`;
@@ -135,9 +135,9 @@ export const SearchFilters = ({ filters, onFiltersChange, onClearFilters }: Sear
           <Slider
             value={filters.priceRange}
             onValueChange={(value) => updateFilter("priceRange", value as [number, number])}
-            max={5000000}
+            max={100000000}
             min={0}
-            step={50000}
+            step={500000}
             className="mb-4"
           />
           <div className="flex items-center justify-between text-sm">

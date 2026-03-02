@@ -17,7 +17,7 @@ import { useAllProducts } from "@/hooks/useAllProducts";
 
 const defaultFilters: FilterState = {
   categories: [],
-  priceRange: [0, 5000000],
+  priceRange: [0, 100000000],
   rating: null,
   inStock: false,
   sellers: [],
