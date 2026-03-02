@@ -30,8 +30,9 @@ import {
 import { 
   Search, MoreHorizontal, Filter, Eye, Package, 
   CheckCircle, XCircle, AlertTriangle, Star, Edit, Trash2, Power, StarOff, Loader2,
-  ImagePlus, X, Upload
+  ImagePlus, X, Upload, Zap, Sparkles, TrendingUp
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { uploadProductImage } from '@/lib/firebase/storage';
@@ -78,7 +79,7 @@ export default function AdminProductsPage() {
   const [editDialog, setEditDialog] = useState<{ open: boolean; product: Product | null }>({ open: false, product: null });
   const [saving, setSaving] = useState(false);
   const [addDialog, setAddDialog] = useState(false);
-  const [addForm, setAddForm] = useState({ name: '', price: '', category: '', description: '', stock: '', tags: '' });
+  const [addForm, setAddForm] = useState({ name: '', price: '', category: '', description: '', stock: '', tags: '', originalPrice: '', isFlashSale: false, isNew: false, isBestSeller: false });
   const [addImages, setAddImages] = useState<{ file: File; preview: string }[]>([]);
   const [addUploading, setAddUploading] = useState(false);
   const [addUploadProgress, setAddUploadProgress] = useState(0);
@@ -111,6 +112,12 @@ export default function AdminProductsPage() {
         totalSales: 0,
         status: 'active',
         featured: false,
+        originalPrice: addForm.isFlashSale && addForm.originalPrice ? Number(addForm.originalPrice) : null,
+        discount: addForm.isFlashSale && addForm.originalPrice && Number(addForm.originalPrice) > Number(addForm.price)
+          ? Math.round(((Number(addForm.originalPrice) - Number(addForm.price)) / Number(addForm.originalPrice)) * 100)
+          : 0,
+        isNew: addForm.isNew,
+        isBestSeller: addForm.isBestSeller,
       });
 
       // Upload images if any
@@ -139,7 +146,7 @@ export default function AdminProductsPage() {
 
       toast.success('Produit ajouté avec succès');
       setAddDialog(false);
-      setAddForm({ name: '', price: '', category: '', description: '', stock: '', tags: '' });
+      setAddForm({ name: '', price: '', category: '', description: '', stock: '', tags: '', originalPrice: '', isFlashSale: false, isNew: false, isBestSeller: false });
       addImages.forEach(img => URL.revokeObjectURL(img.preview));
       setAddImages([]);
     } catch (err) {
@@ -533,6 +540,71 @@ export default function AdminProductsPage() {
                 <Progress value={addUploadProgress} className="h-2" />
               </div>
             )}
+
+            {/* Marketplace Options */}
+            <div className="space-y-3 rounded-lg border border-border p-4">
+              <Label className="text-sm font-semibold">Options Marketplace</Label>
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-destructive" />
+                  <div>
+                    <p className="text-sm font-medium">Vente Flash</p>
+                    <p className="text-xs text-muted-foreground">Afficher dans les promotions</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={addForm.isFlashSale}
+                  onCheckedChange={(v) => setAddForm(prev => ({ ...prev, isFlashSale: v }))}
+                />
+              </div>
+
+              {addForm.isFlashSale && (
+                <div className="space-y-2 pl-6">
+                  <Label>Prix original (GNF) *</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={addForm.originalPrice}
+                    onChange={(e) => setAddForm(prev => ({ ...prev, originalPrice: e.target.value }))}
+                    placeholder="Ex: 800000 (prix avant remise)"
+                  />
+                  {addForm.originalPrice && addForm.price && Number(addForm.originalPrice) > Number(addForm.price) && (
+                    <p className="text-xs text-destructive font-medium">
+                      Remise : {Math.round(((Number(addForm.originalPrice) - Number(addForm.price)) / Number(addForm.originalPrice)) * 100)}%
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Nouveauté</p>
+                    <p className="text-xs text-muted-foreground">Afficher dans les nouveautés</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={addForm.isNew}
+                  onCheckedChange={(v) => setAddForm(prev => ({ ...prev, isNew: v }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-chart-4" />
+                  <div>
+                    <p className="text-sm font-medium">Best-seller</p>
+                    <p className="text-xs text-muted-foreground">Afficher dans les meilleures ventes</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={addForm.isBestSeller}
+                  onCheckedChange={(v) => setAddForm(prev => ({ ...prev, isBestSeller: v }))}
+                />
+              </div>
+            </div>
 
             <div className="space-y-2">
               <Label>Tags (séparés par des virgules)</Label>
