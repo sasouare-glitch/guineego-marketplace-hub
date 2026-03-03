@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { ReviewList } from "@/components/reviews/ReviewList";
 import { useProductReviews } from "@/hooks/useProductReviews";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,6 +37,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const { addItem } = useCart();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { product, loading } = useProductDetail(id);
   const { reviews: firestoreReviews, loading: reviewsLoading, submitReview, userHasReviewed } = useProductReviews(id);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -411,7 +413,7 @@ const ProductDetail = () => {
 
           <TabsContent value="reviews" className="mt-6">
             <div className="space-y-8">
-              <ReviewForm onSubmit={submitReview} disabled={userHasReviewed || !product} />
+              <ReviewForm onSubmit={submitReview} disabled={userHasReviewed || !product} isAuthenticated={!!user} />
               <ReviewList reviews={firestoreReviews} loading={reviewsLoading} />
             </div>
           </TabsContent>

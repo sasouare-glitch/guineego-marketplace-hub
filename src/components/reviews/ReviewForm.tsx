@@ -1,17 +1,20 @@
 import { useState } from 'react';
-import { Star, Loader2 } from 'lucide-react';
+import { Star, Loader2, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 interface ReviewFormProps {
   onSubmit: (rating: number, comment: string) => Promise<void>;
   disabled?: boolean;
+  isAuthenticated?: boolean;
 }
 
-export function ReviewForm({ onSubmit, disabled }: ReviewFormProps) {
+export function ReviewForm({ onSubmit, disabled, isAuthenticated = true }: ReviewFormProps) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -36,6 +39,24 @@ export function ReviewForm({ onSubmit, disabled }: ReviewFormProps) {
   };
 
   if (disabled) return null;
+
+  if (!isAuthenticated) {
+    return (
+      <Card>
+        <CardContent className="py-6">
+          <Alert>
+            <LogIn className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>Connectez-vous pour laisser un avis</span>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/auth/login">Se connecter</Link>
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
