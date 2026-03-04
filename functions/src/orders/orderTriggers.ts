@@ -5,6 +5,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { sendNotification, notifyAdmins } from '../utils/notifications';
+import { sendOrderConfirmation } from '../notifications/sendOrderConfirmation';
 
 const db = admin.firestore();
 
@@ -85,6 +86,16 @@ export const onOrderCreated = functions
         paymentMethod: order.paymentMethod,
         commune: order.shippingAddress.commune,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+
+      // 4. Send confirmation SMS + Email to customer
+      await sendOrderConfirmation({
+        id: orderId,
+        customerId: order.customerId,
+        pricing: order.pricing,
+        items: order.items,
+        shippingAddress: order.shippingAddress,
+        paymentMethod: order.paymentMethod,
       });
 
       console.log(`Order ${orderId} processed successfully`);
