@@ -1,7 +1,9 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { CartItemData } from "@/components/marketplace/CartItem";
 import { Product } from "@/components/marketplace/ProductCard";
 import { toast } from "sonner";
+
+const CART_STORAGE_KEY = "guineego_cart";
 
 interface CartContextType {
   items: CartItemData[];
@@ -15,8 +17,27 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function loadCartFromStorage(): CartItemData[] {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return [];
+}
+
+function saveCartToStorage(items: CartItemData[]) {
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  } catch {}
+}
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [items, setItems] = useState<CartItemData[]>([]);
+  const [items, setItems] = useState<CartItemData[]>(() => loadCartFromStorage());
+
+  // Persist to localStorage on change
+  useEffect(() => {
+    saveCartToStorage(items);
+  }, [items]);
 
   const addItem = (product: Product, quantity = 1, variant?: string) => {
     setItems((prev) => {
@@ -68,6 +89,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const clearCart = () => {
     setItems([]);
+    localStorage.removeItem(CART_STORAGE_KEY);
   };
 
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
