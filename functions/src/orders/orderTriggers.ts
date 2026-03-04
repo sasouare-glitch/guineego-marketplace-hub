@@ -7,9 +7,9 @@ import * as admin from 'firebase-admin';
 import { sendNotification, notifyAdmins } from '../utils/notifications';
 import { sendOrderConfirmation } from '../notifications/sendOrderConfirmation';
 import { sendStatusNotification } from '../notifications/sendStatusNotification';
+import { wrapInTemplate, ctaButton, infoRow, divider, APP_URL, COLORS } from '../utils/emailTemplate';
 
 const db = admin.firestore();
-const APP_URL = 'https://guineego.app'; // TODO: mettre l'URL de production
 
 /**
  * Trigger: Order Created
@@ -314,42 +314,29 @@ async function notifySellers(orderId: string, order: any, status: 'delivered' | 
       title: 'Commande livrée',
       body: (amount: string) => `La commande ${orderId} a été livrée avec succès. Montant : ${amount} GNF.`,
       sms: (amount: string) => `GuineeGo: Commande ${orderId} livrée! Montant: ${amount} GNF ajouté à votre solde.`,
-      emailBody: (sellerName: string, amount: string) => `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #16a34a;">🎉 Commande livrée avec succès</h2>
-          <p>Bonjour <strong>${sellerName}</strong>,</p>
-          <p>La commande <strong>${orderId}</strong> a été livrée au client.</p>
-          <p>Montant crédité : <strong>${amount} GNF</strong></p>
-          <div style="text-align: center; margin: 24px 0;">
-            <a href="${APP_URL}/order/${orderId}" 
-               style="display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: bold;">
-              📍 Voir les détails de la commande
-            </a>
-          </div>
-          <hr style="border: 1px solid #e5e7eb;" />
-          <p style="color: #6b7280; font-size: 0.9em;">L'équipe GuineeGo</p>
-        </div>`,
+      emailBody: (sellerName: string, amount: string) => wrapInTemplate(`
+        <h2 style="margin: 0 0 8px; font-size: 22px; color: ${COLORS.green};">🎉 Commande livrée avec succès</h2>
+        <p style="margin: 0 0 16px; font-size: 15px; color: ${COLORS.bodyText};">Bonjour <strong>${sellerName}</strong>,</p>
+        <p style="margin: 0 0 16px; font-size: 15px; color: ${COLORS.bodyText};">La commande <strong>${orderId}</strong> a été livrée au client.</p>
+        <div style="background-color: #ecfdf5; border-left: 4px solid ${COLORS.green}; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px;">
+          <p style="margin: 0; font-size: 13px; color: ${COLORS.mutedText};">Montant crédité</p>
+          <p style="margin: 4px 0 0; font-size: 22px; font-weight: 700; color: ${COLORS.green};">${amount} GNF</p>
+        </div>
+        ${ctaButton('📋 Voir les détails', `${APP_URL}/order/${orderId}`)}
+      `),
     },
     cancelled: {
       emoji: '❌',
       title: 'Commande annulée',
       body: (_: string) => `La commande ${orderId} a été annulée.`,
       sms: (_: string) => `GuineeGo: Commande ${orderId} annulée. Consultez votre tableau de bord.`,
-      emailBody: (sellerName: string, _: string) => `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #dc2626;">❌ Commande annulée</h2>
-          <p>Bonjour <strong>${sellerName}</strong>,</p>
-          <p>La commande <strong>${orderId}</strong> a été annulée.</p>
-          <p>Consultez votre tableau de bord pour plus de détails.</p>
-          <div style="text-align: center; margin: 24px 0;">
-            <a href="${APP_URL}/order/${orderId}" 
-               style="display: inline-block; background-color: #dc2626; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: bold;">
-              📋 Voir les détails de la commande
-            </a>
-          </div>
-          <hr style="border: 1px solid #e5e7eb;" />
-          <p style="color: #6b7280; font-size: 0.9em;">L'équipe GuineeGo</p>
-        </div>`,
+      emailBody: (sellerName: string, _: string) => wrapInTemplate(`
+        <h2 style="margin: 0 0 8px; font-size: 22px; color: ${COLORS.red};">❌ Commande annulée</h2>
+        <p style="margin: 0 0 16px; font-size: 15px; color: ${COLORS.bodyText};">Bonjour <strong>${sellerName}</strong>,</p>
+        <p style="margin: 0 0 16px; font-size: 15px; color: ${COLORS.bodyText};">La commande <strong>${orderId}</strong> a été annulée.</p>
+        <p style="margin: 0 0 20px; font-size: 14px; color: ${COLORS.mutedText};">Consultez votre tableau de bord pour plus de détails.</p>
+        ${ctaButton('📋 Voir les détails', `${APP_URL}/order/${orderId}`, COLORS.red)}
+      `),
     },
   };
 

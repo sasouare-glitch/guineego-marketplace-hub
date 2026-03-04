@@ -5,9 +5,9 @@
  */
 
 import * as admin from 'firebase-admin';
+import { wrapInTemplate, ctaButton, infoRow, divider, sectionTitle, APP_URL, COLORS } from '../utils/emailTemplate';
 
 const db = admin.firestore();
-const APP_URL = 'https://guineego.app'; // TODO: mettre l'URL de production
 
 interface OrderData {
   id: string;
@@ -65,48 +65,63 @@ async function sendConfirmationEmail(email: string, order: OrderData): Promise<v
       .map(item => `• ${item.name} x${item.quantity} — ${item.price.toLocaleString()} GNF`)
       .join('<br>');
 
+    const itemsHtml = order.items
+      .map(item => `
+        <tr>
+          <td style="padding: 8px 0; font-size: 14px; color: ${COLORS.darkText};">${item.name} <span style="color: ${COLORS.mutedText};">x${item.quantity}</span></td>
+          <td style="padding: 8px 0; font-size: 14px; color: ${COLORS.darkText}; text-align: right;">${item.price.toLocaleString()} GNF</td>
+        </tr>`)
+      .join('');
+
+    const bodyContent = `
+      <h2 style="margin: 0 0 8px; font-size: 22px; color: ${COLORS.green};">✅ Commande confirmée !</h2>
+      <p style="margin: 0 0 20px; font-size: 15px; color: ${COLORS.bodyText};">
+        Bonjour <strong>${order.shippingAddress.fullName}</strong>, votre commande a été créée avec succès.
+      </p>
+
+      <div style="background-color: ${COLORS.lightBg}; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <p style="margin: 0; font-size: 13px; color: ${COLORS.mutedText};">Numéro de commande</p>
+        <p style="margin: 4px 0 0; font-size: 18px; font-weight: 700; color: ${COLORS.darkText}; letter-spacing: 0.5px;">${order.id}</p>
+      </div>
+
+      ${sectionTitle('📦', 'Articles commandés')}
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        ${itemsHtml}
+      </table>
+
+      ${divider()}
+
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        ${infoRow('Sous-total', `${order.pricing.subtotal.toLocaleString()} GNF`)}
+        ${infoRow('Livraison', `${order.pricing.shippingFee.toLocaleString()} GNF`)}
+        ${order.pricing.discount > 0 ? infoRow('Réduction', `-${order.pricing.discount.toLocaleString()} GNF`) : ''}
+      </table>
+
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="padding: 12px 0 0; font-size: 18px; font-weight: 700; color: ${COLORS.darkText};">Total</td>
+          <td style="padding: 12px 0 0; font-size: 18px; font-weight: 700; color: ${COLORS.green}; text-align: right;">${order.pricing.total.toLocaleString()} GNF</td>
+        </tr>
+      </table>
+
+      ${divider()}
+
+      ${sectionTitle('📍', 'Livraison')}
+      <p style="margin: 0; font-size: 14px; color: ${COLORS.bodyText};">${order.shippingAddress.address}, ${order.shippingAddress.commune}</p>
+      
+      <div style="margin-top: 12px;">
+        ${sectionTitle('💳', 'Paiement')}
+        <p style="margin: 0; font-size: 14px; color: ${COLORS.bodyText};">${formatPaymentMethod(order.paymentMethod)}</p>
+      </div>
+
+      ${ctaButton('📍 Suivre ma commande', `${APP_URL}/order/${order.id}`)}
+    `;
+
     await db.collection('mail').add({
       to: email,
       message: {
         subject: `✅ Commande ${order.id} confirmée — GuineeGo`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #16a34a;">Commande confirmée !</h2>
-            <p>Bonjour <strong>${order.shippingAddress.fullName}</strong>,</p>
-            <p>Votre commande <strong>${order.id}</strong> a été créée avec succès.</p>
-            
-            <h3>📦 Articles</h3>
-            <p>${itemsList}</p>
-            
-            <hr style="border: 1px solid #e5e7eb;" />
-            
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr><td>Sous-total</td><td style="text-align: right;">${order.pricing.subtotal.toLocaleString()} GNF</td></tr>
-              <tr><td>Livraison</td><td style="text-align: right;">${order.pricing.shippingFee.toLocaleString()} GNF</td></tr>
-              ${order.pricing.discount > 0 ? `<tr><td>Réduction</td><td style="text-align: right;">-${order.pricing.discount.toLocaleString()} GNF</td></tr>` : ''}
-              <tr style="font-weight: bold; font-size: 1.1em;">
-                <td>Total</td><td style="text-align: right;">${order.pricing.total.toLocaleString()} GNF</td>
-              </tr>
-            </table>
-            
-            <hr style="border: 1px solid #e5e7eb;" />
-            
-            <p>📍 <strong>Livraison :</strong> ${order.shippingAddress.address}, ${order.shippingAddress.commune}</p>
-            <p>💳 <strong>Paiement :</strong> ${formatPaymentMethod(order.paymentMethod)}</p>
-            
-            <div style="text-align: center; margin: 24px 0;">
-              <a href="${APP_URL}/order/${order.id}" 
-                 style="display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: bold; font-size: 1em;">
-                📍 Suivre ma commande
-              </a>
-            </div>
-            
-            <p style="margin-top: 24px; color: #6b7280; font-size: 0.9em;">
-              Merci pour votre confiance !<br/>
-              L'équipe GuineeGo
-            </p>
-          </div>
-        `,
+        html: wrapInTemplate(bodyContent),
       },
     });
     console.log(`✅ Email de confirmation envoyé à ${email} pour commande ${order.id}`);

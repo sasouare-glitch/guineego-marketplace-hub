@@ -5,9 +5,9 @@
  */
 
 import * as admin from 'firebase-admin';
+import { wrapInTemplate, ctaButton, APP_URL, COLORS } from '../utils/emailTemplate';
 
 const db = admin.firestore();
-const APP_URL = 'https://guineego.app'; // TODO: mettre l'URL de production
 
 type NotifiableStatus = 'confirmed' | 'preparing' | 'ready' | 'shipped' | 'in_delivery' | 'delivered' | 'cancelled';
 
@@ -102,30 +102,29 @@ async function sendStatusEmail(
   customerName: string
 ): Promise<void> {
   try {
+    const statusColor = status === 'cancelled' ? COLORS.red : status === 'delivered' ? COLORS.green : COLORS.green;
+    const buttonLabel = status === 'delivered' ? '⭐ Laisser un avis' : '📍 Suivre ma commande';
+
+    const bodyContent = `
+      <h2 style="margin: 0 0 8px; font-size: 22px; color: ${statusColor};">${msg.emoji} ${msg.title}</h2>
+      <p style="margin: 0 0 20px; font-size: 15px; color: ${COLORS.bodyText};">
+        Bonjour <strong>${customerName}</strong>,
+      </p>
+      <p style="margin: 0 0 16px; font-size: 15px; color: ${COLORS.bodyText};">${msg.body}</p>
+
+      <div style="background-color: ${COLORS.lightBg}; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <p style="margin: 0; font-size: 13px; color: ${COLORS.mutedText};">Numéro de commande</p>
+        <p style="margin: 4px 0 0; font-size: 18px; font-weight: 700; color: ${COLORS.darkText}; letter-spacing: 0.5px;">${orderId}</p>
+      </div>
+
+      ${ctaButton(buttonLabel, `${APP_URL}/order/${orderId}`, statusColor)}
+    `;
+
     await db.collection('mail').add({
       to: email,
       message: {
         subject: `${msg.emoji} ${msg.title} — Commande ${orderId}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #16a34a;">${msg.emoji} ${msg.title}</h2>
-            <p>Bonjour <strong>${customerName}</strong>,</p>
-            <p>${msg.body}</p>
-            <p>Numéro de commande : <strong>${orderId}</strong></p>
-            
-            <div style="text-align: center; margin: 24px 0;">
-              <a href="${APP_URL}/order/${orderId}" 
-                 style="display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: bold; font-size: 1em;">
-                📍 Suivre ma commande
-              </a>
-            </div>
-            
-            <hr style="border: 1px solid #e5e7eb;" />
-            <p style="margin-top: 24px; color: #6b7280; font-size: 0.9em;">
-              Merci pour votre confiance !<br/>L'équipe GuineeGo
-            </p>
-          </div>
-        `,
+        html: wrapInTemplate(bodyContent),
       },
     });
     console.log(`✅ Email statut "${status}" envoyé à ${email} pour commande ${orderId}`);
