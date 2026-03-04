@@ -62,6 +62,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         quantity,
         variant,
         seller: product.seller,
+        sellerId: product.sellerId || '',
         inStock: product.inStock,
         maxQuantity: 10,
       };

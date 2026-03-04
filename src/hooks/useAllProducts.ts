@@ -64,9 +64,8 @@ export function useAllProducts() {
       // Resolve store names for products that don't already have sellerName
       const enriched = await Promise.all(
         raw.map(async (p) => {
-          if (p.seller !== 'Vendeur') return p;
-          const storeName = await resolveStoreName(p._sellerId || '');
-          return { ...p, seller: storeName };
+          const storeName = p.seller !== 'Vendeur' ? p.seller : await resolveStoreName(p._sellerId || '');
+          return { ...p, seller: storeName, sellerId: p._sellerId || '' };
         })
       );
       // Remove internal field

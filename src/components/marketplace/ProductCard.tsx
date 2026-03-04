@@ -16,6 +16,7 @@ export interface Product {
   rating: number;
   reviewCount: number;
   seller: string;
+  sellerId?: string;
   category: string;
   inStock: boolean;
   discount?: number;
