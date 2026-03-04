@@ -15,7 +15,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserAddresses } from "@/hooks/useUserAddresses";
 import { useWallet } from "@/hooks/useWallet";
-import { callFunction } from "@/lib/firebase/config";
+import { createOrderDirect } from "@/lib/firebase/orders";
 import { toast } from "sonner";
 
 export default function CheckoutPage() {
@@ -64,7 +64,6 @@ export default function CheckoutPage() {
     if (currentStep === 2) {
       setIsProcessing(true);
       try {
-        // Find selected address data
         const address = addresses.find(a => a.id === selectedAddress);
         if (!address) {
           toast.error("Veuillez sélectionner une adresse");
@@ -72,9 +71,8 @@ export default function CheckoutPage() {
           return;
         }
 
-        // Call createOrder Cloud Function
-        const createOrderFn = callFunction<any, any>('createOrder');
-        const result = await createOrderFn({
+        const result = await createOrderDirect({
+          uid: user!.uid,
           items: items.map(item => ({
             productId: item.productId,
             variantSku: item.variant || 'default',
@@ -82,7 +80,7 @@ export default function CheckoutPage() {
             price: item.price,
             quantity: item.quantity,
             sellerId: item.sellerId || item.seller || 'unknown',
-            thumbnail: item.image
+            thumbnail: item.image,
           })),
           shippingAddress: {
             fullName: address.fullName,
@@ -90,34 +88,18 @@ export default function CheckoutPage() {
             commune: address.commune,
             quartier: address.address,
             address: `${address.address}, ${address.commune}, ${address.city}`,
-            instructions: address.instructions || ''
+            instructions: address.instructions || '',
           },
-          paymentMethod: selectedPayment as any
+          paymentMethod: selectedPayment as string,
         });
 
-        setOrderNumber(result.data.orderId);
+        setOrderNumber(result.orderId);
         clearCart();
         setCurrentStep(3);
         toast.success("Commande créée avec succès !");
       } catch (error: any) {
         console.error('Order creation error:', error);
-        const code = error?.code || '';
-        const details = error?.details || error?.message || '';
-        let userMessage = "Erreur lors de la création de la commande";
-        if (code === 'functions/invalid-argument') {
-          userMessage = details || "Données de commande invalides";
-        } else if (code === 'functions/not-found') {
-          userMessage = details || "Produit ou ressource introuvable";
-        } else if (code === 'functions/permission-denied' || code === 'functions/unauthenticated') {
-          userMessage = "Vous devez être connecté pour passer commande";
-        } else if (code === 'functions/unavailable' || code === 'functions/deadline-exceeded') {
-          userMessage = "Le serveur est temporairement indisponible, réessayez";
-        } else if (code === 'functions/internal') {
-          userMessage = `Erreur serveur : ${details || 'vérifiez que les produits sont disponibles et réessayez'}`;
-        } else if (details && details !== 'internal') {
-          userMessage = details;
-        }
-        toast.error(userMessage);
+        toast.error(error.message || "Erreur lors de la création de la commande");
       } finally {
         setIsProcessing(false);
       }
