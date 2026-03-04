@@ -101,7 +101,23 @@ export default function CheckoutPage() {
         toast.success("Commande créée avec succès !");
       } catch (error: any) {
         console.error('Order creation error:', error);
-        toast.error(error.message || "Erreur lors de la création de la commande");
+        const code = error?.code || '';
+        const details = error?.details || error?.message || '';
+        let userMessage = "Erreur lors de la création de la commande";
+        if (code === 'functions/invalid-argument') {
+          userMessage = details || "Données de commande invalides";
+        } else if (code === 'functions/not-found') {
+          userMessage = details || "Produit ou ressource introuvable";
+        } else if (code === 'functions/permission-denied' || code === 'functions/unauthenticated') {
+          userMessage = "Vous devez être connecté pour passer commande";
+        } else if (code === 'functions/unavailable' || code === 'functions/deadline-exceeded') {
+          userMessage = "Le serveur est temporairement indisponible, réessayez";
+        } else if (code === 'functions/internal') {
+          userMessage = `Erreur serveur : ${details || 'vérifiez que les produits sont disponibles et réessayez'}`;
+        } else if (details && details !== 'internal') {
+          userMessage = details;
+        }
+        toast.error(userMessage);
       } finally {
         setIsProcessing(false);
       }
