@@ -6,6 +6,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { sendNotification, notifyAdmins } from '../utils/notifications';
 import { sendOrderConfirmation } from '../notifications/sendOrderConfirmation';
+import { sendStatusNotification } from '../notifications/sendStatusNotification';
 
 const db = admin.firestore();
 
@@ -170,6 +171,19 @@ export const onOrderStatusChanged = functions
             });
           }
           break;
+      }
+
+      // Send SMS + Email notification for status changes
+      const notifiableStatuses = ['confirmed', 'preparing', 'ready', 'shipped', 'in_delivery', 'delivered', 'cancelled'];
+      if (notifiableStatuses.includes(newStatus)) {
+        await sendStatusNotification({
+          orderId,
+          customerId: after.customerId,
+          status: newStatus as any,
+          customerName: after.shippingAddress?.fullName,
+          commune: after.shippingAddress?.commune,
+          total: after.pricing?.total,
+        });
       }
 
       // Log status change
