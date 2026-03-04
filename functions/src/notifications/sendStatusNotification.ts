@@ -7,6 +7,7 @@
 import * as admin from 'firebase-admin';
 
 const db = admin.firestore();
+const APP_URL = 'https://guineego.app'; // TODO: mettre l'URL de production
 
 type NotifiableStatus = 'confirmed' | 'preparing' | 'ready' | 'shipped' | 'in_delivery' | 'delivered' | 'cancelled';
 
@@ -111,6 +112,14 @@ async function sendStatusEmail(
             <p>Bonjour <strong>${customerName}</strong>,</p>
             <p>${msg.body}</p>
             <p>Numéro de commande : <strong>${orderId}</strong></p>
+            
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${APP_URL}/order/${orderId}" 
+                 style="display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: bold; font-size: 1em;">
+                📍 Suivre ma commande
+              </a>
+            </div>
+            
             <hr style="border: 1px solid #e5e7eb;" />
             <p style="margin-top: 24px; color: #6b7280; font-size: 0.9em;">
               Merci pour votre confiance !<br/>L'équipe GuineeGo
@@ -156,7 +165,7 @@ async function sendStatusSMS(
     const senderAddress = config.senderAddress || 'tel:+224000000000';
     const encodedSender = encodeURIComponent(senderAddress);
 
-    const smsMessage = `GuineeGo: ${msg.sms} Commande ${orderId}.`;
+    const smsMessage = `GuineeGo: ${msg.sms} Commande ${orderId}. Suivi: ${APP_URL}/order/${orderId}`;
 
     const smsResponse = await fetch(
       `https://api.orange.com/smsmessaging/v1/outbound/${encodedSender}/requests`,

@@ -7,6 +7,7 @@
 import * as admin from 'firebase-admin';
 
 const db = admin.firestore();
+const APP_URL = 'https://guineego.app'; // TODO: mettre l'URL de production
 
 interface OrderData {
   id: string;
@@ -93,6 +94,13 @@ async function sendConfirmationEmail(email: string, order: OrderData): Promise<v
             <p>📍 <strong>Livraison :</strong> ${order.shippingAddress.address}, ${order.shippingAddress.commune}</p>
             <p>💳 <strong>Paiement :</strong> ${formatPaymentMethod(order.paymentMethod)}</p>
             
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="${APP_URL}/order/${order.id}" 
+                 style="display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: bold; font-size: 1em;">
+                📍 Suivre ma commande
+              </a>
+            </div>
+            
             <p style="margin-top: 24px; color: #6b7280; font-size: 0.9em;">
               Merci pour votre confiance !<br/>
               L'équipe GuineeGo
@@ -142,10 +150,11 @@ async function sendConfirmationSMS(phone: string, order: OrderData): Promise<voi
     const formattedPhone = formatGuineaPhone(phone);
 
     // 3. Send SMS
+    const trackingLink = `${APP_URL}/order/${order.id}`;
     const smsMessage = 
       `GuineeGo: Commande ${order.id} confirmée! ` +
       `Total: ${order.pricing.total.toLocaleString()} GNF. ` +
-      `Livraison à ${order.shippingAddress.commune}. Merci!`;
+      `Suivi: ${trackingLink}`;
 
     const senderAddress = config.senderAddress || 'tel:+224000000000';
     const encodedSender = encodeURIComponent(senderAddress);
