@@ -161,6 +161,9 @@ export const onOrderStatusChanged = functions
               totalDeliveries: admin.firestore.FieldValue.increment(1)
             });
           }
+
+          // Notify sellers: order delivered
+          await notifySellers(orderId, after, 'delivered');
           break;
 
         case 'cancelled':
@@ -170,6 +173,9 @@ export const onOrderStatusChanged = functions
               pendingOrders: admin.firestore.FieldValue.increment(-1)
             });
           }
+
+          // Notify sellers: order cancelled
+          await notifySellers(orderId, after, 'cancelled');
           break;
       }
 
@@ -295,4 +301,137 @@ async function processSellerPayouts(orderId: string, order: any): Promise<void> 
       data: { orderId, amount: netAmount.toString() }
     });
   }
+}
+
+/**
+ * Notify all sellers of an order via in-app + SMS + Email
+ */
+async function notifySellers(orderId: string, order: any, status: 'delivered' | 'cancelled'): Promise<void> {
+  const sellerMessages = {
+    delivered: {
+      emoji: '🎉',
+      title: 'Commande livrée',
+      body: (amount: string) => `La commande ${orderId} a été livrée avec succès. Montant : ${amount} GNF.`,
+      sms: (amount: string) => `GuineeGo: Commande ${orderId} livrée! Montant: ${amount} GNF ajouté à votre solde.`,
+      emailBody: (sellerName: string, amount: string) => `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #16a34a;">🎉 Commande livrée avec succès</h2>
+          <p>Bonjour <strong>${sellerName}</strong>,</p>
+          <p>La commande <strong>${orderId}</strong> a été livrée au client.</p>
+          <p>Montant crédité : <strong>${amount} GNF</strong></p>
+          <hr style="border: 1px solid #e5e7eb;" />
+          <p style="color: #6b7280; font-size: 0.9em;">L'équipe GuineeGo</p>
+        </div>`,
+    },
+    cancelled: {
+      emoji: '❌',
+      title: 'Commande annulée',
+      body: (_: string) => `La commande ${orderId} a été annulée.`,
+      sms: (_: string) => `GuineeGo: Commande ${orderId} annulée. Consultez votre tableau de bord.`,
+      emailBody: (sellerName: string, _: string) => `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #dc2626;">❌ Commande annulée</h2>
+          <p>Bonjour <strong>${sellerName}</strong>,</p>
+          <p>La commande <strong>${orderId}</strong> a été annulée.</p>
+          <p>Consultez votre tableau de bord pour plus de détails.</p>
+          <hr style="border: 1px solid #e5e7eb;" />
+          <p style="color: #6b7280; font-size: 0.9em;">L'équipe GuineeGo</p>
+        </div>`,
+    },
+  };
+
+  const msg = sellerMessages[status];
+
+  for (const sellerId of order.sellerIds || []) {
+    try {
+      const sellerAmount = order.sellers?.[sellerId]?.subtotal?.toLocaleString() || '0';
+
+      // 1. In-app notification
+      await sendNotification({
+        userId: sellerId,
+        type: status === 'delivered' ? 'order_delivered' : 'order_cancelled',
+        title: `${msg.emoji} ${msg.title}`,
+        body: msg.body(sellerAmount),
+        data: { orderId },
+      });
+
+      // 2. Get seller info for email/SMS
+      const sellerDoc = await db.collection('users').doc(sellerId).get();
+      const seller = sellerDoc.data();
+      if (!seller) continue;
+
+      const sellerName = seller.displayName || seller.shopName || 'Vendeur';
+      const promises: Promise<any>[] = [];
+
+      // 3. Email
+      if (seller.email) {
+        promises.push(
+          db.collection('mail').add({
+            to: seller.email,
+            message: {
+              subject: `${msg.emoji} ${msg.title} — Commande ${orderId}`,
+              html: msg.emailBody(sellerName, sellerAmount),
+            },
+          })
+        );
+      }
+
+      // 4. SMS via Orange API
+      const phone = seller.phone || seller.phoneNumber;
+      if (phone) {
+        promises.push(sendSellerSMS(phone, msg.sms(sellerAmount)));
+      }
+
+      await Promise.allSettled(promises);
+      console.log(`✅ Seller ${sellerId} notifié (${status}) pour commande ${orderId}`);
+    } catch (error) {
+      console.error(`❌ Erreur notification vendeur ${sellerId}:`, error);
+    }
+  }
+}
+
+/**
+ * Send SMS to seller via Orange API
+ */
+async function sendSellerSMS(phone: string, message: string): Promise<void> {
+  const configDoc = await db.collection('config').doc('orange_sms').get();
+  const config = configDoc.data();
+  if (!config?.clientId || !config?.clientSecret) return;
+
+  const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'grant_type=client_credentials',
+  });
+
+  if (!tokenResponse.ok) throw new Error(`Token failed: ${tokenResponse.status}`);
+  const { access_token } = await tokenResponse.json();
+
+  const cleaned = phone.replace(/\s+/g, '').replace(/[^\d+]/g, '');
+  const formattedPhone = cleaned.startsWith('+224') ? cleaned
+    : cleaned.startsWith('224') ? `+${cleaned}`
+    : `+224${cleaned}`;
+
+  const senderAddress = config.senderAddress || 'tel:+224000000000';
+
+  await fetch(
+    `https://api.orange.com/smsmessaging/v1/outbound/${encodeURIComponent(senderAddress)}/requests`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${access_token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        outboundSMSMessageRequest: {
+          address: `tel:${formattedPhone}`,
+          senderAddress,
+          outboundSMSTextMessage: { message },
+        },
+      }),
+    }
+  );
 }
