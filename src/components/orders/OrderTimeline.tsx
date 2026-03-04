@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Check, Package, Truck, MapPin, Clock, ChefHat } from "lucide-react";
+import { Check, Package, Truck, MapPin, Clock, ChefHat, CheckCircle, XCircle, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { StatusHistoryEntry, OrderStatus } from "@/hooks/useRealtimeOrder";
 
 interface TimelineStep {
   id: string;
@@ -75,43 +76,97 @@ export function OrderTimeline({ steps }: OrderTimelineProps) {
   );
 }
 
-export const defaultOrderSteps: TimelineStep[] = [
-  {
-    id: "confirmed",
-    title: "Commande confirmée",
-    description: "Votre commande a été reçue et confirmée",
-    time: "10:30",
-    status: "completed",
-    icon: <Check className="w-5 h-5" />,
-  },
-  {
-    id: "preparing",
-    title: "En préparation",
-    description: "Le vendeur prépare votre commande",
-    time: "10:45",
-    status: "completed",
-    icon: <ChefHat className="w-5 h-5" />,
-  },
-  {
-    id: "picked",
-    title: "Colis récupéré",
-    description: "Le livreur a récupéré votre colis",
-    time: "11:20",
-    status: "current",
-    icon: <Package className="w-5 h-5" />,
-  },
-  {
-    id: "transit",
-    title: "En cours de livraison",
-    description: "Votre colis est en route vers vous",
-    status: "pending",
-    icon: <Truck className="w-5 h-5" />,
-  },
-  {
-    id: "delivered",
-    title: "Livré",
-    description: "Votre commande a été livrée",
-    status: "pending",
-    icon: <MapPin className="w-5 h-5" />,
-  },
+// ============================================
+// Build dynamic timeline from order data
+// ============================================
+
+const allSteps: { id: OrderStatus; title: string; description: string; icon: React.ReactNode }[] = [
+  { id: "pending", title: "Commande reçue", description: "Votre commande a été enregistrée", icon: <Clock className="w-5 h-5" /> },
+  { id: "confirmed", title: "Confirmée", description: "Le vendeur a confirmé votre commande", icon: <CheckCircle className="w-5 h-5" /> },
+  { id: "preparing", title: "En préparation", description: "Le vendeur prépare votre commande", icon: <ChefHat className="w-5 h-5" /> },
+  { id: "ready", title: "Prête", description: "Commande prête, en attente du coursier", icon: <ShoppingBag className="w-5 h-5" /> },
+  { id: "shipped", title: "Colis récupéré", description: "Le livreur a récupéré votre colis", icon: <Package className="w-5 h-5" /> },
+  { id: "in_delivery", title: "En livraison", description: "Votre colis est en route vers vous", icon: <Truck className="w-5 h-5" /> },
+  { id: "delivered", title: "Livré", description: "Votre commande a été livrée avec succès", icon: <MapPin className="w-5 h-5" /> },
 ];
+
+const statusOrder: OrderStatus[] = ["pending", "confirmed", "preparing", "ready", "shipped", "in_delivery", "delivered"];
+
+function formatTimestamp(ts: any): string | undefined {
+  if (!ts) return undefined;
+  const date = ts?.toDate ? ts.toDate() : new Date(ts);
+  return date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+}
+
+export function buildTimelineSteps(
+  currentStatus: OrderStatus,
+  statusHistory: StatusHistoryEntry[] = [],
+  createdAt?: any
+): TimelineStep[] {
+  if (currentStatus === "cancelled") {
+    // Show steps up to cancellation
+    const historyMap = new Map<string, StatusHistoryEntry>();
+    statusHistory.forEach(entry => historyMap.set(entry.status, entry));
+
+    const steps: TimelineStep[] = [];
+    for (const step of allSteps) {
+      const historyEntry = historyMap.get(step.id);
+      if (historyEntry) {
+        steps.push({
+          ...step,
+          time: formatTimestamp(historyEntry.timestamp),
+          status: "completed",
+        });
+      } else if (step.id === "pending" && createdAt) {
+        steps.push({
+          ...step,
+          time: formatTimestamp(createdAt),
+          status: "completed",
+        });
+      }
+    }
+    // Add cancelled step
+    const cancelEntry = statusHistory.find(e => e.status === "cancelled");
+    steps.push({
+      id: "cancelled",
+      title: "Annulée",
+      description: cancelEntry?.note || "Votre commande a été annulée",
+      time: formatTimestamp(cancelEntry?.timestamp),
+      status: "current",
+      icon: <XCircle className="w-5 h-5" />,
+    });
+    return steps;
+  }
+
+  const currentIndex = statusOrder.indexOf(currentStatus);
+  const historyMap = new Map<string, StatusHistoryEntry>();
+  statusHistory.forEach(entry => historyMap.set(entry.status, entry));
+
+  return allSteps.map((step) => {
+    const stepIndex = statusOrder.indexOf(step.id);
+    const historyEntry = historyMap.get(step.id);
+    let time = historyEntry ? formatTimestamp(historyEntry.timestamp) : undefined;
+
+    // For pending, use createdAt
+    if (step.id === "pending" && !time && createdAt) {
+      time = formatTimestamp(createdAt);
+    }
+
+    let status: "completed" | "current" | "pending";
+    if (stepIndex < currentIndex) {
+      status = "completed";
+    } else if (stepIndex === currentIndex) {
+      status = "current";
+    } else {
+      status = "pending";
+    }
+
+    return { ...step, time, status };
+  });
+}
+
+// Keep legacy export for backwards compatibility
+export const defaultOrderSteps: TimelineStep[] = allSteps.map((step, i) => ({
+  ...step,
+  status: i === 0 ? "current" : "pending",
+}));

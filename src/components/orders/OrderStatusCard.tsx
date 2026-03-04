@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Package, MapPin, Phone, MessageCircle } from "lucide-react";
+import { Package, MapPin, Phone, MessageCircle, Clock, CheckCircle, XCircle, Truck, ShoppingBag } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,33 +12,78 @@ interface CourierInfo {
   rating: number;
 }
 
+type OrderStatusKey =
+  | "pending"
+  | "confirmed"
+  | "preparing"
+  | "ready"
+  | "shipped"
+  | "in_delivery"
+  | "delivered"
+  | "cancelled"
+  | "refunded";
+
 interface OrderStatusCardProps {
-  status: "preparing" | "picked" | "transit" | "delivered";
+  status: OrderStatusKey;
   estimatedTime?: string;
   courier?: CourierInfo;
   currentLocation?: string;
 }
 
-const statusConfig = {
+const statusConfig: Record<OrderStatusKey, { label: string; color: string; message: string; icon: React.ReactNode }> = {
+  pending: {
+    label: "En attente",
+    color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    message: "Votre commande est en attente de confirmation",
+    icon: <Clock className="w-5 h-5" />,
+  },
+  confirmed: {
+    label: "Confirmée",
+    color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    message: "Votre commande a été confirmée par le vendeur",
+    icon: <CheckCircle className="w-5 h-5" />,
+  },
   preparing: {
     label: "En préparation",
     color: "bg-amber-500/10 text-amber-600 border-amber-500/20",
     message: "Le vendeur prépare votre commande",
+    icon: <ShoppingBag className="w-5 h-5" />,
   },
-  picked: {
-    label: "Colis récupéré",
+  ready: {
+    label: "Prête",
+    color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
+    message: "Votre commande est prête, en attente du coursier",
+    icon: <Package className="w-5 h-5" />,
+  },
+  shipped: {
+    label: "Expédiée",
     color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
     message: "Le livreur a récupéré votre colis",
+    icon: <Package className="w-5 h-5" />,
   },
-  transit: {
+  in_delivery: {
     label: "En livraison",
     color: "bg-primary/10 text-primary border-primary/20",
-    message: "Votre colis est en route",
+    message: "Votre colis est en route vers vous",
+    icon: <Truck className="w-5 h-5" />,
   },
   delivered: {
     label: "Livré",
     color: "bg-green-500/10 text-green-600 border-green-500/20",
-    message: "Votre commande a été livrée",
+    message: "Votre commande a été livrée avec succès",
+    icon: <CheckCircle className="w-5 h-5" />,
+  },
+  cancelled: {
+    label: "Annulée",
+    color: "bg-destructive/10 text-destructive border-destructive/20",
+    message: "Votre commande a été annulée",
+    icon: <XCircle className="w-5 h-5" />,
+  },
+  refunded: {
+    label: "Remboursée",
+    color: "bg-destructive/10 text-destructive border-destructive/20",
+    message: "Votre commande a été remboursée",
+    icon: <XCircle className="w-5 h-5" />,
   },
 };
 
@@ -48,7 +93,8 @@ export function OrderStatusCard({
   courier,
   currentLocation,
 }: OrderStatusCardProps) {
-  const config = statusConfig[status];
+  const config = statusConfig[status] || statusConfig.pending;
+  const isInTransit = status === "in_delivery" || status === "shipped";
 
   return (
     <motion.div
@@ -62,7 +108,7 @@ export function OrderStatusCard({
             <Badge variant="outline" className={config.color}>
               {config.label}
             </Badge>
-            {estimatedTime && (
+            {estimatedTime && status !== "delivered" && status !== "cancelled" && (
               <span className="text-sm font-medium text-foreground">
                 Arrivée estimée: {estimatedTime}
               </span>
@@ -73,7 +119,7 @@ export function OrderStatusCard({
 
         <CardContent className="p-4 space-y-4">
           {/* Current Location */}
-          {currentLocation && status === "transit" && (
+          {currentLocation && isInTransit && (
             <div className="flex items-center gap-3 p-3 bg-secondary/50 rounded-lg">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                 <MapPin className="w-5 h-5 text-primary" />
@@ -86,7 +132,7 @@ export function OrderStatusCard({
           )}
 
           {/* Courier Info */}
-          {courier && (status === "picked" || status === "transit") && (
+          {courier && isInTransit && (
             <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
               <div className="flex items-center gap-3">
                 <Avatar className="h-12 w-12">
@@ -115,7 +161,7 @@ export function OrderStatusCard({
           )}
 
           {/* Delivery Animation for Transit */}
-          {status === "transit" && (
+          {isInTransit && (
             <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
               <motion.div
                 className="absolute inset-y-0 left-0 bg-primary rounded-full"

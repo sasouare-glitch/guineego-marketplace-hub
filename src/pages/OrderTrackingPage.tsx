@@ -7,7 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { OrderTimeline, defaultOrderSteps } from "@/components/orders/OrderTimeline";
+import { OrderTimeline, buildTimelineSteps } from "@/components/orders/OrderTimeline";
 import { OrderStatusCard } from "@/components/orders/OrderStatusCard";
 import { OrderItemsList } from "@/components/orders/OrderItemsList";
 import { CancelOrderDialog } from "@/components/orders/CancelOrderDialog";
@@ -32,7 +32,7 @@ export default function OrderTrackingPage() {
   const [isCancelling, setIsCancelling] = useState(false);
 
   const orderId = id || "";
-  const { order, loading, error, currentStatus, canCancel } = useRealtimeOrder(orderId);
+  const { order, loading, error, currentStatus, canCancel, statusHistory, estimatedDelivery } = useRealtimeOrder(orderId);
 
   const orderStatus = currentStatus || "pending";
 
@@ -70,7 +70,7 @@ export default function OrderTrackingPage() {
   const formatDate = (date: any) => {
     if (!date) return "—";
     const d = date?.toDate ? date.toDate() : new Date(date);
-    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
   };
 
   const items = (order?.items || []).map((item, i) => ({
@@ -84,6 +84,18 @@ export default function OrderTrackingPage() {
 
   const pricing = order?.pricing;
   const address = order?.shippingAddress;
+
+  // Build dynamic timeline from real order data
+  const timelineSteps = buildTimelineSteps(
+    orderStatus as any,
+    statusHistory,
+    order?.createdAt
+  );
+
+  // Format estimated delivery
+  const estimatedTimeStr = estimatedDelivery
+    ? estimatedDelivery.toLocaleDateString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+    : undefined;
 
   if (loading) {
     return (
@@ -118,11 +130,11 @@ export default function OrderTrackingPage() {
       <main className="container-tight pt-24 pb-16">
         {/* Back Link */}
         <Link
-          to="/marketplace"
+          to="/orders"
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
-          Retour au marketplace
+          Mes commandes
         </Link>
 
         {/* Order Header */}
@@ -176,7 +188,24 @@ export default function OrderTrackingPage() {
             <div>
               <p className="font-medium text-destructive">Commande annulée</p>
               <p className="text-sm text-muted-foreground">
-                Le remboursement sera effectué sous 24-48h via votre méthode de paiement.
+                {order.cancellationReason || "Le remboursement sera effectué sous 24-48h via votre méthode de paiement."}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Delivered Banner */}
+        {orderStatus === "delivered" && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-3"
+          >
+            <Check className="w-5 h-5 text-green-600" />
+            <div>
+              <p className="font-medium text-green-600">Commande livrée</p>
+              <p className="text-sm text-muted-foreground">
+                Votre commande a été livrée avec succès. Merci pour votre confiance !
               </p>
             </div>
           </motion.div>
@@ -188,20 +217,20 @@ export default function OrderTrackingPage() {
             {/* Status Card */}
             {orderStatus !== "cancelled" && (
               <OrderStatusCard
-                status={orderStatus as "preparing" | "picked" | "transit" | "delivered"}
-                estimatedTime="—"
-                courier={undefined as any}
-                currentLocation="—"
+                status={orderStatus as any}
+                estimatedTime={estimatedTimeStr}
+                courier={undefined}
+                currentLocation={undefined}
               />
             )}
 
             {/* Timeline */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Progression de la livraison</CardTitle>
+                <CardTitle className="text-lg">Progression de la commande</CardTitle>
               </CardHeader>
               <CardContent>
-                <OrderTimeline steps={defaultOrderSteps} />
+                <OrderTimeline steps={timelineSteps} />
               </CardContent>
             </Card>
 
@@ -215,9 +244,14 @@ export default function OrderTrackingPage() {
                   <p className="font-medium text-foreground">{address?.fullName || "—"}</p>
                   <p className="text-muted-foreground">{address?.address || "—"}</p>
                   <p className="text-muted-foreground">
-                    {address?.commune || "—"}, {address?.quartier || ""}
+                    {address?.commune || "—"}{address?.quartier ? `, ${address.quartier}` : ""}
                   </p>
                   <p className="text-muted-foreground">{address?.phone || "—"}</p>
+                  {address?.instructions && (
+                    <p className="text-sm text-muted-foreground italic mt-2">
+                      📝 {address.instructions}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -253,6 +287,12 @@ export default function OrderTrackingPage() {
                     {order.paymentStatus === 'paid' ? 'Payé' : 'En attente'}
                   </Badge>
                 </div>
+                {order.deliveryMissionId && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Mission livraison</span>
+                    <span className="text-foreground font-mono text-xs">{order.deliveryMissionId.slice(0, 8)}...</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
