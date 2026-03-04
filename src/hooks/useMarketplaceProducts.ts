@@ -16,6 +16,7 @@ export interface MarketplaceProduct {
   rating: number;
   reviewCount: number;
   seller: string;
+  sellerId?: string;
   category: string;
   inStock: boolean;
   discount?: number;
@@ -79,9 +80,8 @@ function useFirestoreSection(constraints: QueryConstraint[]) {
       const raw = snap.docs.map(mapFirestoreProduct);
       const enriched = await Promise.all(
         raw.map(async (p) => {
-          if (p.seller !== 'Vendeur') return p;
-          const storeName = await resolveStoreName(p._sellerId || '');
-          return { ...p, seller: storeName };
+          const storeName = p.seller !== 'Vendeur' ? p.seller : await resolveStoreName(p._sellerId || '');
+          return { ...p, seller: storeName, sellerId: p._sellerId || '' };
         })
       );
       setProducts(enriched.map(({ _sellerId, ...rest }) => rest));

@@ -11,6 +11,7 @@ export interface CartItemData {
   quantity: number;
   variant?: string;
   seller: string;
+  sellerId?: string;
   inStock: boolean;
   maxQuantity: number;
 }

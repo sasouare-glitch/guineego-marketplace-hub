@@ -81,7 +81,7 @@ export default function CheckoutPage() {
             name: item.name,
             price: item.price,
             quantity: item.quantity,
-            sellerId: item.seller || 'unknown',
+            sellerId: item.sellerId || item.seller || 'unknown',
             thumbnail: item.image
           })),
           shippingAddress: {
