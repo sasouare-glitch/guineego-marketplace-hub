@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Check, Home, Building, Edit, Loader2 } from "lucide-react";
+import { Plus, Check, Home, Building, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,10 +22,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useAuth } from "@/contexts/AuthContext";
-import { Address as UserAddress } from "@/types/auth";
 
-interface CheckoutAddress {
+interface Address {
   id: string;
   label: string;
   type: "home" | "work" | "other";
@@ -43,66 +41,43 @@ interface AddressFormProps {
   onSelectAddress: (addressId: string) => void;
 }
 
+const savedAddresses: Address[] = [
+  {
+    id: "1",
+    label: "Domicile",
+    type: "home",
+    fullName: "Mamadou Diallo",
+    phone: "+224 622 123 456",
+    address: "Quartier Cosa, Rue KA-012",
+    commune: "Ratoma",
+    city: "Conakry",
+    instructions: "Près de la pharmacie centrale",
+    isDefault: true
+  },
+  {
+    id: "2",
+    label: "Bureau",
+    type: "work",
+    fullName: "Mamadou Diallo",
+    phone: "+224 622 123 456",
+    address: "Immeuble Kaloum Center, 3ème étage",
+    commune: "Kaloum",
+    city: "Conakry",
+    isDefault: false
+  }
+];
+
 const communes = [
   "Kaloum", "Dixinn", "Ratoma", "Matam", "Matoto"
 ];
 
-/**
- * Convert user profile addresses to checkout format
- */
-function profileToCheckoutAddresses(
-  profileAddresses: UserAddress[] | undefined,
-  userName: string,
-  userPhone: string
-): CheckoutAddress[] {
-  if (!profileAddresses || profileAddresses.length === 0) return [];
-  return profileAddresses.map((addr, index) => ({
-    id: addr.id || `profile-${index}`,
-    label: addr.label || "Adresse",
-    type: "home" as const,
-    fullName: addr.fullName || userName,
-    phone: addr.phone || userPhone,
-    address: `${addr.quartier ? addr.quartier + ', ' : ''}${addr.address}`,
-    commune: addr.commune,
-    city: "Conakry",
-    instructions: undefined,
-    isDefault: addr.isDefault || index === 0,
-  }));
-}
-
 export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormProps) => {
   const { t } = useTranslation();
-  const { user, profile } = useAuth();
-
-  // Build addresses from user profile
-  const userName = profile?.displayName || user?.displayName || "";
-  const userPhone = profile?.phone || user?.phoneNumber || "";
-  const profileAddresses = profileToCheckoutAddresses(profile?.addresses, userName, userPhone);
-
-  const [addresses, setAddresses] = useState<CheckoutAddress[]>([]);
-  const [initialized, setInitialized] = useState(false);
-
-  // Sync addresses from profile on load
-  useEffect(() => {
-    if (!initialized && profile) {
-      const converted = profileToCheckoutAddresses(profile.addresses, userName, userPhone);
-      if (converted.length > 0) {
-        setAddresses(converted);
-        // Auto-select default address
-        const defaultAddr = converted.find(a => a.isDefault) || converted[0];
-        if (defaultAddr && !selectedAddress) {
-          onSelectAddress(defaultAddr.id);
-        }
-      }
-      setInitialized(true);
-    }
-  }, [profile, initialized, userName, userPhone, selectedAddress, onSelectAddress]);
+  const [addresses, setAddresses] = useState<Address[]>(savedAddresses);
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newAddress, setNewAddress] = useState<Partial<CheckoutAddress>>({
+  const [newAddress, setNewAddress] = useState<Partial<Address>>({
     type: "home",
-    city: "Conakry",
-    fullName: userName,
-    phone: userPhone,
+    city: "Conakry"
   });
 
   const getAddressLabel = (type: "home" | "work" | "other") => {
@@ -113,7 +88,7 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
 
   const handleAddAddress = () => {
     if (newAddress.fullName && newAddress.phone && newAddress.address && newAddress.commune) {
-      const address: CheckoutAddress = {
+      const address: Address = {
         id: Date.now().toString(),
         label: getAddressLabel(newAddress.type || "home"),
         type: newAddress.type || "home",
@@ -128,7 +103,7 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
       setAddresses([...addresses, address]);
       onSelectAddress(address.id);
       setIsAddingNew(false);
-      setNewAddress({ type: "home", city: "Conakry", fullName: userName, phone: userPhone });
+      setNewAddress({ type: "home", city: "Conakry" });
     }
   };
 
