@@ -9,6 +9,7 @@ import { sendOrderConfirmation } from '../notifications/sendOrderConfirmation';
 import { sendStatusNotification } from '../notifications/sendStatusNotification';
 
 const db = admin.firestore();
+const APP_URL = 'https://guineego.app'; // TODO: mettre l'URL de production
 
 /**
  * Trigger: Order Created
@@ -319,6 +320,12 @@ async function notifySellers(orderId: string, order: any, status: 'delivered' | 
           <p>Bonjour <strong>${sellerName}</strong>,</p>
           <p>La commande <strong>${orderId}</strong> a été livrée au client.</p>
           <p>Montant crédité : <strong>${amount} GNF</strong></p>
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="${APP_URL}/order/${orderId}" 
+               style="display: inline-block; background-color: #16a34a; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: bold;">
+              📍 Voir les détails de la commande
+            </a>
+          </div>
           <hr style="border: 1px solid #e5e7eb;" />
           <p style="color: #6b7280; font-size: 0.9em;">L'équipe GuineeGo</p>
         </div>`,
@@ -334,6 +341,12 @@ async function notifySellers(orderId: string, order: any, status: 'delivered' | 
           <p>Bonjour <strong>${sellerName}</strong>,</p>
           <p>La commande <strong>${orderId}</strong> a été annulée.</p>
           <p>Consultez votre tableau de bord pour plus de détails.</p>
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="${APP_URL}/order/${orderId}" 
+               style="display: inline-block; background-color: #dc2626; color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: bold;">
+              📋 Voir les détails de la commande
+            </a>
+          </div>
           <hr style="border: 1px solid #e5e7eb;" />
           <p style="color: #6b7280; font-size: 0.9em;">L'équipe GuineeGo</p>
         </div>`,
