@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, ShoppingBag } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShoppingBag, LogIn } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -12,17 +12,31 @@ import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
 import { useCart } from "@/hooks/useCart";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserAddresses } from "@/hooks/useUserAddresses";
+import { useWallet } from "@/hooks/useWallet";
+import { callFunction } from "@/lib/firebase/config";
+import { toast } from "sonner";
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { items, clearCart } = useCart();
+  const { items, clearCart, subtotal } = useCart();
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { addresses, loading: addressesLoading, addAddress, defaultAddress } = useUserAddresses();
+  const { wallet, loading: walletLoading } = useWallet();
+
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedAddress, setSelectedAddress] = useState<string | null>("1");
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+
+  // Auto-select default address when loaded
+  if (!selectedAddress && defaultAddress && !addressesLoading) {
+    setSelectedAddress(defaultAddress.id);
+  }
 
   const steps = [
     { id: 1, name: t.checkout.step1, description: t.checkout.deliveryAddress },
@@ -38,6 +52,9 @@ export default function CheckoutPage() {
         return phoneNumber.length >= 9;
       }
       if (selectedPayment === "cash") return true;
+      if (selectedPayment === "wallet") {
+        return (wallet?.balance || 0) >= subtotal;
+      }
       return true;
     }
     return true;
@@ -45,14 +62,49 @@ export default function CheckoutPage() {
 
   const handleNext = async () => {
     if (currentStep === 2) {
-      // Process payment
       setIsProcessing(true);
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setIsProcessing(false);
-      setOrderNumber(`GGO-${Date.now().toString().slice(-8)}`);
-      clearCart();
-      setCurrentStep(3);
+      try {
+        // Find selected address data
+        const address = addresses.find(a => a.id === selectedAddress);
+        if (!address) {
+          toast.error("Veuillez sélectionner une adresse");
+          setIsProcessing(false);
+          return;
+        }
+
+        // Call createOrder Cloud Function
+        const createOrderFn = callFunction<any, any>('createOrder');
+        const result = await createOrderFn({
+          items: items.map(item => ({
+            productId: item.productId,
+            variantSku: item.variant || 'default',
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            sellerId: item.seller || 'unknown',
+            thumbnail: item.image
+          })),
+          shippingAddress: {
+            fullName: address.fullName,
+            phone: address.phone,
+            commune: address.commune,
+            quartier: address.address,
+            address: `${address.address}, ${address.commune}, ${address.city}`,
+            instructions: address.instructions || ''
+          },
+          paymentMethod: selectedPayment as any
+        });
+
+        setOrderNumber(result.data.orderId);
+        clearCart();
+        setCurrentStep(3);
+        toast.success("Commande créée avec succès !");
+      } catch (error: any) {
+        console.error('Order creation error:', error);
+        toast.error(error.message || "Erreur lors de la création de la commande");
+      } finally {
+        setIsProcessing(false);
+      }
     } else {
       setCurrentStep(currentStep + 1);
     }
@@ -63,6 +115,32 @@ export default function CheckoutPage() {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  // Not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container-tight pt-24 pb-16">
+          <div className="text-center py-16">
+            <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
+              <LogIn className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <h1 className="text-2xl font-display font-bold text-foreground mb-2">
+              Connexion requise
+            </h1>
+            <p className="text-muted-foreground mb-6">
+              Connectez-vous pour passer votre commande
+            </p>
+            <Button asChild>
+              <Link to="/auth/login">Se connecter</Link>
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   // Empty cart state
   if (items.length === 0 && currentStep !== 3) {
@@ -127,6 +205,9 @@ export default function CheckoutPage() {
                   <AddressForm 
                     selectedAddress={selectedAddress}
                     onSelectAddress={setSelectedAddress}
+                    addresses={addresses}
+                    loading={addressesLoading}
+                    onAddAddress={addAddress}
                   />
                 </motion.div>
               )}
@@ -143,6 +224,8 @@ export default function CheckoutPage() {
                     onSelectMethod={setSelectedPayment}
                     phoneNumber={phoneNumber}
                     onPhoneChange={setPhoneNumber}
+                    walletBalance={wallet?.balance || 0}
+                    walletLoading={walletLoading}
                   />
                 </motion.div>
               )}

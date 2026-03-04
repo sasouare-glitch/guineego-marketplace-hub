@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Smartphone, CreditCard, Wallet, Check, AlertCircle } from "lucide-react";
+import { Smartphone, CreditCard, Wallet, Check, AlertCircle, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -20,6 +20,8 @@ interface PaymentFormProps {
   onSelectMethod: (methodId: string) => void;
   phoneNumber: string;
   onPhoneChange: (phone: string) => void;
+  walletBalance?: number;
+  walletLoading?: boolean;
 }
 
 const paymentMethods: PaymentMethod[] = [
@@ -69,7 +71,9 @@ export const PaymentForm = ({
   selectedMethod, 
   onSelectMethod, 
   phoneNumber, 
-  onPhoneChange 
+  onPhoneChange,
+  walletBalance = 0,
+  walletLoading = false
 }: PaymentFormProps) => {
   const { t } = useTranslation();
   const selectedPayment = paymentMethods.find(m => m.id === selectedMethod);
@@ -84,7 +88,10 @@ export const PaymentForm = ({
 
   const getFeeLabel = (fee: string) => {
     if (fee === "free") return t.checkout.free;
-    if (fee === "balance") return "2 500 000 GNF";
+    if (fee === "balance") {
+      if (walletLoading) return "...";
+      return `${walletBalance.toLocaleString()} GNF`;
+    }
     return fee;
   };
 
@@ -214,7 +221,11 @@ export const PaymentForm = ({
               </div>
               <div>
                 <h3 className="font-semibold text-foreground">{t.checkout.yourBalance}</h3>
-                <p className="text-2xl font-bold text-guinea-green">2 500 000 GNF</p>
+                {walletLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-guinea-green" />
+                ) : (
+                  <p className="text-2xl font-bold text-guinea-green">{walletBalance.toLocaleString()} GNF</p>
+                )}
               </div>
             </div>
             <Check className="w-6 h-6 text-guinea-green" />

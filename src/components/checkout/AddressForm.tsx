@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Check, Home, Building, Edit } from "lucide-react";
+import { Plus, Check, Home, Building, Edit, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,60 +22,25 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/hooks/useTranslation";
-
-interface Address {
-  id: string;
-  label: string;
-  type: "home" | "work" | "other";
-  fullName: string;
-  phone: string;
-  address: string;
-  commune: string;
-  city: string;
-  instructions?: string;
-  isDefault: boolean;
-}
+import { UserAddress } from "@/hooks/useUserAddresses";
 
 interface AddressFormProps {
   selectedAddress: string | null;
   onSelectAddress: (addressId: string) => void;
+  addresses: UserAddress[];
+  loading: boolean;
+  onAddAddress: (address: Omit<UserAddress, 'id'>) => Promise<UserAddress>;
 }
-
-const savedAddresses: Address[] = [
-  {
-    id: "1",
-    label: "Domicile",
-    type: "home",
-    fullName: "Mamadou Diallo",
-    phone: "+224 622 123 456",
-    address: "Quartier Cosa, Rue KA-012",
-    commune: "Ratoma",
-    city: "Conakry",
-    instructions: "Près de la pharmacie centrale",
-    isDefault: true
-  },
-  {
-    id: "2",
-    label: "Bureau",
-    type: "work",
-    fullName: "Mamadou Diallo",
-    phone: "+224 622 123 456",
-    address: "Immeuble Kaloum Center, 3ème étage",
-    commune: "Kaloum",
-    city: "Conakry",
-    isDefault: false
-  }
-];
 
 const communes = [
   "Kaloum", "Dixinn", "Ratoma", "Matam", "Matoto"
 ];
 
-export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormProps) => {
+export const AddressForm = ({ selectedAddress, onSelectAddress, addresses, loading, onAddAddress }: AddressFormProps) => {
   const { t } = useTranslation();
-  const [addresses, setAddresses] = useState<Address[]>(savedAddresses);
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [newAddress, setNewAddress] = useState<Partial<Address>>({
+  const [saving, setSaving] = useState(false);
+  const [newAddress, setNewAddress] = useState<Partial<UserAddress>>({
     type: "home",
     city: "Conakry"
   });
@@ -86,26 +51,37 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
     return t.checkout.otherAddress;
   };
 
-  const handleAddAddress = () => {
+  const handleAddAddress = async () => {
     if (newAddress.fullName && newAddress.phone && newAddress.address && newAddress.commune) {
-      const address: Address = {
-        id: Date.now().toString(),
-        label: getAddressLabel(newAddress.type || "home"),
-        type: newAddress.type || "home",
-        fullName: newAddress.fullName,
-        phone: newAddress.phone,
-        address: newAddress.address,
-        commune: newAddress.commune,
-        city: newAddress.city || "Conakry",
-        instructions: newAddress.instructions,
-        isDefault: addresses.length === 0
-      };
-      setAddresses([...addresses, address]);
-      onSelectAddress(address.id);
-      setIsAddingNew(false);
-      setNewAddress({ type: "home", city: "Conakry" });
+      setSaving(true);
+      try {
+        const addr = await onAddAddress({
+          label: getAddressLabel(newAddress.type || "home"),
+          type: newAddress.type || "home",
+          fullName: newAddress.fullName,
+          phone: newAddress.phone,
+          address: newAddress.address,
+          commune: newAddress.commune,
+          city: newAddress.city || "Conakry",
+          instructions: newAddress.instructions,
+          isDefault: addresses.length === 0
+        });
+        onSelectAddress(addr.id);
+        setIsAddingNew(false);
+        setNewAddress({ type: "home", city: "Conakry" });
+      } finally {
+        setSaving(false);
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -123,58 +99,60 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
       </div>
 
       {/* Saved Addresses */}
-      <RadioGroup value={selectedAddress || ""} onValueChange={onSelectAddress}>
-        <div className="space-y-3">
-          {addresses.map((address) => (
-            <motion.div
-              key={address.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={cn(
-                "relative border rounded-2xl p-4 cursor-pointer transition-all",
-                selectedAddress === address.id 
-                  ? "border-primary bg-primary/5" 
-                  : "border-border hover:border-primary/50"
-              )}
-              onClick={() => onSelectAddress(address.id)}
-            >
-              <div className="flex items-start gap-4">
-                <RadioGroupItem value={address.id} id={address.id} className="mt-1" />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    {address.type === "home" ? (
-                      <Home className="w-4 h-4 text-primary" />
-                    ) : (
-                      <Building className="w-4 h-4 text-primary" />
-                    )}
-                    <span className="font-semibold text-foreground">{address.label}</span>
-                    {address.isDefault && (
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                        {t.checkout.default}
-                      </span>
+      {addresses.length > 0 ? (
+        <RadioGroup value={selectedAddress || ""} onValueChange={onSelectAddress}>
+          <div className="space-y-3">
+            {addresses.map((address) => (
+              <motion.div
+                key={address.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={cn(
+                  "relative border rounded-2xl p-4 cursor-pointer transition-all",
+                  selectedAddress === address.id 
+                    ? "border-primary bg-primary/5" 
+                    : "border-border hover:border-primary/50"
+                )}
+                onClick={() => onSelectAddress(address.id)}
+              >
+                <div className="flex items-start gap-4">
+                  <RadioGroupItem value={address.id} id={address.id} className="mt-1" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      {address.type === "home" ? (
+                        <Home className="w-4 h-4 text-primary" />
+                      ) : (
+                        <Building className="w-4 h-4 text-primary" />
+                      )}
+                      <span className="font-semibold text-foreground">{address.label}</span>
+                      {address.isDefault && (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          {t.checkout.default}
+                        </span>
+                      )}
+                    </div>
+                    <p className="font-medium text-foreground">{address.fullName}</p>
+                    <p className="text-sm text-muted-foreground">{address.phone}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {address.address}, {address.commune}, {address.city}
+                    </p>
+                    {address.instructions && (
+                      <p className="text-xs text-muted-foreground mt-1 italic">
+                        📍 {address.instructions}
+                      </p>
                     )}
                   </div>
-                  <p className="font-medium text-foreground">{address.fullName}</p>
-                  <p className="text-sm text-muted-foreground">{address.phone}</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {address.address}, {address.commune}, {address.city}
-                  </p>
-                  {address.instructions && (
-                    <p className="text-xs text-muted-foreground mt-1 italic">
-                      📍 {address.instructions}
-                    </p>
-                  )}
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))}
+          </div>
+        </RadioGroup>
+      ) : (
+        <div className="text-center py-8 bg-secondary/30 rounded-2xl border border-border">
+          <p className="text-muted-foreground mb-2">Aucune adresse enregistrée</p>
+          <p className="text-sm text-muted-foreground">Ajoutez une adresse de livraison pour continuer</p>
         </div>
-      </RadioGroup>
+      )}
 
       {/* Add New Address */}
       <Dialog open={isAddingNew} onOpenChange={setIsAddingNew}>
@@ -276,8 +254,8 @@ export const AddressForm = ({ selectedAddress, onSelectAddress }: AddressFormPro
               </div>
             </div>
 
-            <Button onClick={handleAddAddress} className="w-full">
-              <Check className="w-4 h-4 mr-2" />
+            <Button onClick={handleAddAddress} className="w-full" disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
               {t.checkout.saveAddress}
             </Button>
           </div>
