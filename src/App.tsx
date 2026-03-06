@@ -34,6 +34,7 @@ import ProductDetail from "./pages/ProductDetail";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
+import PublicOrderTrackingPage from "./pages/PublicOrderTrackingPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import WishlistPage from "./pages/WishlistPage";
 import Academy from "./pages/Academy";
@@ -115,6 +116,7 @@ const App = () => (
                     <Route path="/academy" element={<Academy />} />
                     <Route path="/academy/course/:id" element={<CourseDetail />} />
                     <Route path="/sell/start" element={<SellStartPage />} />
+                    <Route path="/track/:id" element={<PublicOrderTrackingPage />} />
                     
                     {/* Protected Client Routes */}
                     <Route path="/cart" element={<CartPage />} />
