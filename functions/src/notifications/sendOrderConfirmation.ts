@@ -6,6 +6,7 @@
 
 import * as admin from 'firebase-admin';
 import { wrapInTemplate, ctaButton, infoRow, divider, sectionTitle, APP_URL, COLORS } from '../utils/emailTemplate';
+import { sendEmailWithFallback } from '../utils/sendgrid';
 
 const db = admin.firestore();
 
@@ -117,13 +118,11 @@ async function sendConfirmationEmail(email: string, order: OrderData): Promise<v
       ${ctaButton('📍 Suivre ma commande', `${APP_URL}/order/${order.id}`)}
     `;
 
-    await db.collection('mail').add({
-      to: email,
-      message: {
-        subject: `✅ Commande ${order.id} confirmée — GuineeGo`,
-        html: wrapInTemplate(bodyContent),
-      },
-    });
+    const subject = `✅ Commande ${order.id} confirmée — GuineeGo`;
+    const html = wrapInTemplate(bodyContent);
+
+    // Dual strategy: Firestore 'mail' collection + SendGrid fallback
+    await sendEmailWithFallback({ to: email, subject, html });
     console.log(`✅ Email de confirmation envoyé à ${email} pour commande ${order.id}`);
   } catch (error) {
     console.error(`❌ Erreur envoi email pour commande ${order.id}:`, error);

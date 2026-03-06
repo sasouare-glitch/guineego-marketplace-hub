@@ -6,6 +6,7 @@
 
 import * as admin from 'firebase-admin';
 import { wrapInTemplate, ctaButton, APP_URL, COLORS } from '../utils/emailTemplate';
+import { sendEmailWithFallback } from '../utils/sendgrid';
 
 const db = admin.firestore();
 
@@ -120,13 +121,11 @@ async function sendStatusEmail(
       ${ctaButton(buttonLabel, `${APP_URL}/order/${orderId}`, statusColor)}
     `;
 
-    await db.collection('mail').add({
-      to: email,
-      message: {
-        subject: `${msg.emoji} ${msg.title} — Commande ${orderId}`,
-        html: wrapInTemplate(bodyContent),
-      },
-    });
+    const subject = `${msg.emoji} ${msg.title} — Commande ${orderId}`;
+    const html = wrapInTemplate(bodyContent);
+
+    // Dual strategy: Firestore 'mail' collection + SendGrid fallback
+    await sendEmailWithFallback({ to: email, subject, html });
     console.log(`✅ Email statut "${status}" envoyé à ${email} pour commande ${orderId}`);
   } catch (error) {
     console.error(`❌ Erreur envoi email statut pour commande ${orderId}:`, error);
