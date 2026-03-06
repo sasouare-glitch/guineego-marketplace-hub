@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
 import {
   Search,
-  Filter,
   MoreVertical,
   Eye,
   Package,
@@ -12,8 +10,10 @@ import {
   Clock,
   XCircle,
   Phone,
-  ChevronDown,
   Download,
+  ChefHat,
+  ShoppingBag,
+  Loader2,
 } from "lucide-react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { Button } from "@/components/ui/button";
@@ -33,155 +33,253 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { db, callFunction } from "@/lib/firebase/config";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  Timestamp,
+} from "firebase/firestore";
+import { toast } from "sonner";
 
-interface Order {
+// -- Types matching backend --
+type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "preparing"
+  | "ready"
+  | "shipped"
+  | "in_delivery"
+  | "delivered"
+  | "cancelled";
+
+interface FirestoreOrder {
   id: string;
-  customer: {
-    name: string;
-    phone: string;
-    address: string;
-  };
-  items: { name: string; qty: number; price: number }[];
-  total: number;
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
-  paymentMethod: string;
-  date: string;
+  customerId: string;
+  customerName?: string;
+  customerPhone?: string;
+  shippingAddress?: any;
+  items: { name: string; quantity: number; price: number; productId?: string }[];
+  totalAmount: number;
+  status: OrderStatus;
+  paymentMethod?: string;
+  createdAt?: Timestamp;
+  sellerIds?: string[];
+  sellerId?: string;
 }
 
-const orders: Order[] = [
+// -- Status config aligned with backend flow --
+const statusConfig: Record<
+  OrderStatus,
   {
-    id: "#GG-1234",
-    customer: {
-      name: "Mamadou Barry",
-      phone: "+224 621 00 00 00",
-      address: "Kaloum, Conakry",
-    },
-    items: [
-      { name: "iPhone 15 Pro Max", qty: 1, price: 12500000 },
-      { name: "Coque MagSafe", qty: 2, price: 450000 },
-    ],
-    total: 13400000,
-    status: "pending",
-    paymentMethod: "Orange Money",
-    date: "2024-01-15 14:30",
-  },
-  {
-    id: "#GG-1233",
-    customer: {
-      name: "Fatoumata Camara",
-      phone: "+224 622 00 00 00",
-      address: "Ratoma, Conakry",
-    },
-    items: [{ name: "AirPods Pro 2", qty: 1, price: 2500000 }],
-    total: 2500000,
-    status: "processing",
-    paymentMethod: "MTN Money",
-    date: "2024-01-15 12:15",
-  },
-  {
-    id: "#GG-1232",
-    customer: {
-      name: "Ibrahima Sow",
-      phone: "+224 623 00 00 00",
-      address: "Dixinn, Conakry",
-    },
-    items: [
-      { name: "MacBook Air M3", qty: 1, price: 15000000 },
-      { name: "Chargeur USB-C", qty: 1, price: 350000 },
-    ],
-    total: 15350000,
-    status: "shipped",
-    paymentMethod: "Carte bancaire",
-    date: "2024-01-14 16:45",
-  },
-  {
-    id: "#GG-1231",
-    customer: {
-      name: "Aissatou Diallo",
-      phone: "+224 624 00 00 00",
-      address: "Matam, Conakry",
-    },
-    items: [{ name: "Samsung Galaxy S24", qty: 1, price: 9800000 }],
-    total: 9800000,
-    status: "delivered",
-    paymentMethod: "Orange Money",
-    date: "2024-01-13 09:20",
-  },
-  {
-    id: "#GG-1230",
-    customer: {
-      name: "Oumar Bah",
-      phone: "+224 625 00 00 00",
-      address: "Matoto, Conakry",
-    },
-    items: [{ name: "iPad Pro 11\"", qty: 1, price: 11000000 }],
-    total: 11000000,
-    status: "cancelled",
-    paymentMethod: "Orange Money",
-    date: "2024-01-12 11:00",
-  },
-];
-
-const statusConfig = {
+    label: string;
+    icon: React.ElementType;
+    variant: string;
+    sellerAction: string | null;
+    nextStatus: OrderStatus | null;
+  }
+> = {
   pending: {
     label: "En attente",
     icon: Clock,
     variant: "bg-accent/10 text-accent border-accent/20",
-    action: "Préparer",
-    nextStatus: "processing" as const,
+    sellerAction: "Confirmer",
+    nextStatus: "confirmed",
   },
-  processing: {
+  confirmed: {
+    label: "Confirmée",
+    icon: CheckCircle2,
+    variant: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    sellerAction: "Commencer préparation",
+    nextStatus: "preparing",
+  },
+  preparing: {
     label: "En préparation",
-    icon: Package,
+    icon: ChefHat,
     variant: "bg-primary/10 text-primary border-primary/20",
-    action: "Expédier",
-    nextStatus: "shipped" as const,
+    sellerAction: "Marquer prête",
+    nextStatus: "ready",
+  },
+  ready: {
+    label: "Prête",
+    icon: ShoppingBag,
+    variant: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+    sellerAction: null, // Courier takes over
+    nextStatus: null,
   },
   shipped: {
-    label: "Expédiée",
+    label: "Colis récupéré",
+    icon: Package,
+    variant: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
+    sellerAction: null,
+    nextStatus: null,
+  },
+  in_delivery: {
+    label: "En livraison",
     icon: Truck,
-    variant: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-    action: "Marquer livrée",
-    nextStatus: "delivered" as const,
+    variant: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+    sellerAction: null,
+    nextStatus: null,
   },
   delivered: {
     label: "Livrée",
     icon: CheckCircle2,
     variant: "bg-primary/10 text-primary border-primary/20",
-    action: null,
+    sellerAction: null,
     nextStatus: null,
   },
   cancelled: {
     label: "Annulée",
     icon: XCircle,
     variant: "bg-destructive/10 text-destructive border-destructive/20",
-    action: null,
+    sellerAction: null,
     nextStatus: null,
   },
 };
 
-const formatPrice = (price: number) => {
-  return price.toLocaleString("fr-GN") + " GNF";
+const formatPrice = (price: number) =>
+  price.toLocaleString("fr-GN") + " GNF";
+
+const formatDate = (ts?: Timestamp) => {
+  if (!ts) return "";
+  const d = ts.toDate();
+  return d.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 export default function SellerOrders() {
+  const { user, claims } = useAuth();
+  const [orders, setOrders] = useState<FirestoreOrder[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
 
+  // Confirmation dialog state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    orderId: string;
+    nextStatus: OrderStatus;
+    label: string;
+  }>({ open: false, orderId: "", nextStatus: "confirmed", label: "" });
+
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  // Fetch seller orders from Firestore in realtime
+  useEffect(() => {
+    if (!user) return;
+
+    const sellerId = (claims as any)?.ecommerceId || user.uid;
+
+    // Query orders where this seller is involved
+    const q = query(
+      collection(db, "orders"),
+      where("sellerIds", "array-contains", sellerId),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const docs = snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        })) as FirestoreOrder[];
+        setOrders(docs);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Error fetching seller orders:", err);
+        // Fallback: try with sellerId field
+        const q2 = query(
+          collection(db, "orders"),
+          where("sellerId", "==", sellerId),
+          orderBy("createdAt", "desc")
+        );
+        onSnapshot(q2, (snap) => {
+          const docs = snap.docs.map((d) => ({
+            id: d.id,
+            ...d.data(),
+          })) as FirestoreOrder[];
+          setOrders(docs);
+          setLoading(false);
+        });
+      }
+    );
+
+    return () => unsub();
+  }, [user, claims]);
+
+  // Call Cloud Function to update status
+  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+    setUpdatingId(orderId);
+    try {
+      const updateStatus = callFunction<
+        { orderId: string; status: string; note?: string },
+        { success: boolean; message: string }
+      >("updateOrderStatus");
+
+      const result = await updateStatus({ orderId, status: newStatus });
+
+      if (result.data.success) {
+        toast.success(`Commande mise à jour: ${statusConfig[newStatus].label}`);
+      }
+    } catch (error: any) {
+      console.error("Error updating status:", error);
+      toast.error(error.message || "Erreur lors de la mise à jour du statut");
+    } finally {
+      setUpdatingId(null);
+      setConfirmDialog((prev) => ({ ...prev, open: false }));
+    }
+  };
+
+  const openConfirmDialog = (
+    orderId: string,
+    nextStatus: OrderStatus,
+    label: string
+  ) => {
+    setConfirmDialog({ open: true, orderId, nextStatus, label });
+  };
+
+  // Filtering
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.name.toLowerCase().includes(searchQuery.toLowerCase());
+      (order.customerName || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
     const matchesStatus =
       statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const pendingCount = orders.filter((o) => o.status === "pending").length;
-  const processingCount = orders.filter((o) => o.status === "processing").length;
+  const countByStatus = (s: OrderStatus) =>
+    orders.filter((o) => o.status === s).length;
+
+  const pendingCount = countByStatus("pending");
+  const confirmedCount = countByStatus("confirmed");
+  const preparingCount = countByStatus("preparing");
+  const readyCount = countByStatus("ready");
 
   return (
     <SellerLayout>
@@ -199,9 +297,19 @@ export default function SellerOrders() {
                   {pendingCount} en attente •{" "}
                 </span>
               )}
-              {processingCount > 0 && (
+              {confirmedCount > 0 && (
+                <span className="text-emerald-600 font-medium">
+                  {confirmedCount} confirmées •{" "}
+                </span>
+              )}
+              {preparingCount > 0 && (
                 <span className="text-primary font-medium">
-                  {processingCount} en préparation
+                  {preparingCount} en préparation •{" "}
+                </span>
+              )}
+              {readyCount > 0 && (
+                <span className="text-blue-600 font-medium">
+                  {readyCount} prêtes
                 </span>
               )}
             </p>
@@ -222,20 +330,44 @@ export default function SellerOrders() {
 
         {/* Status Tabs */}
         <Tabs defaultValue="all" className="space-y-4">
-          <TabsList className="bg-muted/50 p-1">
+          <TabsList className="bg-muted/50 p-1 flex-wrap">
             <TabsTrigger value="all" onClick={() => setStatusFilter("all")}>
               Toutes ({orders.length})
             </TabsTrigger>
-            <TabsTrigger value="pending" onClick={() => setStatusFilter("pending")}>
+            <TabsTrigger
+              value="pending"
+              onClick={() => setStatusFilter("pending")}
+            >
               En attente ({pendingCount})
             </TabsTrigger>
-            <TabsTrigger value="processing" onClick={() => setStatusFilter("processing")}>
-              En préparation ({processingCount})
+            <TabsTrigger
+              value="confirmed"
+              onClick={() => setStatusFilter("confirmed")}
+            >
+              Confirmées ({confirmedCount})
             </TabsTrigger>
-            <TabsTrigger value="shipped" onClick={() => setStatusFilter("shipped")}>
+            <TabsTrigger
+              value="preparing"
+              onClick={() => setStatusFilter("preparing")}
+            >
+              En préparation ({preparingCount})
+            </TabsTrigger>
+            <TabsTrigger
+              value="ready"
+              onClick={() => setStatusFilter("ready")}
+            >
+              Prêtes ({readyCount})
+            </TabsTrigger>
+            <TabsTrigger
+              value="shipped"
+              onClick={() => setStatusFilter("shipped")}
+            >
               Expédiées
             </TabsTrigger>
-            <TabsTrigger value="delivered" onClick={() => setStatusFilter("delivered")}>
+            <TabsTrigger
+              value="delivered"
+              onClick={() => setStatusFilter("delivered")}
+            >
               Livrées
             </TabsTrigger>
           </TabsList>
@@ -258,7 +390,6 @@ export default function SellerOrders() {
                 className="pl-9"
               />
             </div>
-
             <Select value={dateFilter} onValueChange={setDateFilter}>
               <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder="Période" />
@@ -273,122 +404,211 @@ export default function SellerOrders() {
           </div>
         </motion.div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        )}
+
         {/* Orders List */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-4"
-        >
-          {filteredOrders.map((order) => {
-            const status = statusConfig[order.status];
-            const StatusIcon = status.icon;
+        {!loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-4"
+          >
+            {filteredOrders.map((order) => {
+              const status = statusConfig[order.status] || statusConfig.pending;
+              const StatusIcon = status.icon;
+              const isUpdating = updatingId === order.id;
 
-            return (
-              <div
-                key={order.id}
-                className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow"
-              >
-                {/* Order Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-border bg-muted/30">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-foreground">
-                          {order.id}
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className={cn("flex items-center gap-1", status.variant)}
-                        >
-                          <StatusIcon className="w-3 h-3" />
-                          {status.label}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{order.date}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 mt-3 sm:mt-0">
-                    {status.action && (
-                      <Button size="sm">{status.action}</Button>
-                    )}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="flex items-center gap-2">
-                          <Eye className="w-4 h-4" />
-                          Voir détails
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="flex items-center gap-2">
-                          <Phone className="w-4 h-4" />
-                          Contacter client
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive flex items-center gap-2">
-                          <XCircle className="w-4 h-4" />
-                          Annuler
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-
-                {/* Order Content */}
-                <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Customer Info */}
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-                      Client
-                    </p>
-                    <p className="font-medium text-foreground">
-                      {order.customer.name}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {order.customer.phone}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {order.customer.address}
-                    </p>
-                  </div>
-
-                  {/* Items */}
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-                      Articles ({order.items.length})
-                    </p>
-                    <div className="space-y-1">
-                      {order.items.map((item, idx) => (
-                        <p key={idx} className="text-sm text-foreground">
-                          {item.qty}x {item.name}
+              return (
+                <div
+                  key={order.id}
+                  className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  {/* Order Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-border bg-muted/30">
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-foreground">
+                            {order.id}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "flex items-center gap-1",
+                              status.variant
+                            )}
+                          >
+                            <StatusIcon className="w-3 h-3" />
+                            {status.label}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDate(order.createdAt)}
                         </p>
-                      ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-3 sm:mt-0">
+                      {/* Status action button */}
+                      {status.sellerAction && status.nextStatus && (
+                        <Button
+                          size="sm"
+                          disabled={isUpdating}
+                          onClick={() =>
+                            openConfirmDialog(
+                              order.id,
+                              status.nextStatus!,
+                              status.sellerAction!
+                            )
+                          }
+                        >
+                          {isUpdating ? (
+                            <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                          ) : null}
+                          {status.sellerAction}
+                        </Button>
+                      )}
+
+                      {/* After ready: show waiting badge */}
+                      {order.status === "ready" && (
+                        <Badge variant="outline" className="text-blue-600 border-blue-200">
+                          En attente du coursier
+                        </Badge>
+                      )}
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem className="flex items-center gap-2">
+                            <Eye className="w-4 h-4" />
+                            Voir détails
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="flex items-center gap-2">
+                            <Phone className="w-4 h-4" />
+                            Contacter client
+                          </DropdownMenuItem>
+                          {(order.status === "pending" ||
+                            order.status === "confirmed") && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive flex items-center gap-2"
+                                onClick={() =>
+                                  openConfirmDialog(
+                                    order.id,
+                                    "cancelled",
+                                    "Annuler la commande"
+                                  )
+                                }
+                              >
+                                <XCircle className="w-4 h-4" />
+                                Annuler
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
 
-                  {/* Payment */}
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
-                      Paiement
-                    </p>
-                    <p className="text-xl font-bold text-foreground">
-                      {formatPrice(order.total)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {order.paymentMethod}
-                    </p>
+                  {/* Order Content */}
+                  <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Customer Info */}
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                        Client
+                      </p>
+                      <p className="font-medium text-foreground">
+                        {order.customerName || "Client"}
+                      </p>
+                      {order.customerPhone && (
+                        <p className="text-sm text-muted-foreground">
+                          {order.customerPhone}
+                        </p>
+                      )}
+                      {order.shippingAddress && (
+                        <p className="text-sm text-muted-foreground">
+                          {order.shippingAddress.commune || order.shippingAddress.city || ""}
+                          {order.shippingAddress.commune ? ", Conakry" : ""}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Items */}
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                        Articles ({order.items?.length || 0})
+                      </p>
+                      <div className="space-y-1">
+                        {order.items?.map((item, idx) => (
+                          <p key={idx} className="text-sm text-foreground">
+                            {item.quantity}x {item.name}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Payment */}
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                        Paiement
+                      </p>
+                      <p className="text-xl font-bold text-foreground">
+                        {formatPrice(order.totalAmount || 0)}
+                      </p>
+                      {order.paymentMethod && (
+                        <p className="text-sm text-muted-foreground">
+                          {order.paymentMethod}
+                        </p>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Progress bar for seller-actionable statuses */}
+                  {["pending", "confirmed", "preparing", "ready"].includes(order.status) && (
+                    <div className="px-4 pb-4">
+                      <div className="flex items-center gap-1">
+                        {["pending", "confirmed", "preparing", "ready"].map(
+                          (s, i) => {
+                            const currentIdx = ["pending", "confirmed", "preparing", "ready"].indexOf(order.status);
+                            const isCompleted = i <= currentIdx;
+                            return (
+                              <div
+                                key={s}
+                                className={cn(
+                                  "h-1.5 flex-1 rounded-full transition-colors",
+                                  isCompleted ? "bg-primary" : "bg-muted"
+                                )}
+                              />
+                            );
+                          }
+                        )}
+                      </div>
+                      <div className="flex justify-between mt-1">
+                        <span className="text-[10px] text-muted-foreground">Reçue</span>
+                        <span className="text-[10px] text-muted-foreground">Confirmée</span>
+                        <span className="text-[10px] text-muted-foreground">Préparation</span>
+                        <span className="text-[10px] text-muted-foreground">Prête</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            );
-          })}
-        </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
 
         {/* Empty State */}
-        {filteredOrders.length === 0 && (
+        {!loading && filteredOrders.length === 0 && (
           <div className="bg-card rounded-xl border border-border p-12 text-center">
             <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">
@@ -400,6 +620,56 @@ export default function SellerOrders() {
           </div>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) =>
+          setConfirmDialog((prev) => ({ ...prev, open }))
+        }
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer l'action</AlertDialogTitle>
+            <AlertDialogDescription>
+              Voulez-vous vraiment{" "}
+              <strong className="text-foreground">{confirmDialog.label?.toLowerCase()}</strong>{" "}
+              cette commande ?
+              {confirmDialog.nextStatus === "ready" && (
+                <span className="block mt-2 text-blue-600">
+                  Une mission de livraison sera automatiquement créée pour un coursier.
+                </span>
+              )}
+              {confirmDialog.nextStatus === "cancelled" && (
+                <span className="block mt-2 text-destructive">
+                  Cette action est irréversible.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() =>
+                handleStatusChange(
+                  confirmDialog.orderId,
+                  confirmDialog.nextStatus
+                )
+              }
+              className={
+                confirmDialog.nextStatus === "cancelled"
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : ""
+              }
+            >
+              {updatingId ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-1" />
+              ) : null}
+              Confirmer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SellerLayout>
   );
 }
