@@ -45,7 +45,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { db, callFunction } from "@/lib/firebase/config";
+import { db } from "@/lib/firebase/config";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   collection,
@@ -230,20 +230,26 @@ export default function SellerOrders() {
     return () => unsub();
   }, [user, claims]);
 
-  // Call Cloud Function to update status
+  // Update order status directly in Firestore
   const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
     setUpdatingId(orderId);
     try {
-      const updateStatus = callFunction<
-        { orderId: string; status: string; note?: string },
-        { success: boolean; message: string }
-      >("updateOrderStatus");
+      const orderRef = doc(db, "orders", orderId);
+      const statusEntry = {
+        status: newStatus,
+        timestamp: Timestamp.now(),
+        performedBy: user!.uid,
+        role: "ecommerce",
+        note: null,
+      };
 
-      const result = await updateStatus({ orderId, status: newStatus });
+      await updateDoc(orderRef, {
+        status: newStatus,
+        statusHistory: arrayUnion(statusEntry),
+        updatedAt: serverTimestamp(),
+      });
 
-      if (result.data.success) {
-        toast.success(`Commande mise à jour: ${statusConfig[newStatus].label}`);
-      }
+      toast.success(`Commande mise à jour: ${statusConfig[newStatus].label}`);
     } catch (error: any) {
       console.error("Error updating status:", error);
       toast.error(error.message || "Erreur lors de la mise à jour du statut");
