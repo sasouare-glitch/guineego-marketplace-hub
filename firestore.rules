@@ -259,6 +259,65 @@ service cloud.firestore {
     }
     
     // ============================================
+    // CONFIG COLLECTION (Admin only — API keys, SMTP)
+    // ============================================
+    match /config/{configId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // MAIL COLLECTION (Trigger Email Extension)
+    // ============================================
+    match /mail/{mailId} {
+      // Admin can read all emails for monitoring dashboard
+      allow read: if isAdmin();
+      // Cloud Functions write to this collection; no client writes
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // SELLER ORDERS (seller sub-references)
+    // ============================================
+    match /seller_orders/{docId} {
+      allow read: if isAdmin() || (isSeller() && resource.data.sellerId == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // ANALYTICS EVENTS (Cloud Functions only)
+    // ============================================
+    match /analytics_events/{eventId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // CARTS COLLECTION
+    // ============================================
+    match /carts/{userId} {
+      allow read, write: if isOwner(userId);
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+    
+    // ============================================
+    // CLOSERS COLLECTION
+    // ============================================
+    match /closers/{closerId} {
+      allow read: if isAdmin() || isCloser();
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // COURIERS COLLECTION
+    // ============================================
+    match /couriers/{courierId} {
+      allow read: if isAdmin() || (isCourier() && resource.data.userId == request.auth.uid);
+      allow update: if isCourier() && resource.data.userId == request.auth.uid;
+      allow create, delete: if false;
+    }
+    
+    // ============================================
     // SELLER SETTINGS (owner-only)
     // ============================================
     match /seller_settings/{userId} {
