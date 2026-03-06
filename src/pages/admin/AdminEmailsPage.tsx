@@ -81,6 +81,8 @@ interface MailDoc {
     };
   };
   createdAt?: Timestamp;
+  _resendOf?: string;
+  _resendCount?: number;
 }
 
 type DeliveryState = "all" | "SUCCESS" | "PENDING" | "ERROR" | "PROCESSING";
@@ -119,14 +121,37 @@ export default function AdminEmailsPage() {
   const [maxResults, setMaxResults] = useState(100);
   const [resending, setResending] = useState<string | null>(null);
 
+  const MAX_RESENDS = 3;
+
+  // Count resends for a given original email (by tracing _resendOf chain)
+  const getResendCount = (email: MailDoc): number => {
+    // If this email itself has a _resendCount, use it
+    if (typeof email._resendCount === "number") return email._resendCount;
+    // Count how many emails in the list reference this one (or its origin)
+    const originId = email._resendOf || email.id;
+    return emails.filter((e) => e._resendOf === originId || e._resendOf === email.id).length;
+  };
+
+  const canResend = (email: MailDoc): boolean => {
+    const state = getState(email);
+    if (state !== "ERROR" && state !== "PENDING") return false;
+    return getResendCount(email) < MAX_RESENDS;
+  };
+
   // Resend an email by creating a new document in the 'mail' collection
   const handleResend = async (email: MailDoc) => {
     if (!email.to || !email.message?.subject || !email.message?.html) {
       toast({ title: "Impossible de renvoyer", description: "Données de l'email incomplètes.", variant: "destructive" });
       return;
     }
+    const count = getResendCount(email);
+    if (count >= MAX_RESENDS) {
+      toast({ title: "Limite atteinte", description: `Cet email a déjà été renvoyé ${MAX_RESENDS} fois.`, variant: "destructive" });
+      return;
+    }
     setResending(email.id);
     try {
+      const originId = email._resendOf || email.id;
       await addDoc(collection(db, "mail"), {
         to: email.to,
         message: {
@@ -134,9 +159,10 @@ export default function AdminEmailsPage() {
           html: email.message.html,
         },
         createdAt: serverTimestamp(),
-        _resendOf: email.id,
+        _resendOf: originId,
+        _resendCount: count + 1,
       });
-      toast({ title: "✅ Email renvoyé", description: `Un nouvel email a été créé pour ${email.to}` });
+      toast({ title: "✅ Email renvoyé", description: `Renvoi ${count + 1}/${MAX_RESENDS} pour ${email.to}` });
     } catch (error: any) {
       console.error("Erreur renvoi email:", error);
       toast({ title: "Erreur", description: error.message || "Impossible de renvoyer l'email.", variant: "destructive" });
@@ -369,15 +395,22 @@ export default function AdminEmailsPage() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => handleResend(email)}
-                                  disabled={resending === email.id}
+                                  disabled={resending === email.id || !canResend(email)}
                                   className="text-primary"
+                                  title={
+                                    !canResend(email)
+                                      ? `Limite de ${MAX_RESENDS} renvois atteinte`
+                                      : `Renvoyer (${getResendCount(email)}/${MAX_RESENDS})`
+                                  }
                                 >
                                   {resending === email.id ? (
                                     <RefreshCw className="w-4 h-4 animate-spin" />
                                   ) : (
                                     <Send className="w-4 h-4" />
                                   )}
-                                  <span className="hidden sm:inline ml-1">Renvoyer</span>
+                                  <span className="hidden sm:inline ml-1">
+                                    {getResendCount(email)}/{MAX_RESENDS}
+                                  </span>
                                 </Button>
                               )}
                               <Button
@@ -496,22 +529,27 @@ export default function AdminEmailsPage() {
                     ID: <span className="font-mono">{selectedEmail.id}</span>
                   </p>
                   {(getState(selectedEmail) === "ERROR" || getState(selectedEmail) === "PENDING") && (
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        handleResend(selectedEmail);
-                        setPreviewOpen(false);
-                      }}
-                      disabled={resending === selectedEmail.id}
-                      className="gap-2"
-                    >
-                      {resending === selectedEmail.id ? (
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Send className="w-4 h-4" />
-                      )}
-                      Renvoyer cet email
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {getResendCount(selectedEmail)}/{MAX_RESENDS} renvois
+                      </span>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          handleResend(selectedEmail);
+                          setPreviewOpen(false);
+                        }}
+                        disabled={resending === selectedEmail.id || !canResend(selectedEmail)}
+                        className="gap-2"
+                      >
+                        {resending === selectedEmail.id ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Send className="w-4 h-4" />
+                        )}
+                        {canResend(selectedEmail) ? "Renvoyer" : "Limite atteinte"}
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
