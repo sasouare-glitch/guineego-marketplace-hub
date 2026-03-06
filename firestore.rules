@@ -270,10 +270,10 @@ service cloud.firestore {
     // MAIL COLLECTION (Trigger Email Extension)
     // ============================================
     match /mail/{mailId} {
-      // Admin can read all emails for monitoring dashboard
       allow read: if isAdmin();
-      // Cloud Functions write to this collection; no client writes
-      allow create, update, delete: if false;
+      // Admin can create (resend emails); Cloud Functions also write here
+      allow create: if isAdmin();
+      allow update, delete: if false;
     }
     
     // ============================================
