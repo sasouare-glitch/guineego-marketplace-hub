@@ -363,17 +363,35 @@ export default function AdminEmailsPage() {
                             {email.delivery?.attempts || 0}
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedEmail(email);
-                                setPreviewOpen(true);
-                              }}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              <span className="hidden sm:inline">Détails</span>
-                            </Button>
+                            <div className="flex items-center justify-end gap-1">
+                              {(state === "ERROR" || state === "PENDING") && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleResend(email)}
+                                  disabled={resending === email.id}
+                                  className="text-primary"
+                                >
+                                  {resending === email.id ? (
+                                    <RefreshCw className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Send className="w-4 h-4" />
+                                  )}
+                                  <span className="hidden sm:inline ml-1">Renvoyer</span>
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedEmail(email);
+                                  setPreviewOpen(true);
+                                }}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                <span className="hidden sm:inline">Détails</span>
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
