@@ -111,7 +111,7 @@ service cloud.firestore {
       
       // Admin and sellers involved in the order can update
       allow update: if isAdmin()
-                    || (isSeller() && request.auth.uid in resource.data.sellerIds);
+                    || (isAuthenticated() && request.auth.uid in resource.data.sellerIds);
       
       allow delete: if false;
     }
