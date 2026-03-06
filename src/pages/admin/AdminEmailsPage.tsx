@@ -51,10 +51,13 @@ import {
   orderBy,
   limit,
   onSnapshot,
+  addDoc,
+  serverTimestamp,
   Timestamp,
   where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { toast } from "@/hooks/use-toast";
 
 interface MailDoc {
   id: string;
@@ -114,6 +117,33 @@ export default function AdminEmailsPage() {
   const [selectedEmail, setSelectedEmail] = useState<MailDoc | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [maxResults, setMaxResults] = useState(100);
+  const [resending, setResending] = useState<string | null>(null);
+
+  // Resend an email by creating a new document in the 'mail' collection
+  const handleResend = async (email: MailDoc) => {
+    if (!email.to || !email.message?.subject || !email.message?.html) {
+      toast({ title: "Impossible de renvoyer", description: "Données de l'email incomplètes.", variant: "destructive" });
+      return;
+    }
+    setResending(email.id);
+    try {
+      await addDoc(collection(db, "mail"), {
+        to: email.to,
+        message: {
+          subject: email.message.subject,
+          html: email.message.html,
+        },
+        createdAt: serverTimestamp(),
+        _resendOf: email.id,
+      });
+      toast({ title: "✅ Email renvoyé", description: `Un nouvel email a été créé pour ${email.to}` });
+    } catch (error: any) {
+      console.error("Erreur renvoi email:", error);
+      toast({ title: "Erreur", description: error.message || "Impossible de renvoyer l'email.", variant: "destructive" });
+    } finally {
+      setResending(null);
+    }
+  };
 
   // Real-time listener on 'mail' collection
   useEffect(() => {
