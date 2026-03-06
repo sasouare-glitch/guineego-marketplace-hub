@@ -52,6 +52,8 @@ import {
   limit,
   onSnapshot,
   addDoc,
+  doc,
+  updateDoc,
   serverTimestamp,
   Timestamp,
   where,
@@ -123,13 +125,15 @@ export default function AdminEmailsPage() {
 
   const MAX_RESENDS = 3;
 
-  // Count resends for a given original email (by tracing _resendOf chain)
+  // Get resend count from Firestore data
   const getResendCount = (email: MailDoc): number => {
-    // If this email itself has a _resendCount, use it
+    // If this email has _resendCount, use it directly
     if (typeof email._resendCount === "number") return email._resendCount;
-    // Count how many emails in the list reference this one (or its origin)
-    const originId = email._resendOf || email.id;
-    return emails.filter((e) => e._resendOf === originId || e._resendOf === email.id).length;
+    // For original emails, find the max _resendCount among children
+    const originId = email.id;
+    const children = emails.filter((e) => e._resendOf === originId);
+    if (children.length === 0) return 0;
+    return Math.max(...children.map((e) => e._resendCount || 0));
   };
 
   const canResend = (email: MailDoc): boolean => {
@@ -138,7 +142,7 @@ export default function AdminEmailsPage() {
     return getResendCount(email) < MAX_RESENDS;
   };
 
-  // Resend an email by creating a new document in the 'mail' collection
+  // Resend an email and sync count to Firestore
   const handleResend = async (email: MailDoc) => {
     if (!email.to || !email.message?.subject || !email.message?.html) {
       toast({ title: "Impossible de renvoyer", description: "Données de l'email incomplètes.", variant: "destructive" });
@@ -152,6 +156,9 @@ export default function AdminEmailsPage() {
     setResending(email.id);
     try {
       const originId = email._resendOf || email.id;
+      const newCount = count + 1;
+
+      // Create new resend document
       await addDoc(collection(db, "mail"), {
         to: email.to,
         message: {
@@ -160,9 +167,20 @@ export default function AdminEmailsPage() {
         },
         createdAt: serverTimestamp(),
         _resendOf: originId,
-        _resendCount: count + 1,
+        _resendCount: newCount,
       });
-      toast({ title: "✅ Email renvoyé", description: `Renvoi ${count + 1}/${MAX_RESENDS} pour ${email.to}` });
+
+      // Sync count back to original document
+      try {
+        await updateDoc(doc(db, "mail", originId), {
+          _resendCount: newCount,
+          _lastResendAt: serverTimestamp(),
+        });
+      } catch (updateErr) {
+        console.warn("Impossible de mettre à jour le compteur sur l'original:", updateErr);
+      }
+
+      toast({ title: "✅ Email renvoyé", description: `Renvoi ${newCount}/${MAX_RESENDS} pour ${email.to}` });
     } catch (error: any) {
       console.error("Erreur renvoi email:", error);
       toast({ title: "Erreur", description: error.message || "Impossible de renvoyer l'email.", variant: "destructive" });
