@@ -17,7 +17,8 @@ import {
   HelpCircle,
   Store,
   GraduationCap,
-  Globe
+  Globe,
+  Mail
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -129,6 +130,12 @@ const settingsItems = [
     url: "/admin/notifications", 
     icon: Bell,
     description: "Alertes et messages"
+  },
+  { 
+    title: "Emails", 
+    url: "/admin/emails", 
+    icon: Mail,
+    description: "Suivi des emails envoyés"
   },
   { 
     title: "Sécurité", 
