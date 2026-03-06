@@ -8,6 +8,7 @@ import { sendNotification, notifyAdmins } from '../utils/notifications';
 import { sendOrderConfirmation } from '../notifications/sendOrderConfirmation';
 import { sendStatusNotification } from '../notifications/sendStatusNotification';
 import { wrapInTemplate, ctaButton, infoRow, divider, APP_URL, COLORS } from '../utils/emailTemplate';
+import { sendEmailWithFallback } from '../utils/sendgrid';
 
 const db = admin.firestore();
 
@@ -363,15 +364,13 @@ async function notifySellers(orderId: string, order: any, status: 'delivered' | 
       const sellerName = seller.displayName || seller.shopName || 'Vendeur';
       const promises: Promise<any>[] = [];
 
-      // 3. Email
+      // 3. Email via dual strategy (mail collection + SendGrid fallback)
       if (seller.email) {
         promises.push(
-          db.collection('mail').add({
+          sendEmailWithFallback({
             to: seller.email,
-            message: {
-              subject: `${msg.emoji} ${msg.title} — Commande ${orderId}`,
-              html: msg.emailBody(sellerName, sellerAmount),
-            },
+            subject: `${msg.emoji} ${msg.title} — Commande ${orderId}`,
+            html: msg.emailBody(sellerName, sellerAmount),
           })
         );
       }
