@@ -490,11 +490,29 @@ export default function AdminEmailsPage() {
                   </div>
                 )}
 
-                {/* Document ID */}
-                <div className="pt-2 border-t border-border">
+                {/* Resend + Document ID */}
+                <div className="pt-3 border-t border-border flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
                     ID: <span className="font-mono">{selectedEmail.id}</span>
                   </p>
+                  {(getState(selectedEmail) === "ERROR" || getState(selectedEmail) === "PENDING") && (
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        handleResend(selectedEmail);
+                        setPreviewOpen(false);
+                      }}
+                      disabled={resending === selectedEmail.id}
+                      className="gap-2"
+                    >
+                      {resending === selectedEmail.id ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                      Renvoyer cet email
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
