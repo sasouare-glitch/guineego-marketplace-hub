@@ -51,10 +51,13 @@ import {
   orderBy,
   limit,
   onSnapshot,
+  addDoc,
+  serverTimestamp,
   Timestamp,
   where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { toast } from "@/hooks/use-toast";
 
 interface MailDoc {
   id: string;
@@ -114,6 +117,33 @@ export default function AdminEmailsPage() {
   const [selectedEmail, setSelectedEmail] = useState<MailDoc | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [maxResults, setMaxResults] = useState(100);
+  const [resending, setResending] = useState<string | null>(null);
+
+  // Resend an email by creating a new document in the 'mail' collection
+  const handleResend = async (email: MailDoc) => {
+    if (!email.to || !email.message?.subject || !email.message?.html) {
+      toast({ title: "Impossible de renvoyer", description: "Données de l'email incomplètes.", variant: "destructive" });
+      return;
+    }
+    setResending(email.id);
+    try {
+      await addDoc(collection(db, "mail"), {
+        to: email.to,
+        message: {
+          subject: email.message.subject,
+          html: email.message.html,
+        },
+        createdAt: serverTimestamp(),
+        _resendOf: email.id,
+      });
+      toast({ title: "✅ Email renvoyé", description: `Un nouvel email a été créé pour ${email.to}` });
+    } catch (error: any) {
+      console.error("Erreur renvoi email:", error);
+      toast({ title: "Erreur", description: error.message || "Impossible de renvoyer l'email.", variant: "destructive" });
+    } finally {
+      setResending(null);
+    }
+  };
 
   // Real-time listener on 'mail' collection
   useEffect(() => {
@@ -333,17 +363,35 @@ export default function AdminEmailsPage() {
                             {email.delivery?.attempts || 0}
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedEmail(email);
-                                setPreviewOpen(true);
-                              }}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              <span className="hidden sm:inline">Détails</span>
-                            </Button>
+                            <div className="flex items-center justify-end gap-1">
+                              {(state === "ERROR" || state === "PENDING") && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleResend(email)}
+                                  disabled={resending === email.id}
+                                  className="text-primary"
+                                >
+                                  {resending === email.id ? (
+                                    <RefreshCw className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <Send className="w-4 h-4" />
+                                  )}
+                                  <span className="hidden sm:inline ml-1">Renvoyer</span>
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedEmail(email);
+                                  setPreviewOpen(true);
+                                }}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                <span className="hidden sm:inline">Détails</span>
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -442,11 +490,29 @@ export default function AdminEmailsPage() {
                   </div>
                 )}
 
-                {/* Document ID */}
-                <div className="pt-2 border-t border-border">
+                {/* Resend + Document ID */}
+                <div className="pt-3 border-t border-border flex items-center justify-between">
                   <p className="text-xs text-muted-foreground">
                     ID: <span className="font-mono">{selectedEmail.id}</span>
                   </p>
+                  {(getState(selectedEmail) === "ERROR" || getState(selectedEmail) === "PENDING") && (
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        handleResend(selectedEmail);
+                        setPreviewOpen(false);
+                      }}
+                      disabled={resending === selectedEmail.id}
+                      className="gap-2"
+                    >
+                      {resending === selectedEmail.id ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                      Renvoyer cet email
+                    </Button>
+                  )}
                 </div>
               </div>
             )}
