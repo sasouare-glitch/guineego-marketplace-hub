@@ -92,7 +92,24 @@ export default function RegisterPage() {
     try {
       setError(null);
       await signInWithGoogle();
-      navigate('/', { replace: true });
+      // After Google sign-in, check Firestore for role-based redirect
+      const { getAuth } = await import('firebase/auth');
+      const { doc, getDoc } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase/config');
+      const currentUser = getAuth().currentUser;
+      if (currentUser) {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        const role = userDoc.data()?.role;
+        const roleRoutes: Record<string, string> = {
+          ecommerce: '/seller',
+          courier: '/courier',
+          investor: '/investor',
+          admin: '/admin',
+        };
+        navigate(roleRoutes[role] || '/', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch (err: any) {
       const googleErrors: Record<string, string> = {
         'auth/popup-blocked': 'Le popup a été bloqué. Autorisez les popups pour ce site.',
