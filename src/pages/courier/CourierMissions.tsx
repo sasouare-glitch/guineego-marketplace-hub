@@ -134,6 +134,12 @@ const CourierMissions = () => {
   const { hasRole } = useAuth();
   const { available, myMissions, loading, acceptMission } = useCourierMissions();
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("available");
+
+  const handleAcceptMission = async (missionId: string) => {
+    await acceptMission(missionId);
+    setActiveTab("active");
+  };
   const [zoneFilter, setZoneFilter] = useState("all");
 
   const filterBySearch = (missions: DeliveryMission[]) =>
@@ -198,7 +204,7 @@ const CourierMissions = () => {
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
-          <Tabs defaultValue="available" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
               <TabsTrigger value="available" className="gap-2">
                 Disponibles
@@ -221,7 +227,7 @@ const CourierMissions = () => {
                   <MissionRealCard
                     key={mission.id}
                     mission={mission}
-                    onAccept={hasRole('courier') ? () => acceptMission(mission.id) : undefined}
+                    onAccept={hasRole('courier') ? () => handleAcceptMission(mission.id) : undefined}
                     onViewDetails={() => navigate(`/courier/mission/${mission.id}`)}
                   />
                 ))}
