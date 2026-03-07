@@ -133,5 +133,6 @@ export const SwipeStatusButton = ({
         </motion.div>
       )}
     </motion.div>
+    </div>
   );
 };
