@@ -27,15 +27,25 @@ const registerSchema = z.object({
   role: z.enum(['customer', 'ecommerce', 'courier', 'investor'], { required_error: 'Veuillez choisir votre profil' }),
   displayName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Email invalide'),
+  phone: z.string().optional(),
   password: z.string()
     .min(8, 'Minimum 8 caractères')
     .regex(/[A-Z]/, 'Au moins une majuscule')
     .regex(/[0-9]/, 'Au moins un chiffre'),
   confirmPassword: z.string(),
-  acceptTerms: z.boolean().refine(val => val === true, 'Vous devez accepter les conditions')
+  acceptTerms: z.boolean().refine(val => val === true, 'Vous devez accepter les conditions'),
+  // Champs vendeur
+  businessName: z.string().optional(),
+  businessAddress: z.string().optional(),
+  // Champs coursier
+  vehicleType: z.enum(['moto', 'velo', 'voiture', 'pied']).optional(),
+  zones: z.array(z.string()).optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: 'Les mots de passe ne correspondent pas',
   path: ['confirmPassword']
+}).refine(data => data.role !== 'ecommerce' || (data.businessName && data.businessName.length >= 2), {
+  message: 'Le nom de la boutique est requis',
+  path: ['businessName']
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
