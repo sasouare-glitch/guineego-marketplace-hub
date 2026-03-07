@@ -123,8 +123,8 @@ const statusConfig: Record<
     label: "Prête",
     icon: ShoppingBag,
     variant: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-    sellerAction: null, // Courier takes over
-    nextStatus: null,
+    sellerAction: "Expédier",
+    nextStatus: "shipped",
   },
   shipped: {
     label: "Colis récupéré",
@@ -474,10 +474,17 @@ export default function SellerOrders() {
                         </Button>
                       )}
 
-                      {/* After ready: show waiting badge */}
-                      {order.status === "ready" && (
-                        <Badge variant="outline" className="text-blue-600 border-blue-200">
-                          En attente du coursier
+                      {/* After shipped: waiting for courier pickup */}
+                      {order.status === "shipped" && (
+                        <Badge variant="outline" className="text-indigo-600 border-indigo-200">
+                          <Truck className="w-3 h-3 mr-1" />
+                          Coursier en route
+                        </Badge>
+                      )}
+                      {order.status === "in_delivery" && (
+                        <Badge variant="outline" className="text-violet-600 border-violet-200">
+                          <Truck className="w-3 h-3 mr-1" />
+                          En cours de livraison
                         </Badge>
                       )}
 
