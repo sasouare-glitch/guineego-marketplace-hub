@@ -73,7 +73,7 @@ export function useCourierMissions() {
       orderBy("createdAt", "desc")
     );
     const unsub = onSnapshot(q, (snap) => {
-      setAvailable(snap.docs.map((d) => ({ id: d.id, ...d.data() } as DeliveryMission)));
+      setAvailable(snap.docs.map((d) => ({ ...d.data(), id: d.id } as DeliveryMission)));
       setLoading(false);
     }, (err) => {
       console.error("Error fetching available missions:", err);
@@ -91,7 +91,7 @@ export function useCourierMissions() {
       orderBy("createdAt", "desc")
     );
     const unsub = onSnapshot(q, (snap) => {
-      setMyMissions(snap.docs.map((d) => ({ id: d.id, ...d.data() } as DeliveryMission)));
+      setMyMissions(snap.docs.map((d) => ({ ...d.data(), id: d.id } as DeliveryMission)));
     });
     return () => unsub();
   }, [user]);
