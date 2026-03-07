@@ -32,6 +32,15 @@ const CourierEarnings = () => {
 
   const loading = walletLoading;
 
+  // Calculate from delivered missions as fallback
+  const deliveredMissions = myMissions.filter((m) => m.status === "delivered");
+  const totalEarningsFromMissions = deliveredMissions.reduce((sum, m) => sum + (m.fee || 0), 0);
+  const totalWithdrawals = wallet?.totalWithdrawals || 0;
+
+  const computedTotalEarnings = wallet?.totalEarnings || totalEarningsFromMissions;
+  const computedBalance = wallet?.balance || (totalEarningsFromMissions - totalWithdrawals);
+  const completedCount = wallet?.completedMissions || deliveredMissions.length;
+
   return (
     <CourierLayout>
       <div className="space-y-6">
@@ -69,7 +78,7 @@ const CourierEarnings = () => {
                     <div>
                       <p className="text-white/80 text-sm">Solde disponible</p>
                       <p className="text-3xl font-display font-bold mt-1">
-                        {(wallet?.balance || 0).toLocaleString("fr-GN")} GNF
+                        {computedBalance.toLocaleString("fr-GN")} GNF
                       </p>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
@@ -92,11 +101,11 @@ const CourierEarnings = () => {
                     <div>
                       <p className="text-muted-foreground text-sm">Gains totaux</p>
                       <p className="text-2xl font-display font-bold mt-1">
-                        {(wallet?.totalEarnings || 0).toLocaleString("fr-GN")} GNF
+                        {computedTotalEarnings.toLocaleString("fr-GN")} GNF
                       </p>
                       <div className="flex items-center gap-1 mt-2 text-guinea-green text-sm">
                         <TrendingUp className="w-4 h-4" />
-                        <span>{wallet?.completedMissions || 0} missions</span>
+                        <span>{completedCount} missions</span>
                       </div>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-guinea-green/10 flex items-center justify-center">
