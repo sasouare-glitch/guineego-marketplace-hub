@@ -48,7 +48,7 @@ export default function CourierStatsPage() {
           <p className="text-muted-foreground">Aperçu de vos performances</p>
         </div>
 
-        <CourierStats missions={myMissions} wallet={wallet} />
+        <CourierStats myMissions={myMissions} wallet={wallet} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <EarningsChart missions={myMissions} />
