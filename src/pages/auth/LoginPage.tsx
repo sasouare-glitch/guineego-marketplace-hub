@@ -57,8 +57,9 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError(null);
-      await signIn(data.email, data.password);
-      navigate(from, { replace: true });
+      const cred = await signIn(data.email, data.password);
+      const dest = from || await getRedirectByRole((cred as any)?.user?.uid || auth.currentUser?.uid);
+      navigate(dest, { replace: true });
     } catch (err: any) {
       const errorMessages: Record<string, string> = {
         'auth/user-not-found': 'Aucun compte trouvé avec cet email',
