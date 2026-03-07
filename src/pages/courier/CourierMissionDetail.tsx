@@ -45,6 +45,22 @@ const CourierMissionDetail = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
+  // Extract GPS coordinates from mission if available
+  const pickupCoords = mission?.pickup && 'lat' in mission.pickup
+    ? { lat: (mission.pickup as any).lat, lng: (mission.pickup as any).lng }
+    : null;
+  const deliveryCoords = mission?.delivery && 'lat' in mission.delivery
+    ? { lat: (mission.delivery as any).lat, lng: (mission.delivery as any).lng }
+    : null;
+
+  // GPS tracking
+  const gps = useCourierGPS({
+    missionId: id,
+    pickupCoords,
+    deliveryCoords,
+    currentStatus: mission?.status,
+  });
+
   // Real-time listener on this delivery document
   useEffect(() => {
     if (!id) return;
