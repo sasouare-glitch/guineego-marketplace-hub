@@ -17,11 +17,14 @@ import {
   CheckCircle2,
   Circle,
   Loader2,
+  Navigation2,
+  Crosshair,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useCourierMissions, DeliveryMission, DeliveryStatus } from "@/hooks/useCourierMissions";
+import { useCourierGPS } from "@/hooks/useCourierGPS";
 
 type StepStatus = "accepted" | "pickup_started" | "picked_up" | "in_transit" | "arrived" | "delivered";
 
