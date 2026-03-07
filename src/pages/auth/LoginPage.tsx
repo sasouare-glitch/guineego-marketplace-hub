@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '@/lib/firebase/config';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,7 +32,23 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const from = (location.state as { from?: Location })?.from?.pathname || '/';
+  const from = (location.state as { from?: Location })?.from?.pathname;
+
+  const getRedirectByRole = async (uid: string): Promise<string> => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      const role = userDoc.data()?.role;
+      const roleRoutes: Record<string, string> = {
+        ecommerce: '/seller',
+        courier: '/courier',
+        investor: '/investor',
+        admin: '/admin',
+      };
+      return roleRoutes[role] || '/';
+    } catch {
+      return '/';
+    }
+  };
   
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema)
@@ -40,7 +58,8 @@ export default function LoginPage() {
     try {
       setError(null);
       await signIn(data.email, data.password);
-      navigate(from, { replace: true });
+      const dest = from || await getRedirectByRole(auth.currentUser?.uid || '');
+      navigate(dest, { replace: true });
     } catch (err: any) {
       const errorMessages: Record<string, string> = {
         'auth/user-not-found': 'Aucun compte trouvé avec cet email',
@@ -57,7 +76,8 @@ export default function LoginPage() {
     try {
       setError(null);
       await signInWithGoogle();
-      navigate(from, { replace: true });
+      const dest = from || await getRedirectByRole(auth.currentUser?.uid || '');
+      navigate(dest, { replace: true });
     } catch (err: any) {
       setError('Erreur de connexion avec Google');
     }
