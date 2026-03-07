@@ -30,16 +30,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const notifChannels = [
-  { key: 'new_order', label: 'Nouvelles commandes', desc: 'Alerte à chaque nouvelle commande reçue', push: true, email: true, sms: false },
-  { key: 'low_stock', label: 'Stock faible', desc: 'Alerte quand un produit passe sous le seuil critique', push: true, email: false, sms: false },
-  { key: 'delivery_alert', label: 'Alertes livraison', desc: 'Retards, annulations, livreurs en zone', push: true, email: false, sms: true },
-  { key: 'payment', label: 'Paiements & virements', desc: 'Confirmation de paiements et retraits', push: true, email: true, sms: true },
-  { key: 'new_seller', label: 'Nouveau vendeur', desc: 'Inscription et validation des e-commerçants', push: true, email: true, sms: false },
-  { key: 'report', label: 'Rapports automatiques', desc: 'Rapports quotidiens et hebdomadaires', push: false, email: true, sms: false },
-  { key: 'security', label: 'Alertes sécurité', desc: "Connexion suspecte, tentatives d'accès échouées", push: true, email: true, sms: true },
-  { key: 'promo', label: 'Campagnes promotionnelles', desc: 'Envoi de promotions aux clients', push: true, email: false, sms: false },
-];
+// Channel defaults moved to useAdminNotifications hook
 
 const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: string; label: string }> = {
   order:           { icon: ShoppingCart,  color: 'text-primary',          bg: 'bg-primary/10',    label: 'Commande' },
@@ -69,7 +60,6 @@ const audienceConfig: Record<string, string> = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function AdminNotificationsPage() {
-  const [channels, setChannels] = useState(notifChannels);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: '', body: '', audience: 'all', type: 'promo' });
   const [sending, setSending] = useState(false);
@@ -77,13 +67,8 @@ export default function AdminNotificationsPage() {
   const {
     notifications, loading, unreadCount, sentCount, scheduledCount,
     sendNotification, deleteNotification,
+    channels, channelsLoading, savingChannels, toggleChannel, saveChannels,
   } = useAdminNotifications();
-
-  const toggleChannel = (key: string, channel: 'push' | 'email' | 'sms') => {
-    setChannels(prev => prev.map(c =>
-      c.key === key ? { ...c, [channel]: !c[channel] } : c
-    ));
-  };
 
   const handleSend = async () => {
     if (!form.title.trim()) return;
@@ -334,8 +319,8 @@ export default function AdminNotificationsPage() {
                   ))}
                 </div>
                 <div className="flex justify-end mt-4">
-                  <Button className="gap-2">
-                    <CheckCircle2 className="w-4 h-4" />
+                  <Button className="gap-2" onClick={saveChannels} disabled={savingChannels}>
+                    {savingChannels ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                     Enregistrer les préférences
                   </Button>
                 </div>

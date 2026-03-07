@@ -2,10 +2,32 @@ import { useState, useEffect, useCallback } from "react";
 import {
   collection, query, orderBy, onSnapshot, doc, deleteDoc,
   updateDoc, addDoc, serverTimestamp, Timestamp, limit, writeBatch,
-  where,
+  where, getDoc, setDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { toast } from "sonner";
+
+// ─── Channel Preferences ─────────────────────────────────────────────────────
+
+export interface ChannelPreference {
+  key: string;
+  label: string;
+  desc: string;
+  push: boolean;
+  email: boolean;
+  sms: boolean;
+}
+
+const DEFAULT_CHANNELS: ChannelPreference[] = [
+  { key: 'new_order', label: 'Nouvelles commandes', desc: 'Alerte à chaque nouvelle commande reçue', push: true, email: true, sms: false },
+  { key: 'low_stock', label: 'Stock faible', desc: 'Alerte quand un produit passe sous le seuil critique', push: true, email: false, sms: false },
+  { key: 'delivery_alert', label: 'Alertes livraison', desc: 'Retards, annulations, livreurs en zone', push: true, email: false, sms: true },
+  { key: 'payment', label: 'Paiements & virements', desc: 'Confirmation de paiements et retraits', push: true, email: true, sms: true },
+  { key: 'new_seller', label: 'Nouveau vendeur', desc: 'Inscription et validation des e-commerçants', push: true, email: true, sms: false },
+  { key: 'report', label: 'Rapports automatiques', desc: 'Rapports quotidiens et hebdomadaires', push: false, email: true, sms: false },
+  { key: 'security', label: 'Alertes sécurité', desc: "Connexion suspecte, tentatives d'accès échouées", push: true, email: true, sms: true },
+  { key: 'promo', label: 'Campagnes promotionnelles', desc: 'Envoi de promotions aux clients', push: true, email: false, sms: false },
+];
 
 export interface AdminNotification {
   id: string;
@@ -102,6 +124,59 @@ export function useAdminNotifications() {
     }
   }, []);
 
+  // ─── Channel Preferences (config/notification_channels) ───────────────────
+
+  const [channels, setChannels] = useState<ChannelPreference[]>(DEFAULT_CHANNELS);
+  const [channelsLoading, setChannelsLoading] = useState(true);
+  const [savingChannels, setSavingChannels] = useState(false);
+
+  useEffect(() => {
+    const docRef = doc(db, "config", "notification_channels");
+    const unsubChannels = onSnapshot(docRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        const saved = data.channels as Record<string, { push: boolean; email: boolean; sms: boolean }> | undefined;
+        if (saved) {
+          setChannels(DEFAULT_CHANNELS.map(ch => ({
+            ...ch,
+            push: saved[ch.key]?.push ?? ch.push,
+            email: saved[ch.key]?.email ?? ch.email,
+            sms: saved[ch.key]?.sms ?? ch.sms,
+          })));
+        }
+      }
+      setChannelsLoading(false);
+    }, () => setChannelsLoading(false));
+
+    return () => unsubChannels();
+  }, []);
+
+  const toggleChannel = useCallback((key: string, channel: 'push' | 'email' | 'sms') => {
+    setChannels(prev => prev.map(c =>
+      c.key === key ? { ...c, [channel]: !c[channel] } : c
+    ));
+  }, []);
+
+  const saveChannels = useCallback(async () => {
+    setSavingChannels(true);
+    try {
+      const channelsMap: Record<string, { push: boolean; email: boolean; sms: boolean }> = {};
+      channels.forEach(ch => {
+        channelsMap[ch.key] = { push: ch.push, email: ch.email, sms: ch.sms };
+      });
+      await setDoc(doc(db, "config", "notification_channels"), {
+        channels: channelsMap,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+      toast.success("Préférences enregistrées !");
+    } catch (error) {
+      console.error("Error saving channel preferences:", error);
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSavingChannels(false);
+    }
+  }, [channels]);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
   const sentCount = notifications.filter((n) => n.status === "sent").length;
   const scheduledCount = notifications.filter((n) => n.status === "scheduled").length;
@@ -109,5 +184,6 @@ export function useAdminNotifications() {
   return {
     notifications, loading, unreadCount, sentCount, scheduledCount,
     sendNotification, deleteNotification, markAsRead,
+    channels, channelsLoading, savingChannels, toggleChannel, saveChannels,
   };
 }
