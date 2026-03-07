@@ -33,6 +33,7 @@ import CourierStatsPage from "./pages/courier/CourierStatsPage";
 import CourierProfilePage from "./pages/courier/CourierProfilePage";
 import CourierSettingsPage from "./pages/courier/CourierSettingsPage";
 import CourierHelpPage from "./pages/courier/CourierHelpPage";
+import CourierScanPage from "./pages/courier/CourierScanPage";
 import Marketplace from "./pages/Marketplace";
 import SearchPage from "./pages/SearchPage";
 import ProductDetail from "./pages/ProductDetail";
@@ -332,6 +333,11 @@ const App = () => (
                     <Route path="/courier/help" element={
                       <ProtectedRoute requiredRoles={['courier', 'admin']}>
                         <CourierHelpPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/courier/scan" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierScanPage />
                       </ProtectedRoute>
                     } />
                     
