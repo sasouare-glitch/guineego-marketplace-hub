@@ -79,6 +79,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<FirestoreUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<FirestoreUser | null>(null);
   const [newRole, setNewRole] = useState<UserRole>('customer');
   const [reason, setReason] = useState('');
@@ -111,10 +112,12 @@ export default function AdminUsersPage() {
   }, []);
 
   // Filter users
-  const filteredUsers = users.filter(user => 
-    (user.displayName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-    (user.email?.toLowerCase() || '').includes(searchQuery.toLowerCase())
-  );
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = (user.displayName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (user.email?.toLowerCase() || '').includes(searchQuery.toLowerCase());
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
 
   // Stats
   const stats = {
@@ -243,6 +246,20 @@ export default function AdminUsersPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
+                <Select value={roleFilter} onValueChange={setRoleFilter}>
+                  <SelectTrigger className="w-36">
+                    <Filter className="w-4 h-4 mr-1" />
+                    <SelectValue placeholder="Rôle" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les rôles</SelectItem>
+                    {allRoles.map(role => (
+                      <SelectItem key={role} value={role}>
+                        {roleLabels[role]?.label || role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
               </div>
             </div>
