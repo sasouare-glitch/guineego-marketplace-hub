@@ -56,6 +56,7 @@ import {
   Timestamp,
   doc,
   updateDoc,
+  addDoc,
   arrayUnion,
   serverTimestamp,
 } from "firebase/firestore";
