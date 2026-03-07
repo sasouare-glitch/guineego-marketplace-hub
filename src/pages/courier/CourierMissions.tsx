@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { CourierLayout } from "@/components/courier/CourierLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -219,7 +220,7 @@ const CourierMissions = () => {
                   <MissionRealCard
                     key={mission.id}
                     mission={mission}
-                    onAccept={() => acceptMission(mission.id)}
+                    onAccept={hasRole('courier') ? () => acceptMission(mission.id) : undefined}
                     onViewDetails={() => navigate(`/courier/mission/${mission.id}`)}
                   />
                 ))}
