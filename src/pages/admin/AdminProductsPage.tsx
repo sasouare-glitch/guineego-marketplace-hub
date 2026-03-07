@@ -473,6 +473,21 @@ export default function AdminProductsPage() {
               <Input value={addForm.name} onChange={(e) => setAddForm(prev => ({ ...prev, name: e.target.value }))} placeholder="Ex: iPhone 15 Pro" />
             </div>
             <div className="space-y-2">
+              <Label>Boutique (vendeur) *</Label>
+              <Select value={addForm.sellerId} onValueChange={(v) => setAddForm(prev => ({ ...prev, sellerId: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir une boutique..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {sellers.map((seller) => (
+                    <SelectItem key={seller.id} value={seller.id}>
+                      {seller.businessName || seller.shopName || seller.name || seller.displayName || seller.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label>Description</Label>
               <Textarea value={addForm.description} onChange={(e) => setAddForm(prev => ({ ...prev, description: e.target.value }))} placeholder="Description du produit" rows={3} />
             </div>
