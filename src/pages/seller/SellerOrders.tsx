@@ -254,6 +254,53 @@ export default function SellerOrders() {
         updatedAt: serverTimestamp(),
       });
 
+      // Auto-create delivery mission when seller ships the order
+      if (newStatus === "shipped") {
+        const order = orders.find((o) => o.id === orderId);
+        if (order) {
+          const missionTimestamp = Date.now().toString(36).toUpperCase();
+          const missionRandom = Math.random().toString(36).substring(2, 6).toUpperCase();
+          const missionId = `MIS-${missionTimestamp}${missionRandom}`;
+
+          const sellerAddress = {
+            address: "Adresse du vendeur",
+            commune: order.shippingAddress?.commune || "Kaloum",
+            phone: user?.phoneNumber || "",
+          };
+
+          const deliveryCommune = order.shippingAddress?.commune || "Kaloum";
+          const baseFees: Record<string, number> = {
+            Kaloum: 15000, Dixinn: 20000, Matam: 20000, Ratoma: 25000, Matoto: 30000,
+          };
+          const fee = baseFees[deliveryCommune] || 35000;
+
+          await addDoc(collection(db, "deliveries"), {
+            id: missionId,
+            orderId,
+            customerId: order.customerId,
+            sellerIds: order.sellerIds || [order.sellerId],
+            pickup: sellerAddress,
+            delivery: order.shippingAddress,
+            priority: "normal",
+            fee,
+            estimatedTime: 60,
+            status: "pending",
+            assignedCourier: null,
+            courierLocation: null,
+            statusHistory: [
+              {
+                status: "pending",
+                timestamp: Timestamp.now(),
+                note: "Mission créée par le vendeur",
+              },
+            ],
+            createdAt: serverTimestamp(),
+          });
+
+          await updateDoc(orderRef, { deliveryMissionId: missionId });
+        }
+      }
+
       toast.success(`Commande mise à jour: ${statusConfig[newStatus].label}`);
 
       // Optimistically update the local order status so the filter works immediately
