@@ -364,7 +364,7 @@ export default function AdminProductsPage() {
                           <TableCell>
                             <Badge variant="outline" className="text-xs">{product.category}</Badge>
                           </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">{product.sellerName || product.sellerId}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{sellerNameMap[product.sellerId] || product.sellerName || product.sellerId}</TableCell>
                           <TableCell className="font-medium">{format(product.price)}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
