@@ -1,7 +1,22 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import type { Notification as NotificationData } from "@/types/notifications";
-import { mockNotifications } from "@/types/notifications";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+  addDoc,
+  writeBatch,
+  serverTimestamp,
+  Timestamp
+} from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 
 interface NotificationContextType {
   notifications: NotificationData[];
@@ -18,8 +33,9 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notifications, setNotifications] = useState<NotificationData[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [permissionStatus, setPermissionStatus] = useState<globalThis.NotificationPermission | "default">("default");
+  const { user } = useAuth();
 
   // Check notification permission on mount
   useEffect(() => {
@@ -28,48 +44,115 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  // Listen to Firestore notifications in real-time
+  useEffect(() => {
+    if (!user?.uid) {
+      setNotifications([]);
+      return;
+    }
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    const q = query(
+      collection(db, "notifications"),
+      where("userId", "==", user.uid),
+      orderBy("createdAt", "desc")
     );
-  };
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const notifs: NotificationData[] = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        const createdAt = data.createdAt instanceof Timestamp
+          ? data.createdAt.toDate().toISOString()
+          : data.createdAt || new Date().toISOString();
 
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
-
-  const clearAll = () => {
-    setNotifications([]);
-  };
-
-  const addNotification = (notification: Omit<NotificationData, "id" | "read" | "createdAt">) => {
-    const newNotification: NotificationData = {
-      ...notification,
-      id: Date.now().toString(),
-      read: false,
-      createdAt: new Date().toISOString(),
-    };
-    setNotifications((prev) => [newNotification, ...prev]);
-
-    // Show toast for new notification
-    toast(notification.title, {
-      description: notification.message,
+        return {
+          id: docSnap.id,
+          type: data.type || "system",
+          title: data.title || data.body || "",
+          message: data.message || data.body || "",
+          orderId: data.data?.orderId || data.orderId,
+          read: data.read ?? false,
+          createdAt,
+        };
+      });
+      setNotifications(notifs);
+    }, (error) => {
+      console.error("Error listening to notifications:", error);
     });
 
-    // Show browser notification if permitted
-    if (permissionStatus === "granted" && "Notification" in window) {
-      new globalThis.Notification(notification.title, {
-        body: notification.message,
-        icon: "/favicon.ico",
-      });
+    return () => unsubscribe();
+  }, [user?.uid]);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const markAsRead = useCallback(async (id: string) => {
+    try {
+      await updateDoc(doc(db, "notifications", id), { read: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
     }
-  };
+  }, []);
+
+  const markAllAsRead = useCallback(async () => {
+    if (!user?.uid) return;
+    try {
+      const batch = writeBatch(db);
+      notifications.filter((n) => !n.read).forEach((n) => {
+        batch.update(doc(db, "notifications", n.id), { read: true });
+      });
+      await batch.commit();
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  }, [user?.uid, notifications]);
+
+  const deleteNotification = useCallback(async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "notifications", id));
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+    }
+  }, []);
+
+  const clearAll = useCallback(async () => {
+    if (!user?.uid) return;
+    try {
+      const batch = writeBatch(db);
+      notifications.forEach((n) => {
+        batch.delete(doc(db, "notifications", n.id));
+      });
+      await batch.commit();
+    } catch (error) {
+      console.error("Error clearing notifications:", error);
+    }
+  }, [user?.uid, notifications]);
+
+  const addNotification = useCallback(async (notification: Omit<NotificationData, "id" | "read" | "createdAt">) => {
+    if (!user?.uid) return;
+    try {
+      await addDoc(collection(db, "notifications"), {
+        userId: user.uid,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        body: notification.message,
+        orderId: notification.orderId || null,
+        data: notification.orderId ? { orderId: notification.orderId } : {},
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+
+      toast(notification.title, { description: notification.message });
+
+      if (permissionStatus === "granted" && "Notification" in window) {
+        new globalThis.Notification(notification.title, {
+          body: notification.message,
+          icon: "/favicon.ico",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding notification:", error);
+    }
+  }, [user?.uid, permissionStatus]);
 
   const requestPermission = async (): Promise<boolean> => {
     if (!("Notification" in window)) {
