@@ -4,24 +4,83 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bell, Globe, Moon, Shield, Smartphone, Volume2 } from "lucide-react";
-import { useState } from "react";
+import { Bell, Shield, Smartphone, Loader2, Save } from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { db } from "@/lib/firebase/config";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+
+interface CourierSettings {
+  pushNotifications: boolean;
+  soundAlerts: boolean;
+  missionAlerts: boolean;
+  darkMode: boolean;
+  language: string;
+  autoAccept: boolean;
+}
+
+const defaults: CourierSettings = {
+  pushNotifications: true,
+  soundAlerts: true,
+  missionAlerts: true,
+  darkMode: false,
+  language: "fr",
+  autoAccept: false,
+};
 
 export default function CourierSettingsPage() {
-  const [settings, setSettings] = useState({
-    pushNotifications: true,
-    soundAlerts: true,
-    missionAlerts: true,
-    darkMode: false,
-    language: "fr",
-    autoAccept: false,
-  });
+  const { user } = useAuth();
+  const [settings, setSettings] = useState<CourierSettings>(defaults);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const toggle = (key: keyof typeof settings) =>
+  useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      try {
+        const snap = await getDoc(doc(db, "courier_settings", user.uid));
+        if (snap.exists()) {
+          setSettings({ ...defaults, ...snap.data() as Partial<CourierSettings> });
+        }
+      } catch (err) {
+        console.error("Error loading courier settings:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [user]);
+
+  const toggle = (key: keyof CourierSettings) =>
     setSettings((s) => ({ ...s, [key]: !s[key] }));
 
-  const handleSave = () => toast.success("Paramètres enregistrés !");
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      await setDoc(doc(db, "courier_settings", user.uid), {
+        ...settings,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+      toast.success("Paramètres enregistrés !");
+    } catch (err: any) {
+      console.error("Error saving courier settings:", err);
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <CourierLayout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </CourierLayout>
+    );
+  }
 
   return (
     <CourierLayout>
@@ -84,7 +143,10 @@ export default function CourierSettingsPage() {
           </div>
         </Card>
 
-        <Button onClick={handleSave} className="w-full">Enregistrer</Button>
+        <Button onClick={handleSave} disabled={saving} className="w-full">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+          Enregistrer
+        </Button>
       </div>
     </CourierLayout>
   );

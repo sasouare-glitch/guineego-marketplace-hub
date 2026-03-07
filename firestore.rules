@@ -340,5 +340,14 @@ service cloud.firestore {
       allow update: if isOwner(userId) && isSeller();
       allow delete: if isAdmin();
     }
+    
+    // ============================================
+    // COURIER SETTINGS (owner-only)
+    // ============================================
+    match /courier_settings/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create, update: if isOwner(userId) && isCourier();
+      allow delete: if isAdmin();
+    }
   }
 }
