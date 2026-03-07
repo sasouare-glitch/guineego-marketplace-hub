@@ -1,5 +1,5 @@
 /**
- * Admin Notifications Page - Centre de notifications global
+ * Admin Notifications Page - Centre de notifications global (Firestore)
  */
 
 import { useState } from 'react';
@@ -22,21 +22,13 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
 import {
-  Bell, BellOff, Send, Users, ShoppingCart, Truck, AlertTriangle,
-  CheckCircle2, Clock, Info, Package, Megaphone, Settings2, RefreshCw, Trash2,
+  Bell, Send, Users, ShoppingCart, Truck, AlertTriangle,
+  CheckCircle2, Clock, Info, Package, Megaphone, Settings2, RefreshCw, Trash2, Loader2,
 } from 'lucide-react';
+import { useAdminNotifications } from '@/hooks/useAdminNotifications';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-
-const recentNotifications = [
-  { id: 'N001', title: 'Nouvelle commande #CMD-1284', body: 'TechStore GN vient de passer une commande de 450 000 GNF', type: 'order', audience: 'admin', status: 'sent', sentAt: '2024-03-20 14:32', read: false },
-  { id: 'N002', title: 'Stock faible : iPhone 15 Pro', body: 'Il reste seulement 2 unités en stock chez TechStore GN', type: 'stock', audience: 'seller', status: 'sent', sentAt: '2024-03-20 12:15', read: true },
-  { id: 'N003', title: 'Livreur en retard — Mission M-089', body: 'Le coursier Mamadou D. est en retard sur la livraison', type: 'delivery', audience: 'admin', status: 'sent', sentAt: '2024-03-20 11:48', read: true },
-  { id: 'N004', title: 'Promotion Flash : -20% toute catégorie', body: 'Promotion envoyée à tous les clients actifs', type: 'promo', audience: 'customers', status: 'sent', sentAt: '2024-03-19 09:00', read: true },
-  { id: 'N005', title: 'Paiement transit validé — TRN-004', body: 'Le virement de 2 400 000 GNF a été reçu', type: 'payment', audience: 'admin', status: 'sent', sentAt: '2024-03-19 08:30', read: true },
-  { id: 'N006', title: 'Nouvelle inscription vendeur', body: 'Boutique "Mode Conakry" demande une validation', type: 'user', audience: 'admin', status: 'pending', sentAt: '2024-03-18 17:00', read: false },
-  { id: 'N007', title: 'Rapport quotidien disponible', body: 'Le rapport du 18 Mars 2024 est prêt à télécharger', type: 'report', audience: 'admin', status: 'scheduled', sentAt: '2024-03-18 08:00', read: true },
-];
+// ─── Config ───────────────────────────────────────────────────────────────────
 
 const notifChannels = [
   { key: 'new_order', label: 'Nouvelles commandes', desc: 'Alerte à chaque nouvelle commande reçue', push: true, email: true, sms: false },
@@ -50,26 +42,28 @@ const notifChannels = [
 ];
 
 const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: string; label: string }> = {
-  order:    { icon: ShoppingCart, color: 'text-primary',   bg: 'bg-primary/10',   label: 'Commande' },
-  stock:    { icon: Package,      color: 'text-orange-600', bg: 'bg-orange-500/10', label: 'Stock' },
-  delivery: { icon: Truck,        color: 'text-blue-600',   bg: 'bg-blue-500/10',   label: 'Livraison' },
-  promo:    { icon: Megaphone,    color: 'text-purple-600', bg: 'bg-purple-500/10', label: 'Promo' },
-  payment:  { icon: CheckCircle2, color: 'text-green-600',  bg: 'bg-green-500/10',  label: 'Paiement' },
-  user:     { icon: Users,        color: 'text-yellow-600', bg: 'bg-yellow-500/10', label: 'Utilisateur' },
-  report:   { icon: Info,         color: 'text-muted-foreground', bg: 'bg-muted',   label: 'Rapport' },
+  order:           { icon: ShoppingCart,  color: 'text-primary',          bg: 'bg-primary/10',    label: 'Commande' },
+  order_confirmed: { icon: CheckCircle2,  color: 'text-green-600',       bg: 'bg-green-500/10',  label: 'Confirmée' },
+  order_preparing: { icon: Package,       color: 'text-blue-600',        bg: 'bg-blue-500/10',   label: 'Préparation' },
+  order_shipped:   { icon: Truck,         color: 'text-primary',         bg: 'bg-primary/10',    label: 'Expédiée' },
+  order_delivered:  { icon: CheckCircle2, color: 'text-green-600',       bg: 'bg-green-500/10',  label: 'Livrée' },
+  stock:           { icon: Package,       color: 'text-orange-600',      bg: 'bg-orange-500/10', label: 'Stock' },
+  delivery:        { icon: Truck,         color: 'text-blue-600',        bg: 'bg-blue-500/10',   label: 'Livraison' },
+  promo:           { icon: Megaphone,     color: 'text-purple-600',      bg: 'bg-purple-500/10', label: 'Promo' },
+  payment:         { icon: CheckCircle2,  color: 'text-green-600',       bg: 'bg-green-500/10',  label: 'Paiement' },
+  user:            { icon: Users,         color: 'text-yellow-600',      bg: 'bg-yellow-500/10', label: 'Utilisateur' },
+  report:          { icon: Info,          color: 'text-muted-foreground', bg: 'bg-muted',         label: 'Rapport' },
+  system:          { icon: Bell,          color: 'text-muted-foreground', bg: 'bg-muted',         label: 'Système' },
 };
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
-  sent:      { label: 'Envoyée',     variant: 'default' },
-  pending:   { label: 'En attente',  variant: 'secondary' },
-  scheduled: { label: 'Planifiée',   variant: 'outline' },
+  sent:      { label: 'Envoyée',    variant: 'default' },
+  pending:   { label: 'En attente', variant: 'secondary' },
+  scheduled: { label: 'Planifiée',  variant: 'outline' },
 };
 
 const audienceConfig: Record<string, string> = {
-  admin:     'Admins',
-  seller:    'Vendeurs',
-  customers: 'Clients',
-  all:       'Tous',
+  admin: 'Admins', seller: 'Vendeurs', customers: 'Clients', all: 'Tous', user: 'Utilisateur',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -78,13 +72,30 @@ export default function AdminNotificationsPage() {
   const [channels, setChannels] = useState(notifChannels);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: '', body: '', audience: 'all', type: 'promo' });
+  const [sending, setSending] = useState(false);
 
-  const unreadCount = recentNotifications.filter(n => !n.read).length;
+  const {
+    notifications, loading, unreadCount, sentCount, scheduledCount,
+    sendNotification, deleteNotification,
+  } = useAdminNotifications();
 
   const toggleChannel = (key: string, channel: 'push' | 'email' | 'sms') => {
     setChannels(prev => prev.map(c =>
       c.key === key ? { ...c, [channel]: !c[channel] } : c
     ));
+  };
+
+  const handleSend = async () => {
+    if (!form.title.trim()) return;
+    setSending(true);
+    await sendNotification(form);
+    setSending(false);
+    setForm({ title: '', body: '', audience: 'all', type: 'promo' });
+    setOpen(false);
+  };
+
+  const getTypeConfig = (type: string) => {
+    return typeConfig[type] || typeConfig.system;
   };
 
   return (
@@ -97,7 +108,7 @@ export default function AdminNotificationsPage() {
             <CardContent className="pt-5 flex items-center gap-3">
               <Bell className="w-8 h-8 text-primary" />
               <div>
-                <p className="text-2xl font-bold text-primary">{unreadCount}</p>
+                <p className="text-2xl font-bold text-primary">{loading ? '—' : unreadCount}</p>
                 <p className="text-xs text-muted-foreground">Non lues</p>
               </div>
             </CardContent>
@@ -106,8 +117,8 @@ export default function AdminNotificationsPage() {
             <CardContent className="pt-5 flex items-center gap-3">
               <Send className="w-8 h-8 text-green-600" />
               <div>
-                <p className="text-2xl font-bold">{recentNotifications.filter(n => n.status === 'sent').length}</p>
-                <p className="text-xs text-muted-foreground">Envoyées aujourd'hui</p>
+                <p className="text-2xl font-bold">{loading ? '—' : sentCount}</p>
+                <p className="text-xs text-muted-foreground">Envoyées</p>
               </div>
             </CardContent>
           </Card>
@@ -115,7 +126,7 @@ export default function AdminNotificationsPage() {
             <CardContent className="pt-5 flex items-center gap-3">
               <Clock className="w-8 h-8 text-yellow-600" />
               <div>
-                <p className="text-2xl font-bold">{recentNotifications.filter(n => n.status === 'scheduled').length}</p>
+                <p className="text-2xl font-bold">{loading ? '—' : scheduledCount}</p>
                 <p className="text-xs text-muted-foreground">Planifiées</p>
               </div>
             </CardContent>
@@ -124,8 +135,8 @@ export default function AdminNotificationsPage() {
             <CardContent className="pt-5 flex items-center gap-3">
               <Users className="w-8 h-8 text-blue-600" />
               <div>
-                <p className="text-2xl font-bold">1 284</p>
-                <p className="text-xs text-muted-foreground">Abonnés push</p>
+                <p className="text-2xl font-bold">{loading ? '—' : notifications.length}</p>
+                <p className="text-xs text-muted-foreground">Total notifications</p>
               </div>
             </CardContent>
           </Card>
@@ -175,7 +186,7 @@ export default function AdminNotificationsPage() {
                         <SelectItem value="promo">Promotion</SelectItem>
                         <SelectItem value="order">Commande</SelectItem>
                         <SelectItem value="delivery">Livraison</SelectItem>
-                        <SelectItem value="report">Rapport</SelectItem>
+                        <SelectItem value="system">Système</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -183,8 +194,9 @@ export default function AdminNotificationsPage() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
-                <Button onClick={() => setOpen(false)} className="gap-2">
-                  <Send className="w-4 h-4" /> Envoyer
+                <Button onClick={handleSend} disabled={sending || !form.title.trim()} className="gap-2">
+                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  Envoyer
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -204,65 +216,84 @@ export default function AdminNotificationsPage() {
                 <div className="flex justify-between items-center">
                   <div>
                     <CardTitle>Notifications récentes</CardTitle>
-                    <CardDescription>Toutes les notifications envoyées, planifiées ou en attente</CardDescription>
+                    <CardDescription>
+                      {loading ? 'Chargement...' : `${notifications.length} notification${notifications.length !== 1 ? 's' : ''} depuis Firestore`}
+                    </CardDescription>
                   </div>
-                  <Button variant="outline" size="icon"><RefreshCw className="w-4 h-4" /></Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Notification</TableHead>
-                      <TableHead>Audience</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="w-12"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentNotifications.map(n => {
-                      const type = typeConfig[n.type];
-                      const Icon = type.icon;
-                      const status = statusConfig[n.status];
-                      return (
-                        <TableRow key={n.id} className={n.read ? '' : 'bg-primary/5'}>
-                          <TableCell>
-                            <div className={`w-8 h-8 rounded-lg ${type.bg} flex items-center justify-center`}>
-                              <Icon className={`w-4 h-4 ${type.color}`} />
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-start gap-1.5">
-                              {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />}
-                              <div>
-                                <p className="font-medium text-sm">{n.title}</p>
-                                <p className="text-xs text-muted-foreground truncate max-w-xs">{n.body}</p>
+                {loading ? (
+                  <div className="space-y-3">
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton key={i} className="h-14 w-full" />
+                    ))}
+                  </div>
+                ) : notifications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Bell className="h-12 w-12 text-muted-foreground/40 mb-3" />
+                    <p className="text-sm text-muted-foreground">Aucune notification dans Firestore</p>
+                    <p className="text-xs text-muted-foreground mt-1">Envoyez-en une pour commencer</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Notification</TableHead>
+                        <TableHead>Audience</TableHead>
+                        <TableHead>Statut</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="w-12"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {notifications.map(n => {
+                        const type = getTypeConfig(n.type);
+                        const Icon = type.icon;
+                        const status = statusConfig[n.status] || statusConfig.sent;
+                        return (
+                          <TableRow key={n.id} className={n.read ? '' : 'bg-primary/5'}>
+                            <TableCell>
+                              <div className={`w-8 h-8 rounded-lg ${type.bg} flex items-center justify-center`}>
+                                <Icon className={`w-4 h-4 ${type.color}`} />
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="text-xs">
-                              {audienceConfig[n.audience] ?? n.audience}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={status.variant} className="text-xs">{status.label}</Badge>
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                            {n.sentAt}
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive">
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-start gap-1.5">
+                                {!n.read && <span className="mt-1.5 w-2 h-2 rounded-full bg-primary shrink-0" />}
+                                <div>
+                                  <p className="font-medium text-sm">{n.title}</p>
+                                  <p className="text-xs text-muted-foreground truncate max-w-xs">{n.body}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">
+                                {audienceConfig[n.audience] ?? n.audience}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={status.variant} className="text-xs">{status.label}</Badge>
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                              {n.sentAt}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost" size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                onClick={() => deleteNotification(n.id)}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -287,24 +318,15 @@ export default function AdminNotificationsPage() {
                       </div>
                       <div className="flex items-center gap-6 shrink-0">
                         <div className="flex flex-col items-center gap-1">
-                          <Switch
-                            checked={ch.push}
-                            onCheckedChange={() => toggleChannel(ch.key, 'push')}
-                          />
+                          <Switch checked={ch.push} onCheckedChange={() => toggleChannel(ch.key, 'push')} />
                           <span className="text-[10px] text-muted-foreground">Push</span>
                         </div>
                         <div className="flex flex-col items-center gap-1">
-                          <Switch
-                            checked={ch.email}
-                            onCheckedChange={() => toggleChannel(ch.key, 'email')}
-                          />
+                          <Switch checked={ch.email} onCheckedChange={() => toggleChannel(ch.key, 'email')} />
                           <span className="text-[10px] text-muted-foreground">Email</span>
                         </div>
                         <div className="flex flex-col items-center gap-1">
-                          <Switch
-                            checked={ch.sms}
-                            onCheckedChange={() => toggleChannel(ch.key, 'sms')}
-                          />
+                          <Switch checked={ch.sms} onCheckedChange={() => toggleChannel(ch.key, 'sms')} />
                           <span className="text-[10px] text-muted-foreground">SMS</span>
                         </div>
                       </div>
