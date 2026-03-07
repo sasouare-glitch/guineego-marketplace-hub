@@ -299,9 +299,9 @@ export default function OrderTrackingPage() {
                 {order.deliveryMissionId && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Mission livraison</span>
-                    <Link to={`/order/${orderId}`} className="text-primary font-mono text-xs hover:underline">
+                    <span className="text-primary font-mono text-xs">
                       {order.deliveryMissionId}
-                    </Link>
+                    </span>
                   </div>
                 )}
               </CardContent>
