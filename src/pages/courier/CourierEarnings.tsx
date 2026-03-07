@@ -101,11 +101,11 @@ const CourierEarnings = () => {
                     <div>
                       <p className="text-muted-foreground text-sm">Gains totaux</p>
                       <p className="text-2xl font-display font-bold mt-1">
-                        {(wallet?.totalEarnings || 0).toLocaleString("fr-GN")} GNF
+                        {computedTotalEarnings.toLocaleString("fr-GN")} GNF
                       </p>
                       <div className="flex items-center gap-1 mt-2 text-guinea-green text-sm">
                         <TrendingUp className="w-4 h-4" />
-                        <span>{wallet?.completedMissions || 0} missions</span>
+                        <span>{completedCount} missions</span>
                       </div>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-guinea-green/10 flex items-center justify-center">
