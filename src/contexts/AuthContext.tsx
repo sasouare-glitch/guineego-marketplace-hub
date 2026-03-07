@@ -250,7 +250,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Connexion par email
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<string> => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       const { user } = await signInWithEmailAndPassword(auth, email, password);
@@ -278,6 +278,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
         });
       }
+      return user.uid;
     } catch (error) {
       setState(prev => ({ ...prev, loading: false, error: error as Error }));
       throw error;
