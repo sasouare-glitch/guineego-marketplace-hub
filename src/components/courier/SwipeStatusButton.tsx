@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight, Navigation2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SwipeStatusButtonProps {
@@ -8,13 +8,22 @@ interface SwipeStatusButtonProps {
   label: string;
   completedLabel?: string;
   disabled?: boolean;
+  /** GPS proximity info */
+  gpsInfo?: {
+    distanceToTarget: number | null;
+    isNearTarget: boolean;
+    targetLabel: string;
+    formatDistance: (m: number) => string;
+    error: string | null;
+  };
 }
 
 export const SwipeStatusButton = ({ 
   onComplete, 
   label, 
   completedLabel = "Terminé !",
-  disabled = false 
+  disabled = false,
+  gpsInfo,
 }: SwipeStatusButtonProps) => {
   const [isCompleted, setIsCompleted] = useState(false);
   const constraintsRef = useRef<HTMLDivElement>(null);
@@ -50,13 +59,35 @@ export const SwipeStatusButton = ({
 
   if (disabled) {
     return (
-      <div className="w-full h-14 rounded-full bg-muted flex items-center justify-center">
-        <span className="text-muted-foreground font-medium">{label}</span>
+      <div className="w-full">
+        {gpsInfo?.distanceToTarget !== null && gpsInfo?.distanceToTarget !== undefined && (
+          <div className="text-center text-xs text-muted-foreground mb-2 flex items-center justify-center gap-1">
+            <Navigation2 className="w-3 h-3" />
+            {gpsInfo.formatDistance(gpsInfo.distanceToTarget)} du {gpsInfo.targetLabel}
+          </div>
+        )}
+        <div className="w-full h-14 rounded-full bg-muted flex items-center justify-center">
+          <span className="text-muted-foreground font-medium">{label}</span>
+        </div>
       </div>
     );
   }
 
   return (
+    <div className="w-full">
+      {gpsInfo && gpsInfo.distanceToTarget !== null && gpsInfo.distanceToTarget !== undefined && (
+        <div className={cn(
+          "text-center text-xs mb-2 flex items-center justify-center gap-1",
+          gpsInfo.isNearTarget ? "text-guinea-green font-semibold" : "text-muted-foreground"
+        )}>
+          <Navigation2 className="w-3 h-3" />
+          {gpsInfo.formatDistance(gpsInfo.distanceToTarget)} du {gpsInfo.targetLabel}
+          {gpsInfo.isNearTarget && " ✓"}
+        </div>
+      )}
+      {gpsInfo?.error && (
+        <div className="text-center text-xs text-destructive mb-2">{gpsInfo.error}</div>
+      )}
     <motion.div
       ref={constraintsRef}
       className="relative w-full h-14 rounded-full overflow-hidden"
@@ -102,5 +133,6 @@ export const SwipeStatusButton = ({
         </motion.div>
       )}
     </motion.div>
+    </div>
   );
 };

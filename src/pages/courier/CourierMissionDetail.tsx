@@ -17,11 +17,14 @@ import {
   CheckCircle2,
   Circle,
   Loader2,
+  Navigation2,
+  Crosshair,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/firebase/config";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useCourierMissions, DeliveryMission, DeliveryStatus } from "@/hooks/useCourierMissions";
+import { useCourierGPS } from "@/hooks/useCourierGPS";
 
 type StepStatus = "accepted" | "pickup_started" | "picked_up" | "in_transit" | "arrived" | "delivered";
 
@@ -41,6 +44,22 @@ const CourierMissionDetail = () => {
   const [mission, setMission] = useState<DeliveryMission | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+
+  // Extract GPS coordinates from mission if available
+  const pickupCoords = mission?.pickup && 'lat' in mission.pickup
+    ? { lat: (mission.pickup as any).lat, lng: (mission.pickup as any).lng }
+    : null;
+  const deliveryCoords = mission?.delivery && 'lat' in mission.delivery
+    ? { lat: (mission.delivery as any).lat, lng: (mission.delivery as any).lng }
+    : null;
+
+  // GPS tracking
+  const gps = useCourierGPS({
+    missionId: id,
+    pickupCoords,
+    deliveryCoords,
+    currentStatus: mission?.status,
+  });
 
   // Real-time listener on this delivery document
   useEffect(() => {
@@ -284,6 +303,59 @@ const CourierMissionDetail = () => {
           </CardContent>
         </Card>
 
+        {/* GPS Status */}
+        {!isPending && mission.status !== "delivered" && (
+          <Card className="bg-card border-border">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center",
+                  gps.position ? "bg-guinea-green/10" : "bg-destructive/10"
+                )}>
+                  <Crosshair className={cn(
+                    "w-5 h-5",
+                    gps.position ? "text-guinea-green" : "text-destructive"
+                  )} />
+                </div>
+                <div className="flex-1">
+                  {gps.error ? (
+                    <p className="text-sm text-destructive">{gps.error}</p>
+                  ) : gps.position ? (
+                    <>
+                      <p className="text-sm font-medium flex items-center gap-1">
+                        <Navigation2 className="w-3 h-3 text-guinea-green" />
+                        GPS actif
+                        {gps.position.accuracy && (
+                          <span className="text-xs text-muted-foreground">
+                            (±{Math.round(gps.position.accuracy)}m)
+                          </span>
+                        )}
+                      </p>
+                      {gps.distanceToTarget !== null && (
+                        <p className="text-xs text-muted-foreground">
+                          {gps.formatDistance(gps.distanceToTarget)} du {gps.targetLabel}
+                          {gps.isNearTarget && (
+                            <span className="ml-2 text-guinea-green font-semibold">
+                              ✓ À proximité
+                            </span>
+                          )}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Localisation en cours...</p>
+                  )}
+                </div>
+                {gps.position?.speed !== null && gps.position?.speed !== undefined && gps.position.speed > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    {Math.round(gps.position.speed * 3.6)} km/h
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Actions */}
         {isPending && (
           <Button
@@ -302,6 +374,13 @@ const CourierMissionDetail = () => {
               onComplete={handleNextStatus}
               label={getNextStatusLabel()}
               completedLabel="Statut mis à jour !"
+              gpsInfo={{
+                distanceToTarget: gps.distanceToTarget,
+                isNearTarget: gps.isNearTarget,
+                targetLabel: gps.targetLabel,
+                formatDistance: gps.formatDistance,
+                error: gps.error,
+              }}
             />
           </div>
         )}
