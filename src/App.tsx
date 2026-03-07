@@ -312,6 +312,16 @@ const App = () => (
                         <CourierEarnings />
                       </ProtectedRoute>
                     } />
+                    <Route path="/courier/stats" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierStatsPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/courier/profile" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierProfilePage />
+                      </ProtectedRoute>
+                    } />
                     
                     {/* Admin Routes (Protected - admin role only) */}
                     <Route path="/admin/dashboard" element={
