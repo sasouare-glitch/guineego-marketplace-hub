@@ -82,6 +82,12 @@ export default function AdminProductsPage() {
   const [activeTab, setActiveTab] = useState('all');
   const { format } = useCurrency();
 
+  // Build seller name lookup
+  const sellerNameMap: Record<string, string> = {};
+  sellers.forEach(s => {
+    sellerNameMap[s.id] = s.businessName || s.shopName || s.name || s.displayName || s.id;
+  });
+
   // Dialog states
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
   const [editDialog, setEditDialog] = useState<{ open: boolean; product: Product | null }>({ open: false, product: null });
