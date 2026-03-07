@@ -204,7 +204,7 @@ const CourierMissions = () => {
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
-          <Tabs defaultValue="available" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
               <TabsTrigger value="available" className="gap-2">
                 Disponibles
