@@ -32,7 +32,23 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const from = (location.state as { from?: Location })?.from?.pathname || '/';
+  const from = (location.state as { from?: Location })?.from?.pathname;
+
+  const getRedirectByRole = async (uid: string): Promise<string> => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', uid));
+      const role = userDoc.data()?.role;
+      const roleRoutes: Record<string, string> = {
+        ecommerce: '/seller',
+        courier: '/courier',
+        investor: '/investor',
+        admin: '/admin',
+      };
+      return roleRoutes[role] || '/';
+    } catch {
+      return '/';
+    }
+  };
   
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema)
