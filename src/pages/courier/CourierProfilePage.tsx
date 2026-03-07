@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CourierLayout } from "@/components/courier/CourierLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { uploadAvatar } from "@/lib/firebase/storage";
 import { toast } from "sonner";
 import {
-  User, Phone, MapPin, Bike, Shield, Loader2, Save,
+  User, Phone, MapPin, Bike, Shield, Loader2, Save, Camera,
 } from "lucide-react";
 
 interface CourierProfile {
@@ -22,6 +24,7 @@ interface CourierProfile {
   vehicleType?: string;
   isOnline?: boolean;
   status?: string;
+  photoURL?: string;
 }
 
 const COMMUNES = ["Kaloum", "Dixinn", "Matam", "Ratoma", "Matoto"];
@@ -32,6 +35,9 @@ export default function CourierProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedZones, setSelectedZones] = useState<string[]>([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -48,6 +54,7 @@ export default function CourierProfilePage() {
           vehicleType: courierData.vehicleType || "moto",
           isOnline: courierData.isOnline || false,
           status: courierData.status || "active",
+          photoURL: userData.photoURL || user.photoURL || "",
         };
         setProfile(merged);
         setSelectedZones(merged.zones || []);
@@ -59,6 +66,41 @@ export default function CourierProfilePage() {
     };
     fetchProfile();
   }, [user]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Veuillez sélectionner une image");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 5 Mo");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    setUploadProgress(0);
+    try {
+      const result = await uploadAvatar(file, user.uid, (progress) => {
+        setUploadProgress(progress);
+      });
+      await setDoc(doc(db, "users", user.uid), {
+        photoURL: result.url,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+      setProfile((p) => ({ ...p, photoURL: result.url }));
+      toast.success("Photo de profil mise à jour !");
+    } catch (err) {
+      console.error("Error uploading avatar:", err);
+      toast.error("Erreur lors de l'upload de la photo");
+    } finally {
+      setUploadingPhoto(false);
+      setUploadProgress(0);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const toggleZone = (zone: string) => {
     setSelectedZones((prev) =>
@@ -117,11 +159,40 @@ export default function CourierProfilePage() {
 
         {/* Avatar + status */}
         <Card className="p-6 flex items-center gap-4">
-          <Avatar className="w-16 h-16">
-            <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative group">
+            <Avatar className="w-16 h-16">
+              {profile.photoURL && (
+                <AvatarImage src={profile.photoURL} alt={profile.displayName || "Avatar"} />
+              )}
+              <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            >
+              {uploadingPhoto ? (
+                <Loader2 className="w-5 h-5 text-white animate-spin" />
+              ) : (
+                <Camera className="w-5 h-5 text-white" />
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+            />
+          </div>
+          {uploadingPhoto && (
+            <div className="w-24">
+              <Progress value={uploadProgress} className="h-1.5" />
+            </div>
+          )}
           <div className="flex-1">
             <h2 className="font-semibold text-lg">{profile.displayName || "Coursier"}</h2>
             <div className="flex items-center gap-2 mt-1">
