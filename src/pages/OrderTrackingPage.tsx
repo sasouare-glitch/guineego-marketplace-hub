@@ -11,6 +11,7 @@ import { OrderTimeline, buildTimelineSteps } from "@/components/orders/OrderTime
 import { OrderStatusCard } from "@/components/orders/OrderStatusCard";
 import { OrderItemsList } from "@/components/orders/OrderItemsList";
 import { CancelOrderDialog } from "@/components/orders/CancelOrderDialog";
+import { CourierTrackingCard } from "@/components/orders/CourierTrackingCard";
 import { toast } from "sonner";
 import { useRealtimeOrder } from "@/hooks/useRealtimeOrder";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -259,6 +260,11 @@ export default function OrderTrackingPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Courier Tracking */}
+            {order.deliveryMissionId && (
+              <CourierTrackingCard deliveryMissionId={order.deliveryMissionId} />
+            )}
+
             {/* Order Items */}
             <OrderItemsList
               items={items}
@@ -298,9 +304,9 @@ export default function OrderTrackingPage() {
                 {order.deliveryMissionId && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Mission livraison</span>
-                    <Link to={`/order/${orderId}`} className="text-primary font-mono text-xs hover:underline">
+                    <span className="text-primary font-mono text-xs">
                       {order.deliveryMissionId}
-                    </Link>
+                    </span>
                   </div>
                 )}
               </CardContent>
