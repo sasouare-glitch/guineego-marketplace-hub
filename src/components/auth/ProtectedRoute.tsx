@@ -44,13 +44,13 @@ export function ProtectedRoute({
       return <>{children}</>;
     }
 
-    // hasAnyRole dans AuthContext a aussi le bypass admin, mais on vérifie ici en plus
+    // hasAnyRole now also checks profile fallback
     if (hasAnyRole(requiredRoles)) {
       return <>{children}</>;
     }
 
-    // Attendre que les claims soient chargés avant de refuser l'accès
-    if (!claims) {
+    // Attendre que les claims OU le profil soient chargés avant de refuser l'accès
+    if (!claims && !profile) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-4">
