@@ -67,6 +67,41 @@ export default function CourierProfilePage() {
     fetchProfile();
   }, [user]);
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Veuillez sélectionner une image");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("L'image ne doit pas dépasser 5 Mo");
+      return;
+    }
+
+    setUploadingPhoto(true);
+    setUploadProgress(0);
+    try {
+      const result = await uploadAvatar(file, user.uid, (progress) => {
+        setUploadProgress(progress);
+      });
+      await setDoc(doc(db, "users", user.uid), {
+        photoURL: result.url,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+      setProfile((p) => ({ ...p, photoURL: result.url }));
+      toast.success("Photo de profil mise à jour !");
+    } catch (err) {
+      console.error("Error uploading avatar:", err);
+      toast.error("Erreur lors de l'upload de la photo");
+    } finally {
+      setUploadingPhoto(false);
+      setUploadProgress(0);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
   const toggleZone = (zone: string) => {
     setSelectedZones((prev) =>
       prev.includes(zone) ? prev.filter((z) => z !== zone) : [...prev, zone]
