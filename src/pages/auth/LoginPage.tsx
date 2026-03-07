@@ -57,8 +57,8 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError(null);
-      const cred = await signIn(data.email, data.password);
-      const dest = from || await getRedirectByRole((cred as any)?.user?.uid || auth.currentUser?.uid);
+      await signIn(data.email, data.password);
+      const dest = from || await getRedirectByRole(auth.currentUser?.uid || '');
       navigate(dest, { replace: true });
     } catch (err: any) {
       const errorMessages: Record<string, string> = {
