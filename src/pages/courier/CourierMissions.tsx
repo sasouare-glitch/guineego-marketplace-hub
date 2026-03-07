@@ -134,6 +134,12 @@ const CourierMissions = () => {
   const { hasRole } = useAuth();
   const { available, myMissions, loading, acceptMission } = useCourierMissions();
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("available");
+
+  const handleAcceptMission = async (missionId: string) => {
+    await acceptMission(missionId);
+    setActiveTab("active");
+  };
   const [zoneFilter, setZoneFilter] = useState("all");
 
   const filterBySearch = (missions: DeliveryMission[]) =>
