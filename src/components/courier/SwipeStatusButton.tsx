@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { Check, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,8 +17,14 @@ export const SwipeStatusButton = ({
   disabled = false 
 }: SwipeStatusButtonProps) => {
   const [isCompleted, setIsCompleted] = useState(false);
-  const constraintsRef = useRef(null);
+  const constraintsRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
+
+  // Reset when label changes (new status step)
+  useEffect(() => {
+    setIsCompleted(false);
+    x.set(0);
+  }, [label]);
   
   const buttonWidth = 300;
   const handleWidth = 56;
