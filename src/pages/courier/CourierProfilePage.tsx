@@ -24,6 +24,7 @@ interface CourierProfile {
   vehicleType?: string;
   isOnline?: boolean;
   status?: string;
+  photoURL?: string;
 }
 
 const COMMUNES = ["Kaloum", "Dixinn", "Matam", "Ratoma", "Matoto"];
