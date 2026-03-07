@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight, Navigation2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SwipeStatusButtonProps {
