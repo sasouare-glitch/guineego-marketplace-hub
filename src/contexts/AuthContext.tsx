@@ -481,8 +481,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (state.user?.email && ADMIN_EMAILS.includes(state.user.email.toLowerCase())) {
       return true;
     }
-    if (!state.claims) return false;
-    return state.claims.role === role || (state.claims.roles?.includes(role) ?? false);
+    // Check claims first
+    if (state.claims) {
+      if (state.claims.role === role || (state.claims.roles?.includes(role) ?? false)) {
+        return true;
+      }
+    }
+    // Fallback: check Firestore profile role when claims not available
+    if (state.profile) {
+      const profileData = state.profile as any;
+      if (profileData.role === role) return true;
+      if (Array.isArray(profileData.roles) && profileData.roles.includes(role)) return true;
+    }
+    return false;
   };
 
   // Vérifier si l'utilisateur a un des rôles
@@ -490,7 +501,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (state.user?.email && ADMIN_EMAILS.includes(state.user.email.toLowerCase())) {
       return true;
     }
-    if (!state.claims) return false;
     return roles.some(role => hasRole(role));
   };
 
