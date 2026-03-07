@@ -219,7 +219,9 @@ service cloud.firestore {
                       || resource.data.assignedCourier == request.auth.uid
                     )
                     || isAdmin();
-      allow create, delete: if false;
+      // Sellers can create delivery missions when shipping orders
+      allow create: if isSeller() || isAdmin();
+      allow delete: if false;
     }
     
     // ============================================
