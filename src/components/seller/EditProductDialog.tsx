@@ -30,14 +30,24 @@ interface ImagePreview {
   isExisting: boolean;
 }
 
+interface SellerOption {
+  id: string;
+  businessName?: string;
+  shopName?: string;
+  name?: string;
+  displayName?: string;
+}
+
 interface EditProductDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   product: SellerProduct;
   onSubmit: (productId: string, data: Partial<SellerProduct>) => Promise<void>;
+  /** When provided (admin mode), shows a seller selector */
+  sellers?: SellerOption[];
 }
 
-export function EditProductDialog({ open, onOpenChange, product, onSubmit }: EditProductDialogProps) {
+export function EditProductDialog({ open, onOpenChange, product, onSubmit, sellers }: EditProductDialogProps) {
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -53,6 +63,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit }: Edi
     isFlashSale: false,
     isNew: false,
     isBestSeller: false,
+    sellerId: "",
   });
 
   useEffect(() => {
@@ -68,6 +79,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit }: Edi
         isFlashSale: hasDiscount,
         isNew: (product as any).isNew ?? false,
         isBestSeller: (product as any).isBestSeller ?? false,
+        sellerId: (product as any).sellerId || "",
       });
       // Load existing images
       const existingImages: ImagePreview[] = (product.images || [])
@@ -141,6 +153,13 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit }: Edi
         ? Math.round(((originalPrice - basePrice) / originalPrice) * 100)
         : 0;
 
+      const sellerUpdate: Record<string, any> = {};
+      if (sellers && form.sellerId) {
+        sellerUpdate.sellerId = form.sellerId;
+        const selectedSeller = sellers.find(s => s.id === form.sellerId);
+        sellerUpdate.sellerName = selectedSeller?.businessName || selectedSeller?.shopName || selectedSeller?.name || form.sellerId;
+      }
+
       await onSubmit(product.id, {
         name: form.name,
         description: form.description,
@@ -154,6 +173,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit }: Edi
         discount,
         isNew: form.isNew,
         isBestSeller: form.isBestSeller,
+        ...sellerUpdate,
       } as any);
       onOpenChange(false);
     } catch {
@@ -181,6 +201,24 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit }: Edi
               required
             />
           </div>
+
+          {sellers && sellers.length > 0 && (
+            <div className="space-y-2">
+              <Label>Boutique (vendeur) *</Label>
+              <Select value={form.sellerId} onValueChange={(v) => setForm((f) => ({ ...f, sellerId: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir une boutique..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {sellers.map((seller) => (
+                    <SelectItem key={seller.id} value={seller.id}>
+                      {seller.businessName || seller.shopName || seller.name || seller.displayName || seller.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="edit-description">Description</Label>
