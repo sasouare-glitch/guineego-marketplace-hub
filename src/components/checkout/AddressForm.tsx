@@ -226,6 +226,22 @@ export const AddressForm = ({ selectedAddress, onSelectAddress, addresses, loadi
               ))}
             </div>
 
+            {/* Use Current Location */}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full gap-2 border-dashed"
+              onClick={handleUseCurrentLocation}
+              disabled={locating}
+            >
+              {locating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Navigation className="w-4 h-4 text-primary" />
+              )}
+              {locating ? "Localisation en cours..." : "📍 Utiliser ma position actuelle"}
+            </Button>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <Label htmlFor="fullName">{t.checkout.fullName}</Label>
