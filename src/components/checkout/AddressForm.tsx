@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Plus, Check, Home, Building, Edit, Loader2 } from "lucide-react";
+import { Plus, Check, Home, Building, Edit, Loader2, MapPin, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,10 +40,46 @@ export const AddressForm = ({ selectedAddress, onSelectAddress, addresses, loadi
   const { t } = useTranslation();
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [newAddress, setNewAddress] = useState<Partial<UserAddress>>({
     type: "home",
     city: "Conakry"
   });
+
+  const handleUseCurrentLocation = useCallback(async () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=fr`
+          );
+          const data = await res.json();
+          if (data?.display_name) {
+            const road = data.address?.road || data.address?.neighbourhood || '';
+            const suburb = data.address?.suburb || data.address?.city_district || '';
+            const city = data.address?.city || data.address?.town || 'Conakry';
+            setNewAddress(prev => ({
+              ...prev,
+              address: road ? `${road}${suburb ? ', ' + suburb : ''}` : data.display_name.split(',').slice(0, 2).join(','),
+              city,
+              commune: prev?.commune || suburb || '',
+            }));
+          }
+        } catch {
+          setNewAddress(prev => ({
+            ...prev,
+            address: `GPS: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
+          }));
+        }
+        setLocating(false);
+      },
+      () => setLocating(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
 
   const getAddressLabel = (type: "home" | "work" | "other") => {
     if (type === "home") return t.checkout.homeAddress;
@@ -189,6 +225,22 @@ export const AddressForm = ({ selectedAddress, onSelectAddress, addresses, loadi
                 </button>
               ))}
             </div>
+
+            {/* Use Current Location */}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full gap-2 border-dashed"
+              onClick={handleUseCurrentLocation}
+              disabled={locating}
+            >
+              {locating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Navigation className="w-4 h-4 text-primary" />
+              )}
+              {locating ? "Localisation en cours..." : "📍 Utiliser ma position actuelle"}
+            </Button>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
