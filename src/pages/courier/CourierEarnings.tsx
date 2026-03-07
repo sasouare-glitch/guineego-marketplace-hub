@@ -1,5 +1,5 @@
 import { CourierLayout } from "@/components/courier/CourierLayout";
-import { EarningsChart } from "@/components/courier/EarningsChart";
+import { EarningsChart, EarningsPeriod } from "@/components/courier/EarningsChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,12 +20,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useWallet, useTransactions, formatGNF } from "@/hooks/useWallet";
 import { useCourierMissions } from "@/hooks/useCourierMissions";
+import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
+
+function getPeriodStart(period: EarningsPeriod): Date {
+  const now = new Date();
+  switch (period) {
+    case "today": return startOfDay(now);
+    case "week": return startOfWeek(now, { weekStartsOn: 1 });
+    case "month": return startOfMonth(now);
+    case "year": return startOfYear(now);
+  }
+}
 
 const CourierEarnings = () => {
-  const [period, setPeriod] = useState("week");
+  const [period, setPeriod] = useState<EarningsPeriod>("week");
   const { wallet, loading: walletLoading } = useWallet();
   const { transactions, loading: txLoading } = useTransactions();
   const { myMissions } = useCourierMissions();
@@ -41,6 +52,16 @@ const CourierEarnings = () => {
   const computedBalance = wallet?.balance || (totalEarningsFromMissions - totalWithdrawals);
   const completedCount = wallet?.completedMissions || deliveredMissions.length;
 
+  // Filter transactions by period
+  const filteredTransactions = useMemo(() => {
+    const start = getPeriodStart(period);
+    return transactions.filter((tx) => {
+      if (!tx.createdAt) return false;
+      const d = new Date(tx.createdAt);
+      return d >= start;
+    });
+  }, [transactions, period]);
+
   return (
     <CourierLayout>
       <div className="space-y-6">
@@ -50,7 +71,7 @@ const CourierEarnings = () => {
             <h1 className="text-2xl font-display font-bold">Mes Revenus</h1>
             <p className="text-muted-foreground">Suivez vos gains et retraits</p>
           </div>
-          <Select value={period} onValueChange={setPeriod}>
+          <Select value={period} onValueChange={(v) => setPeriod(v as EarningsPeriod)}>
             <SelectTrigger className="w-[180px]">
               <Calendar className="w-4 h-4 mr-2" />
               <SelectValue />
@@ -136,13 +157,20 @@ const CourierEarnings = () => {
             </div>
 
             {/* Chart */}
-            <EarningsChart missions={myMissions} />
+            <EarningsChart missions={myMissions} period={period} />
 
             {/* Transactions */}
             <Card className="bg-card border-border">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="font-display text-lg">Historique des transactions</CardTitle>
+                  <CardTitle className="font-display text-lg">
+                    Historique des transactions
+                    {filteredTransactions.length !== transactions.length && (
+                      <Badge variant="secondary" className="ml-2 text-xs">
+                        {filteredTransactions.length}
+                      </Badge>
+                    )}
+                  </CardTitle>
                   <Button variant="outline" size="sm" className="gap-2">
                     <Download className="w-4 h-4" />
                     Exporter
@@ -154,9 +182,9 @@ const CourierEarnings = () => {
                   <div className="flex justify-center py-8">
                     <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                   </div>
-                ) : transactions.length > 0 ? (
+                ) : filteredTransactions.length > 0 ? (
                   <div className="space-y-3">
-                    {transactions.map((tx) => (
+                    {filteredTransactions.map((tx) => (
                       <div
                         key={tx.id}
                         className="flex items-center justify-between py-3 border-b border-border last:border-0"
@@ -203,7 +231,7 @@ const CourierEarnings = () => {
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    <p>Aucune transaction pour le moment</p>
+                    <p>Aucune transaction pour cette période</p>
                   </div>
                 )}
               </CardContent>
