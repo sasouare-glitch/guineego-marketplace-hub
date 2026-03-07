@@ -56,9 +56,11 @@ import {
   Timestamp,
   doc,
   updateDoc,
+  setDoc,
   addDoc,
   arrayUnion,
   serverTimestamp,
+  writeBatch,
 } from "firebase/firestore";
 import { toast } from "sonner";
 
@@ -248,16 +250,13 @@ export default function SellerOrders() {
         note: null,
       };
 
-      await updateDoc(orderRef, {
-        status: newStatus,
-        statusHistory: arrayUnion(statusEntry),
-        updatedAt: serverTimestamp(),
-      });
-
       // Auto-create delivery mission when seller ships the order
+      // Use a batch write so order + delivery are created atomically
       if (newStatus === "shipped") {
         const order = orders.find((o) => o.id === orderId);
         if (order) {
+          const batch = writeBatch(db);
+
           const missionTimestamp = Date.now().toString(36).toUpperCase();
           const missionRandom = Math.random().toString(36).substring(2, 6).toUpperCase();
           const missionId = `MIS-${missionTimestamp}${missionRandom}`;
@@ -274,7 +273,9 @@ export default function SellerOrders() {
           };
           const fee = baseFees[deliveryCommune] || 35000;
 
-          await addDoc(collection(db, "deliveries"), {
+          // Create delivery mission document
+          const deliveryRef = doc(collection(db, "deliveries"));
+          batch.set(deliveryRef, {
             id: missionId,
             orderId,
             customerId: order.customerId,
@@ -297,11 +298,25 @@ export default function SellerOrders() {
             createdAt: serverTimestamp(),
           });
 
-          await updateDoc(orderRef, { deliveryMissionId: missionId });
-        }
-      }
+          // Update order status + link mission
+          batch.update(orderRef, {
+            status: newStatus,
+            statusHistory: arrayUnion(statusEntry),
+            deliveryMissionId: missionId,
+            updatedAt: serverTimestamp(),
+          });
 
-      toast.success(`Commande mise à jour: ${statusConfig[newStatus].label}`);
+          await batch.commit();
+          toast.success("Commande expédiée et mission de livraison créée !");
+        }
+      } else {
+        await updateDoc(orderRef, {
+          status: newStatus,
+          statusHistory: arrayUnion(statusEntry),
+          updatedAt: serverTimestamp(),
+        });
+        toast.success(`Commande mise à jour: ${statusConfig[newStatus].label}`);
+      }
 
       // Optimistically update the local order status so the filter works immediately
       setOrders((prev) =>
