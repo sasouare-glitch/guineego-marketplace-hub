@@ -109,9 +109,12 @@ service cloud.firestore {
       allow create: if isAdmin()
                     || (isAuthenticated() && request.resource.data.customerId == request.auth.uid);
       
-      // Admin can update any order
+      // Sellers can update orders they are involved in (by UID or ecommerceId)
       allow update: if isAdmin()
-              || (isAuthenticated() && request.auth.uid in resource.data.sellerIds);
+              || (isAuthenticated() && request.auth.uid in resource.data.sellerIds)
+              || (isAuthenticated() && request.auth.token.ecommerceId != null && request.auth.token.ecommerceId in resource.data.sellerIds)
+              || (isAuthenticated() && request.auth.token.ecomId != null && request.auth.token.ecomId in resource.data.sellerIds)
+              || isOwner(resource.data.customerId);
       allow delete: if false;
     }
     
