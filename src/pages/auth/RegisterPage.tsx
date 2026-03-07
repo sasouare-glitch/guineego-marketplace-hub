@@ -69,7 +69,10 @@ export default function RegisterPage() {
   });
 
   const password = watch('password', '');
+  const selectedRole = watch('role');
   
+  const zonesGuinee = ['Kaloum', 'Dixinn', 'Matam', 'Ratoma', 'Matoto', 'Coyah', 'Dubréka', 'Kindia'];
+
   const passwordStrength = {
     length: password.length >= 8,
     uppercase: /[A-Z]/.test(password),
