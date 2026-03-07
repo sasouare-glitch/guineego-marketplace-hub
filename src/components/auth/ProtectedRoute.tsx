@@ -12,7 +12,7 @@ export function ProtectedRoute({
   redirectTo = '/login',
   fallback
 }: ProtectedRouteProps) {
-  const { user, claims, loading, hasAnyRole } = useAuth();
+  const { user, claims, profile, loading, hasAnyRole } = useAuth();
   const location = useLocation();
 
   // Afficher le loader pendant le chargement
