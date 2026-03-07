@@ -52,7 +52,7 @@ service cloud.firestore {
     }
     
     function isCourier() {
-      return hasRole('courier') || isAdmin();
+      return hasRole('courier') || hasRoleInDoc('courier') || isAdmin();
     }
     
     function isCloser() {
@@ -326,8 +326,8 @@ service cloud.firestore {
     // COURIERS COLLECTION
     // ============================================
     match /couriers/{courierId} {
-      allow read: if isAdmin() || (isCourier() && resource.data.userId == request.auth.uid);
-      allow update: if isCourier() && resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() || isOwner(courierId) || (isCourier() && resource.data.userId == request.auth.uid);
+      allow update: if isOwner(courierId) || (isCourier() && resource.data.userId == request.auth.uid) || isAdmin();
       allow create, delete: if false;
     }
     
@@ -346,7 +346,7 @@ service cloud.firestore {
     // ============================================
     match /courier_settings/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow create, update: if isOwner(userId) && isCourier();
+      allow create, update: if isOwner(userId);
       allow delete: if isAdmin();
     }
   }
