@@ -1,5 +1,6 @@
 /**
  * Admin Transit Page - China-Guinea Shipment Management
+ * Persisted with Firestore collection "transit"
  */
 
 import { useState } from 'react';
@@ -14,40 +15,43 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Search, MoreHorizontal, Globe, Package, Plane, Ship, 
-  Clock, CheckCircle2, AlertCircle, RefreshCw, Banknote 
+  Clock, CheckCircle2, AlertCircle, RefreshCw, Banknote, Plus, Loader2
 } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useRealtimeCollection, type FirestoreDoc } from '@/lib/firebase/queries';
+import { addDocument, updateDocument } from '@/lib/firebase/mutations';
+import { orderBy } from 'firebase/firestore';
+import { toast } from 'sonner';
 
-const mockShipments = [
-  {
-    id: 'TRN-001', client: 'Alpha Import SARL', weight: 45, mode: 'air',
-    origin: 'Guangzhou', destination: 'Conakry', cost: 540000,
-    status: 'in_transit', eta: '2024-01-25', createdAt: '2024-01-15',
-  },
-  {
-    id: 'TRN-002', client: 'Mamadou Commerce', weight: 320, mode: 'sea',
-    origin: 'Shanghai', destination: 'Conakry', cost: 1120000,
-    status: 'customs', eta: '2024-02-10', createdAt: '2024-01-05',
-  },
-  {
-    id: 'TRN-003', client: 'TechGN Import', weight: 18, mode: 'air',
-    origin: 'Shenzhen', destination: 'Conakry', cost: 216000,
-    status: 'delivered', eta: '2024-01-18', createdAt: '2024-01-10',
-  },
-  {
-    id: 'TRN-004', client: 'Mode Guinée', weight: 85, mode: 'sea',
-    origin: 'Guangzhou', destination: 'Conakry', cost: 297500,
-    status: 'pending', eta: '2024-02-20', createdAt: '2024-01-19',
-  },
-  {
-    id: 'TRN-005', client: 'ElectroGN', weight: 60, mode: 'air',
-    origin: 'Yiwu', destination: 'Conakry', cost: 720000,
-    status: 'preparation', eta: '2024-01-30', createdAt: '2024-01-18',
-  },
-];
+// ============================================
+// TYPES
+// ============================================
+
+interface Shipment extends FirestoreDoc {
+  shipmentId: string;
+  client: string;
+  weight: number;
+  mode: 'air' | 'sea';
+  origin: string;
+  destination: string;
+  cost: number;
+  status: string;
+  eta: string;
+}
+
+// ============================================
+// CONFIGS
+// ============================================
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
   pending:     { label: 'En attente',   variant: 'secondary',    icon: Clock },
@@ -62,22 +66,72 @@ const modeConfig: Record<string, { label: string; icon: React.ElementType }> = {
   sea: { label: 'Fret Maritime', icon: Ship },
 };
 
+const defaultForm = {
+  shipmentId: '', client: '', weight: 0, mode: 'air' as 'air' | 'sea',
+  origin: 'Guangzhou', destination: 'Conakry', cost: 0, status: 'pending', eta: '',
+};
+
+// ============================================
+// COMPONENT
+// ============================================
+
 export default function AdminTransitPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [addOpen, setAddOpen] = useState(false);
+  const [statusDialog, setStatusDialog] = useState<Shipment | null>(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [form, setForm] = useState(defaultForm);
+  const [saving, setSaving] = useState(false);
   const { format } = useCurrency();
 
-  const filtered = mockShipments.filter(s => {
-    const matchSearch = s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.client.toLowerCase().includes(searchQuery.toLowerCase());
+  const { data: shipments, loading } = useRealtimeCollection<Shipment>(
+    'transit',
+    [orderBy('createdAt', 'desc')]
+  );
+
+  const filtered = shipments.filter(s => {
+    const matchSearch = (s.shipmentId || s.id).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.client?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchTab = activeTab === 'all' || s.status === activeTab;
     return matchSearch && matchTab;
   });
 
-  const totalRevenue = mockShipments.reduce((sum, s) => sum + s.cost, 0);
-  const totalWeight = mockShipments.reduce((sum, s) => sum + s.weight, 0);
-  const airCount = mockShipments.filter(s => s.mode === 'air').length;
-  const seaCount = mockShipments.filter(s => s.mode === 'sea').length;
+  const totalRevenue = shipments.reduce((sum, s) => sum + (s.cost || 0), 0);
+  const airCount = shipments.filter(s => s.mode === 'air').length;
+  const seaCount = shipments.filter(s => s.mode === 'sea').length;
+
+  const handleAdd = async () => {
+    if (!form.client || !form.shipmentId) {
+      toast.error('ID et client sont requis');
+      return;
+    }
+    setSaving(true);
+    try {
+      await addDocument('transit', { ...form });
+      toast.success('Expédition créée');
+      setForm(defaultForm);
+      setAddOpen(false);
+    } catch (e: any) {
+      toast.error(e.message || 'Erreur lors de la création');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!statusDialog || !newStatus) return;
+    setSaving(true);
+    try {
+      await updateDocument('transit', statusDialog.id, { status: newStatus });
+      toast.success('Statut mis à jour');
+      setStatusDialog(null);
+    } catch (e: any) {
+      toast.error(e.message || 'Erreur');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <AdminLayout title="Transit" description="Gestion des expéditions Chine-Guinée">
@@ -86,7 +140,7 @@ export default function AdminTransitPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-6">
-              <p className="text-2xl font-bold">{mockShipments.length}</p>
+              <p className="text-2xl font-bold">{shipments.length}</p>
               <p className="text-sm text-muted-foreground">Expéditions totales</p>
             </CardContent>
           </Card>
@@ -137,8 +191,8 @@ export default function AdminTransitPage() {
                     onChange={e => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Button variant="outline" size="icon">
-                  <RefreshCw className="w-4 h-4" />
+                <Button onClick={() => setAddOpen(true)}>
+                  <Plus className="w-4 h-4 mr-1" /> Nouvelle
                 </Button>
               </div>
             </div>
@@ -155,73 +209,168 @@ export default function AdminTransitPage() {
               </TabsList>
             </Tabs>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Mode</TableHead>
-                  <TableHead>Trajet</TableHead>
-                  <TableHead>Poids</TableHead>
-                  <TableHead>Coût</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>ETA</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map(s => {
-                  const status = statusConfig[s.status];
-                  const mode = modeConfig[s.mode];
-                  const StatusIcon = status.icon;
-                  const ModeIcon = mode.icon;
-                  return (
-                    <TableRow key={s.id}>
-                      <TableCell className="font-mono font-medium">{s.id}</TableCell>
-                      <TableCell>{s.client}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1.5">
-                          <ModeIcon className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm">{mode.label}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {s.origin} → {s.destination}
-                      </TableCell>
-                      <TableCell>{s.weight} kg</TableCell>
-                      <TableCell className="font-medium">{format(s.cost)}</TableCell>
-                      <TableCell>
-                        <Badge variant={status.variant} className="gap-1">
-                          <StatusIcon className="w-3 h-3" />
-                          {status.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {new Date(s.eta).toLocaleDateString('fr-FR')}
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                            <DropdownMenuItem>Mettre à jour statut</DropdownMenuItem>
-                            <DropdownMenuItem>Générer facture</DropdownMenuItem>
-                            <DropdownMenuItem>Contacter client</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : filtered.length === 0 ? (
+              <p className="text-center py-12 text-muted-foreground">Aucune expédition trouvée</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Mode</TableHead>
+                    <TableHead>Trajet</TableHead>
+                    <TableHead>Poids</TableHead>
+                    <TableHead>Coût</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>ETA</TableHead>
+                    <TableHead className="w-12"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map(s => {
+                    const status = statusConfig[s.status] || statusConfig.pending;
+                    const mode = modeConfig[s.mode] || modeConfig.air;
+                    const StatusIcon = status.icon;
+                    const ModeIcon = mode.icon;
+                    return (
+                      <TableRow key={s.id}>
+                        <TableCell className="font-mono font-medium">{s.shipmentId || s.id}</TableCell>
+                        <TableCell>{s.client}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5">
+                            <ModeIcon className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-sm">{mode.label}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {s.origin} → {s.destination}
+                        </TableCell>
+                        <TableCell>{s.weight} kg</TableCell>
+                        <TableCell className="font-medium">{format(s.cost)}</TableCell>
+                        <TableCell>
+                          <Badge variant={status.variant} className="gap-1">
+                            <StatusIcon className="w-3 h-3" />
+                            {status.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {s.eta ? new Date(s.eta).toLocaleDateString('fr-FR') : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => { setStatusDialog(s); setNewStatus(s.status); }}>
+                                Mettre à jour statut
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Add Shipment Dialog */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouvelle expédition</DialogTitle>
+            <DialogDescription>Créer une expédition dans la collection transit</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>ID Expédition</Label>
+                <Input value={form.shipmentId} onChange={e => setForm(p => ({ ...p, shipmentId: e.target.value }))} placeholder="TRN-006" />
+              </div>
+              <div className="space-y-2">
+                <Label>Client</Label>
+                <Input value={form.client} onChange={e => setForm(p => ({ ...p, client: e.target.value }))} placeholder="Nom du client" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Mode</Label>
+                <Select value={form.mode} onValueChange={v => setForm(p => ({ ...p, mode: v as 'air' | 'sea' }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="air">Fret Aérien</SelectItem>
+                    <SelectItem value="sea">Fret Maritime</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Poids (kg)</Label>
+                <Input type="number" value={form.weight || ''} onChange={e => setForm(p => ({ ...p, weight: Number(e.target.value) }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Origine</Label>
+                <Input value={form.origin} onChange={e => setForm(p => ({ ...p, origin: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Destination</Label>
+                <Input value={form.destination} onChange={e => setForm(p => ({ ...p, destination: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Coût (GNF)</Label>
+                <Input type="number" value={form.cost || ''} onChange={e => setForm(p => ({ ...p, cost: Number(e.target.value) }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>ETA</Label>
+                <Input type="date" value={form.eta} onChange={e => setForm(p => ({ ...p, eta: e.target.value }))} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)}>Annuler</Button>
+            <Button onClick={handleAdd} disabled={saving}>
+              {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />} Créer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Status Dialog */}
+      <Dialog open={!!statusDialog} onOpenChange={open => !open && setStatusDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mettre à jour le statut</DialogTitle>
+            <DialogDescription>{statusDialog?.shipmentId || statusDialog?.id} — {statusDialog?.client}</DialogDescription>
+          </DialogHeader>
+          <Select value={newStatus} onValueChange={setNewStatus}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {Object.entries(statusConfig).map(([key, cfg]) => (
+                <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStatusDialog(null)}>Annuler</Button>
+            <Button onClick={handleUpdateStatus} disabled={saving}>
+              {saving && <Loader2 className="w-4 h-4 mr-1 animate-spin" />} Mettre à jour
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }
