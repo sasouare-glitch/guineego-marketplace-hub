@@ -14,7 +14,8 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, TrendingUp, UserCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, TrendingUp, UserCircle, Phone, Store, MapPin, Bike } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const roleOptions = [
   { value: 'customer', label: 'Client / Acheteur', description: 'Acheter des produits sur la marketplace', icon: UserCircle },
