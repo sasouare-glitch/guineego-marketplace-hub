@@ -159,11 +159,40 @@ export default function CourierProfilePage() {
 
         {/* Avatar + status */}
         <Card className="p-6 flex items-center gap-4">
-          <Avatar className="w-16 h-16">
-            <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative group">
+            <Avatar className="w-16 h-16">
+              {profile.photoURL && (
+                <AvatarImage src={profile.photoURL} alt={profile.displayName || "Avatar"} />
+              )}
+              <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadingPhoto}
+              className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            >
+              {uploadingPhoto ? (
+                <Loader2 className="w-5 h-5 text-white animate-spin" />
+              ) : (
+                <Camera className="w-5 h-5 text-white" />
+              )}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+            />
+          </div>
+          {uploadingPhoto && (
+            <div className="w-24">
+              <Progress value={uploadProgress} className="h-1.5" />
+            </div>
+          )}
           <div className="flex-1">
             <h2 className="font-semibold text-lg">{profile.displayName || "Coursier"}</h2>
             <div className="flex items-center gap-2 mt-1">
