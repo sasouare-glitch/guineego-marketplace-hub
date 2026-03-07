@@ -255,7 +255,12 @@ export default function SellerOrders() {
 
       toast.success(`Commande mise à jour: ${statusConfig[newStatus].label}`);
 
-      // Always switch to the new status tab so the progress bar is visible
+      // Optimistically update the local order status so the filter works immediately
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
+      );
+
+      // Switch to the new status tab so the progress bar is visible
       setStatusFilter(newStatus);
     } catch (error: any) {
       console.error("Error updating status:", error);
