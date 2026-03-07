@@ -457,6 +457,7 @@ export default function AdminProductsPage() {
           onOpenChange={(open) => setEditDialog(prev => ({ ...prev, open }))}
           product={editDialog.product as any}
           onSubmit={handleSaveEdit}
+          sellers={sellers}
         />
       )}
 
