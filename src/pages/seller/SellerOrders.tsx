@@ -254,6 +254,11 @@ export default function SellerOrders() {
       });
 
       toast.success(`Commande mise à jour: ${statusConfig[newStatus].label}`);
+
+      // Switch filter to show the updated order in its new status
+      if (statusFilter !== "all" && statusFilter !== newStatus) {
+        setStatusFilter(newStatus);
+      }
     } catch (error: any) {
       console.error("Error updating status:", error);
       toast.error(error.message || "Erreur lors de la mise à jour du statut");
@@ -339,45 +344,27 @@ export default function SellerOrders() {
         </div>
 
         {/* Status Tabs */}
-        <Tabs defaultValue="all" className="space-y-4">
+        <Tabs value={statusFilter} onValueChange={setStatusFilter} className="space-y-4">
           <TabsList className="bg-muted/50 p-1 flex-wrap">
-            <TabsTrigger value="all" onClick={() => setStatusFilter("all")}>
+            <TabsTrigger value="all">
               Toutes ({orders.length})
             </TabsTrigger>
-            <TabsTrigger
-              value="pending"
-              onClick={() => setStatusFilter("pending")}
-            >
+            <TabsTrigger value="pending">
               En attente ({pendingCount})
             </TabsTrigger>
-            <TabsTrigger
-              value="confirmed"
-              onClick={() => setStatusFilter("confirmed")}
-            >
+            <TabsTrigger value="confirmed">
               Confirmées ({confirmedCount})
             </TabsTrigger>
-            <TabsTrigger
-              value="preparing"
-              onClick={() => setStatusFilter("preparing")}
-            >
+            <TabsTrigger value="preparing">
               En préparation ({preparingCount})
             </TabsTrigger>
-            <TabsTrigger
-              value="ready"
-              onClick={() => setStatusFilter("ready")}
-            >
+            <TabsTrigger value="ready">
               Prêtes ({readyCount})
             </TabsTrigger>
-            <TabsTrigger
-              value="shipped"
-              onClick={() => setStatusFilter("shipped")}
-            >
+            <TabsTrigger value="shipped">
               Expédiées
             </TabsTrigger>
-            <TabsTrigger
-              value="delivered"
-              onClick={() => setStatusFilter("delivered")}
-            >
+            <TabsTrigger value="delivered">
               Livrées
             </TabsTrigger>
           </TabsList>
