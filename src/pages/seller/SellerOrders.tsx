@@ -346,43 +346,25 @@ export default function SellerOrders() {
         {/* Status Tabs */}
         <Tabs value={statusFilter} onValueChange={setStatusFilter} className="space-y-4">
           <TabsList className="bg-muted/50 p-1 flex-wrap">
-            <TabsTrigger value="all" onClick={() => setStatusFilter("all")}>
+            <TabsTrigger value="all">
               Toutes ({orders.length})
             </TabsTrigger>
-            <TabsTrigger
-              value="pending"
-              onClick={() => setStatusFilter("pending")}
-            >
+            <TabsTrigger value="pending">
               En attente ({pendingCount})
             </TabsTrigger>
-            <TabsTrigger
-              value="confirmed"
-              onClick={() => setStatusFilter("confirmed")}
-            >
+            <TabsTrigger value="confirmed">
               Confirmées ({confirmedCount})
             </TabsTrigger>
-            <TabsTrigger
-              value="preparing"
-              onClick={() => setStatusFilter("preparing")}
-            >
+            <TabsTrigger value="preparing">
               En préparation ({preparingCount})
             </TabsTrigger>
-            <TabsTrigger
-              value="ready"
-              onClick={() => setStatusFilter("ready")}
-            >
+            <TabsTrigger value="ready">
               Prêtes ({readyCount})
             </TabsTrigger>
-            <TabsTrigger
-              value="shipped"
-              onClick={() => setStatusFilter("shipped")}
-            >
+            <TabsTrigger value="shipped">
               Expédiées
             </TabsTrigger>
-            <TabsTrigger
-              value="delivered"
-              onClick={() => setStatusFilter("delivered")}
-            >
+            <TabsTrigger value="delivered">
               Livrées
             </TabsTrigger>
           </TabsList>
