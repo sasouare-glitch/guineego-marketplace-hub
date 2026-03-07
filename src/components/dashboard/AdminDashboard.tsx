@@ -52,6 +52,7 @@ import {
   ComposedChart
 } from 'recharts';
 import { useAdminDashboard, useDailyReports } from '@/hooks/useAnalytics';
+import { useAdminDashboardData } from '@/hooks/useAdminDashboardData';
 import { useCurrency } from '@/hooks/useCurrency';
 
 const COLORS = ['hsl(var(--primary))', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
@@ -61,34 +62,10 @@ const useFormatPrice = () => {
   return { formatPrice: format };
 };
 
-// Mock alerts for UI
-const recentAlerts = [
-  { type: 'warning', message: 'Stock faible : Téléphone Samsung A54 (3 restants)', time: 'Il y a 5 min' },
-  { type: 'success', message: 'Nouveau vendeur vérifié : TechStore Conakry', time: 'Il y a 12 min' },
-  { type: 'error', message: 'Livraison #ORD-2847 en retard de 2h', time: 'Il y a 30 min' },
-  { type: 'success', message: 'Paiement reçu : 4 500 000 GNF via Orange Money', time: 'Il y a 1h' },
-];
-
-// Mock top sellers
-const topSellers = [
-  { name: 'TechStore GN', sales: 847, revenue: 48500000, trend: 12.4 },
-  { name: 'Mode Africaine', sales: 623, revenue: 31200000, trend: 8.1 },
-  { name: 'ElectroConakry', sales: 512, revenue: 27800000, trend: -3.2 },
-  { name: 'BioShop Guinea', sales: 389, revenue: 19400000, trend: 22.7 },
-  { name: 'SportZone GN', sales: 271, revenue: 14900000, trend: 5.3 },
-];
-
-// Mock monthly objectives
-const objectives = [
-  { label: 'GMV mensuel', current: 842000000, target: 1000000000 },
-  { label: 'Nouvelles inscriptions', current: 1240, target: 2000 },
-  { label: 'Taux de livraison', current: 87, target: 95, isPercent: true },
-  { label: 'Satisfaction client', current: 4.2, target: 4.8, isRating: true },
-];
-
 export function AdminDashboard() {
   const { realtime, rolling, today, trends, weeklyReports, loading } = useAdminDashboard();
   const { reports: monthlyReports } = useDailyReports(30);
+  const dashData = useAdminDashboardData();
   const { formatPrice } = useFormatPrice();
   
   const [period, setPeriod] = useState<'7' | '30'>('7');
@@ -220,11 +197,11 @@ export function AdminDashboard() {
       {/* Secondary KPIs */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { label: 'Vendeurs actifs', value: '48', icon: Store, color: 'text-primary' },
-          { label: 'Produits en ligne', value: '1 247', icon: Package, color: 'text-primary' },
-          { label: 'Étudiants Academy', value: '312', icon: GraduationCap, color: 'text-primary' },
-          { label: 'Expéditions transit', value: '23', icon: Globe, color: 'text-primary' },
-          { label: 'Coursiers actifs', value: '67', icon: Truck, color: 'text-primary' },
+          { label: 'Vendeurs actifs', value: String(dashData.activeSellers), icon: Store, color: 'text-primary' },
+          { label: 'Produits en ligne', value: dashData.liveProducts.toLocaleString(), icon: Package, color: 'text-primary' },
+          { label: 'Étudiants Academy', value: String(dashData.academyStudents), icon: GraduationCap, color: 'text-primary' },
+          { label: 'Expéditions transit', value: String(dashData.transitCount), icon: Globe, color: 'text-primary' },
+          { label: 'Coursiers actifs', value: String(dashData.activeCouriers), icon: Truck, color: 'text-primary' },
           { label: 'Taux de conversion', value: '3.4%', icon: Target, color: 'text-primary' },
         ].map((item) => (
           <Card key={item.label} className="bg-card border-border">
@@ -338,19 +315,18 @@ export function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {objectives.map((obj) => {
-                  const progress = obj.isPercent || obj.isRating
-                    ? (obj.current / obj.target) * 100
-                    : (obj.current / obj.target) * 100;
+                {[
+                  { label: 'GMV mensuel', current: selectedRolling?.gmv || 0, target: 1000000000 },
+                  { label: 'Nouvelles inscriptions', current: selectedRolling?.newUsers || 0, target: 2000 },
+                  { label: 'Taux de livraison', current: dashData.deliveryStats.onTimeRate, target: 95, isPercent: true },
+                  { label: 'Vendeurs actifs', current: dashData.activeSellers, target: 100 },
+                ].map((obj) => {
+                  const progress = (obj.current / obj.target) * 100;
                   const displayCurrent = obj.isPercent
                     ? `${obj.current}%`
-                    : obj.isRating
-                    ? `${obj.current}/5`
                     : formatPrice(obj.current);
                   const displayTarget = obj.isPercent
                     ? `${obj.target}%`
-                    : obj.isRating
-                    ? `${obj.target}/5`
                     : formatPrice(obj.target);
 
                   return (
@@ -475,7 +451,7 @@ export function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {topSellers.map((seller, i) => (
+                    {dashData.topSellers.map((seller, i) => (
                       <tr key={seller.name} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                         <td className="py-3 pr-4">
                           <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-bold">
@@ -581,10 +557,10 @@ export function AdminDashboard() {
               <CardContent className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { label: 'En transit', value: 42, color: 'text-primary', bg: 'bg-primary/10' },
-                    { label: 'Livrées', value: 137, color: 'text-primary', bg: 'bg-primary/10' },
-                    { label: 'En retard', value: 8, color: 'text-destructive', bg: 'bg-destructive/10' },
-                    { label: 'Annulées', value: 3, color: 'text-muted-foreground', bg: 'bg-muted' },
+                    { label: 'En transit', value: dashData.deliveryStats.inTransit, color: 'text-primary', bg: 'bg-primary/10' },
+                    { label: 'Livrées', value: dashData.deliveryStats.completed, color: 'text-primary', bg: 'bg-primary/10' },
+                    { label: 'En retard', value: dashData.deliveryStats.late, color: 'text-destructive', bg: 'bg-destructive/10' },
+                    { label: 'Annulées', value: dashData.deliveryStats.cancelled, color: 'text-muted-foreground', bg: 'bg-muted' },
                   ].map(item => (
                     <div key={item.label} className={`${item.bg} rounded-lg p-4 text-center`}>
                       <p className={`text-2xl font-bold ${item.color}`}>{item.value}</p>
@@ -595,9 +571,9 @@ export function AdminDashboard() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Taux de livraison à l'heure</span>
-                    <span className="font-medium text-foreground">87%</span>
+                    <span className="font-medium text-foreground">{dashData.deliveryStats.onTimeRate}%</span>
                   </div>
-                  <Progress value={87} className="h-2" />
+                  <Progress value={dashData.deliveryStats.onTimeRate} className="h-2" />
                 </div>
                 <div className="pt-2 border-t border-border">
                   <div className="flex justify-between items-center text-sm">
@@ -620,22 +596,20 @@ export function AdminDashboard() {
                 <CardDescription>Expéditions en cours</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {[
-                  { id: 'TRX-2024-089', status: 'En mer', eta: '15 mars', weight: '234 kg', pieces: 48 },
-                  { id: 'TRX-2024-090', status: 'En douane', eta: '8 mars', weight: '178 kg', pieces: 32 },
-                  { id: 'TRX-2024-091', status: 'Prêt à expédier', eta: '22 mars', weight: '312 kg', pieces: 67 },
-                ].map(shipment => (
+                {dashData.recentTransit.length > 0 ? dashData.recentTransit.map(shipment => (
                   <div key={shipment.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                     <div>
                       <p className="text-sm font-medium text-foreground">{shipment.id}</p>
-                      <p className="text-xs text-muted-foreground">{shipment.weight} · {shipment.pieces} colis</p>
+                      <p className="text-xs text-muted-foreground">{shipment.weight} · {shipment.client}</p>
                     </div>
                     <div className="text-right">
                       <Badge variant="outline" className="text-xs mb-1">{shipment.status}</Badge>
-                      <p className="text-xs text-muted-foreground">ETA: {shipment.eta}</p>
+                      <p className="text-xs text-muted-foreground">ETA: {shipment.eta ? new Date(shipment.eta).toLocaleDateString('fr-FR') : '-'}</p>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">Aucune expédition</p>
+                )}
               </CardContent>
             </Card>
 
@@ -650,24 +624,20 @@ export function AdminDashboard() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-3 gap-3 text-center">
                   <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xl font-bold text-foreground">312</p>
+                    <p className="text-xl font-bold text-foreground">{dashData.academyStats.students}</p>
                     <p className="text-xs text-muted-foreground">Étudiants</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xl font-bold text-foreground">18</p>
+                    <p className="text-xl font-bold text-foreground">{dashData.academyStats.activeCourses}</p>
                     <p className="text-xs text-muted-foreground">Cours actifs</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3">
-                    <p className="text-xl font-bold text-primary">67</p>
+                    <p className="text-xl font-bold text-primary">{dashData.academyStats.certified}</p>
                     <p className="text-xs text-muted-foreground">Certifiés</p>
                   </div>
                 </div>
                 <div className="space-y-3">
-                  {[
-                    { name: 'E-commerce 101', students: 124, completion: 72 },
-                    { name: 'Logistique & Livraison', students: 89, completion: 58 },
-                    { name: 'Marketing Digital', students: 67, completion: 43 },
-                  ].map(course => (
+                  {dashData.academyStats.topCourses.length > 0 ? dashData.academyStats.topCourses.map(course => (
                     <div key={course.name} className="space-y-1">
                       <div className="flex justify-between text-sm">
                         <span className="text-foreground">{course.name}</span>
@@ -675,7 +645,9 @@ export function AdminDashboard() {
                       </div>
                       <Progress value={course.completion} className="h-1.5" />
                     </div>
-                  ))}
+                  )) : (
+                    <p className="text-sm text-muted-foreground text-center">Aucun cours</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -694,12 +666,12 @@ export function AdminDashboard() {
                   </CardTitle>
                   <CardDescription>Événements nécessitant votre attention</CardDescription>
                 </div>
-                <Badge variant="destructive">4 nouvelles</Badge>
+                <Badge variant="destructive">{dashData.recentAlerts.length} nouvelles</Badge>
               </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {recentAlerts.map((alert, i) => (
+                {dashData.recentAlerts.length > 0 ? dashData.recentAlerts.map((alert, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, x: -20 }}
@@ -715,6 +687,7 @@ export function AdminDashboard() {
                       {alert.type === 'warning' && <AlertTriangle className="w-4 h-4" />}
                       {alert.type === 'error' && <AlertTriangle className="w-4 h-4" />}
                       {alert.type === 'success' && <CheckCircle2 className="w-4 h-4" />}
+                      {alert.type === 'info' && <CheckCircle2 className="w-4 h-4" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-foreground">{alert.message}</p>
@@ -725,7 +698,9 @@ export function AdminDashboard() {
                     </div>
                     <Button variant="ghost" size="sm" className="text-xs shrink-0">Voir</Button>
                   </motion.div>
-                ))}
+                )) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">Aucune alerte récente</p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -739,10 +714,9 @@ export function AdminDashboard() {
             <CardContent>
               <div className="space-y-3">
                 {[
-                  { label: 'Vendeurs à valider', count: 3, action: 'Valider', href: '/admin/sellers' },
-                  { label: 'Retraits en attente', count: 7, action: 'Traiter', href: '/admin/finances' },
-                  { label: 'Signalements produits', count: 2, action: 'Examiner', href: '/admin/products' },
-                  { label: 'Litiges commandes', count: 5, action: 'Résoudre', href: '/admin/orders' },
+                  { label: 'Vendeurs à valider', count: dashData.pendingActions.sellers, action: 'Valider', href: '/admin/sellers' },
+                  { label: 'Signalements produits', count: dashData.pendingActions.reported, action: 'Examiner', href: '/admin/products' },
+                  { label: 'Litiges commandes', count: dashData.pendingActions.disputes, action: 'Résoudre', href: '/admin/orders' },
                 ].map(item => (
                   <div key={item.label} className="flex items-center justify-between p-3 rounded-lg border border-border">
                     <div className="flex items-center gap-3">
