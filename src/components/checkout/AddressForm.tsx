@@ -40,10 +40,46 @@ export const AddressForm = ({ selectedAddress, onSelectAddress, addresses, loadi
   const { t } = useTranslation();
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [newAddress, setNewAddress] = useState<Partial<UserAddress>>({
     type: "home",
     city: "Conakry"
   });
+
+  const handleUseCurrentLocation = useCallback(async () => {
+    if (!navigator.geolocation) return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=fr`
+          );
+          const data = await res.json();
+          if (data?.display_name) {
+            const road = data.address?.road || data.address?.neighbourhood || '';
+            const suburb = data.address?.suburb || data.address?.city_district || '';
+            const city = data.address?.city || data.address?.town || 'Conakry';
+            setNewAddress(prev => ({
+              ...prev,
+              address: road ? `${road}${suburb ? ', ' + suburb : ''}` : data.display_name.split(',').slice(0, 2).join(','),
+              city,
+              commune: prev?.commune || suburb || '',
+            }));
+          }
+        } catch {
+          setNewAddress(prev => ({
+            ...prev,
+            address: `GPS: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
+          }));
+        }
+        setLocating(false);
+      },
+      () => setLocating(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
 
   const getAddressLabel = (type: "home" | "work" | "other") => {
     if (type === "home") return t.checkout.homeAddress;
