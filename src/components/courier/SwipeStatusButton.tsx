@@ -59,8 +59,16 @@ export const SwipeStatusButton = ({
 
   if (disabled) {
     return (
-      <div className="w-full h-14 rounded-full bg-muted flex items-center justify-center">
-        <span className="text-muted-foreground font-medium">{label}</span>
+      <div className="w-full">
+        {gpsInfo?.distanceToTarget !== null && gpsInfo?.distanceToTarget !== undefined && (
+          <div className="text-center text-xs text-muted-foreground mb-2 flex items-center justify-center gap-1">
+            <Navigation className="w-3 h-3" />
+            {gpsInfo.formatDistance(gpsInfo.distanceToTarget)} du {gpsInfo.targetLabel}
+          </div>
+        )}
+        <div className="w-full h-14 rounded-full bg-muted flex items-center justify-center">
+          <span className="text-muted-foreground font-medium">{label}</span>
+        </div>
       </div>
     );
   }
