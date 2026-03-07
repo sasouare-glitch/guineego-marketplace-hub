@@ -65,6 +65,7 @@ const useFormatPrice = () => {
 export function AdminDashboard() {
   const { realtime, rolling, today, trends, weeklyReports, loading } = useAdminDashboard();
   const { reports: monthlyReports } = useDailyReports(30);
+  const dashData = useAdminDashboardData();
   const { formatPrice } = useFormatPrice();
   
   const [period, setPeriod] = useState<'7' | '30'>('7');
