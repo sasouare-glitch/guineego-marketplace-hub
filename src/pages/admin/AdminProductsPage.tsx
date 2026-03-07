@@ -639,7 +639,7 @@ export default function AdminProductsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddDialog(false)}>Annuler</Button>
-            <Button onClick={handleAddProduct} disabled={saving || addUploading}>
+            <Button onClick={handleAddProduct} disabled={saving || addUploading || !addForm.sellerId}>
               {addUploading ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upload...</>
               ) : saving ? (
