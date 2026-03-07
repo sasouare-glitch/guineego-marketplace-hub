@@ -31,6 +31,8 @@ import CourierMobileHome from "./pages/courier/CourierMobileHome";
 import CourierActiveMissions from "./pages/courier/CourierActiveMissions";
 import CourierStatsPage from "./pages/courier/CourierStatsPage";
 import CourierProfilePage from "./pages/courier/CourierProfilePage";
+import CourierSettingsPage from "./pages/courier/CourierSettingsPage";
+import CourierHelpPage from "./pages/courier/CourierHelpPage";
 import Marketplace from "./pages/Marketplace";
 import SearchPage from "./pages/SearchPage";
 import ProductDetail from "./pages/ProductDetail";
@@ -320,6 +322,16 @@ const App = () => (
                     <Route path="/courier/profile" element={
                       <ProtectedRoute requiredRoles={['courier', 'admin']}>
                         <CourierProfilePage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/courier/settings" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierSettingsPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/courier/help" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierHelpPage />
                       </ProtectedRoute>
                     } />
                     
