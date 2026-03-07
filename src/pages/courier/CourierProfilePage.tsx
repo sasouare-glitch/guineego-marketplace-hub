@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase/config";
-import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import {
   User, Phone, MapPin, Bike, Shield, Loader2, Save,
@@ -70,17 +70,17 @@ export default function CourierProfilePage() {
     if (!user) return;
     setSaving(true);
     try {
-      await updateDoc(doc(db, "couriers", user.uid), {
+      await setDoc(doc(db, "couriers", user.uid), {
         zones: selectedZones,
         vehicleType: profile.vehicleType,
         isOnline: profile.isOnline,
         updatedAt: serverTimestamp(),
-      });
-      await updateDoc(doc(db, "users", user.uid), {
+      }, { merge: true });
+      await setDoc(doc(db, "users", user.uid), {
         displayName: profile.displayName,
         phone: profile.phone,
         updatedAt: serverTimestamp(),
-      });
+      }, { merge: true });
       toast.success("Profil mis à jour !");
     } catch (err: any) {
       console.error("Error saving profile:", err);
