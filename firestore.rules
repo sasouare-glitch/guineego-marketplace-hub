@@ -215,12 +215,12 @@ service cloud.firestore {
       allow read: if isOwner(resource.data.customerId)
                   || (isCourier() && (resource.data.assignedCourier == request.auth.uid || resource.data.status == 'pending'))
                   || isAdmin();
-      // Couriers can accept pending missions or update their own assigned missions
-      allow update: if isCourier() && (
-                      (resource.data.status == 'pending' && request.resource.data.status == 'accepted')
-                      || resource.data.assignedCourier == request.auth.uid
-                    )
-                    || isAdmin();
+      // Any authenticated user can accept a pending mission (courier role may not be propagated yet)
+      // Couriers can update their own assigned missions
+      allow update: if isAdmin()
+                    || (isAuthenticated() && resource.data.status == 'pending' && request.resource.data.status == 'accepted')
+                    || (isAuthenticated() && resource.data.assignedCourier == request.auth.uid)
+                    || isCourier();
       // Sellers can create delivery missions when shipping orders
       allow create: if isSeller() || isAdmin();
       allow delete: if false;
