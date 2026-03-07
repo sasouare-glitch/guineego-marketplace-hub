@@ -76,7 +76,8 @@ export default function LoginPage() {
     try {
       setError(null);
       await signInWithGoogle();
-      navigate(from, { replace: true });
+      const dest = from || await getRedirectByRole(auth.currentUser?.uid || '');
+      navigate(dest, { replace: true });
     } catch (err: any) {
       setError('Erreur de connexion avec Google');
     }
