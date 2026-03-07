@@ -1,10 +1,21 @@
 import { useState } from "react";
 import { CourierLayout } from "@/components/courier/CourierLayout";
-import { MissionCard, Mission } from "@/components/courier/MissionCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Filter, MapPin } from "lucide-react";
+import {
+  Search,
+  Filter,
+  MapPin,
+  Package,
+  Clock,
+  ChevronRight,
+  Loader2,
+  CheckCircle2,
+  Truck,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Select,
@@ -13,124 +24,141 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCourierMissions, DeliveryMission } from "@/hooks/useCourierMissions";
+import { cn } from "@/lib/utils";
 
-const allMissions: Mission[] = [
-  {
-    id: "1",
-    pickupAddress: "Av. République, Imm. 45",
-    pickupArea: "Kaloum",
-    deliveryAddress: "Quartier Cosa, Villa 12",
-    deliveryArea: "Ratoma",
-    distance: "4.2 km",
-    packages: 2,
-    maxTime: "45 min",
-    price: 25000,
-    priority: "urgent",
-    status: "available",
-  },
-  {
-    id: "2",
-    pickupAddress: "Centre Commercial",
-    pickupArea: "Matam",
-    deliveryAddress: "Rue 213, Maison bleue",
-    deliveryArea: "Dixinn",
-    distance: "2.8 km",
-    packages: 1,
-    maxTime: "2h",
-    price: 15000,
-    priority: "standard",
-    status: "available",
-  },
-  {
-    id: "3",
-    pickupAddress: "Marché Niger",
-    pickupArea: "Kaloum",
-    deliveryAddress: "Cité des Médecins",
-    deliveryArea: "Lambanyi",
-    distance: "8.5 km",
-    packages: 3,
-    maxTime: "1h30",
-    price: 45000,
-    priority: "urgent",
-    status: "available",
-  },
-  {
-    id: "4",
-    pickupAddress: "Magasin Central",
-    pickupArea: "Madina",
-    deliveryAddress: "Résidence Parc",
-    deliveryArea: "Kipé",
-    distance: "6.1 km",
-    packages: 2,
-    maxTime: "1h",
-    price: 30000,
-    priority: "standard",
-    status: "accepted",
-  },
-  {
-    id: "5",
-    pickupAddress: "Boutique Mode",
-    pickupArea: "Taouyah",
-    deliveryAddress: "Cité Chemin de Fer",
-    deliveryArea: "Almamya",
-    distance: "3.5 km",
-    packages: 1,
-    maxTime: "45 min",
-    price: 18000,
-    priority: "low",
-    status: "accepted",
-  },
-  {
-    id: "6",
-    pickupAddress: "Entrepôt Logistique",
-    pickupArea: "Zone Industrielle",
-    deliveryAddress: "Quartier Cameroun",
-    deliveryArea: "Matoto",
-    distance: "12 km",
-    packages: 5,
-    maxTime: "2h",
-    price: 65000,
-    priority: "urgent",
-    status: "delivered",
-  },
-];
+const priorityConfig = {
+  normal: { label: "Standard", className: "bg-muted text-muted-foreground" },
+  express: { label: "EXPRESS", className: "bg-destructive/10 text-destructive border-destructive/20" },
+};
+
+const statusLabels: Record<string, string> = {
+  pending: "En attente",
+  accepted: "Acceptée",
+  pickup_started: "En route pickup",
+  picked_up: "Colis récupéré",
+  in_transit: "En livraison",
+  arrived: "Arrivé",
+  delivered: "Livrée",
+};
+
+const formatPrice = (p: number) => p.toLocaleString("fr-GN") + " GNF";
+
+function MissionRealCard({
+  mission,
+  onAccept,
+  onViewDetails,
+}: {
+  mission: DeliveryMission;
+  onAccept?: () => void;
+  onViewDetails: () => void;
+}) {
+  const priority = priorityConfig[mission.priority] || priorityConfig.normal;
+  const isAvailable = mission.status === "pending";
+
+  return (
+    <Card className="p-4 hover:shadow-lg transition-all duration-300 border-border bg-card">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className={cn("text-xs font-semibold", priority.className)}>
+            {priority.label}
+          </Badge>
+          {!isAvailable && (
+            <Badge className="text-xs bg-primary/10 text-primary">
+              {statusLabels[mission.status] || mission.status}
+            </Badge>
+          )}
+        </div>
+        <span className="font-display font-bold text-lg text-guinea-green">
+          {formatPrice(mission.fee)}
+        </span>
+      </div>
+
+      {/* Route */}
+      <div className="space-y-2 mb-4">
+        <div className="flex items-start gap-3">
+          <div className="w-6 h-6 rounded-full bg-guinea-green/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="w-2 h-2 rounded-full bg-guinea-green" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{mission.pickup.commune}</p>
+            <p className="text-xs text-muted-foreground truncate">{mission.pickup.address}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-6 flex justify-center">
+            <div className="w-0.5 h-4 bg-border" />
+          </div>
+          <div className="flex-1 border-t border-dashed border-border" />
+        </div>
+        <div className="flex items-start gap-3">
+          <div className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <MapPin className="w-3 h-3 text-destructive" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{mission.delivery.commune}</p>
+            <p className="text-xs text-muted-foreground truncate">{mission.delivery.address}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+        <div className="flex items-center gap-1">
+          <Clock className="w-4 h-4" />
+          <span>{mission.estimatedTime} min</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Package className="w-4 h-4" />
+          <span>Réf: {mission.orderId.slice(0, 16)}</span>
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        {isAvailable && onAccept && (
+          <Button onClick={onAccept} className="flex-1 bg-guinea-green hover:bg-guinea-green/90">
+            Accepter
+          </Button>
+        )}
+        <Button variant="outline" onClick={onViewDetails} className={cn(!isAvailable && "flex-1")}>
+          Détails
+          <ChevronRight className="w-4 h-4 ml-1" />
+        </Button>
+      </div>
+    </Card>
+  );
+}
 
 const CourierMissions = () => {
   const navigate = useNavigate();
+  const { available, myMissions, loading, acceptMission } = useCourierMissions();
   const [searchTerm, setSearchTerm] = useState("");
   const [zoneFilter, setZoneFilter] = useState("all");
 
-  const filterMissions = (status: string) => {
-    return allMissions.filter((m) => {
-      const matchesStatus = status === "all" || m.status === status || 
-        (status === "available" && m.status === "available") ||
-        (status === "accepted" && (m.status === "accepted" || m.status === "pickup" || m.status === "in_transit")) ||
-        (status === "delivered" && m.status === "delivered");
-      
-      const matchesSearch = m.pickupArea.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        m.deliveryArea.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesZone = zoneFilter === "all" || 
-        m.pickupArea.toLowerCase() === zoneFilter.toLowerCase() ||
-        m.deliveryArea.toLowerCase() === zoneFilter.toLowerCase();
-      
-      return matchesStatus && matchesSearch && matchesZone;
+  const filterBySearch = (missions: DeliveryMission[]) =>
+    missions.filter((m) => {
+      const matchesSearch =
+        !searchTerm ||
+        m.pickup.commune.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.delivery.commune.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.orderId.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesZone =
+        zoneFilter === "all" ||
+        m.pickup.commune.toLowerCase() === zoneFilter.toLowerCase() ||
+        m.delivery.commune.toLowerCase() === zoneFilter.toLowerCase();
+      return matchesSearch && matchesZone;
     });
-  };
 
-  const handleAccept = (missionId: string) => {
-    console.log("Accepting mission:", missionId);
-    // TODO: API call to accept mission
-  };
-
-  const handleViewDetails = (missionId: string) => {
-    navigate(`/courier/mission/${missionId}`);
-  };
+  const activeMissions = filterBySearch(
+    myMissions.filter((m) => m.status !== "delivered" && m.status !== "cancelled")
+  );
+  const completedMissions = filterBySearch(
+    myMissions.filter((m) => m.status === "delivered")
+  );
+  const filteredAvailable = filterBySearch(available);
 
   return (
     <CourierLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div>
           <h1 className="text-2xl font-display font-bold">Missions</h1>
           <p className="text-muted-foreground">Gérez vos livraisons</p>
@@ -141,7 +169,7 @@ const CourierMissions = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par zone..."
+              placeholder="Rechercher par zone ou réf..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -161,86 +189,85 @@ const CourierMissions = () => {
               <SelectItem value="matoto">Matoto</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="gap-2">
-            <Filter className="w-4 h-4" />
-            Plus de filtres
-          </Button>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="available" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
-            <TabsTrigger value="available" className="gap-2">
-              Disponibles
-              <span className="bg-guinea-green/20 text-guinea-green text-xs px-2 py-0.5 rounded-full">
-                {filterMissions("available").length}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="accepted" className="gap-2">
-              Acceptées
-              <span className="bg-guinea-yellow/20 text-guinea-yellow text-xs px-2 py-0.5 rounded-full">
-                {filterMissions("accepted").length}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="delivered" className="gap-2">
-              Terminées
-            </TabsTrigger>
-          </TabsList>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <Tabs defaultValue="available" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+              <TabsTrigger value="available" className="gap-2">
+                Disponibles
+                <span className="bg-guinea-green/20 text-guinea-green text-xs px-2 py-0.5 rounded-full">
+                  {filteredAvailable.length}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="active" className="gap-2">
+                En cours
+                <span className="bg-accent/20 text-accent text-xs px-2 py-0.5 rounded-full">
+                  {activeMissions.length}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="completed">Terminées</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="available" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filterMissions("available").map((mission) => (
-                <MissionCard
-                  key={mission.id}
-                  mission={mission}
-                  onAccept={() => handleAccept(mission.id)}
-                  onViewDetails={() => handleViewDetails(mission.id)}
-                />
-              ))}
-            </div>
-            {filterMissions("available").length === 0 && (
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Aucune mission disponible pour le moment</p>
+            <TabsContent value="available" className="mt-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredAvailable.map((mission) => (
+                  <MissionRealCard
+                    key={mission.id}
+                    mission={mission}
+                    onAccept={() => acceptMission(mission.id)}
+                    onViewDetails={() => navigate(`/courier/mission/${mission.id}`)}
+                  />
+                ))}
               </div>
-            )}
-          </TabsContent>
+              {filteredAvailable.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Truck className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p>Aucune mission disponible pour le moment</p>
+                </div>
+              )}
+            </TabsContent>
 
-          <TabsContent value="accepted" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filterMissions("accepted").map((mission) => (
-                <MissionCard
-                  key={mission.id}
-                  mission={mission}
-                  onViewDetails={() => handleViewDetails(mission.id)}
-                  showActions={true}
-                />
-              ))}
-            </div>
-            {filterMissions("accepted").length === 0 && (
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Aucune mission acceptée</p>
+            <TabsContent value="active" className="mt-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {activeMissions.map((mission) => (
+                  <MissionRealCard
+                    key={mission.id}
+                    mission={mission}
+                    onViewDetails={() => navigate(`/courier/mission/${mission.id}`)}
+                  />
+                ))}
               </div>
-            )}
-          </TabsContent>
+              {activeMissions.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>Aucune mission en cours</p>
+                </div>
+              )}
+            </TabsContent>
 
-          <TabsContent value="delivered" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filterMissions("delivered").map((mission) => (
-                <MissionCard
-                  key={mission.id}
-                  mission={mission}
-                  onViewDetails={() => handleViewDetails(mission.id)}
-                  showActions={false}
-                />
-              ))}
-            </div>
-            {filterMissions("delivered").length === 0 && (
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Aucune mission terminée</p>
+            <TabsContent value="completed" className="mt-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {completedMissions.map((mission) => (
+                  <MissionRealCard
+                    key={mission.id}
+                    mission={mission}
+                    onViewDetails={() => navigate(`/courier/mission/${mission.id}`)}
+                  />
+                ))}
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
+              {completedMissions.length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <CheckCircle2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p>Aucune mission terminée</p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </CourierLayout>
   );

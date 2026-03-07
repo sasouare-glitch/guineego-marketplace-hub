@@ -1,75 +1,110 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CourierLayout } from "@/components/courier/CourierLayout";
 import { SwipeStatusButton } from "@/components/courier/SwipeStatusButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, 
-  MapPin, 
-  Phone, 
-  MessageCircle, 
-  Navigation, 
+import {
+  ArrowLeft,
+  MapPin,
+  Phone,
+  MessageCircle,
+  Navigation,
   Package,
   Clock,
   Store,
-  User,
   CheckCircle2,
-  Circle
+  Circle,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { db } from "@/lib/firebase/config";
+import { doc, onSnapshot } from "firebase/firestore";
+import { useCourierMissions, DeliveryMission, DeliveryStatus } from "@/hooks/useCourierMissions";
 
-type MissionStatus = "accepted" | "pickup" | "in_transit" | "delivered";
+type StepStatus = "accepted" | "pickup_started" | "picked_up" | "in_transit" | "arrived" | "delivered";
 
-const statusSteps: { status: MissionStatus; label: string }[] = [
+const statusSteps: { status: StepStatus; label: string }[] = [
   { status: "accepted", label: "Acceptée" },
-  { status: "pickup", label: "Récupération" },
+  { status: "pickup_started", label: "En route vers pickup" },
+  { status: "picked_up", label: "Colis récupéré" },
   { status: "in_transit", label: "En livraison" },
+  { status: "arrived", label: "Arrivé chez le client" },
   { status: "delivered", label: "Livrée" },
 ];
 
 const CourierMissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [currentStatus, setCurrentStatus] = useState<MissionStatus>("pickup");
+  const { acceptMission, updateMissionStatus } = useCourierMissions();
+  const [mission, setMission] = useState<DeliveryMission | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
-  // Mock data - would come from API
-  const mission = {
-    id: id || "1",
-    pickupAddress: "Av. République, Imm. 45, 2ème étage",
-    pickupArea: "Kaloum",
-    deliveryAddress: "Quartier Cosa, Villa 12, Porte verte",
-    deliveryArea: "Ratoma",
-    distance: "4.2 km",
-    packages: 2,
-    maxTime: "45 min",
-    price: 25000,
-    priority: "urgent" as const,
-    shopName: "TechShop Conakry",
-    shopPhone: "+224 628 12 34 56",
-    customerName: "Fatoumata Diallo",
-    customerPhone: "+224 622 98 76 54",
-    orderRef: "#GG-2024-0892",
-    items: ["iPhone 13 Pro", "Coque de protection"],
+  // Real-time listener on this delivery document
+  useEffect(() => {
+    if (!id) return;
+    const unsub = onSnapshot(doc(db, "deliveries", id), (snap) => {
+      if (snap.exists()) {
+        setMission({ id: snap.id, ...snap.data() } as DeliveryMission);
+      }
+      setLoading(false);
+    });
+    return () => unsub();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <CourierLayout>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </CourierLayout>
+    );
+  }
+
+  if (!mission) {
+    return (
+      <CourierLayout>
+        <div className="text-center py-20 text-muted-foreground">
+          <p>Mission introuvable</p>
+          <Button className="mt-4" onClick={() => navigate("/courier/missions")}>
+            Retour aux missions
+          </Button>
+        </div>
+      </CourierLayout>
+    );
+  }
+
+  const currentStepIndex = statusSteps.findIndex((s) => s.status === mission.status);
+  const isPending = mission.status === "pending";
+
+  const handleAccept = async () => {
+    setUpdating(true);
+    await acceptMission(mission.id);
+    setUpdating(false);
   };
 
-  const currentStepIndex = statusSteps.findIndex(s => s.status === currentStatus);
-
-  const handleStatusChange = () => {
+  const handleNextStatus = async () => {
     const nextIndex = currentStepIndex + 1;
     if (nextIndex < statusSteps.length) {
-      setCurrentStatus(statusSteps[nextIndex].status);
+      setUpdating(true);
+      await updateMissionStatus(mission.id, statusSteps[nextIndex].status as DeliveryStatus);
+      setUpdating(false);
     }
   };
 
   const getNextStatusLabel = () => {
+    if (isPending) return "Accepter la mission";
     const nextIndex = currentStepIndex + 1;
     if (nextIndex < statusSteps.length) {
-      return `Marquer comme ${statusSteps[nextIndex].label.toLowerCase()}`;
+      return `Marquer : ${statusSteps[nextIndex].label}`;
     }
     return "Mission terminée";
   };
+
+  const formatPrice = (p: number) => p.toLocaleString("fr-GN") + " GNF";
 
   return (
     <CourierLayout>
@@ -80,74 +115,80 @@ const CourierMissionDetail = () => {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-xl font-display font-bold">Mission {mission.orderRef}</h1>
+            <h1 className="text-xl font-display font-bold">
+              Mission {mission.orderId.slice(0, 16)}
+            </h1>
             <p className="text-sm text-muted-foreground">
-              {mission.distance} • {mission.packages} colis
+              ~{mission.estimatedTime} min
             </p>
           </div>
-          <Badge className="bg-guinea-red/10 text-guinea-red border-guinea-red/20">
-            URGENT
-          </Badge>
+          {mission.priority === "express" && (
+            <Badge className="bg-destructive/10 text-destructive border-destructive/20">
+              EXPRESS
+            </Badge>
+          )}
         </div>
 
         {/* Status Timeline */}
-        <Card className="bg-card border-border">
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              {statusSteps.map((step, index) => {
-                const isCompleted = index < currentStepIndex;
-                const isCurrent = index === currentStepIndex;
-                const isPending = index > currentStepIndex;
+        {!isPending && (
+          <Card className="bg-card border-border">
+            <CardContent className="pt-6">
+              <div className="space-y-4">
+                {statusSteps.map((step, index) => {
+                  const isCompleted = index < currentStepIndex;
+                  const isCurrent = index === currentStepIndex;
+                  const isPendingStep = index > currentStepIndex;
 
-                return (
-                  <div key={step.status} className="flex items-center gap-4">
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center",
-                          isCompleted && "bg-guinea-green text-white",
-                          isCurrent && "bg-guinea-yellow text-white",
-                          isPending && "bg-muted text-muted-foreground"
-                        )}
-                      >
-                        {isCompleted ? (
-                          <CheckCircle2 className="w-5 h-5" />
-                        ) : (
-                          <Circle className="w-5 h-5" />
-                        )}
-                      </div>
-                      {index < statusSteps.length - 1 && (
+                  return (
+                    <div key={step.status} className="flex items-center gap-4">
+                      <div className="flex flex-col items-center">
                         <div
                           className={cn(
-                            "w-0.5 h-8",
-                            isCompleted ? "bg-guinea-green" : "bg-muted"
+                            "w-8 h-8 rounded-full flex items-center justify-center",
+                            isCompleted && "bg-guinea-green text-white",
+                            isCurrent && "bg-accent text-white",
+                            isPendingStep && "bg-muted text-muted-foreground"
                           )}
-                        />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p
-                        className={cn(
-                          "font-medium",
-                          isCurrent && "text-guinea-yellow",
-                          isCompleted && "text-guinea-green",
-                          isPending && "text-muted-foreground"
+                        >
+                          {isCompleted ? (
+                            <CheckCircle2 className="w-5 h-5" />
+                          ) : (
+                            <Circle className="w-5 h-5" />
+                          )}
+                        </div>
+                        {index < statusSteps.length - 1 && (
+                          <div
+                            className={cn(
+                              "w-0.5 h-8",
+                              isCompleted ? "bg-guinea-green" : "bg-muted"
+                            )}
+                          />
                         )}
-                      >
-                        {step.label}
-                        {isCurrent && (
-                          <span className="ml-2 text-xs bg-guinea-yellow/20 px-2 py-0.5 rounded-full">
-                            En cours
-                          </span>
-                        )}
-                      </p>
+                      </div>
+                      <div className="flex-1">
+                        <p
+                          className={cn(
+                            "font-medium",
+                            isCurrent && "text-accent",
+                            isCompleted && "text-guinea-green",
+                            isPendingStep && "text-muted-foreground"
+                          )}
+                        >
+                          {step.label}
+                          {isCurrent && (
+                            <span className="ml-2 text-xs bg-accent/20 px-2 py-0.5 rounded-full">
+                              En cours
+                            </span>
+                          )}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Pickup Info */}
         <Card className="bg-card border-border overflow-hidden">
@@ -159,15 +200,26 @@ const CourierMissionDetail = () => {
           </div>
           <CardContent className="pt-4 space-y-3">
             <div>
-              <p className="font-medium">{mission.shopName}</p>
-              <p className="text-sm text-muted-foreground">{mission.pickupArea}</p>
-              <p className="text-sm text-muted-foreground">{mission.pickupAddress}</p>
+              <p className="font-medium">{mission.pickup.commune}</p>
+              <p className="text-sm text-muted-foreground">{mission.pickup.address}</p>
+              {mission.pickup.instructions && (
+                <p className="text-xs text-muted-foreground mt-1 italic">
+                  {mission.pickup.instructions}
+                </p>
+              )}
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1 gap-2">
-                <Phone className="w-4 h-4" />
-                Appeler
-              </Button>
+              {mission.pickup.phone && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 gap-2"
+                  onClick={() => window.open(`tel:${mission.pickup.phone}`)}
+                >
+                  <Phone className="w-4 h-4" />
+                  Appeler
+                </Button>
+              )}
               <Button variant="outline" size="sm" className="flex-1 gap-2">
                 <Navigation className="w-4 h-4" />
                 Naviguer
@@ -178,50 +230,37 @@ const CourierMissionDetail = () => {
 
         {/* Delivery Info */}
         <Card className="bg-card border-border overflow-hidden">
-          <div className="bg-guinea-red/10 px-4 py-2 border-b border-border">
-            <div className="flex items-center gap-2 text-guinea-red font-medium">
+          <div className="bg-destructive/10 px-4 py-2 border-b border-border">
+            <div className="flex items-center gap-2 text-destructive font-medium">
               <MapPin className="w-4 h-4" />
               Point de livraison
             </div>
           </div>
           <CardContent className="pt-4 space-y-3">
             <div>
-              <p className="font-medium">{mission.customerName}</p>
-              <p className="text-sm text-muted-foreground">{mission.deliveryArea}</p>
-              <p className="text-sm text-muted-foreground">{mission.deliveryAddress}</p>
+              {mission.delivery.fullName && (
+                <p className="font-medium">{mission.delivery.fullName}</p>
+              )}
+              <p className="text-sm font-medium">{mission.delivery.commune}</p>
+              <p className="text-sm text-muted-foreground">{mission.delivery.address}</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1 gap-2">
-                <Phone className="w-4 h-4" />
-                Appeler
-              </Button>
-              <Button variant="outline" size="sm" className="flex-1 gap-2">
-                <MessageCircle className="w-4 h-4" />
-                Message
-              </Button>
+              {mission.delivery.phone && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 gap-2"
+                  onClick={() => window.open(`tel:${mission.delivery.phone}`)}
+                >
+                  <Phone className="w-4 h-4" />
+                  Appeler
+                </Button>
+              )}
               <Button variant="outline" size="sm" className="flex-1 gap-2">
                 <Navigation className="w-4 h-4" />
                 Naviguer
               </Button>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Package Details */}
-        <Card className="bg-card border-border">
-          <CardContent className="pt-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Package className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium">Contenu de la commande</span>
-            </div>
-            <ul className="space-y-2">
-              {mission.items.map((item, index) => (
-                <li key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                  {item}
-                </li>
-              ))}
-            </ul>
           </CardContent>
         </Card>
 
@@ -231,11 +270,13 @@ const CourierMissionDetail = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Temps max: {mission.maxTime}</span>
+                <span className="text-sm text-muted-foreground">
+                  Temps estimé: {mission.estimatedTime} min
+                </span>
               </div>
               <div className="text-right">
                 <p className="text-2xl font-display font-bold text-guinea-green">
-                  {mission.price.toLocaleString('fr-GN')} GNF
+                  {formatPrice(mission.fee)}
                 </p>
                 <p className="text-xs text-muted-foreground">Gain pour cette mission</p>
               </div>
@@ -243,23 +284,36 @@ const CourierMissionDetail = () => {
           </CardContent>
         </Card>
 
-        {/* Swipe Action */}
-        {currentStatus !== "delivered" && (
+        {/* Actions */}
+        {isPending && (
+          <Button
+            className="w-full bg-guinea-green hover:bg-guinea-green/90 h-14 text-lg font-bold"
+            disabled={updating}
+            onClick={handleAccept}
+          >
+            {updating ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+            Accepter la mission
+          </Button>
+        )}
+
+        {!isPending && mission.status !== "delivered" && (
           <div className="sticky bottom-4">
             <SwipeStatusButton
-              onComplete={handleStatusChange}
+              onComplete={handleNextStatus}
               label={getNextStatusLabel()}
               completedLabel="Statut mis à jour !"
             />
           </div>
         )}
 
-        {currentStatus === "delivered" && (
+        {mission.status === "delivered" && (
           <div className="bg-guinea-green/10 rounded-xl p-6 text-center">
             <CheckCircle2 className="w-12 h-12 text-guinea-green mx-auto mb-3" />
-            <h3 className="font-display font-bold text-lg text-guinea-green">Mission terminée !</h3>
+            <h3 className="font-display font-bold text-lg text-guinea-green">
+              Mission terminée !
+            </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              +{mission.price.toLocaleString('fr-GN')} GNF ajoutés à votre wallet
+              +{formatPrice(mission.fee)} ajoutés à votre wallet
             </p>
             <Button className="mt-4" onClick={() => navigate("/courier/missions")}>
               Voir d'autres missions
