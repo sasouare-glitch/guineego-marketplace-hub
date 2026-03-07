@@ -303,6 +303,59 @@ const CourierMissionDetail = () => {
           </CardContent>
         </Card>
 
+        {/* GPS Status */}
+        {!isPending && mission.status !== "delivered" && (
+          <Card className="bg-card border-border">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center",
+                  gps.position ? "bg-guinea-green/10" : "bg-destructive/10"
+                )}>
+                  <Crosshair className={cn(
+                    "w-5 h-5",
+                    gps.position ? "text-guinea-green" : "text-destructive"
+                  )} />
+                </div>
+                <div className="flex-1">
+                  {gps.error ? (
+                    <p className="text-sm text-destructive">{gps.error}</p>
+                  ) : gps.position ? (
+                    <>
+                      <p className="text-sm font-medium flex items-center gap-1">
+                        <Navigation2 className="w-3 h-3 text-guinea-green" />
+                        GPS actif
+                        {gps.position.accuracy && (
+                          <span className="text-xs text-muted-foreground">
+                            (±{Math.round(gps.position.accuracy)}m)
+                          </span>
+                        )}
+                      </p>
+                      {gps.distanceToTarget !== null && (
+                        <p className="text-xs text-muted-foreground">
+                          {gps.formatDistance(gps.distanceToTarget)} du {gps.targetLabel}
+                          {gps.isNearTarget && (
+                            <span className="ml-2 text-guinea-green font-semibold">
+                              ✓ À proximité
+                            </span>
+                          )}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Localisation en cours...</p>
+                  )}
+                </div>
+                {gps.position?.speed !== null && gps.position?.speed !== undefined && gps.position.speed > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    {Math.round(gps.position.speed * 3.6)} km/h
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Actions */}
         {isPending && (
           <Button
@@ -321,6 +374,13 @@ const CourierMissionDetail = () => {
               onComplete={handleNextStatus}
               label={getNextStatusLabel()}
               completedLabel="Statut mis à jour !"
+              gpsInfo={{
+                distanceToTarget: gps.distanceToTarget,
+                isNearTarget: gps.isNearTarget,
+                targetLabel: gps.targetLabel,
+                formatDistance: gps.formatDistance,
+                error: gps.error,
+              }}
             />
           </div>
         )}
