@@ -321,18 +321,12 @@ export function AdminDashboard() {
                   { label: 'Taux de livraison', current: dashData.deliveryStats.onTimeRate, target: 95, isPercent: true },
                   { label: 'Vendeurs actifs', current: dashData.activeSellers, target: 100 },
                 ].map((obj) => {
-                  const progress = obj.isPercent || obj.isRating
-                    ? (obj.current / obj.target) * 100
-                    : (obj.current / obj.target) * 100;
+                  const progress = (obj.current / obj.target) * 100;
                   const displayCurrent = obj.isPercent
                     ? `${obj.current}%`
-                    : obj.isRating
-                    ? `${obj.current}/5`
                     : formatPrice(obj.current);
                   const displayTarget = obj.isPercent
                     ? `${obj.target}%`
-                    : obj.isRating
-                    ? `${obj.target}/5`
                     : formatPrice(obj.target);
 
                   return (
