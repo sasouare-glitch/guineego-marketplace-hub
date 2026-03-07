@@ -2,11 +2,13 @@ import { CourierMobileLayout } from "@/components/courier/mobile/CourierMobileLa
 import { QuickStatsBar } from "@/components/courier/mobile/QuickStatsBar";
 import { MissionCardSimple, SimpleMission } from "@/components/courier/mobile/MissionCardSimple";
 import { BigActionButton } from "@/components/courier/mobile/BigActionButton";
-import { QrCode, Package, Loader2 } from "lucide-react";
+import { QrCode, Package, Loader2, Bell } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCourierMissions, DeliveryMission } from "@/hooks/useCourierMissions";
 import { useWallet } from "@/hooks/useWallet";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { Button } from "@/components/ui/button";
 
 // Convert Firestore DeliveryMission → SimpleMission for the card component
 function toSimpleMission(m: DeliveryMission, isAvailable: boolean): SimpleMission {
@@ -27,6 +29,7 @@ const CourierMobileHome = () => {
   const { user, hasRole } = useAuth();
   const { available, myMissions, loading, acceptMission, updateMissionStatus } = useCourierMissions();
   const { wallet } = useWallet();
+  const { supported: pushSupported, permission: pushPermission, requestPermission } = usePushNotifications();
 
   const activeMission = myMissions.find(
     (m) => m.status !== "delivered" && m.status !== "cancelled"
@@ -63,6 +66,17 @@ const CourierMobileHome = () => {
             Bonne journée de livraison !
           </p>
         </div>
+
+        {pushSupported && pushPermission !== 'granted' && (
+          <Button
+            onClick={requestPermission}
+            variant="outline"
+            className="w-full flex items-center gap-2 border-primary text-primary"
+          >
+            <Bell className="w-4 h-4" />
+            Activer les notifications pour les nouvelles missions
+          </Button>
+        )}
 
         <QuickStatsBar
           todayDeliveries={todayDelivered.length}
