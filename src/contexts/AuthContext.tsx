@@ -289,6 +289,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signOutUser = async () => {
     try {
       await firebaseSignOut(auth);
+      window.location.href = '/';
     } catch (error) {
       setState(prev => ({ ...prev, error: error as Error }));
       throw error;
