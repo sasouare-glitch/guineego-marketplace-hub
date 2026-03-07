@@ -328,7 +328,8 @@ service cloud.firestore {
     match /couriers/{courierId} {
       allow read: if isAdmin() || isOwner(courierId) || (isCourier() && resource.data.userId == request.auth.uid);
       allow update: if isOwner(courierId) || (isCourier() && resource.data.userId == request.auth.uid) || isAdmin();
-      allow create, delete: if false;
+      allow create: if isOwner(courierId) && isCourier();
+      allow delete: if false;
     }
     
     // ============================================
