@@ -260,6 +260,11 @@ export default function OrderTrackingPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Courier Tracking */}
+            {order.deliveryMissionId && (
+              <CourierTrackingCard deliveryMissionId={order.deliveryMissionId} />
+            )}
+
             {/* Order Items */}
             <OrderItemsList
               items={items}
