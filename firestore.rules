@@ -114,7 +114,9 @@ service cloud.firestore {
               || (isAuthenticated() && request.auth.uid in resource.data.sellerIds)
               || (isAuthenticated() && request.auth.token.ecommerceId != null && request.auth.token.ecommerceId in resource.data.sellerIds)
               || (isAuthenticated() && request.auth.token.ecomId != null && request.auth.token.ecomId in resource.data.sellerIds)
-              || isOwner(resource.data.customerId);
+              || isOwner(resource.data.customerId)
+              || (isCourier() && resource.data.assignedCourier == request.auth.uid)
+              || (isCourier() && request.resource.data.assignedCourier == request.auth.uid);
       allow delete: if false;
     }
     
