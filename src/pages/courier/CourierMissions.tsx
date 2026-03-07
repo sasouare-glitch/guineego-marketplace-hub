@@ -131,6 +131,7 @@ function MissionRealCard({
 
 const CourierMissions = () => {
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
   const { available, myMissions, loading, acceptMission } = useCourierMissions();
   const [searchTerm, setSearchTerm] = useState("");
   const [zoneFilter, setZoneFilter] = useState("all");
