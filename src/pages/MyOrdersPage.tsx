@@ -60,7 +60,7 @@ export default function MyOrdersPage() {
             orderNumber: d.id,
             status: (data.status || "pending") as OrderStatus,
             createdAt: data.createdAt || null,
-            totalAmount: data.totalAmount || 0,
+            totalAmount: data.totalAmount || data.pricing?.total || 0,
             items: (data.items || []).map((item: any) => ({
               name: item.name || item.productName || "Article",
               image: item.image || item.imageUrl || "",
