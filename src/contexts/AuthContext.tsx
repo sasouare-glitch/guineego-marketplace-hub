@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
   User,
   createUserWithEmailAndPassword,
@@ -447,21 +447,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setState(prev => ({ ...prev, profile, claims }));
   }, [state.user, loadUserProfile, loadUserClaims]);
 
+  // Track current role via ref to avoid stale closure in onSnapshot
+  const currentRoleRef = useRef<string | null>(null);
+  const isRefreshingRef = useRef(false);
+
+  useEffect(() => {
+    currentRoleRef.current = state.claims?.role || null;
+  }, [state.claims?.role]);
+
   // Écouter les changements du document utilisateur pour auto-refresh des claims
   useEffect(() => {
     if (!state.user) return;
     const unsubscribe = onSnapshot(doc(db, 'users', state.user.uid), (snap) => {
       if (!snap.exists()) return;
       const data = snap.data();
-      const currentRole = state.claims?.role;
-      // Si le rôle a changé dans Firestore, rafraîchir les claims
-      if (data.role && data.role !== currentRole) {
+      // Si le rôle a changé dans Firestore, rafraîchir les claims (une seule fois)
+      if (data.role && data.role !== currentRoleRef.current && !isRefreshingRef.current) {
         console.log('[AuthContext] Role changed in Firestore, refreshing claims…');
-        refreshClaims();
+        isRefreshingRef.current = true;
+        refreshClaims().finally(() => {
+          isRefreshingRef.current = false;
+        });
       }
     });
     return () => unsubscribe();
-    // Only re-subscribe when user changes, not on every claims change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.user?.uid]);
 
