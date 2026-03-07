@@ -227,7 +227,7 @@ const CourierMissions = () => {
                   <MissionRealCard
                     key={mission.id}
                     mission={mission}
-                    onAccept={hasRole('courier') ? () => acceptMission(mission.id) : undefined}
+                    onAccept={hasRole('courier') ? () => handleAcceptMission(mission.id) : undefined}
                     onViewDetails={() => navigate(`/courier/mission/${mission.id}`)}
                   />
                 ))}
