@@ -44,6 +44,13 @@ import { useRealtimeCollection } from '@/lib/firebase/queries';
 import { updateDocument, deleteDocument } from '@/lib/firebase/mutations';
 import type { FirestoreDoc } from '@/lib/firebase/queries';
 
+interface Seller extends FirestoreDoc {
+  businessName?: string;
+  shopName?: string;
+  name?: string;
+  displayName?: string;
+}
+
 interface Product extends FirestoreDoc {
   name: string;
   category: string;
@@ -70,6 +77,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 
 export default function AdminProductsPage() {
   const { data: products, loading, error } = useRealtimeCollection<Product>('products');
+  const { data: sellers } = useRealtimeCollection<Seller>('sellers');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const { format } = useCurrency();
@@ -79,20 +87,22 @@ export default function AdminProductsPage() {
   const [editDialog, setEditDialog] = useState<{ open: boolean; product: Product | null }>({ open: false, product: null });
   const [saving, setSaving] = useState(false);
   const [addDialog, setAddDialog] = useState(false);
-  const [addForm, setAddForm] = useState({ name: '', price: '', category: '', description: '', stock: '', tags: '', originalPrice: '', isFlashSale: false, isNew: false, isBestSeller: false });
+  const [addForm, setAddForm] = useState({ name: '', price: '', category: '', description: '', stock: '', tags: '', originalPrice: '', isFlashSale: false, isNew: false, isBestSeller: false, sellerId: '' });
   const [addImages, setAddImages] = useState<{ file: File; preview: string }[]>([]);
   const [addUploading, setAddUploading] = useState(false);
   const [addUploadProgress, setAddUploadProgress] = useState(0);
   const addFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddProduct = async () => {
-    if (!addForm.name || !addForm.price || !addForm.category) {
-      toast.error('Nom, prix et catégorie sont requis');
+    if (!addForm.name || !addForm.price || !addForm.category || !addForm.sellerId) {
+      toast.error('Nom, prix, catégorie et vendeur sont requis');
       return;
     }
     setSaving(true);
     try {
       const { addDocument } = await import('@/lib/firebase/mutations');
+      const selectedSeller = sellers.find(s => s.id === addForm.sellerId);
+      const sellerName = selectedSeller?.businessName || selectedSeller?.shopName || selectedSeller?.name || addForm.sellerId;
       // First create the product to get an ID
       const docRef = await addDocument('products', {
         name: addForm.name,
@@ -104,7 +114,8 @@ export default function AdminProductsPage() {
         thumbnail: '/placeholder.svg',
         variants: [{ sku: 'DEFAULT', name: 'Standard', price: Number(addForm.price), stock: Number(addForm.stock) || 0 }],
         totalStock: Number(addForm.stock) || 0,
-        sellerId: 'admin',
+        sellerId: addForm.sellerId,
+        sellerName: sellerName,
         tags: addForm.tags ? addForm.tags.split(',').map(s => s.trim()) : [],
         specifications: {},
         avgRating: 0,
@@ -146,7 +157,7 @@ export default function AdminProductsPage() {
 
       toast.success('Produit ajouté avec succès');
       setAddDialog(false);
-      setAddForm({ name: '', price: '', category: '', description: '', stock: '', tags: '', originalPrice: '', isFlashSale: false, isNew: false, isBestSeller: false });
+      setAddForm({ name: '', price: '', category: '', description: '', stock: '', tags: '', originalPrice: '', isFlashSale: false, isNew: false, isBestSeller: false, sellerId: '' });
       addImages.forEach(img => URL.revokeObjectURL(img.preview));
       setAddImages([]);
     } catch (err) {
@@ -462,6 +473,21 @@ export default function AdminProductsPage() {
               <Input value={addForm.name} onChange={(e) => setAddForm(prev => ({ ...prev, name: e.target.value }))} placeholder="Ex: iPhone 15 Pro" />
             </div>
             <div className="space-y-2">
+              <Label>Boutique (vendeur) *</Label>
+              <Select value={addForm.sellerId} onValueChange={(v) => setAddForm(prev => ({ ...prev, sellerId: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir une boutique..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {sellers.map((seller) => (
+                    <SelectItem key={seller.id} value={seller.id}>
+                      {seller.businessName || seller.shopName || seller.name || seller.displayName || seller.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label>Description</Label>
               <Textarea value={addForm.description} onChange={(e) => setAddForm(prev => ({ ...prev, description: e.target.value }))} placeholder="Description du produit" rows={3} />
             </div>
@@ -613,7 +639,7 @@ export default function AdminProductsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddDialog(false)}>Annuler</Button>
-            <Button onClick={handleAddProduct} disabled={saving || addUploading}>
+            <Button onClick={handleAddProduct} disabled={saving || addUploading || !addForm.sellerId}>
               {addUploading ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Upload...</>
               ) : saving ? (
