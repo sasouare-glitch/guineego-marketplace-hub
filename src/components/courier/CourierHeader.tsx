@@ -101,7 +101,7 @@ export const CourierHeader = ({ onMenuClick }: CourierHeaderProps) => {
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                 <User className="w-4 h-4 text-primary" />
               </div>
-              <span className="hidden md:inline font-medium">Mamadou B.</span>
+              <span className="hidden md:inline font-medium">{user?.displayName || "Coursier"}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 bg-card border-border">
