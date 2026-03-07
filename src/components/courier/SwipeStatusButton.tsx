@@ -22,7 +22,8 @@ export const SwipeStatusButton = ({
   onComplete, 
   label, 
   completedLabel = "Terminé !",
-  disabled = false 
+  disabled = false,
+  gpsInfo,
 }: SwipeStatusButtonProps) => {
   const [isCompleted, setIsCompleted] = useState(false);
   const constraintsRef = useRef<HTMLDivElement>(null);
