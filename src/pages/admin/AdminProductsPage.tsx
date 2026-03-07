@@ -77,6 +77,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 
 export default function AdminProductsPage() {
   const { data: products, loading, error } = useRealtimeCollection<Product>('products');
+  const { data: sellers } = useRealtimeCollection<Seller>('sellers');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const { format } = useCurrency();
@@ -86,7 +87,7 @@ export default function AdminProductsPage() {
   const [editDialog, setEditDialog] = useState<{ open: boolean; product: Product | null }>({ open: false, product: null });
   const [saving, setSaving] = useState(false);
   const [addDialog, setAddDialog] = useState(false);
-  const [addForm, setAddForm] = useState({ name: '', price: '', category: '', description: '', stock: '', tags: '', originalPrice: '', isFlashSale: false, isNew: false, isBestSeller: false });
+  const [addForm, setAddForm] = useState({ name: '', price: '', category: '', description: '', stock: '', tags: '', originalPrice: '', isFlashSale: false, isNew: false, isBestSeller: false, sellerId: '' });
   const [addImages, setAddImages] = useState<{ file: File; preview: string }[]>([]);
   const [addUploading, setAddUploading] = useState(false);
   const [addUploadProgress, setAddUploadProgress] = useState(0);
