@@ -29,6 +29,8 @@ import CourierMissionDetail from "./pages/courier/CourierMissionDetail";
 import CourierEarnings from "./pages/courier/CourierEarnings";
 import CourierMobileHome from "./pages/courier/CourierMobileHome";
 import CourierActiveMissions from "./pages/courier/CourierActiveMissions";
+import CourierStatsPage from "./pages/courier/CourierStatsPage";
+import CourierProfilePage from "./pages/courier/CourierProfilePage";
 import Marketplace from "./pages/Marketplace";
 import SearchPage from "./pages/SearchPage";
 import ProductDetail from "./pages/ProductDetail";
@@ -308,6 +310,16 @@ const App = () => (
                     <Route path="/courier/earnings" element={
                       <ProtectedRoute requiredRoles={['courier', 'admin']}>
                         <CourierEarnings />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/courier/stats" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierStatsPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/courier/profile" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierProfilePage />
                       </ProtectedRoute>
                     } />
                     
