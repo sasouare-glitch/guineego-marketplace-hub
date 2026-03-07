@@ -48,6 +48,7 @@ export { createDeliveryMission } from './deliveries/createDeliveryMission';
 export { updateDeliveryStatus } from './deliveries/updateDeliveryStatus';
 export { updateCourierLocation } from './deliveries/updateCourierLocation';
 export { onDeliveryStatusChanged } from './deliveries/deliveryTriggers';
+export { onNewDeliveryMission } from './deliveries/onNewMission';
 
 // ============================================
 // TRANSIT FUNCTIONS
