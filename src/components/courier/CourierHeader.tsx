@@ -1,4 +1,6 @@
 import { Bell, Menu, User, MapPin, Power } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,7 +19,14 @@ interface CourierHeaderProps {
 }
 
 export const CourierHeader = ({ onMenuClick }: CourierHeaderProps) => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(true);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6">
@@ -98,21 +107,21 @@ export const CourierHeader = ({ onMenuClick }: CourierHeaderProps) => {
           <DropdownMenuContent align="end" className="w-56 bg-card border-border">
             <DropdownMenuLabel>
               <div>
-                <p className="font-medium">Mamadou Bah</p>
-                <p className="text-sm text-muted-foreground">coursier@guineego.com</p>
+                <p className="font-medium">{user?.displayName || "Coursier"}</p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/courier/profile")}>
               <User className="w-4 h-4 mr-2" />
               Mon profil
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/courier/profile")}>
               <MapPin className="w-4 h-4 mr-2" />
               Mes zones
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-guinea-red">
+            <DropdownMenuItem className="text-guinea-red" onClick={handleSignOut}>
               <Power className="w-4 h-4 mr-2" />
               Déconnexion
             </DropdownMenuItem>
