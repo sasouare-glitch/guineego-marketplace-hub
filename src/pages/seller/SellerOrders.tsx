@@ -344,7 +344,7 @@ export default function SellerOrders() {
         </div>
 
         {/* Status Tabs */}
-        <Tabs defaultValue="all" className="space-y-4">
+        <Tabs value={statusFilter} onValueChange={setStatusFilter} className="space-y-4">
           <TabsList className="bg-muted/50 p-1 flex-wrap">
             <TabsTrigger value="all" onClick={() => setStatusFilter("all")}>
               Toutes ({orders.length})
