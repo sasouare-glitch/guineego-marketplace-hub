@@ -44,6 +44,13 @@ import { useRealtimeCollection } from '@/lib/firebase/queries';
 import { updateDocument, deleteDocument } from '@/lib/firebase/mutations';
 import type { FirestoreDoc } from '@/lib/firebase/queries';
 
+interface Seller extends FirestoreDoc {
+  businessName?: string;
+  shopName?: string;
+  name?: string;
+  displayName?: string;
+}
+
 interface Product extends FirestoreDoc {
   name: string;
   category: string;
