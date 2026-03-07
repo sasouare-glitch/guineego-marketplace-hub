@@ -119,6 +119,75 @@ export async function createOrderDirect(params: CreateOrderParams) {
     createdAt: now,
   });
 
+  // Send confirmation email via Firebase Trigger Email extension (client-side fallback)
+  try {
+    const userDoc = await (await import('firebase/firestore')).getDoc(doc(db, 'users', uid));
+    const userEmail = userDoc.data()?.email;
+    if (userEmail) {
+      const itemsList = items
+        .map(item => `<tr><td style="padding:8px 0;font-size:14px;">${item.name} <span style="color:#6b7280;">x${item.quantity}</span></td><td style="padding:8px 0;font-size:14px;text-align:right;">${(item.price * item.quantity).toLocaleString()} GNF</td></tr>`)
+        .join('');
+
+      const paymentLabels: Record<string, string> = {
+        'orange_money': 'Orange Money',
+        'mtn_money': 'MTN Mobile Money',
+        'card': 'Carte bancaire',
+        'wallet': 'Portefeuille GuineeGo',
+        'cash': 'Paiement à la livraison',
+      };
+
+      const mailRef = doc(collection(db, 'mail'));
+      await setDoc(mailRef, {
+        to: userEmail,
+        message: {
+          subject: `✅ Commande ${orderId} confirmée — GuineeGo`,
+          html: `
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+              <div style="background:linear-gradient(135deg,#009639,#00b847);padding:24px;text-align:center;">
+                <h1 style="color:#fff;margin:0;font-size:24px;">GuineeGo</h1>
+              </div>
+              <div style="padding:24px;">
+                <h2 style="color:#009639;margin:0 0 8px;font-size:22px;">✅ Commande confirmée !</h2>
+                <p style="margin:0 0 20px;font-size:15px;color:#374151;">
+                  Bonjour <strong>${shippingAddress.fullName}</strong>, votre commande a été créée avec succès.
+                </p>
+                <div style="background:#f9fafb;border-radius:8px;padding:16px;margin-bottom:20px;">
+                  <p style="margin:0;font-size:13px;color:#6b7280;">Numéro de commande</p>
+                  <p style="margin:4px 0 0;font-size:18px;font-weight:700;color:#111827;letter-spacing:0.5px;">${orderId}</p>
+                </div>
+                <h3 style="font-size:16px;color:#111827;margin:0 0 8px;">📦 Articles commandés</h3>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${itemsList}</table>
+                <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr><td style="padding:4px 0;font-size:14px;color:#6b7280;">Sous-total</td><td style="text-align:right;font-size:14px;">${subtotal.toLocaleString()} GNF</td></tr>
+                  <tr><td style="padding:4px 0;font-size:14px;color:#6b7280;">Livraison</td><td style="text-align:right;font-size:14px;">${shippingFee.toLocaleString()} GNF</td></tr>
+                </table>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr><td style="padding:12px 0 0;font-size:18px;font-weight:700;">Total</td><td style="padding:12px 0 0;font-size:18px;font-weight:700;color:#009639;text-align:right;">${total.toLocaleString()} GNF</td></tr>
+                </table>
+                <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;">
+                <h3 style="font-size:16px;color:#111827;margin:0 0 4px;">📍 Livraison</h3>
+                <p style="margin:0 0 12px;font-size:14px;color:#374151;">${shippingAddress.address}, ${shippingAddress.commune}</p>
+                <h3 style="font-size:16px;color:#111827;margin:0 0 4px;">💳 Paiement</h3>
+                <p style="margin:0 0 20px;font-size:14px;color:#374151;">${paymentLabels[paymentMethod] || paymentMethod}</p>
+                <div style="text-align:center;margin-top:24px;">
+                  <a href="https://guineego.com/order/${orderId}" style="display:inline-block;background:#009639;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:16px;">📍 Suivre ma commande</a>
+                </div>
+              </div>
+              <div style="background:#f9fafb;padding:16px;text-align:center;font-size:12px;color:#9ca3af;">
+                © GuineeGo — Conakry, Guinée
+              </div>
+            </div>
+          `,
+        },
+        createdAt: now,
+      });
+      console.log('📧 Email de confirmation écrit dans la collection mail');
+    }
+  } catch (emailError) {
+    console.warn('⚠️ Erreur envoi email de confirmation:', emailError);
+  }
+
   // Clear user cart
   try {
     await deleteDoc(doc(db, 'carts', uid));
