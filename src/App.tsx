@@ -29,6 +29,8 @@ import CourierMissionDetail from "./pages/courier/CourierMissionDetail";
 import CourierEarnings from "./pages/courier/CourierEarnings";
 import CourierMobileHome from "./pages/courier/CourierMobileHome";
 import CourierActiveMissions from "./pages/courier/CourierActiveMissions";
+import CourierStatsPage from "./pages/courier/CourierStatsPage";
+import CourierProfilePage from "./pages/courier/CourierProfilePage";
 import Marketplace from "./pages/Marketplace";
 import SearchPage from "./pages/SearchPage";
 import ProductDetail from "./pages/ProductDetail";
