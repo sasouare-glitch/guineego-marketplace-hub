@@ -52,6 +52,7 @@ import {
   ComposedChart
 } from 'recharts';
 import { useAdminDashboard, useDailyReports } from '@/hooks/useAnalytics';
+import { useAdminDashboardData } from '@/hooks/useAdminDashboardData';
 import { useCurrency } from '@/hooks/useCurrency';
 
 const COLORS = ['hsl(var(--primary))', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
@@ -60,31 +61,6 @@ const useFormatPrice = () => {
   const { format } = useCurrency();
   return { formatPrice: format };
 };
-
-// Mock alerts for UI
-const recentAlerts = [
-  { type: 'warning', message: 'Stock faible : Téléphone Samsung A54 (3 restants)', time: 'Il y a 5 min' },
-  { type: 'success', message: 'Nouveau vendeur vérifié : TechStore Conakry', time: 'Il y a 12 min' },
-  { type: 'error', message: 'Livraison #ORD-2847 en retard de 2h', time: 'Il y a 30 min' },
-  { type: 'success', message: 'Paiement reçu : 4 500 000 GNF via Orange Money', time: 'Il y a 1h' },
-];
-
-// Mock top sellers
-const topSellers = [
-  { name: 'TechStore GN', sales: 847, revenue: 48500000, trend: 12.4 },
-  { name: 'Mode Africaine', sales: 623, revenue: 31200000, trend: 8.1 },
-  { name: 'ElectroConakry', sales: 512, revenue: 27800000, trend: -3.2 },
-  { name: 'BioShop Guinea', sales: 389, revenue: 19400000, trend: 22.7 },
-  { name: 'SportZone GN', sales: 271, revenue: 14900000, trend: 5.3 },
-];
-
-// Mock monthly objectives
-const objectives = [
-  { label: 'GMV mensuel', current: 842000000, target: 1000000000 },
-  { label: 'Nouvelles inscriptions', current: 1240, target: 2000 },
-  { label: 'Taux de livraison', current: 87, target: 95, isPercent: true },
-  { label: 'Satisfaction client', current: 4.2, target: 4.8, isRating: true },
-];
 
 export function AdminDashboard() {
   const { realtime, rolling, today, trends, weeklyReports, loading } = useAdminDashboard();
