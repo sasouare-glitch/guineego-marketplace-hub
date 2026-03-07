@@ -255,10 +255,8 @@ export default function SellerOrders() {
 
       toast.success(`Commande mise à jour: ${statusConfig[newStatus].label}`);
 
-      // Switch filter to show the updated order in its new status
-      if (statusFilter !== "all" && statusFilter !== newStatus) {
-        setStatusFilter(newStatus);
-      }
+      // Always switch to the new status tab so the progress bar is visible
+      setStatusFilter(newStatus);
     } catch (error: any) {
       console.error("Error updating status:", error);
       toast.error(error.message || "Erreur lors de la mise à jour du statut");
