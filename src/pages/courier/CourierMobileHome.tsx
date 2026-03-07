@@ -24,7 +24,7 @@ function toSimpleMission(m: DeliveryMission, isAvailable: boolean): SimpleMissio
 
 const CourierMobileHome = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const { available, myMissions, loading, acceptMission, updateMissionStatus } = useCourierMissions();
   const { wallet } = useWallet();
 
@@ -105,7 +105,7 @@ const CourierMobileHome = () => {
               <MissionCardSimple
                 key={mission.id}
                 mission={toSimpleMission(mission, true)}
-                onAccept={() => acceptMission(mission.id)}
+                onAccept={hasRole('courier') ? () => acceptMission(mission.id) : undefined}
                 onReject={() => {}}
               />
             ))
