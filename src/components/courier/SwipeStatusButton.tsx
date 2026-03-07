@@ -74,6 +74,20 @@ export const SwipeStatusButton = ({
   }
 
   return (
+    <div className="w-full">
+      {gpsInfo && gpsInfo.distanceToTarget !== null && gpsInfo.distanceToTarget !== undefined && (
+        <div className={cn(
+          "text-center text-xs mb-2 flex items-center justify-center gap-1",
+          gpsInfo.isNearTarget ? "text-guinea-green font-semibold" : "text-muted-foreground"
+        )}>
+          <Navigation2 className="w-3 h-3" />
+          {gpsInfo.formatDistance(gpsInfo.distanceToTarget)} du {gpsInfo.targetLabel}
+          {gpsInfo.isNearTarget && " ✓"}
+        </div>
+      )}
+      {gpsInfo?.error && (
+        <div className="text-center text-xs text-destructive mb-2">{gpsInfo.error}</div>
+      )}
     <motion.div
       ref={constraintsRef}
       className="relative w-full h-14 rounded-full overflow-hidden"
