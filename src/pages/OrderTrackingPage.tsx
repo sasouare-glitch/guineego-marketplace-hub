@@ -281,16 +281,26 @@ export default function OrderTrackingPage() {
                   <span className="text-muted-foreground">Paiement</span>
                   <span className="text-foreground">{paymentMethodLabels[order.paymentMethod] || order.paymentMethod}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm items-center">
                   <span className="text-muted-foreground">Statut paiement</span>
-                  <Badge variant={order.paymentStatus === 'paid' ? 'default' : 'secondary'}>
-                    {order.paymentStatus === 'paid' ? 'Payé' : 'En attente'}
+                  <Badge variant={order.paymentStatus === 'paid' ? 'default' : order.paymentMethod === 'cash' ? 'outline' : 'secondary'}>
+                    {order.paymentStatus === 'paid'
+                      ? 'Payé'
+                      : order.paymentStatus === 'refunded'
+                      ? 'Remboursé'
+                      : order.paymentStatus === 'failed'
+                      ? 'Échoué'
+                      : order.paymentMethod === 'cash'
+                      ? 'Cash à la livraison'
+                      : 'En attente'}
                   </Badge>
                 </div>
                 {order.deliveryMissionId && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Mission livraison</span>
-                    <span className="text-foreground font-mono text-xs">{order.deliveryMissionId.slice(0, 8)}...</span>
+                    <Link to={`/order/${orderId}`} className="text-primary font-mono text-xs hover:underline">
+                      {order.deliveryMissionId}
+                    </Link>
                   </div>
                 )}
               </CardContent>
