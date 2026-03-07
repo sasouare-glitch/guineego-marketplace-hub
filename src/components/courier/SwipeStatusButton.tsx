@@ -8,6 +8,14 @@ interface SwipeStatusButtonProps {
   label: string;
   completedLabel?: string;
   disabled?: boolean;
+  /** GPS proximity info */
+  gpsInfo?: {
+    distanceToTarget: number | null;
+    isNearTarget: boolean;
+    targetLabel: string;
+    formatDistance: (m: number) => string;
+    error: string | null;
+  };
 }
 
 export const SwipeStatusButton = ({ 
