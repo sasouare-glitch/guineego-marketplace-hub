@@ -47,7 +47,7 @@ const CourierMissionDetail = () => {
     if (!id) return;
     const unsub = onSnapshot(doc(db, "deliveries", id), (snap) => {
       if (snap.exists()) {
-        setMission({ id: snap.id, ...snap.data() } as DeliveryMission);
+        setMission({ ...snap.data(), id: snap.id } as DeliveryMission);
       }
       setLoading(false);
     });
