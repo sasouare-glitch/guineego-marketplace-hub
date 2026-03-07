@@ -14,7 +14,8 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, TrendingUp, UserCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, TrendingUp, UserCircle, Phone, Store, MapPin, Bike } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const roleOptions = [
   { value: 'customer', label: 'Client / Acheteur', description: 'Acheter des produits sur la marketplace', icon: UserCircle },
@@ -27,15 +28,25 @@ const registerSchema = z.object({
   role: z.enum(['customer', 'ecommerce', 'courier', 'investor'], { required_error: 'Veuillez choisir votre profil' }),
   displayName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Email invalide'),
+  phone: z.string().optional(),
   password: z.string()
     .min(8, 'Minimum 8 caractères')
     .regex(/[A-Z]/, 'Au moins une majuscule')
     .regex(/[0-9]/, 'Au moins un chiffre'),
   confirmPassword: z.string(),
-  acceptTerms: z.boolean().refine(val => val === true, 'Vous devez accepter les conditions')
+  acceptTerms: z.boolean().refine(val => val === true, 'Vous devez accepter les conditions'),
+  // Champs vendeur
+  businessName: z.string().optional(),
+  businessAddress: z.string().optional(),
+  // Champs coursier
+  vehicleType: z.enum(['moto', 'velo', 'voiture', 'pied']).optional(),
+  zones: z.array(z.string()).optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: 'Les mots de passe ne correspondent pas',
   path: ['confirmPassword']
+}).refine(data => data.role !== 'ecommerce' || (data.businessName && data.businessName.length >= 2), {
+  message: 'Le nom de la boutique est requis',
+  path: ['businessName']
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -58,7 +69,10 @@ export default function RegisterPage() {
   });
 
   const password = watch('password', '');
+  const selectedRole = watch('role');
   
+  const zonesGuinee = ['Kaloum', 'Dixinn', 'Matam', 'Ratoma', 'Matoto', 'Coyah', 'Dubréka', 'Kindia'];
+
   const passwordStrength = {
     length: password.length >= 8,
     uppercase: /[A-Z]/.test(password),
@@ -244,7 +258,117 @@ export default function RegisterPage() {
                   <p className="text-sm text-destructive">{errors.email.message}</p>
                 )}
               </div>
-              
+
+              {/* Champs téléphone */}
+              <div className="space-y-2">
+                <Label htmlFor="phone">Téléphone <span className="text-muted-foreground text-xs">(optionnel)</span></Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+224 6XX XX XX XX"
+                    className="pl-10"
+                    {...register('phone')}
+                  />
+                </div>
+              </div>
+
+              {/* Champs spécifiques VENDEUR */}
+              {selectedRole === 'ecommerce' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="space-y-3 p-3 rounded-lg border border-primary/20 bg-primary/5"
+                >
+                  <p className="text-xs font-semibold text-primary flex items-center gap-1.5">
+                    <Store className="w-3.5 h-3.5" /> Informations boutique
+                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor="businessName">Nom de la boutique <span className="text-destructive">*</span></Label>
+                    <Input
+                      id="businessName"
+                      placeholder="Ma Boutique Conakry"
+                      {...register('businessName')}
+                    />
+                    {errors.businessName && (
+                      <p className="text-sm text-destructive">{errors.businessName.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="businessAddress">Adresse de la boutique</Label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="businessAddress"
+                        placeholder="Quartier, Commune, Conakry"
+                        className="pl-10"
+                        {...register('businessAddress')}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Champs spécifiques COURSIER */}
+              {selectedRole === 'courier' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="space-y-3 p-3 rounded-lg border border-primary/20 bg-primary/5"
+                >
+                  <p className="text-xs font-semibold text-primary flex items-center gap-1.5">
+                    <Bike className="w-3.5 h-3.5" /> Informations livreur
+                  </p>
+                  <div className="space-y-2">
+                    <Label>Type de véhicule</Label>
+                    <Select onValueChange={(val) => setValue('vehicleType', val as any)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choisir un véhicule" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="moto">🏍️ Moto</SelectItem>
+                        <SelectItem value="velo">🚲 Vélo</SelectItem>
+                        <SelectItem value="voiture">🚗 Voiture</SelectItem>
+                        <SelectItem value="pied">🚶 À pied</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Zones de livraison</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {zonesGuinee.map((zone) => {
+                        const currentZones = watch('zones') || [];
+                        const isChecked = currentZones.includes(zone);
+                        return (
+                          <label
+                            key={zone}
+                            className={`text-xs px-2.5 py-1 rounded-full border cursor-pointer transition-all ${
+                              isChecked
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-muted/50 border-border hover:border-primary/40'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              className="sr-only"
+                              checked={isChecked}
+                              onChange={() => {
+                                const updated = isChecked
+                                  ? currentZones.filter((z: string) => z !== zone)
+                                  : [...currentZones, zone];
+                                setValue('zones', updated);
+                              }}
+                            />
+                            {zone}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="password">{t.auth?.password || 'Mot de passe'}</Label>
                 <div className="relative">
