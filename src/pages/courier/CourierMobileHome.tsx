@@ -2,106 +2,119 @@ import { CourierMobileLayout } from "@/components/courier/mobile/CourierMobileLa
 import { QuickStatsBar } from "@/components/courier/mobile/QuickStatsBar";
 import { MissionCardSimple, SimpleMission } from "@/components/courier/mobile/MissionCardSimple";
 import { BigActionButton } from "@/components/courier/mobile/BigActionButton";
-import { QrCode, Package } from "lucide-react";
-import { Link } from "react-router-dom";
+import { QrCode, Package, Loader2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useCourierMissions, DeliveryMission } from "@/hooks/useCourierMissions";
+import { useWallet } from "@/hooks/useWallet";
+import { useAuth } from "@/contexts/AuthContext";
 
-// Mock data
-const activeMission: SimpleMission | null = {
-  id: "1",
-  pickupArea: "Kaloum",
-  deliveryArea: "Ratoma",
-  packages: 2,
-  price: 25000,
-  priority: "urgent",
-  status: "in_transit",
-  customerPhone: "+224 622 00 00 00",
-};
-
-const availableMissions: SimpleMission[] = [
-  {
-    id: "2",
-    pickupArea: "Matam",
-    deliveryArea: "Dixinn",
+// Convert Firestore DeliveryMission → SimpleMission for the card component
+function toSimpleMission(m: DeliveryMission, isAvailable: boolean): SimpleMission {
+  return {
+    id: m.id,
+    pickupArea: m.pickup.commune,
+    deliveryArea: m.delivery.commune,
     packages: 1,
-    price: 15000,
-    priority: "standard",
-    status: "available",
-  },
-  {
-    id: "3",
-    pickupArea: "Kaloum",
-    deliveryArea: "Lambanyi",
-    packages: 3,
-    price: 45000,
-    priority: "express",
-    status: "available",
-  },
-];
+    price: m.fee,
+    priority: m.priority === "express" ? "express" : "standard",
+    status: isAvailable ? "available" : (m.status as SimpleMission["status"]),
+    customerPhone: m.delivery.phone,
+  };
+}
 
 const CourierMobileHome = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { available, myMissions, loading, acceptMission, updateMissionStatus } = useCourierMissions();
+  const { wallet } = useWallet();
+
+  const activeMission = myMissions.find(
+    (m) => m.status !== "delivered" && m.status !== "cancelled"
+  );
+
+  // Today's stats
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayDelivered = myMissions.filter((m) => {
+    if (m.status !== "delivered") return false;
+    const d = m.deliveredAt?.toDate?.() ? m.deliveredAt.toDate() : m.deliveredAt;
+    return d && new Date(d as any) >= today;
+  });
+  const todayEarnings = todayDelivered.reduce((sum, m) => sum + (m.fee || 0), 0);
+
+  const displayName = user?.displayName?.split(" ")[0] || "Coursier";
+
+  if (loading) {
+    return (
+      <CourierMobileLayout>
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        </div>
+      </CourierMobileLayout>
+    );
+  }
+
   return (
     <CourierMobileLayout>
       <div className="space-y-6">
-        {/* Welcome */}
         <div className="text-center">
-          <h1 className="text-3xl font-black">Bonjour Mamadou 👋</h1>
+          <h1 className="text-3xl font-black">Bonjour {displayName} 👋</h1>
           <p className="text-lg text-muted-foreground font-medium mt-1">
             Bonne journée de livraison !
           </p>
         </div>
 
-        {/* Quick Stats */}
         <QuickStatsBar
-          todayDeliveries={5}
-          todayEarnings={85000}
+          todayDeliveries={todayDelivered.length}
+          todayEarnings={todayEarnings}
           rating={4.8}
         />
 
-        {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-3">
           <Link to="/courier/scan">
-            <BigActionButton
-              icon={QrCode}
-              label="SCANNER"
-              color="primary"
-            />
+            <BigActionButton icon={QrCode} label="SCANNER" color="primary" />
           </Link>
           <Link to="/courier/missions">
-            <BigActionButton
-              icon={Package}
-              label="MISSIONS"
-              color="yellow"
-            />
+            <BigActionButton icon={Package} label="MISSIONS" color="yellow" />
           </Link>
         </div>
 
-        {/* Active Mission */}
         {activeMission && (
           <div className="space-y-3">
             <h2 className="text-xl font-black flex items-center gap-2">
               <span className="w-3 h-3 bg-guinea-green rounded-full animate-pulse" />
               MISSION EN COURS
             </h2>
-            <MissionCardSimple
-              mission={activeMission}
-              onCall={() => window.open(`tel:${activeMission.customerPhone}`)}
-              onNavigate={() => console.log("Open GPS")}
-              onDeliver={() => console.log("Mark as delivered")}
-            />
+            <div onClick={() => navigate(`/courier/mission/${activeMission.id}`)} className="cursor-pointer">
+              <MissionCardSimple
+                mission={toSimpleMission(activeMission, false)}
+                onCall={() => activeMission.delivery.phone && window.open(`tel:${activeMission.delivery.phone}`)}
+                onNavigate={() => navigate(`/courier/mission/${activeMission.id}`)}
+                onDeliver={() => updateMissionStatus(activeMission.id, "delivered")}
+              />
+            </div>
           </div>
         )}
 
-        {/* Available Missions */}
         <div className="space-y-3">
-          <h2 className="text-xl font-black">NOUVELLES MISSIONS</h2>
-          {availableMissions.map((mission) => (
-            <MissionCardSimple
-              key={mission.id}
-              mission={mission}
-              onAccept={() => console.log("Accept", mission.id)}
-              onReject={() => console.log("Reject", mission.id)}
-            />
-          ))}
+          <h2 className="text-xl font-black">
+            NOUVELLES MISSIONS {available.length > 0 && `(${available.length})`}
+          </h2>
+          {available.length > 0 ? (
+            available.slice(0, 5).map((mission) => (
+              <MissionCardSimple
+                key={mission.id}
+                mission={toSimpleMission(mission, true)}
+                onAccept={() => acceptMission(mission.id)}
+                onReject={() => {}}
+              />
+            ))
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <Package className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p className="text-lg font-bold">Aucune mission disponible</p>
+            </div>
+          )}
         </div>
       </div>
     </CourierMobileLayout>
