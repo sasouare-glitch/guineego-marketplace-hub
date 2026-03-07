@@ -54,6 +54,7 @@ export default function CourierProfilePage() {
           vehicleType: courierData.vehicleType || "moto",
           isOnline: courierData.isOnline || false,
           status: courierData.status || "active",
+          photoURL: userData.photoURL || user.photoURL || "",
         };
         setProfile(merged);
         setSelectedZones(merged.zones || []);
