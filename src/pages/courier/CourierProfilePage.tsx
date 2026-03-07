@@ -70,17 +70,17 @@ export default function CourierProfilePage() {
     if (!user) return;
     setSaving(true);
     try {
-      await updateDoc(doc(db, "couriers", user.uid), {
+      await setDoc(doc(db, "couriers", user.uid), {
         zones: selectedZones,
         vehicleType: profile.vehicleType,
         isOnline: profile.isOnline,
         updatedAt: serverTimestamp(),
-      });
-      await updateDoc(doc(db, "users", user.uid), {
+      }, { merge: true });
+      await setDoc(doc(db, "users", user.uid), {
         displayName: profile.displayName,
         phone: profile.phone,
         updatedAt: serverTimestamp(),
-      });
+      }, { merge: true });
       toast.success("Profil mis à jour !");
     } catch (err: any) {
       console.error("Error saving profile:", err);
