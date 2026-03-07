@@ -42,7 +42,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Search, MoreHorizontal, UserPlus, Filter, Loader2, RefreshCw, ShieldCheck, Truck, Store, TrendingUp, Users } from 'lucide-react';
-import { collection, getDocs, query, orderBy, limit, where, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -85,31 +85,29 @@ export default function AdminUsersPage() {
   const [updating, setUpdating] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
 
-  // Load users from Firestore
-  const loadUsers = async () => {
+  // Real-time listener for users
+  useEffect(() => {
     setLoading(true);
-    try {
-      const usersQuery = query(
-        collection(db, 'users'),
-        orderBy('metadata.createdAt', 'desc'),
-        limit(100)
-      );
-      const snapshot = await getDocs(usersQuery);
-      const usersData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+    const usersQuery = query(
+      collection(db, 'users'),
+      orderBy('metadata.createdAt', 'desc'),
+      limit(200)
+    );
+
+    const unsubscribe = onSnapshot(usersQuery, (snapshot) => {
+      const usersData = snapshot.docs.map(d => ({
+        id: d.id,
+        ...d.data()
       })) as FirestoreUser[];
       setUsers(usersData);
-    } catch (error) {
-      console.error('Error loading users:', error);
-      toast.error('Erreur lors du chargement des utilisateurs');
-    } finally {
       setLoading(false);
-    }
-  };
+    }, (error) => {
+      console.error('Error listening to users:', error);
+      toast.error('Erreur lors du chargement des utilisateurs');
+      setLoading(false);
+    });
 
-  useEffect(() => {
-    loadUsers();
+    return () => unsubscribe();
   }, []);
 
   // Filter users
@@ -161,7 +159,7 @@ export default function AdminUsersPage() {
       
       toast.success(`Rôle de ${selectedUser.displayName || selectedUser.email} changé en ${roleLabels[newRole]?.label}`);
       setRoleDialogOpen(false);
-      loadUsers(); // Refresh list
+      // onSnapshot handles refresh automatically
     } catch (error: any) {
       console.error('Error updating role:', error);
       toast.error(error.message || 'Erreur lors de la mise à jour du rôle');
@@ -180,7 +178,7 @@ export default function AdminUsersPage() {
         'metadata.updatedAt': serverTimestamp()
       });
       toast.success(`Rôle mis à jour en ${roleLabels[role]?.label}. Reconnectez-vous pour appliquer.`);
-      loadUsers();
+      // onSnapshot handles refresh automatically
     } catch (error) {
       console.error('Error:', error);
       toast.error('Erreur lors de la mise à jour');
@@ -245,9 +243,7 @@ export default function AdminUsersPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Button variant="outline" size="icon" onClick={loadUsers} disabled={loading}>
-                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                </Button>
+                {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
               </div>
             </div>
           </CardHeader>
