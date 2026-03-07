@@ -77,7 +77,7 @@ export interface AuthState {
 export interface AuthActions {
   // Email/Password
   signUp: (email: string, password: string, displayName: string, role?: UserRole) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<string>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<void>;
