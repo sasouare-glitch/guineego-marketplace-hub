@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { CourierLayout } from "@/components/courier/CourierLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,6 +131,7 @@ function MissionRealCard({
 
 const CourierMissions = () => {
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
   const { available, myMissions, loading, acceptMission } = useCourierMissions();
   const [searchTerm, setSearchTerm] = useState("");
   const [zoneFilter, setZoneFilter] = useState("all");
@@ -219,7 +221,7 @@ const CourierMissions = () => {
                   <MissionRealCard
                     key={mission.id}
                     mission={mission}
-                    onAccept={() => acceptMission(mission.id)}
+                    onAccept={hasRole('courier') ? () => acceptMission(mission.id) : undefined}
                     onViewDetails={() => navigate(`/courier/mission/${mission.id}`)}
                   />
                 ))}
