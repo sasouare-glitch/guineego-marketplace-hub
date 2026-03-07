@@ -228,10 +228,14 @@ export default function SellerOrders() {
           orderBy("createdAt", "desc")
         );
         onSnapshot(q2, (snap) => {
-          const docs = snap.docs.map((d) => ({
-            id: d.id,
-            ...d.data(),
-          })) as FirestoreOrder[];
+          const docs = snap.docs.map((d) => {
+            const data = d.data();
+            return {
+              id: d.id,
+              ...data,
+              totalAmount: data.totalAmount || data.pricing?.total || 0,
+            };
+          }) as FirestoreOrder[];
           setOrders(docs);
           setLoading(false);
         });
