@@ -159,7 +159,7 @@ export default function AdminUsersPage() {
       
       toast.success(`Rôle de ${selectedUser.displayName || selectedUser.email} changé en ${roleLabels[newRole]?.label}`);
       setRoleDialogOpen(false);
-      loadUsers(); // Refresh list
+      // onSnapshot handles refresh automatically
     } catch (error: any) {
       console.error('Error updating role:', error);
       toast.error(error.message || 'Erreur lors de la mise à jour du rôle');
@@ -178,7 +178,7 @@ export default function AdminUsersPage() {
         'metadata.updatedAt': serverTimestamp()
       });
       toast.success(`Rôle mis à jour en ${roleLabels[role]?.label}. Reconnectez-vous pour appliquer.`);
-      loadUsers();
+      // onSnapshot handles refresh automatically
     } catch (error) {
       console.error('Error:', error);
       toast.error('Erreur lors de la mise à jour');
@@ -243,9 +243,7 @@ export default function AdminUsersPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Button variant="outline" size="icon" onClick={loadUsers} disabled={loading}>
-                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                </Button>
+                {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
               </div>
             </div>
           </CardHeader>
