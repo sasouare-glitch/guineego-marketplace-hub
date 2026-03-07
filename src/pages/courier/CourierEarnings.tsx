@@ -78,7 +78,7 @@ const CourierEarnings = () => {
                     <div>
                       <p className="text-white/80 text-sm">Solde disponible</p>
                       <p className="text-3xl font-display font-bold mt-1">
-                        {(wallet?.balance || 0).toLocaleString("fr-GN")} GNF
+                        {computedBalance.toLocaleString("fr-GN")} GNF
                       </p>
                     </div>
                     <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
