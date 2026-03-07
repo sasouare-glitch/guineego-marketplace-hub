@@ -32,6 +32,15 @@ const CourierEarnings = () => {
 
   const loading = walletLoading;
 
+  // Calculate from delivered missions as fallback
+  const deliveredMissions = myMissions.filter((m) => m.status === "delivered");
+  const totalEarningsFromMissions = deliveredMissions.reduce((sum, m) => sum + (m.fee || 0), 0);
+  const totalWithdrawals = wallet?.totalWithdrawals || 0;
+
+  const computedTotalEarnings = wallet?.totalEarnings || totalEarningsFromMissions;
+  const computedBalance = wallet?.balance || (totalEarningsFromMissions - totalWithdrawals);
+  const completedCount = wallet?.completedMissions || deliveredMissions.length;
+
   return (
     <CourierLayout>
       <div className="space-y-6">
