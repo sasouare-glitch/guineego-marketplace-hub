@@ -153,6 +153,13 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit, selle
         ? Math.round(((originalPrice - basePrice) / originalPrice) * 100)
         : 0;
 
+      const sellerUpdate: Record<string, any> = {};
+      if (sellers && form.sellerId) {
+        sellerUpdate.sellerId = form.sellerId;
+        const selectedSeller = sellers.find(s => s.id === form.sellerId);
+        sellerUpdate.sellerName = selectedSeller?.businessName || selectedSeller?.shopName || selectedSeller?.name || form.sellerId;
+      }
+
       await onSubmit(product.id, {
         name: form.name,
         description: form.description,
@@ -166,6 +173,7 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit, selle
         discount,
         isNew: form.isNew,
         isBestSeller: form.isBestSeller,
+        ...sellerUpdate,
       } as any);
       onOpenChange(false);
     } catch {
@@ -193,6 +201,24 @@ export function EditProductDialog({ open, onOpenChange, product, onSubmit, selle
               required
             />
           </div>
+
+          {sellers && sellers.length > 0 && (
+            <div className="space-y-2">
+              <Label>Boutique (vendeur) *</Label>
+              <Select value={form.sellerId} onValueChange={(v) => setForm((f) => ({ ...f, sellerId: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choisir une boutique..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {sellers.map((seller) => (
+                    <SelectItem key={seller.id} value={seller.id}>
+                      {seller.businessName || seller.shopName || seller.name || seller.displayName || seller.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="edit-description">Description</Label>
