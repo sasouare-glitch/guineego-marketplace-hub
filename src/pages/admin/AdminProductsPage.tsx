@@ -94,13 +94,15 @@ export default function AdminProductsPage() {
   const addFileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddProduct = async () => {
-    if (!addForm.name || !addForm.price || !addForm.category) {
-      toast.error('Nom, prix et catégorie sont requis');
+    if (!addForm.name || !addForm.price || !addForm.category || !addForm.sellerId) {
+      toast.error('Nom, prix, catégorie et vendeur sont requis');
       return;
     }
     setSaving(true);
     try {
       const { addDocument } = await import('@/lib/firebase/mutations');
+      const selectedSeller = sellers.find(s => s.id === addForm.sellerId);
+      const sellerName = selectedSeller?.businessName || selectedSeller?.shopName || selectedSeller?.name || addForm.sellerId;
       // First create the product to get an ID
       const docRef = await addDocument('products', {
         name: addForm.name,
@@ -112,7 +114,8 @@ export default function AdminProductsPage() {
         thumbnail: '/placeholder.svg',
         variants: [{ sku: 'DEFAULT', name: 'Standard', price: Number(addForm.price), stock: Number(addForm.stock) || 0 }],
         totalStock: Number(addForm.stock) || 0,
-        sellerId: 'admin',
+        sellerId: addForm.sellerId,
+        sellerName: sellerName,
         tags: addForm.tags ? addForm.tags.split(',').map(s => s.trim()) : [],
         specifications: {},
         avgRating: 0,
@@ -154,7 +157,7 @@ export default function AdminProductsPage() {
 
       toast.success('Produit ajouté avec succès');
       setAddDialog(false);
-      setAddForm({ name: '', price: '', category: '', description: '', stock: '', tags: '', originalPrice: '', isFlashSale: false, isNew: false, isBestSeller: false });
+      setAddForm({ name: '', price: '', category: '', description: '', stock: '', tags: '', originalPrice: '', isFlashSale: false, isNew: false, isBestSeller: false, sellerId: '' });
       addImages.forEach(img => URL.revokeObjectURL(img.preview));
       setAddImages([]);
     } catch (err) {
