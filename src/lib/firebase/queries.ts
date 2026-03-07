@@ -185,16 +185,32 @@ export function useRealtimeDoc<T extends FirestoreDoc>(
     setLoading(true);
     const docRef = doc(db, collectionPath, docId);
     
+    // First try direct document lookup
     const unsubscribe = onSnapshot(
       docRef,
       (snapshot) => {
         if (snapshot.exists()) {
           setData({ id: snapshot.id, ...snapshot.data() } as T);
+          setLoading(false);
+          setError(null);
         } else {
-          setData(null);
+          // Fallback: query by 'id' field for legacy/mismatched IDs
+          const q = query(collection(db, collectionPath), where('id', '==', docId), limit(1));
+          onSnapshot(q, (querySnap) => {
+            if (!querySnap.empty) {
+              const docSnap = querySnap.docs[0];
+              setData({ id: docSnap.id, ...docSnap.data() } as T);
+            } else {
+              setData(null);
+            }
+            setLoading(false);
+            setError(null);
+          }, (err) => {
+            console.error('Realtime doc fallback query error:', err);
+            setError(err);
+            setLoading(false);
+          });
         }
-        setLoading(false);
-        setError(null);
       },
       (err) => {
         console.error('Realtime doc error:', err);
