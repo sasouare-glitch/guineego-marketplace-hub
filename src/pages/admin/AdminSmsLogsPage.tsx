@@ -236,8 +236,7 @@ export default function AdminSmsLogsPage() {
                               <span className="ml-1">Retry</span>
                             </Button>
                           )}
-                        </TableCell>
-                        </TableCell>
+                      </TableRow>
                       </TableRow>
                     ))}
                   </TableBody>
