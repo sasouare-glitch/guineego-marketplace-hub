@@ -64,6 +64,7 @@ import InstallApp from "./pages/InstallApp";
 import DeliveryPage from "./pages/DeliveryPage";
 import PaymentPage from "./pages/PaymentPage";
 import ProtectionPage from "./pages/ProtectionPage";
+import CourierJoinPage from "./pages/courier/CourierJoinPage";
 // Auth Pages
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -346,6 +347,7 @@ const App = () => (
                         <CourierScanPage />
                       </ProtectedRoute>
                     } />
+                    <Route path="/courier/join" element={<CourierJoinPage />} />
                     
                     {/* Admin Routes (Protected - admin role only) */}
                     <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
