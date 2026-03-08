@@ -81,11 +81,12 @@ export default function AdminDeliveryDetailPage() {
   const [courierName, setCourierName] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState<string | null>(null);
 
-  // Courier assignment
+  // Courier assignment / reassignment
   const [couriers, setCouriers] = useState<{ id: string; name: string; phone?: string }[]>([]);
   const [selectedCourierId, setSelectedCourierId] = useState<string>('');
   const [assigning, setAssigning] = useState(false);
   const [loadingCouriers, setLoadingCouriers] = useState(false);
+  const [showReassign, setShowReassign] = useState(false);
 
   useEffect(() => {
     if (!delivery) return;
@@ -102,13 +103,12 @@ export default function AdminDeliveryDetailPage() {
     if (delivery.customerId) resolveUser(delivery.customerId, setCustomerName);
   }, [delivery?.assignedCourier, delivery?.customerId]);
 
-  // Fetch available couriers when mission is pending/unassigned
-  useEffect(() => {
-    if (delivery?.assignedCourier) return;
+  // Fetch couriers list (for assign or reassign)
+  const fetchCouriers = () => {
+    if (couriers.length > 0) return;
     setLoadingCouriers(true);
     getDocs(query(collection(db, 'courier_settings'))).then((snap) => {
       const ids = snap.docs.map(d => ({ uid: d.data().userId || d.id, phone: d.data().phone }));
-      // Resolve names
       getDocs(collection(db, 'users')).then((usersSnap) => {
         const userMap: Record<string, any> = {};
         usersSnap.docs.forEach(d => { userMap[d.id] = d.data(); });
@@ -121,6 +121,11 @@ export default function AdminDeliveryDetailPage() {
         setLoadingCouriers(false);
       });
     }).catch(() => setLoadingCouriers(false));
+  };
+
+  // Auto-fetch when no courier assigned
+  useEffect(() => {
+    if (!delivery?.assignedCourier) fetchCouriers();
   }, [delivery?.assignedCourier]);
 
   const handleAssignCourier = async () => {
