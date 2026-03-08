@@ -42,6 +42,7 @@ type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancell
 interface Order extends FirestoreDoc {
   orderNumber?: string;
   customerName?: string;
+  customerEmail?: string;
   customerId?: string;
   sellerName?: string;
   sellerId?: string;
@@ -52,6 +53,7 @@ interface Order extends FirestoreDoc {
   pricing?: { total?: number; subtotal?: number; fees?: number };
   status: OrderStatus;
   items?: any[];
+  shippingAddress?: { fullName?: string };
 }
 
 const statusConfig: Record<OrderStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
