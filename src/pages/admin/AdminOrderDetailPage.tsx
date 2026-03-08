@@ -20,7 +20,7 @@ import {
 import {
   ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, Loader2,
   MessageSquare, MapPin, Phone, User, CreditCard, Store, Copy, Check, ExternalLink,
-  ChefHat, ShoppingBag,
+  ChefHat, ShoppingBag, History,
 } from 'lucide-react';
 import { useRealtimeOrder, type OrderStatus, type Order as BaseOrder } from '@/hooks/useRealtimeOrder';
 import { OrderTimeline, buildTimelineSteps } from '@/components/orders/OrderTimeline';
