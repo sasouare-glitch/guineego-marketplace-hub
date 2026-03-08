@@ -247,6 +247,9 @@ export function useRollingMetrics() {
         setMetrics(snapshot.data() as RollingMetrics);
       }
       setLoading(false);
+    }, (error) => {
+      console.error('Error listening to rolling metrics:', error);
+      setLoading(false);
     });
 
     return () => unsubscribe();
