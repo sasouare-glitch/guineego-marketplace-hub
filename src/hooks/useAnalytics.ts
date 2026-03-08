@@ -152,6 +152,9 @@ export function useRealtimeCounters() {
         });
       }
       setLoading(false);
+    }, (error) => {
+      console.error('Error listening to realtime counters:', error);
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -200,6 +203,9 @@ export function useDailyReports(days: number = 30) {
       const data = snapshot.docs.map(doc => doc.data() as DailyReport);
       setReports(data);
       setLoading(false);
+    }, (error) => {
+      console.error('Error listening to daily reports:', error);
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -240,6 +246,9 @@ export function useRollingMetrics() {
       if (snapshot.exists()) {
         setMetrics(snapshot.data() as RollingMetrics);
       }
+      setLoading(false);
+    }, (error) => {
+      console.error('Error listening to rolling metrics:', error);
       setLoading(false);
     });
 
