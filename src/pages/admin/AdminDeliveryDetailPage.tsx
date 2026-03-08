@@ -20,8 +20,11 @@ import { useCurrency } from '@/hooks/useCurrency';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, getDocs, query, where, serverTimestamp, Timestamp, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
+import { Loader2, UserPlus } from 'lucide-react';
 
 // Status config for badges
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
