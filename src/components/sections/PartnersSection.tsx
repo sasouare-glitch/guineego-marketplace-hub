@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import avatarMamadou from "@/assets/avatar-mamadou.jpg";
+import avatarFatoumata from "@/assets/avatar-fatoumata.jpg";
 import { 
   Truck, 
   Users2, 
