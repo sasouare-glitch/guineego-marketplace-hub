@@ -152,6 +152,9 @@ export function useRealtimeCounters() {
         });
       }
       setLoading(false);
+    }, (error) => {
+      console.error('Error listening to realtime counters:', error);
+      setLoading(false);
     });
 
     return () => unsubscribe();
