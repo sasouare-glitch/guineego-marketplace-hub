@@ -280,8 +280,47 @@ export function DeliveryMap({
               {deliveryCommune && <br />}
               {deliveryCommune && <span>{deliveryCommune}</span>}
             </Popup>
-          </Marker>
+        </Marker>
         )}
+
+        {/* Legend */}
+        <div className="leaflet-bottom leaflet-left" style={{ pointerEvents: 'auto' }}>
+          <div
+            style={{
+              background: 'rgba(255,255,255,0.92)',
+              backdropFilter: 'blur(4px)',
+              borderRadius: 8,
+              padding: '8px 12px',
+              margin: 10,
+              fontSize: 11,
+              lineHeight: '20px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              border: '1px solid #e5e7eb',
+            }}
+          >
+            <div style={{ fontWeight: 600, marginBottom: 4, fontSize: 12 }}>Légende</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#3b82f6', display: 'inline-block', border: '2px solid white', boxShadow: '0 0 0 1px #3b82f6' }} />
+              <span>Coursier</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#f97316', display: 'inline-block', border: '2px solid white', boxShadow: '0 0 0 1px #f97316' }} />
+              <span>Point de collecte</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', display: 'inline-block', border: '2px solid white', boxShadow: '0 0 0 1px #22c55e' }} />
+              <span>Destination</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, borderTop: '1px solid #e5e7eb', paddingTop: 4 }}>
+              <span style={{ width: 18, height: 0, borderTop: '2px dashed #f97316', display: 'inline-block' }} />
+              <span>Trajet collecte</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 18, height: 0, borderTop: '2px dashed #22c55e', display: 'inline-block' }} />
+              <span>Trajet livraison</span>
+            </div>
+          </div>
+        </div>
       </MapContainer>
     </div>
   );
