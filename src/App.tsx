@@ -62,6 +62,7 @@ import NotificationSettings from "./pages/settings/NotificationSettings";
 import PreferencesSettings from "./pages/settings/PreferencesSettings";
 import InstallApp from "./pages/InstallApp";
 import DeliveryPage from "./pages/DeliveryPage";
+import PaymentPage from "./pages/PaymentPage";
 // Auth Pages
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -125,6 +126,7 @@ const App = () => (
                     <Route path="/academy/course/:id" element={<CourseDetail />} />
                     <Route path="/sell/start" element={<SellStartPage />} />
                     <Route path="/delivery" element={<DeliveryPage />} />
+                    <Route path="/payment" element={<PaymentPage />} />
                     <Route path="/track/:id" element={<PublicOrderTrackingPage />} />
                     
                     {/* Protected Client Routes */}
