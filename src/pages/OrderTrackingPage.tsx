@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Copy, Check, RefreshCw, XCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Copy, Check, RefreshCw, XCircle, Loader2, MessageSquare, RotateCcw } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import { CourierTrackingCard } from "@/components/orders/CourierTrackingCard";
 import { toast } from "sonner";
 import { useRealtimeOrder } from "@/hooks/useRealtimeOrder";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/contexts/AuthContext";
+import { callFunction } from "@/lib/firebase/config";
 
 const paymentMethodLabels: Record<string, string> = {
   orange_money: "Orange Money",
@@ -31,7 +33,10 @@ export default function OrderTrackingPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [isCancelling, setIsCancelling] = useState(false);
+  const [isResendingSms, setIsResendingSms] = useState(false);
 
+  const { user, claims } = useAuth();
+  const isAdmin = claims?.role === 'admin' || (user?.email && ['sasouare@gmail.com'].includes(user.email));
   const orderId = id || "";
   const { order, loading, error, currentStatus, canCancel, statusHistory, estimatedDelivery } = useRealtimeOrder(orderId);
 
@@ -315,6 +320,47 @@ export default function OrderTrackingPage() {
             {/* Help */}
             <Card>
               <CardContent className="p-4 space-y-3">
+                {/* Admin: Resend SMS */}
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={isResendingSms}
+                    onClick={async () => {
+                      setIsResendingSms(true);
+                      try {
+                        const phone = address?.phone;
+                        if (!phone) {
+                          toast.error("Aucun numéro de téléphone pour cette commande");
+                          return;
+                        }
+                        const sendTestSms = callFunction<
+                          { phoneNumber: string },
+                          { success: boolean; message: string }
+                        >('sendTestSms');
+                        // Use a custom message via the status notification function
+                        const sendNotif = callFunction<
+                          { orderId: string; status: string },
+                          { success: boolean }
+                        >('sendStatusNotification');
+                        await sendNotif({ orderId, status: orderStatus });
+                        toast.success("SMS renvoyé avec succès");
+                      } catch (err: any) {
+                        toast.error(err?.message || "Échec du renvoi SMS");
+                      } finally {
+                        setIsResendingSms(false);
+                      }
+                    }}
+                  >
+                    {isResendingSms ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                    )}
+                    Renvoyer SMS
+                  </Button>
+                )}
+
                 <p className="text-sm text-muted-foreground">
                   Un problème avec votre commande ?
                 </p>
