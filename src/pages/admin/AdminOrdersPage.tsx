@@ -43,7 +43,9 @@ interface Order extends FirestoreDoc {
   customerId?: string;
   sellerName?: string;
   sellerId?: string;
-  total: number;
+  total?: number;
+  totalAmount?: number;
+  pricing?: { total?: number; subtotal?: number; fees?: number };
   status: OrderStatus;
   items?: any[];
 }
@@ -227,7 +229,7 @@ export default function AdminOrdersPage() {
                         <TableCell className="font-mono font-medium">{order.orderNumber || order.id.slice(0, 12)}</TableCell>
                         <TableCell>{order.customerName || order.customerId || '—'}</TableCell>
                         <TableCell className="text-muted-foreground">{order.sellerName || order.sellerId || '—'}</TableCell>
-                        <TableCell className="font-medium">{format(order.total || 0)}</TableCell>
+                        <TableCell className="font-medium">{format(order.pricing?.total || order.totalAmount || order.total || 0)}</TableCell>
                         <TableCell>
                           <Badge variant={status.variant} className="gap-1">
                             <StatusIcon className="w-3 h-3" />
