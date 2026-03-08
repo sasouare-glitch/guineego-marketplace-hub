@@ -93,6 +93,22 @@ export default function AdminSmsLogsPage() {
     failed: logs.filter(l => l.status === 'failed').length,
   };
 
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+
+  const handleManualRetry = async (log: SmsLog) => {
+    setRetryingId(log.id);
+    try {
+      const retrySms = callFunction<{ logId: string }, { success: boolean; message: string }>('manualRetrySms');
+      const result = await retrySms({ logId: log.id });
+      toast.success(result.data.message || 'SMS renvoyé avec succès');
+      await loadLogs();
+    } catch (err: any) {
+      toast.error(err?.message || 'Échec du renvoi');
+    } finally {
+      setRetryingId(null);
+    }
+  };
+
   const StatusBadge = ({ status, retryCount }: { status: string; retryCount?: number }) => {
     if (status === 'sent') return <Badge className="bg-primary/15 text-primary border-primary/30"><CheckCircle2 className="w-3 h-3 mr-1" />Envoyé{retryCount ? ` (retry ${retryCount})` : ''}</Badge>;
     if (status === 'permanently_failed') return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Abandon (3/3)</Badge>;
