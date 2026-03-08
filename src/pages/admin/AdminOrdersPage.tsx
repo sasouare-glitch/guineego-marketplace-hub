@@ -362,6 +362,13 @@ export default function AdminOrdersPage() {
                                 <Eye className="w-4 h-4 mr-2" />
                                 Voir détails
                               </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleResendSms(order)}
+                                disabled={resendingSmsId === order.id}
+                              >
+                                <MessageSquare className="w-4 h-4 mr-2" />
+                                {resendingSmsId === order.id ? 'Envoi...' : 'Renvoyer SMS'}
+                              </DropdownMenuItem>
                               {order.status !== 'cancelled' && order.status !== 'delivered' && (
                                 <DropdownMenuItem onClick={() => handleOpenStatusDialog(order)}>
                                   <Edit className="w-4 h-4 mr-2" />
