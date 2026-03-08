@@ -98,11 +98,11 @@ export default function AdminOrdersPage() {
     loadSellerNames();
   }, []);
 
-  // Helper: get seller display names for an order
-  const getOrderSellerNames = (order: Order): string => {
+  // Helper: get seller info for an order
+  const getOrderSellers = (order: Order): { id: string; name: string }[] => {
     const ids = order.sellerIds || (order.sellerId ? [order.sellerId] : []);
-    if (ids.length === 0) return order.sellerName || '—';
-    return ids.map(id => sellerNames[id] || order.sellerName || id.slice(0, 8)).join(', ');
+    if (ids.length === 0) return [{ id: '', name: order.sellerName || '—' }];
+    return ids.map(id => ({ id, name: sellerNames[id] || order.sellerName || id.slice(0, 8) }));
   };
 
   // Helper: count total items
