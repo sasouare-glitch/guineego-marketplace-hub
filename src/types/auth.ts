@@ -97,6 +97,11 @@ export interface AuthActions {
   hasRole: (role: UserRole) => boolean;
   hasAnyRole: (roles: UserRole[]) => boolean;
   refreshClaims: () => Promise<void>;
+  
+  // Multi-rôles
+  activeRole: UserRole;
+  userRoles: UserRole[];
+  switchRole: (role: UserRole) => void;
 }
 
 export interface AuthContextType extends AuthState, AuthActions {}

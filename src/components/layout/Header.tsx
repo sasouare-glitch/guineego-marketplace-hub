@@ -28,6 +28,7 @@ import { NotificationCenter } from "@/components/notifications/NotificationCente
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePreferences } from "@/hooks/usePreferences";
 import { useAuth } from "@/contexts/AuthContext";
+import { RoleSwitcher } from "@/components/auth/RoleSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -178,6 +179,9 @@ export function Header() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
+            {/* Role Switcher for multi-role users */}
+            {isLoggedIn && <RoleSwitcher />}
+            
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

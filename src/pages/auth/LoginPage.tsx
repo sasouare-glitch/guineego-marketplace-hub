@@ -37,14 +37,17 @@ export default function LoginPage() {
   const getRedirectByRole = async (uid: string): Promise<string> => {
     try {
       const userDoc = await getDoc(doc(db, 'users', uid));
-      const role = userDoc.data()?.role;
+      const data = userDoc.data();
+      const roles: string[] = data?.roles || [data?.role || 'customer'];
+      const primaryRole = data?.role || roles[0] || 'customer';
+      
       const roleRoutes: Record<string, string> = {
-        ecommerce: '/seller',
-        courier: '/courier',
-        investor: '/investor',
-        admin: '/admin',
+        ecommerce: '/seller/dashboard',
+        courier: '/courier/dashboard',
+        investor: '/investor/dashboard',
+        admin: '/admin/dashboard',
       };
-      return roleRoutes[role] || '/';
+      return roleRoutes[primaryRole] || '/';
     } catch {
       return '/';
     }

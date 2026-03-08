@@ -58,6 +58,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     error: null
   });
   
+  const [activeRole, setActiveRole] = useState<UserRole>('customer');
+
+  
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   // Charger le profil utilisateur depuis Firestore
@@ -505,6 +508,43 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return roles.some(role => hasRole(role));
   };
 
+  // Compute user's available roles
+  const userRoles = useMemo((): UserRole[] => {
+    const roles = new Set<UserRole>();
+    if (state.claims?.roles) {
+      state.claims.roles.forEach(r => roles.add(r));
+    }
+    if (state.claims?.role) {
+      roles.add(state.claims.role);
+    }
+    // Fallback to profile
+    const profileData = state.profile as any;
+    if (profileData?.roles && Array.isArray(profileData.roles)) {
+      profileData.roles.forEach((r: UserRole) => roles.add(r));
+    } else if (profileData?.role) {
+      roles.add(profileData.role);
+    }
+    if (state.user?.email && ADMIN_EMAILS.includes(state.user.email.toLowerCase())) {
+      roles.add('admin');
+    }
+    if (roles.size === 0) roles.add('customer');
+    return Array.from(roles);
+  }, [state.claims, state.profile, state.user]);
+
+  // Sync activeRole when claims/profile load
+  useEffect(() => {
+    if (userRoles.length > 0 && !userRoles.includes(activeRole)) {
+      setActiveRole(userRoles[0]);
+    }
+  }, [userRoles, activeRole]);
+
+  // Switch active role
+  const switchRole = useCallback((role: UserRole) => {
+    if (userRoles.includes(role)) {
+      setActiveRole(role);
+    }
+  }, [userRoles]);
+
   const value: AuthContextType = {
     ...state,
     signUp,
@@ -519,7 +559,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     updateProfile: updateUserProfile,
     hasRole,
     hasAnyRole,
-    refreshClaims
+    refreshClaims,
+    activeRole,
+    userRoles,
+    switchRole
   };
 
   return (
