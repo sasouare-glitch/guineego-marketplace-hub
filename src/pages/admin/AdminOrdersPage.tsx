@@ -75,6 +75,7 @@ export default function AdminOrdersPage() {
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
   const [statusDialog, setStatusDialog] = useState<{ open: boolean; order: Order | null; newStatus: OrderStatus | '' }>({ open: false, order: null, newStatus: '' });
   const [saving, setSaving] = useState(false);
+  const [resendingSmsId, setResendingSmsId] = useState<string | null>(null);
   const [sellerNames, setSellerNames] = useState<Record<string, string>>({});
   const [customerInfo, setCustomerInfo] = useState<Record<string, { name: string; email: string }>>({});
 
@@ -186,6 +187,20 @@ export default function AdminOrdersPage() {
     if (!ts) return '—';
     const date = ts instanceof Timestamp ? ts.toDate() : new Date(ts);
     return date.toLocaleDateString('fr-FR');
+  };
+
+  const handleResendSms = async (order: Order) => {
+    const oid = order.orderNumber || order.id;
+    setResendingSmsId(order.id);
+    try {
+      const resend = callFunction<{ orderId: string }, { success: boolean; message: string }>('resendOrderSms');
+      const result = await resend({ orderId: order.id });
+      toast.success(result.data.message || `SMS renvoyé pour ${oid}`);
+    } catch (err: any) {
+      toast.error(err?.message || `Échec du renvoi SMS pour ${oid}`);
+    } finally {
+      setResendingSmsId(null);
+    }
   };
 
   return (
