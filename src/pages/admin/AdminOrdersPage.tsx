@@ -72,6 +72,45 @@ export default function AdminOrdersPage() {
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
   const [statusDialog, setStatusDialog] = useState<{ open: boolean; order: Order | null; newStatus: OrderStatus | '' }>({ open: false, order: null, newStatus: '' });
   const [saving, setSaving] = useState(false);
+  const [sellerNames, setSellerNames] = useState<Record<string, string>>({});
+
+  // Load seller/shop names
+  useEffect(() => {
+    const loadSellerNames = async () => {
+      const nameMap: Record<string, string> = {};
+      try {
+        const [settingsSnap, sellersSnap] = await Promise.all([
+          getDocs(collection(db, 'seller_settings')),
+          getDocs(collection(db, 'sellers')),
+        ]);
+        sellersSnap.docs.forEach(doc => {
+          const d = doc.data();
+          nameMap[doc.id] = d.shopName || d.businessName || d.displayName || doc.id.slice(0, 8);
+        });
+        settingsSnap.docs.forEach(doc => {
+          const d = doc.data();
+          if (d.shopName) nameMap[doc.id] = d.shopName;
+        });
+      } catch (e) { console.error('Error loading seller names:', e); }
+      setSellerNames(nameMap);
+    };
+    loadSellerNames();
+  }, []);
+
+  // Helper: get seller display names for an order
+  const getOrderSellerNames = (order: Order): string => {
+    const ids = order.sellerIds || (order.sellerId ? [order.sellerId] : []);
+    if (ids.length === 0) return order.sellerName || '—';
+    return ids.map(id => sellerNames[id] || order.sellerName || id.slice(0, 8)).join(', ');
+  };
+
+  // Helper: count total items
+  const getItemCount = (order: Order): number => {
+    if (order.items && order.items.length > 0) {
+      return order.items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    }
+    return 0;
+  };
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = (order.orderNumber || order.id).toLowerCase().includes(searchQuery.toLowerCase()) ||
