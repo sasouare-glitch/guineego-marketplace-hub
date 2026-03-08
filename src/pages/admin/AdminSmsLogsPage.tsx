@@ -89,7 +89,7 @@ export default function AdminSmsLogsPage() {
   };
 
   const StatusBadge = ({ status }: { status: string }) => {
-    if (status === 'sent') return <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30"><CheckCircle2 className="w-3 h-3 mr-1" />Envoyé</Badge>;
+    if (status === 'sent') return <Badge className="bg-primary/15 text-primary border-primary/30"><CheckCircle2 className="w-3 h-3 mr-1" />Envoyé</Badge>;
     if (status === 'failed') return <Badge variant="destructive" className="bg-destructive/15 text-destructive border-destructive/30"><XCircle className="w-3 h-3 mr-1" />Échoué</Badge>;
     return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />{status}</Badge>;
   };

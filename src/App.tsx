@@ -382,6 +382,11 @@ const App = () => (
                         <AdminSmsConfigPage />
                       </ProtectedRoute>
                     } />
+                    <Route path="/admin/sms-logs" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminSmsLogsPage />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/admin/products" element={
                       <ProtectedRoute requiredRoles={['admin']}>
                         <AdminProductsPage />
