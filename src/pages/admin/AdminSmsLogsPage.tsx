@@ -200,6 +200,7 @@ export default function AdminSmsLogsPage() {
                       <TableHead>Type</TableHead>
                       <TableHead>Statut</TableHead>
                       <TableHead>Détails</TableHead>
+                      <TableHead className="w-[80px]">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -217,6 +218,25 @@ export default function AdminSmsLogsPage() {
                         <TableCell><StatusBadge status={log.status} retryCount={log.retryCount} /></TableCell>
                         <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
                           {log.error || log.orderId || '—'}
+                        </TableCell>
+                        <TableCell>
+                          {(log.status === 'failed' || log.status === 'permanently_failed') && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleManualRetry(log)}
+                              disabled={retryingId === log.id}
+                              className="h-8 px-2 text-xs"
+                            >
+                              {retryingId === log.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <RotateCcw className="w-3 h-3" />
+                              )}
+                              <span className="ml-1">Retry</span>
+                            </Button>
+                          )}
+                        </TableCell>
                         </TableCell>
                       </TableRow>
                     ))}
