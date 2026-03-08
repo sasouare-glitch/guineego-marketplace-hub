@@ -273,7 +273,23 @@ export default function AdminOrdersPage() {
                       <TableRow key={order.id}>
                         <TableCell className="font-mono font-medium">{order.orderNumber || order.id.slice(0, 12)}</TableCell>
                         <TableCell>{order.customerName || order.customerId || '—'}</TableCell>
-                        <TableCell className="text-muted-foreground">{getOrderSellerNames(order)}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {getOrderSellers(order).map((seller, i) => (
+                              seller.id ? (
+                                <button
+                                  key={i}
+                                  onClick={() => navigate(`/admin/sellers?highlight=${seller.id}`)}
+                                  className="text-primary hover:underline cursor-pointer text-sm"
+                                >
+                                  {seller.name}
+                                </button>
+                              ) : (
+                                <span key={i} className="text-muted-foreground text-sm">{seller.name}</span>
+                              )
+                            ))}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline">{itemCount}</Badge>
                         </TableCell>
