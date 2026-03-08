@@ -1,9 +1,10 @@
 /**
  * DeliveryMap - Interactive Leaflet map for delivery tracking
  * Shows courier position, pickup and delivery markers in real-time
+ * Supports geocoding addresses via OpenStreetMap Nominatim
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -44,13 +45,64 @@ interface MapPoint {
 
 interface DeliveryMapProps {
   courierPosition?: MapPoint | null;
+  /** Direct coordinates — take priority over address geocoding */
   pickupPosition?: MapPoint | null;
   deliveryPosition?: MapPoint | null;
+  /** Addresses to geocode when no direct coordinates are provided */
+  pickupAddress?: string;
+  pickupCommune?: string;
+  deliveryAddress?: string;
+  deliveryCommune?: string;
   courierName?: string;
   pickupLabel?: string;
   deliveryLabel?: string;
   className?: string;
 }
+
+// ============================================
+// Geocoding via OpenStreetMap Nominatim
+// ============================================
+
+const geocodeCache = new Map<string, MapPoint | null>();
+
+async function geocodeAddress(address: string, commune?: string): Promise<MapPoint | null> {
+  const query = commune ? `${address}, ${commune}, Guinée` : `${address}, Guinée`;
+  if (geocodeCache.has(query)) return geocodeCache.get(query)!;
+
+  try {
+    const params = new URLSearchParams({
+      q: query,
+      format: 'json',
+      limit: '1',
+      countrycodes: 'gn',
+    });
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
+      headers: { 'Accept-Language': 'fr' },
+    });
+    const data = await res.json();
+    if (data.length > 0) {
+      const point = { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      geocodeCache.set(query, point);
+      return point;
+    }
+    // Fallback: try commune only
+    if (commune) {
+      const fallback = await geocodeAddress(commune);
+      geocodeCache.set(query, fallback);
+      return fallback;
+    }
+    geocodeCache.set(query, null);
+    return null;
+  } catch (err) {
+    console.warn('Geocoding failed:', err);
+    geocodeCache.set(query, null);
+    return null;
+  }
+}
+
+// ============================================
+// Map sub-components
+// ============================================
 
 /** Auto-fit map bounds when markers change */
 function FitBounds({ points }: { points: MapPoint[] }) {
@@ -86,20 +138,46 @@ function FollowCourier({ position }: { position: MapPoint | null }) {
   return null;
 }
 
+// ============================================
+// Main component
+// ============================================
+
 export function DeliveryMap({
   courierPosition,
   pickupPosition,
   deliveryPosition,
+  pickupAddress,
+  pickupCommune,
+  deliveryAddress,
+  deliveryCommune,
   courierName = 'Coursier',
   pickupLabel = 'Point de collecte',
   deliveryLabel = 'Destination',
   className = '',
 }: DeliveryMapProps) {
+  const [geocodedPickup, setGeocodedPickup] = useState<MapPoint | null>(null);
+  const [geocodedDelivery, setGeocodedDelivery] = useState<MapPoint | null>(null);
+
+  // Geocode pickup address if no direct coords
+  useEffect(() => {
+    if (pickupPosition || !pickupAddress) return;
+    geocodeAddress(pickupAddress, pickupCommune).then(setGeocodedPickup);
+  }, [pickupAddress, pickupCommune, pickupPosition]);
+
+  // Geocode delivery address if no direct coords
+  useEffect(() => {
+    if (deliveryPosition || !deliveryAddress) return;
+    geocodeAddress(deliveryAddress, deliveryCommune).then(setGeocodedDelivery);
+  }, [deliveryAddress, deliveryCommune, deliveryPosition]);
+
+  const resolvedPickup = pickupPosition || geocodedPickup;
+  const resolvedDelivery = deliveryPosition || geocodedDelivery;
+
   // Gather all valid points for bounds
   const allPoints: MapPoint[] = [
     courierPosition,
-    pickupPosition,
-    deliveryPosition,
+    resolvedPickup,
+    resolvedDelivery,
   ].filter(Boolean) as MapPoint[];
 
   // Default center: Conakry, Guinea
@@ -136,19 +214,23 @@ export function DeliveryMap({
         )}
 
         {/* Pickup marker */}
-        {pickupPosition && (
-          <Marker position={[pickupPosition.lat, pickupPosition.lng]} icon={pickupIcon}>
+        {resolvedPickup && (
+          <Marker position={[resolvedPickup.lat, resolvedPickup.lng]} icon={pickupIcon}>
             <Popup>
               <strong>📦 {pickupLabel}</strong>
+              {pickupCommune && <br />}
+              {pickupCommune && <span>{pickupCommune}</span>}
             </Popup>
           </Marker>
         )}
 
         {/* Delivery marker */}
-        {deliveryPosition && (
-          <Marker position={[deliveryPosition.lat, deliveryPosition.lng]} icon={deliveryIcon}>
+        {resolvedDelivery && (
+          <Marker position={[resolvedDelivery.lat, resolvedDelivery.lng]} icon={deliveryIcon}>
             <Popup>
               <strong>📍 {deliveryLabel}</strong>
+              {deliveryCommune && <br />}
+              {deliveryCommune && <span>{deliveryCommune}</span>}
             </Popup>
           </Marker>
         )}
