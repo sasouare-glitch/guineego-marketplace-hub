@@ -19,7 +19,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import avatarMariama from "@/assets/avatar-mariama.jpg";
+import avatarIbrahima from "@/assets/avatar-ibrahima.jpg";
+import avatarFatoumata from "@/assets/avatar-fatoumata.jpg";
 import { Badge } from "@/components/ui/badge";
 
 const benefits = [
