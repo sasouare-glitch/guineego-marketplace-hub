@@ -13,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -22,12 +23,13 @@ import {
   MessageSquare, MapPin, Phone, User, CreditCard, Store, Copy, Check, ExternalLink,
   ChefHat, ShoppingBag, History,
 } from 'lucide-react';
+import { useAuth } from '@/lib/firebase/auth';
 import { useRealtimeOrder, type OrderStatus, type Order as BaseOrder } from '@/hooks/useRealtimeOrder';
 import { OrderTimeline, buildTimelineSteps } from '@/components/orders/OrderTimeline';
 import { useCurrency } from '@/hooks/useCurrency';
 import { updateDocument } from '@/lib/firebase/mutations';
 import { callFunction } from '@/lib/firebase/config';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, arrayUnion, Timestamp as FsTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from 'sonner';
 
@@ -57,11 +59,13 @@ export default function AdminOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { format } = useCurrency();
+  const { user } = useAuth();
   const { order: rawOrder, loading, error, currentStatus, statusHistory } = useRealtimeOrder(id);
   const order = rawOrder as (BaseOrder & { orderNumber?: string }) | null;
 
   const [copied, setCopied] = useState(false);
   const [newStatus, setNewStatus] = useState<string>('');
+  const [statusNote, setStatusNote] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [resendingSms, setResendingSms] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -150,9 +154,22 @@ export default function AdminOrderDetailPage() {
     if (!newStatus || !id) return;
     setSaving(true);
     try {
-      await updateDocument('orders', id, { status: newStatus });
+      const historyEntry: Record<string, any> = {
+        status: newStatus,
+        timestamp: FsTimestamp.now(),
+        performedBy: user?.uid || '',
+        role: 'admin',
+      };
+      if (statusNote.trim()) {
+        historyEntry.note = statusNote.trim();
+      }
+      await updateDocument('orders', id, {
+        status: newStatus,
+        statusHistory: arrayUnion(historyEntry),
+      });
       toast.success(`Statut mis à jour → ${statusConfig[newStatus]?.label || newStatus}`);
       setNewStatus('');
+      setStatusNote('');
     } catch {
       toast.error('Erreur lors de la mise à jour');
     } finally {
@@ -164,9 +181,23 @@ export default function AdminOrderDetailPage() {
     if (!id) return;
     setSaving(true);
     try {
-      await updateDocument('orders', id, { status: 'cancelled' });
+      const historyEntry: Record<string, any> = {
+        status: 'cancelled',
+        timestamp: FsTimestamp.now(),
+        performedBy: user?.uid || '',
+        role: 'admin',
+      };
+      if (statusNote.trim()) {
+        historyEntry.note = statusNote.trim();
+      }
+      await updateDocument('orders', id, {
+        status: 'cancelled',
+        cancellationReason: statusNote.trim() || 'Annulée par un administrateur',
+        statusHistory: arrayUnion(historyEntry),
+      });
       toast.success('Commande annulée');
       setCancelDialogOpen(false);
+      setStatusNote('');
     } catch {
       toast.error("Erreur lors de l'annulation");
     } finally {
@@ -473,6 +504,12 @@ export default function AdminOrderDetailPage() {
                         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'OK'}
                       </Button>
                     </div>
+                    <Textarea
+                      placeholder="Note optionnelle (ex: raison du changement)…"
+                      value={statusNote}
+                      onChange={(e) => setStatusNote(e.target.value)}
+                      className="text-sm min-h-[60px]"
+                    />
                   </div>
                 )}
 
