@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import avatarMamadou from "@/assets/avatar-mamadou.jpg";
+import avatarFatoumata from "@/assets/avatar-fatoumata.jpg";
 import { 
   Truck, 
   Users2, 
@@ -51,14 +53,14 @@ const testimonials = [
   {
     name: "Mamadou Diallo",
     role: "Coursier, Conakry",
-    avatar: "https://i.pravatar.cc/100?img=11",
+    avatar: avatarMamadou,
     quote: "GuineeGo m'a permis de travailler à mon rythme et de bien gagner ma vie. Le système est transparent et les paiements sont toujours à temps.",
     rating: 5,
   },
   {
     name: "Fatoumata Camara",
     role: "Investisseuse",
-    avatar: "https://i.pravatar.cc/100?img=5",
+    avatar: avatarFatoumata,
     quote: "J'ai diversifié mes investissements avec GuineeGo. Les rendements sont bons et le suivi est excellent. Je recommande !",
     rating: 5,
   },
