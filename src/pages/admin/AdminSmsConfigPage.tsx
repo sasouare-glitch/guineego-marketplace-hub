@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Save, Loader2, Eye, EyeOff, Send, CheckCircle2, XCircle, MessageSquare, Phone } from 'lucide-react';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, callFunction } from '@/lib/firebase/config';
 import { toast } from 'sonner';
 
 export default function AdminSmsConfigPage() {
