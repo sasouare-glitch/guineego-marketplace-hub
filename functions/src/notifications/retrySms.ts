@@ -65,6 +65,35 @@ async function sendSms(
   return { ok: response.ok, body };
 }
 
+async function createAdminNotification(recipient: string, logId: string) {
+  try {
+    // Get all admin users
+    const adminsSnap = await db.collection('users')
+      .where('role', 'in', ['admin', 'super_admin'])
+      .limit(20)
+      .get();
+
+    const batch = db.batch();
+    for (const adminDoc of adminsSnap.docs) {
+      const notifRef = db.collection('notifications').doc();
+      batch.set(notifRef, {
+        userId: adminDoc.id,
+        title: '🚨 SMS définitivement échoué',
+        message: `Le SMS vers ${recipient} a échoué après 3 tentatives. Vérifiez la configuration Orange SMS.`,
+        type: 'sms_failure',
+        category: 'system',
+        read: false,
+        link: '/admin/sms-logs',
+        metadata: { smsLogId: logId, recipient },
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+    await batch.commit();
+  } catch (err: any) {
+    console.error('Failed to create admin notification:', err.message);
+  }
+}
+
 export const retrySmsScheduled = functions
   .region('europe-west1')
   .pubsub.schedule('every 5 minutes')
