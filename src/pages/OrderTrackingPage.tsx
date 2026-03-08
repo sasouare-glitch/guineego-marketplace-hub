@@ -334,17 +334,12 @@ export default function OrderTrackingPage() {
                           toast.error("Aucun numéro de téléphone pour cette commande");
                           return;
                         }
-                        const sendTestSms = callFunction<
-                          { phoneNumber: string },
+                        const resend = callFunction<
+                          { orderId: string },
                           { success: boolean; message: string }
-                        >('sendTestSms');
-                        // Use a custom message via the status notification function
-                        const sendNotif = callFunction<
-                          { orderId: string; status: string },
-                          { success: boolean }
-                        >('sendStatusNotification');
-                        await sendNotif({ orderId, status: orderStatus });
-                        toast.success("SMS renvoyé avec succès");
+                        >('resendOrderSms');
+                        const result = await resend({ orderId });
+                        toast.success(result.data.message || "SMS renvoyé avec succès");
                       } catch (err: any) {
                         toast.error(err?.message || "Échec du renvoi SMS");
                       } finally {
