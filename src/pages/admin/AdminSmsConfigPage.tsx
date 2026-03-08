@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Save, Loader2, Eye, EyeOff, Send, CheckCircle2, XCircle, MessageSquare, Phone } from 'lucide-react';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, callFunction } from '@/lib/firebase/config';
 import { toast } from 'sonner';
 
 export default function AdminSmsConfigPage() {
@@ -92,11 +92,13 @@ export default function AdminSmsConfigPage() {
     }
     setTesting(true);
     try {
-      // Simulate test - in production this would call a Cloud Function
-      await new Promise(r => setTimeout(r, 2000));
-      toast.success(`SMS de test envoyé au ${testPhone}`);
-    } catch {
-      toast.error('Échec de l\'envoi du SMS de test');
+      const sendTestSms = callFunction<{ phoneNumber: string }, { success: boolean; message: string }>('sendTestSms');
+      const result = await sendTestSms({ phoneNumber: testPhone.trim() });
+      toast.success(result.data.message || `SMS de test envoyé au ${testPhone}`);
+    } catch (err: any) {
+      const msg = err?.message || 'Échec de l\'envoi du SMS de test';
+      toast.error(msg);
+      console.error('Test SMS error:', err);
     } finally {
       setTesting(false);
     }

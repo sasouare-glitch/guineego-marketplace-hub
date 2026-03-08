@@ -127,3 +127,8 @@ export {
   generateAccountingExport,
   dailyReconciliation
 } from './analytics/bigQuerySync';
+
+// ============================================
+// SMS FUNCTIONS
+// ============================================
+export { sendTestSms } from './notifications/sendTestSms';
