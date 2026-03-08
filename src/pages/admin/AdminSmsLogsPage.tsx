@@ -110,7 +110,7 @@ export default function AdminSmsLogsPage() {
           </Card>
           <Card>
             <CardContent className="flex items-center gap-3 py-4">
-              <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+              <CheckCircle2 className="w-8 h-8 text-primary" />
               <div>
                 <p className="text-2xl font-bold text-foreground">{stats.sent}</p>
                 <p className="text-sm text-muted-foreground">Envoyés</p>
