@@ -44,6 +44,8 @@ interface Order extends FirestoreDoc {
   customerId?: string;
   sellerName?: string;
   sellerId?: string;
+  sellerIds?: string[];
+  sellers?: Record<string, any>;
   total?: number;
   totalAmount?: number;
   pricing?: { total?: number; subtotal?: number; fees?: number };
