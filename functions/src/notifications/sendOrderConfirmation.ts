@@ -133,13 +133,36 @@ async function sendConfirmationEmail(email: string, order: OrderData): Promise<v
  * Send SMS via Orange SMS API (Guinea)
  */
 async function sendConfirmationSMS(phone: string, order: OrderData): Promise<void> {
+  const formattedPhone = formatGuineaPhone(phone);
+  const trackingLink = `${APP_URL}/order/${order.id}`;
+  const smsMessage = 
+    `GuineeGo: Commande ${order.id} confirmée! ` +
+    `Total: ${order.pricing.total.toLocaleString()} GNF. ` +
+    `Suivi: ${trackingLink}`;
+
+  const logRef = db.collection('sms_logs').doc();
+  const logBase = {
+    type: 'order_confirmation',
+    to: formattedPhone,
+    message: smsMessage,
+    orderId: order.id,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
   try {
-    // Get Orange API credentials from Firebase Functions config
+    // Get Orange API credentials
     const configDoc = await db.collection('config').doc('orange_sms').get();
     const config = configDoc.data();
 
     if (!config?.clientId || !config?.clientSecret) {
+      await logRef.set({ ...logBase, status: 'failed', error: 'Orange SMS API non configurée (clientId/clientSecret manquant)' });
       console.warn('⚠️ Orange SMS API non configurée — SMS non envoyé');
+      return;
+    }
+
+    if (!config?.enabled) {
+      await logRef.set({ ...logBase, status: 'failed', error: 'SMS désactivé dans la configuration' });
+      console.warn('⚠️ Orange SMS désactivé — SMS non envoyé');
       return;
     }
 
@@ -154,22 +177,15 @@ async function sendConfirmationSMS(phone: string, order: OrderData): Promise<voi
     });
 
     if (!tokenResponse.ok) {
+      const tokenError = await tokenResponse.text();
+      await logRef.set({ ...logBase, status: 'failed', error: `Token OAuth échoué [${tokenResponse.status}]: ${tokenError}` });
       throw new Error(`Token request failed: ${tokenResponse.status}`);
     }
 
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    // 2. Format phone number (ensure +224 prefix)
-    const formattedPhone = formatGuineaPhone(phone);
-
-    // 3. Send SMS
-    const trackingLink = `${APP_URL}/order/${order.id}`;
-    const smsMessage = 
-      `GuineeGo: Commande ${order.id} confirmée! ` +
-      `Total: ${order.pricing.total.toLocaleString()} GNF. ` +
-      `Suivi: ${trackingLink}`;
-
+    // 2. Send SMS
     const senderAddress = config.senderAddress || 'tel:+224000000000';
     const encodedSender = encodeURIComponent(senderAddress);
 
@@ -185,9 +201,7 @@ async function sendConfirmationSMS(phone: string, order: OrderData): Promise<voi
           outboundSMSMessageRequest: {
             address: `tel:${formattedPhone}`,
             senderAddress,
-            outboundSMSTextMessage: {
-              message: smsMessage,
-            },
+            outboundSMSTextMessage: { message: smsMessage },
           },
         }),
       }
@@ -195,11 +209,19 @@ async function sendConfirmationSMS(phone: string, order: OrderData): Promise<voi
 
     if (!smsResponse.ok) {
       const errorBody = await smsResponse.text();
+      await logRef.set({ ...logBase, status: 'failed', error: `SMS envoi échoué [${smsResponse.status}]: ${errorBody}` });
       throw new Error(`SMS send failed [${smsResponse.status}]: ${errorBody}`);
     }
 
+    const responseBody = await smsResponse.text();
+    await logRef.set({ ...logBase, status: 'sent', response: responseBody });
     console.log(`✅ SMS de confirmation envoyé à ${formattedPhone} pour commande ${order.id}`);
-  } catch (error) {
+  } catch (error: any) {
+    // If not already logged above, log the catch-all error
+    const existingLog = await logRef.get();
+    if (!existingLog.exists) {
+      await logRef.set({ ...logBase, status: 'failed', error: error?.message || String(error) });
+    }
     console.error(`❌ Erreur envoi SMS pour commande ${order.id}:`, error);
   }
 }
