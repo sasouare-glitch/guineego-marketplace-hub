@@ -67,6 +67,7 @@ export default function AdminOrderDetailPage() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [sellerNames, setSellerNames] = useState<Record<string, string>>({});
   const [customerInfo, setCustomerInfo] = useState<{ name: string; email: string } | null>(null);
+  const [userNames, setUserNames] = useState<Record<string, string>>({});
 
   // Load seller names & customer info
   useEffect(() => {
