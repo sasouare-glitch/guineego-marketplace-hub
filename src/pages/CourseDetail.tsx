@@ -1,4 +1,5 @@
 import { useState } from "react";
+import avatarMamadou from "@/assets/avatar-mamadou.jpg";
 import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -32,7 +33,7 @@ const course = {
   thumbnail: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200",
   instructor: {
     name: "Mamadou Diallo",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200",
+    avatar: avatarMamadou,
     title: "Expert E-commerce",
     students: 8500,
     courses: 12,
