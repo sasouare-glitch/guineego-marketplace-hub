@@ -18,8 +18,10 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Search, MoreHorizontal, Truck, Clock, CheckCircle2, 
-  MapPin, AlertCircle, Package, User, RefreshCw, Loader2
+  MapPin, AlertCircle, Package, User, RefreshCw, Loader2, UserPlus
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCurrency } from '@/hooks/useCurrency';
 import { db } from '@/lib/firebase/config';
 import {
@@ -66,6 +68,14 @@ export default function AdminDeliveriesPage() {
   const [courierNames, setCourierNames] = useState<Record<string, string>>({});
   const [customerNames, setCustomerNames] = useState<Record<string, string>>({});
   const { format } = useCurrency();
+  
+  // Courier assignment
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [assignMissionId, setAssignMissionId] = useState<string | null>(null);
+  const [couriers, setCouriers] = useState<{ id: string; name: string; phone?: string }[]>([]);
+  const [selectedCourierId, setSelectedCourierId] = useState('');
+  const [assigning, setAssigning] = useState(false);
+  const [loadingCouriers, setLoadingCouriers] = useState(false);
 
   // Real-time deliveries listener
   useEffect(() => {
@@ -180,6 +190,58 @@ export default function AdminDeliveriesPage() {
     } catch (err) {
       console.error('Error cancelling mission:', err);
       toast.error('Erreur lors de l\'annulation');
+    }
+  };
+
+  const openAssignDialog = (missionId: string) => {
+    setAssignMissionId(missionId);
+    setSelectedCourierId('');
+    setAssignDialogOpen(true);
+    // Fetch couriers
+    if (couriers.length === 0) {
+      setLoadingCouriers(true);
+      getDocs(collection(db, 'courier_settings')).then((snap) => {
+        const ids = snap.docs.map(d => ({ uid: d.data().userId || d.id, phone: d.data().phone }));
+        getDocs(collection(db, 'users')).then((usersSnap) => {
+          const userMap: Record<string, any> = {};
+          usersSnap.docs.forEach(d => { userMap[d.id] = d.data(); });
+          setCouriers(ids.map(c => ({
+            id: c.uid,
+            name: userMap[c.uid]?.displayName || userMap[c.uid]?.fullName || userMap[c.uid]?.email || c.uid.slice(0, 8),
+            phone: c.phone || userMap[c.uid]?.phone,
+          })));
+          setLoadingCouriers(false);
+        });
+      }).catch(() => setLoadingCouriers(false));
+    }
+  };
+
+  const handleAssignCourier = async () => {
+    if (!selectedCourierId || !assignMissionId) return;
+    setAssigning(true);
+    try {
+      const courier = couriers.find(c => c.id === selectedCourierId);
+      await updateDoc(doc(db, 'deliveries', assignMissionId), {
+        assignedCourier: selectedCourierId,
+        assignedCourierId: selectedCourierId,
+        courierName: courier?.name || '',
+        courierPhone: courier?.phone || '',
+        status: 'accepted',
+        acceptedAt: serverTimestamp(),
+        statusHistory: arrayUnion({
+          status: 'accepted',
+          timestamp: Timestamp.now(),
+          note: 'Assigné manuellement par l\'administrateur',
+        }),
+        updatedAt: serverTimestamp(),
+      });
+      toast.success(`Coursier ${courier?.name} assigné`);
+      setAssignDialogOpen(false);
+    } catch (err) {
+      console.error('Error assigning courier:', err);
+      toast.error('Erreur lors de l\'assignation');
+    } finally {
+      setAssigning(false);
     }
   };
 
