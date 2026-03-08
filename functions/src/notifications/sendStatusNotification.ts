@@ -138,12 +138,28 @@ async function sendStatusSMS(
   status: string,
   msg: { sms: string }
 ): Promise<void> {
+  const formattedPhone = formatGuineaPhone(phone);
+  const smsMessage = `GuineeGo: ${msg.sms} Commande ${orderId}. Suivi: ${APP_URL}/order/${orderId}`;
+  const logRef = db.collection('sms_logs').doc();
+  const logBase = {
+    type: `status_${status}`,
+    to: formattedPhone,
+    message: smsMessage,
+    orderId,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
   try {
     const configDoc = await db.collection('config').doc('orange_sms').get();
     const config = configDoc.data();
 
     if (!config?.clientId || !config?.clientSecret) {
-      console.warn('⚠️ Orange SMS API non configurée — SMS statut non envoyé');
+      await logRef.set({ ...logBase, status: 'failed', error: 'Orange SMS API non configurée' });
+      return;
+    }
+
+    if (!config?.enabled) {
+      await logRef.set({ ...logBase, status: 'failed', error: 'SMS désactivé' });
       return;
     }
 
@@ -156,14 +172,15 @@ async function sendStatusSMS(
       body: 'grant_type=client_credentials',
     });
 
-    if (!tokenResponse.ok) throw new Error(`Token failed: ${tokenResponse.status}`);
+    if (!tokenResponse.ok) {
+      const tokenError = await tokenResponse.text();
+      await logRef.set({ ...logBase, status: 'failed', error: `Token OAuth échoué [${tokenResponse.status}]: ${tokenError}` });
+      throw new Error(`Token failed: ${tokenResponse.status}`);
+    }
 
     const { access_token } = await tokenResponse.json();
-    const formattedPhone = formatGuineaPhone(phone);
     const senderAddress = config.senderAddress || 'tel:+224000000000';
     const encodedSender = encodeURIComponent(senderAddress);
-
-    const smsMessage = `GuineeGo: ${msg.sms} Commande ${orderId}. Suivi: ${APP_URL}/order/${orderId}`;
 
     const smsResponse = await fetch(
       `https://api.orange.com/smsmessaging/v1/outbound/${encodedSender}/requests`,
@@ -185,11 +202,18 @@ async function sendStatusSMS(
 
     if (!smsResponse.ok) {
       const errorBody = await smsResponse.text();
+      await logRef.set({ ...logBase, status: 'failed', error: `SMS échoué [${smsResponse.status}]: ${errorBody}` });
       throw new Error(`SMS failed [${smsResponse.status}]: ${errorBody}`);
     }
 
+    const responseBody = await smsResponse.text();
+    await logRef.set({ ...logBase, status: 'sent', response: responseBody });
     console.log(`✅ SMS statut "${status}" envoyé à ${formattedPhone} pour commande ${orderId}`);
-  } catch (error) {
+  } catch (error: any) {
+    const existingLog = await logRef.get();
+    if (!existingLog.exists) {
+      await logRef.set({ ...logBase, status: 'failed', error: error?.message || String(error) });
+    }
     console.error(`❌ Erreur envoi SMS statut pour commande ${orderId}:`, error);
   }
 }

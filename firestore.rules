@@ -335,6 +335,14 @@ service cloud.firestore {
     }
     
     // ============================================
+    // SMS LOGS (Admin only)
+    // ============================================
+    match /sms_logs/{logId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
     // SELLER SETTINGS (owner-only)
     // ============================================
     match /seller_settings/{userId} {
