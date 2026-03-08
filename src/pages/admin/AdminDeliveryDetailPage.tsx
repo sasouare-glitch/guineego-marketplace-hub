@@ -81,11 +81,12 @@ export default function AdminDeliveryDetailPage() {
   const [courierName, setCourierName] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState<string | null>(null);
 
-  // Courier assignment
+  // Courier assignment / reassignment
   const [couriers, setCouriers] = useState<{ id: string; name: string; phone?: string }[]>([]);
   const [selectedCourierId, setSelectedCourierId] = useState<string>('');
   const [assigning, setAssigning] = useState(false);
   const [loadingCouriers, setLoadingCouriers] = useState(false);
+  const [showReassign, setShowReassign] = useState(false);
 
   useEffect(() => {
     if (!delivery) return;
@@ -102,13 +103,12 @@ export default function AdminDeliveryDetailPage() {
     if (delivery.customerId) resolveUser(delivery.customerId, setCustomerName);
   }, [delivery?.assignedCourier, delivery?.customerId]);
 
-  // Fetch available couriers when mission is pending/unassigned
-  useEffect(() => {
-    if (delivery?.assignedCourier) return;
+  // Fetch couriers list (for assign or reassign)
+  const fetchCouriers = () => {
+    if (couriers.length > 0) return;
     setLoadingCouriers(true);
     getDocs(query(collection(db, 'courier_settings'))).then((snap) => {
       const ids = snap.docs.map(d => ({ uid: d.data().userId || d.id, phone: d.data().phone }));
-      // Resolve names
       getDocs(collection(db, 'users')).then((usersSnap) => {
         const userMap: Record<string, any> = {};
         usersSnap.docs.forEach(d => { userMap[d.id] = d.data(); });
@@ -121,13 +121,23 @@ export default function AdminDeliveryDetailPage() {
         setLoadingCouriers(false);
       });
     }).catch(() => setLoadingCouriers(false));
+  };
+
+  // Auto-fetch when no courier assigned
+  useEffect(() => {
+    if (!delivery?.assignedCourier) fetchCouriers();
   }, [delivery?.assignedCourier]);
 
-  const handleAssignCourier = async () => {
+  const handleAssignCourier = async (isReassign = false) => {
     if (!selectedCourierId || !id) return;
     setAssigning(true);
     try {
       const courierUser = couriers.find(c => c.id === selectedCourierId);
+      const previousCourier = delivery?.assignedCourier;
+      const note = isReassign
+        ? `Réassigné par l'administrateur (ancien: ${courierName || previousCourier?.slice(0, 8)})`
+        : 'Assigné manuellement par l\'administrateur';
+
       await updateDoc(doc(db, 'deliveries', id), {
         assignedCourier: selectedCourierId,
         assignedCourierId: selectedCourierId,
@@ -138,12 +148,13 @@ export default function AdminDeliveryDetailPage() {
         statusHistory: arrayUnion({
           status: 'accepted',
           timestamp: Timestamp.now(),
-          note: 'Assigné manuellement par l\'administrateur',
+          note,
         }),
         updatedAt: serverTimestamp(),
       });
       toast.success(`Coursier ${courierUser?.name} assigné avec succès`);
       setSelectedCourierId('');
+      setShowReassign(false);
     } catch (err) {
       console.error('Error assigning courier:', err);
       toast.error('Erreur lors de l\'assignation du coursier');
@@ -355,6 +366,70 @@ export default function AdminDeliveryDetailPage() {
                         Pas de position GPS disponible
                       </p>
                     )}
+
+                    {/* Reassign button - available when mission is not delivered/cancelled */}
+                    {currentStatus && !['delivered', 'cancelled'].includes(currentStatus) && (
+                      <Separator />
+                    )}
+                    {currentStatus && !['delivered', 'cancelled'].includes(currentStatus) && !showReassign && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full gap-2"
+                        onClick={() => { setShowReassign(true); fetchCouriers(); }}
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        Réassigner un autre coursier
+                      </Button>
+                    )}
+
+                    {/* Reassign form */}
+                    {showReassign && (
+                      <div className="space-y-3 p-3 rounded-lg border border-dashed border-destructive/30 bg-destructive/5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                            <UserPlus className="w-4 h-4" /> Réassigner
+                          </span>
+                          <Button variant="ghost" size="sm" onClick={() => setShowReassign(false)}>
+                            Annuler
+                          </Button>
+                        </div>
+                        {loadingCouriers ? (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Loader2 className="w-4 h-4 animate-spin" /> Chargement...
+                          </div>
+                        ) : couriers.filter(c => c.id !== delivery.assignedCourier).length === 0 ? (
+                          <p className="text-sm text-muted-foreground">Aucun autre coursier disponible</p>
+                        ) : (
+                          <>
+                            <Select value={selectedCourierId} onValueChange={setSelectedCourierId}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Nouveau coursier" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {couriers
+                                  .filter(c => c.id !== delivery.assignedCourier)
+                                  .map(c => (
+                                    <SelectItem key={c.id} value={c.id}>
+                                      {c.name} {c.phone ? `(${c.phone})` : ''}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              onClick={() => handleAssignCourier(true)}
+                              disabled={!selectedCourierId || assigning}
+                              className="w-full gap-2"
+                              variant="destructive"
+                              size="sm"
+                            >
+                              {assigning ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                              {assigning ? 'Réassignation...' : 'Confirmer la réassignation'}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -387,7 +462,7 @@ export default function AdminDeliveryDetailPage() {
                               </SelectContent>
                             </Select>
                             <Button
-                              onClick={handleAssignCourier}
+                              onClick={() => handleAssignCourier(false)}
                               disabled={!selectedCourierId || assigning}
                               className="w-full gap-2"
                               size="sm"
