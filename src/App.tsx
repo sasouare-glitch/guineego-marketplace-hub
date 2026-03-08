@@ -429,6 +429,11 @@ const App = () => (
                          <AdminEmailsPage />
                        </ProtectedRoute>
                      } />
+                     <Route path="/admin/role-requests" element={
+                       <ProtectedRoute requiredRoles={['admin']}>
+                         <AdminRoleRequestsPage />
+                       </ProtectedRoute>
+                     } />
                      
                      {/* Catch-all Route */}
                     <Route path="*" element={<NotFound />} />
