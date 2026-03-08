@@ -21,6 +21,7 @@ interface SmsLog {
   id: string;
   type: string;
   to: string;
+  message?: string;
   status: string;
   error?: string;
   sentBy?: string;
