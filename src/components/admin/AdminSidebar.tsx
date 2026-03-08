@@ -61,6 +61,13 @@ const managementItems = [
     description: "Gestion des comptes"
   },
   { 
+    title: "Demandes de rôle", 
+    url: "/admin/role-requests", 
+    icon: UserPlus,
+    badge: null,
+    description: "Approbation des rôles"
+  },
+  { 
     title: "Commandes", 
     url: "/admin/orders", 
     icon: ShoppingCart,
