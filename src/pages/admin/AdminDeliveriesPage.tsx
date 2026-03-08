@@ -287,7 +287,9 @@ export default function AdminDeliveriesPage() {
                       <TableRow key={d.id}>
                         <TableCell className="font-mono text-sm">
                           <div>
-                            <p className="font-medium">{d.id.slice(0, 12)}</p>
+                            <button onClick={() => navigate(`/admin/deliveries/${d.id}`)} className="font-medium text-primary hover:underline">
+                              {d.id.slice(0, 12)}
+                            </button>
                             <p className="text-xs text-muted-foreground">{d.orderId || '—'}</p>
                           </div>
                         </TableCell>
