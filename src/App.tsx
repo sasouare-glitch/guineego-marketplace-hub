@@ -90,6 +90,7 @@ import AdminSecurityPage from "./pages/admin/AdminSecurityPage";
 import AdminEmailsPage from "./pages/admin/AdminEmailsPage";
 import AdminRoleRequestsPage from "./pages/admin/AdminRoleRequestsPage";
 import AdminSmsConfigPage from "./pages/admin/AdminSmsConfigPage";
+import AdminSmsLogsPage from "./pages/admin/AdminSmsLogsPage";
 // Mobile Components
 import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
 import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";

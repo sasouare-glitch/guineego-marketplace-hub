@@ -158,6 +158,12 @@ const settingsItems = [
     icon: MessageSquare,
     description: "Configuration API SMS"
   },
+  {
+    title: "Historique SMS",
+    url: "/admin/sms-logs",
+    icon: MessageSquare,
+    description: "Journal des SMS envoyés"
+  },
 ];
 
 export function AdminSidebar() {
