@@ -95,6 +95,17 @@ const SearchPage = () => {
     return result;
   }, [allProducts, searchTerm, filters, sortBy]);
 
+  // Compute product counts per seller for filter display
+  const sellerProductCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    allProducts.forEach(p => {
+      if (p.sellerId) {
+        counts[p.sellerId] = (counts[p.sellerId] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [allProducts]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchParams({ q: searchTerm });
