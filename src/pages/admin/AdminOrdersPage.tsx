@@ -69,7 +69,7 @@ export default function AdminOrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const { format } = useCurrency();
-
+  const navigate = useNavigate();
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
   const [statusDialog, setStatusDialog] = useState<{ open: boolean; order: Order | null; newStatus: OrderStatus | '' }>({ open: false, order: null, newStatus: '' });
   const [saving, setSaving] = useState(false);
