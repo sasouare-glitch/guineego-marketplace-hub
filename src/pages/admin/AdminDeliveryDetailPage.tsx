@@ -128,11 +128,16 @@ export default function AdminDeliveryDetailPage() {
     if (!delivery?.assignedCourier) fetchCouriers();
   }, [delivery?.assignedCourier]);
 
-  const handleAssignCourier = async () => {
+  const handleAssignCourier = async (isReassign = false) => {
     if (!selectedCourierId || !id) return;
     setAssigning(true);
     try {
       const courierUser = couriers.find(c => c.id === selectedCourierId);
+      const previousCourier = delivery?.assignedCourier;
+      const note = isReassign
+        ? `Réassigné par l'administrateur (ancien: ${courierName || previousCourier?.slice(0, 8)})`
+        : 'Assigné manuellement par l\'administrateur';
+
       await updateDoc(doc(db, 'deliveries', id), {
         assignedCourier: selectedCourierId,
         assignedCourierId: selectedCourierId,
@@ -143,12 +148,13 @@ export default function AdminDeliveryDetailPage() {
         statusHistory: arrayUnion({
           status: 'accepted',
           timestamp: Timestamp.now(),
-          note: 'Assigné manuellement par l\'administrateur',
+          note,
         }),
         updatedAt: serverTimestamp(),
       });
       toast.success(`Coursier ${courierUser?.name} assigné avec succès`);
       setSelectedCourierId('');
+      setShowReassign(false);
     } catch (err) {
       console.error('Error assigning courier:', err);
       toast.error('Erreur lors de l\'assignation du coursier');
