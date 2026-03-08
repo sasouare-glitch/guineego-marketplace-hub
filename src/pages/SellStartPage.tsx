@@ -314,6 +314,7 @@ export default function SellStartPage() {
                     <p className="text-sm text-muted-foreground leading-relaxed mb-5">"{t.content}"</p>
                     <div className="flex items-center gap-3">
                       <Avatar className="w-10 h-10">
+                        <AvatarImage src={t.avatar} alt={t.name} className="object-cover" />
                         <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                           {t.initials}
                         </AvatarFallback>
