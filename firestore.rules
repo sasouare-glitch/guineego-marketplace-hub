@@ -285,8 +285,8 @@ service cloud.firestore {
     // ============================================
     match /mail/{mailId} {
       allow read: if isAdmin();
-      // Admin can create (resend emails); Cloud Functions also write here
-      allow create: if isAdmin();
+      // Authenticated users can create (order confirmation emails); admin can also create (resend)
+      allow create: if isAuthenticated() || isAdmin();
       // Admin can update _resendCount on original emails
       allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['_resendCount', '_lastResendAt']);
       allow delete: if false;
