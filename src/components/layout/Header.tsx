@@ -179,6 +179,9 @@ export function Header() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
+            {/* Role Switcher for multi-role users */}
+            {isLoggedIn && <RoleSwitcher />}
+            
             {/* Language Selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
