@@ -112,6 +112,33 @@ export default function AdminOrderDetailPage() {
     loadExtra();
   }, [order]);
 
+  // Resolve user names from statusHistory performedBy UIDs
+  useEffect(() => {
+    if (!statusHistory || statusHistory.length === 0) return;
+    const uids = [...new Set(statusHistory.map(e => e.performedBy).filter(Boolean))] as string[];
+    const unknown = uids.filter(uid => !userNames[uid]);
+    if (unknown.length === 0) return;
+
+    const load = async () => {
+      const names: Record<string, string> = {};
+      await Promise.all(unknown.map(async (uid) => {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', uid));
+          if (userDoc.exists()) {
+            const d = userDoc.data();
+            names[uid] = d.displayName || d.fullName || d.email || uid.slice(0, 8);
+          } else {
+            names[uid] = uid.slice(0, 8);
+          }
+        } catch {
+          names[uid] = uid.slice(0, 8);
+        }
+      }));
+      setUserNames(prev => ({ ...prev, ...names }));
+    };
+    load();
+  }, [statusHistory]);
+
   const copyId = () => {
     navigator.clipboard.writeText(id || '');
     setCopied(true);
