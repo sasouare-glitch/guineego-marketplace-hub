@@ -13,15 +13,17 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   ArrowLeft, Truck, MapPin, Clock, User, Phone, Package,
-  CheckCircle2, AlertCircle, Navigation, XCircle, Check
+  CheckCircle2, AlertCircle, Navigation, XCircle, Check, Loader2, UserPlus
 } from 'lucide-react';
 import { useDeliveryTracking } from '@/hooks/useDeliveryTracking';
 import { useCurrency } from '@/hooks/useCurrency';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, getDocs, query, where, serverTimestamp, Timestamp, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 // Status config for badges
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
@@ -78,6 +80,12 @@ export default function AdminDeliveryDetailPage() {
   const [courierName, setCourierName] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState<string | null>(null);
 
+  // Courier assignment
+  const [couriers, setCouriers] = useState<{ id: string; name: string; phone?: string }[]>([]);
+  const [selectedCourierId, setSelectedCourierId] = useState<string>('');
+  const [assigning, setAssigning] = useState(false);
+  const [loadingCouriers, setLoadingCouriers] = useState(false);
+
   useEffect(() => {
     if (!delivery) return;
     const resolveUser = async (uid: string, setter: (n: string) => void) => {
@@ -92,6 +100,56 @@ export default function AdminDeliveryDetailPage() {
     if (delivery.assignedCourier) resolveUser(delivery.assignedCourier, setCourierName);
     if (delivery.customerId) resolveUser(delivery.customerId, setCustomerName);
   }, [delivery?.assignedCourier, delivery?.customerId]);
+
+  // Fetch available couriers when mission is pending/unassigned
+  useEffect(() => {
+    if (delivery?.assignedCourier) return;
+    setLoadingCouriers(true);
+    getDocs(query(collection(db, 'courier_settings'))).then((snap) => {
+      const ids = snap.docs.map(d => ({ uid: d.data().userId || d.id, phone: d.data().phone }));
+      // Resolve names
+      getDocs(collection(db, 'users')).then((usersSnap) => {
+        const userMap: Record<string, any> = {};
+        usersSnap.docs.forEach(d => { userMap[d.id] = d.data(); });
+        const list = ids.map(c => ({
+          id: c.uid,
+          name: userMap[c.uid]?.displayName || userMap[c.uid]?.fullName || userMap[c.uid]?.email || c.uid.slice(0, 8),
+          phone: c.phone || userMap[c.uid]?.phone,
+        }));
+        setCouriers(list);
+        setLoadingCouriers(false);
+      });
+    }).catch(() => setLoadingCouriers(false));
+  }, [delivery?.assignedCourier]);
+
+  const handleAssignCourier = async () => {
+    if (!selectedCourierId || !id) return;
+    setAssigning(true);
+    try {
+      const courierUser = couriers.find(c => c.id === selectedCourierId);
+      await updateDoc(doc(db, 'deliveries', id), {
+        assignedCourier: selectedCourierId,
+        assignedCourierId: selectedCourierId,
+        courierName: courierUser?.name || '',
+        courierPhone: courierUser?.phone || '',
+        status: 'accepted',
+        acceptedAt: serverTimestamp(),
+        statusHistory: arrayUnion({
+          status: 'accepted',
+          timestamp: Timestamp.now(),
+          note: 'Assigné manuellement par l\'administrateur',
+        }),
+        updatedAt: serverTimestamp(),
+      });
+      toast.success(`Coursier ${courierUser?.name} assigné avec succès`);
+      setSelectedCourierId('');
+    } catch (err) {
+      console.error('Error assigning courier:', err);
+      toast.error('Erreur lors de l\'assignation du coursier');
+    } finally {
+      setAssigning(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -313,7 +371,49 @@ export default function AdminDeliveryDetailPage() {
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground italic">Aucun coursier assigné</p>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground italic">Aucun coursier assigné</p>
+                    
+                    {currentStatus === 'pending' && (
+                      <div className="space-y-3 p-3 rounded-lg border border-dashed border-border bg-muted/30">
+                        <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                          <UserPlus className="w-4 h-4" />
+                          Assigner un coursier
+                        </div>
+                        {loadingCouriers ? (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Loader2 className="w-4 h-4 animate-spin" /> Chargement des coursiers...
+                          </div>
+                        ) : couriers.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">Aucun coursier enregistré</p>
+                        ) : (
+                          <>
+                            <Select value={selectedCourierId} onValueChange={setSelectedCourierId}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Sélectionner un coursier" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {couriers.map(c => (
+                                  <SelectItem key={c.id} value={c.id}>
+                                    {c.name} {c.phone ? `(${c.phone})` : ''}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              onClick={handleAssignCourier}
+                              disabled={!selectedCourierId || assigning}
+                              className="w-full gap-2"
+                              size="sm"
+                            >
+                              {assigning ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                              {assigning ? 'Assignation...' : 'Assigner'}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
