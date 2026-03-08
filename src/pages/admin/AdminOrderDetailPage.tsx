@@ -154,9 +154,22 @@ export default function AdminOrderDetailPage() {
     if (!newStatus || !id) return;
     setSaving(true);
     try {
-      await updateDocument('orders', id, { status: newStatus });
+      const historyEntry: Record<string, any> = {
+        status: newStatus,
+        timestamp: FsTimestamp.now(),
+        performedBy: user?.uid || '',
+        role: 'admin',
+      };
+      if (statusNote.trim()) {
+        historyEntry.note = statusNote.trim();
+      }
+      await updateDocument('orders', id, {
+        status: newStatus,
+        statusHistory: arrayUnion(historyEntry),
+      });
       toast.success(`Statut mis à jour → ${statusConfig[newStatus]?.label || newStatus}`);
       setNewStatus('');
+      setStatusNote('');
     } catch {
       toast.error('Erreur lors de la mise à jour');
     } finally {
@@ -168,9 +181,23 @@ export default function AdminOrderDetailPage() {
     if (!id) return;
     setSaving(true);
     try {
-      await updateDocument('orders', id, { status: 'cancelled' });
+      const historyEntry: Record<string, any> = {
+        status: 'cancelled',
+        timestamp: FsTimestamp.now(),
+        performedBy: user?.uid || '',
+        role: 'admin',
+      };
+      if (statusNote.trim()) {
+        historyEntry.note = statusNote.trim();
+      }
+      await updateDocument('orders', id, {
+        status: 'cancelled',
+        cancellationReason: statusNote.trim() || 'Annulée par un administrateur',
+        statusHistory: arrayUnion(historyEntry),
+      });
       toast.success('Commande annulée');
       setCancelDialogOpen(false);
+      setStatusNote('');
     } catch {
       toast.error("Erreur lors de l'annulation");
     } finally {
