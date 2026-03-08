@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronDown, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
@@ -10,6 +10,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 
 export interface FilterState {
   categories: string[];
@@ -19,32 +21,66 @@ export interface FilterState {
   sellers: string[];
 }
 
+interface SellerOption {
+  id: string;
+  label: string;
+}
+
 interface SearchFiltersProps {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
   onClearFilters: () => void;
+  /** Product counts per sellerId for display */
+  sellerProductCounts?: Record<string, number>;
 }
 
 import { CATEGORIES } from "@/constants/categories";
 
 const categories = CATEGORIES.map((c) => ({ id: c.id, label: c.label }));
 
-const sellers = [
-  { id: "techshop", label: "TechShop GN", count: 45 },
-  { id: "modestyle", label: "Mode Style", count: 89 },
-  { id: "homeplus", label: "Home Plus", count: 34 },
-  { id: "beautyworld", label: "Beauty World", count: 67 },
-];
-
 const ratings = [4, 3, 2, 1];
 
-export const SearchFilters = ({ filters, onFiltersChange, onClearFilters }: SearchFiltersProps) => {
+export const SearchFilters = ({ filters, onFiltersChange, onClearFilters, sellerProductCounts = {} }: SearchFiltersProps) => {
+  const [sellers, setSellers] = useState<SellerOption[]>([]);
+  const [loadingSellers, setLoadingSellers] = useState(false);
   const [openSections, setOpenSections] = useState({
     categories: true,
     price: true,
     rating: false,
     sellers: false,
   });
+
+  // Fetch sellers from Firestore
+  useEffect(() => {
+    setLoadingSellers(true);
+    getDocs(collection(db, "seller_settings")).then((snap) => {
+      const list: SellerOption[] = [];
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        const name = data.shopName || data.storeName || data.name;
+        if (name) {
+          list.push({ id: data.userId || d.id, label: name });
+        }
+      });
+      // Fallback: also check 'sellers' collection
+      if (list.length === 0) {
+        getDocs(collection(db, "sellers")).then((sellersSnap) => {
+          sellersSnap.docs.forEach((d) => {
+            const data = d.data();
+            const name = data.shopName || data.storeName || data.businessName || data.name;
+            if (name) {
+              list.push({ id: data.userId || d.id, label: name });
+            }
+          });
+          setSellers(list);
+          setLoadingSellers(false);
+        });
+      } else {
+        setSellers(list);
+        setLoadingSellers(false);
+      }
+    }).catch(() => setLoadingSellers(false));
+  }, []);
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -177,21 +213,34 @@ export const SearchFilters = ({ filters, onFiltersChange, onClearFilters }: Sear
           <ChevronDown className={cn("w-4 h-4 transition-transform", openSections.sellers && "rotate-180")} />
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-3 space-y-2">
-          {sellers.map((seller) => (
-            <div key={seller.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={seller.id}
-                  checked={filters.sellers.includes(seller.id)}
-                  onCheckedChange={() => toggleArrayFilter("sellers", seller.id)}
-                />
-                <label htmlFor={seller.id} className="text-sm cursor-pointer">
-                  {seller.label}
-                </label>
-              </div>
-              <span className="text-xs text-muted-foreground">({seller.count})</span>
+          {loadingSellers ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+              <Loader2 className="w-4 h-4 animate-spin" /> Chargement...
             </div>
-          ))}
+          ) : sellers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucun vendeur</p>
+          ) : (
+            sellers.map((seller) => {
+              const count = sellerProductCounts[seller.id] || 0;
+              return (
+                <div key={seller.id} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`seller-${seller.id}`}
+                      checked={filters.sellers.includes(seller.id)}
+                      onCheckedChange={() => toggleArrayFilter("sellers", seller.id)}
+                    />
+                    <label htmlFor={`seller-${seller.id}`} className="text-sm cursor-pointer">
+                      {seller.label}
+                    </label>
+                  </div>
+                  {count > 0 && (
+                    <span className="text-xs text-muted-foreground">({count})</span>
+                  )}
+                </div>
+              );
+            })
+          )}
         </CollapsibleContent>
       </Collapsible>
     </div>

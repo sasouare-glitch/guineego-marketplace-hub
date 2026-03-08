@@ -68,6 +68,11 @@ const SearchPage = () => {
         return false;
       }
 
+      // Sellers
+      if (filters.sellers.length > 0 && product.sellerId && !filters.sellers.includes(product.sellerId)) {
+        return false;
+      }
+
       return true;
     });
 
@@ -89,6 +94,17 @@ const SearchPage = () => {
 
     return result;
   }, [allProducts, searchTerm, filters, sortBy]);
+
+  // Compute product counts per seller for filter display
+  const sellerProductCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    allProducts.forEach(p => {
+      if (p.sellerId) {
+        counts[p.sellerId] = (counts[p.sellerId] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [allProducts]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,6 +156,7 @@ const SearchPage = () => {
                 filters={filters}
                 onFiltersChange={setFilters}
                 onClearFilters={clearFilters}
+                sellerProductCounts={sellerProductCounts}
               />
             </div>
           </aside>
@@ -167,6 +184,7 @@ const SearchPage = () => {
                     </SheetHeader>
                     <div className="mt-6">
                       <SearchFilters
+                        sellerProductCounts={sellerProductCounts}
                         filters={filters}
                         onFiltersChange={(newFilters) => {
                           setFilters(newFilters);
