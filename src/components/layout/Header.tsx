@@ -28,6 +28,7 @@ import { NotificationCenter } from "@/components/notifications/NotificationCente
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePreferences } from "@/hooks/usePreferences";
 import { useAuth } from "@/contexts/AuthContext";
+import { RoleSwitcher } from "@/components/auth/RoleSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
