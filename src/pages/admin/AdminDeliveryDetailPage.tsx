@@ -366,6 +366,70 @@ export default function AdminDeliveryDetailPage() {
                         Pas de position GPS disponible
                       </p>
                     )}
+
+                    {/* Reassign button - available when mission is not delivered/cancelled */}
+                    {currentStatus && !['delivered', 'cancelled'].includes(currentStatus) && (
+                      <Separator />
+                    )}
+                    {currentStatus && !['delivered', 'cancelled'].includes(currentStatus) && !showReassign && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full gap-2"
+                        onClick={() => { setShowReassign(true); fetchCouriers(); }}
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        Réassigner un autre coursier
+                      </Button>
+                    )}
+
+                    {/* Reassign form */}
+                    {showReassign && (
+                      <div className="space-y-3 p-3 rounded-lg border border-dashed border-destructive/30 bg-destructive/5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-foreground flex items-center gap-2">
+                            <UserPlus className="w-4 h-4" /> Réassigner
+                          </span>
+                          <Button variant="ghost" size="sm" onClick={() => setShowReassign(false)}>
+                            Annuler
+                          </Button>
+                        </div>
+                        {loadingCouriers ? (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Loader2 className="w-4 h-4 animate-spin" /> Chargement...
+                          </div>
+                        ) : couriers.filter(c => c.id !== delivery.assignedCourier).length === 0 ? (
+                          <p className="text-sm text-muted-foreground">Aucun autre coursier disponible</p>
+                        ) : (
+                          <>
+                            <Select value={selectedCourierId} onValueChange={setSelectedCourierId}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Nouveau coursier" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {couriers
+                                  .filter(c => c.id !== delivery.assignedCourier)
+                                  .map(c => (
+                                    <SelectItem key={c.id} value={c.id}>
+                                      {c.name} {c.phone ? `(${c.phone})` : ''}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                            <Button
+                              onClick={() => handleAssignCourier(true)}
+                              disabled={!selectedCourierId || assigning}
+                              className="w-full gap-2"
+                              variant="destructive"
+                              size="sm"
+                            >
+                              {assigning ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                              {assigning ? 'Réassignation...' : 'Confirmer la réassignation'}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -398,7 +462,7 @@ export default function AdminDeliveryDetailPage() {
                               </SelectContent>
                             </Select>
                             <Button
-                              onClick={handleAssignCourier}
+                              onClick={() => handleAssignCourier(false)}
                               disabled={!selectedCourierId || assigning}
                               className="w-full gap-2"
                               size="sm"
