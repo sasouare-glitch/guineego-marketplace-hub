@@ -152,12 +152,75 @@ export default function AdminOrdersPage() {
     return 0;
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = (order.orderNumber || order.id).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (order.customerName || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === 'all' || order.status === activeTab;
-    return matchesSearch && matchesTab;
-  });
+  // Get unique sellers for filter dropdown
+  const uniqueSellers = useMemo(() => {
+    const sellersSet = new Map<string, string>();
+    orders.forEach(order => {
+      const ids = order.sellerIds || (order.sellerId ? [order.sellerId] : []);
+      ids.forEach(id => {
+        if (id && !sellersSet.has(id)) {
+          sellersSet.set(id, sellerNames[id] || id.slice(0, 8));
+        }
+      });
+    });
+    return Array.from(sellersSet.entries()).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [orders, sellerNames]);
+
+  // Check if any advanced filter is active
+  const hasActiveFilters = filterStatus !== 'all' || filterSeller !== 'all' || filterDateFrom || filterDateTo;
+
+  // Clear all filters
+  const clearFilters = useCallback(() => {
+    setFilterStatus('all');
+    setFilterSeller('all');
+    setFilterDateFrom(undefined);
+    setFilterDateTo(undefined);
+    setActiveTab('all');
+    setSearchQuery('');
+  }, []);
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter(order => {
+      // Search filter
+      const matchesSearch = (order.orderNumber || order.id).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (order.customerName || '').toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Tab filter (quick status filter)
+      const matchesTab = activeTab === 'all' || order.status === activeTab;
+      
+      // Advanced status filter
+      const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
+      
+      // Seller filter
+      const orderSellerIds = order.sellerIds || (order.sellerId ? [order.sellerId] : []);
+      const matchesSeller = filterSeller === 'all' || orderSellerIds.includes(filterSeller);
+      
+      // Date range filter
+      let matchesDate = true;
+      if (filterDateFrom || filterDateTo) {
+        const orderDate = order.createdAt instanceof Timestamp 
+          ? order.createdAt.toDate() 
+          : order.createdAt ? new Date(order.createdAt) : null;
+        
+        if (orderDate) {
+          if (filterDateFrom) {
+            const fromStart = new Date(filterDateFrom);
+            fromStart.setHours(0, 0, 0, 0);
+            matchesDate = matchesDate && orderDate >= fromStart;
+          }
+          if (filterDateTo) {
+            const toEnd = new Date(filterDateTo);
+            toEnd.setHours(23, 59, 59, 999);
+            matchesDate = matchesDate && orderDate <= toEnd;
+          }
+        } else {
+          matchesDate = false;
+        }
+      }
+      
+      return matchesSearch && matchesTab && matchesStatus && matchesSeller && matchesDate;
+    });
+  }, [orders, searchQuery, activeTab, filterStatus, filterSeller, filterDateFrom, filterDateTo]);
 
   const counts = {
     pending: orders.filter(o => o.status === 'pending').length,
