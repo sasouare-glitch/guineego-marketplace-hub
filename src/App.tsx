@@ -79,6 +79,7 @@ import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminSellersPage from "./pages/admin/AdminSellersPage";
 import AdminDeliveriesPage from "./pages/admin/AdminDeliveriesPage";
+import AdminDeliveryDetailPage from "./pages/admin/AdminDeliveryDetailPage";
 import AdminTransitPage from "./pages/admin/AdminTransitPage";
 import AdminAcademyPage from "./pages/admin/AdminAcademyPage";
 import AdminAnalyticsPage from "./pages/admin/AdminAnalyticsPage";
@@ -385,10 +386,15 @@ const App = () => (
                        </ProtectedRoute>
                      } />
                      <Route path="/admin/deliveries" element={
-                       <ProtectedRoute requiredRoles={['admin']}>
-                         <AdminDeliveriesPage />
-                       </ProtectedRoute>
-                     } />
+                        <ProtectedRoute requiredRoles={['admin']}>
+                          <AdminDeliveriesPage />
+                        </ProtectedRoute>
+                      } />
+                     <Route path="/admin/deliveries/:id" element={
+                        <ProtectedRoute requiredRoles={['admin']}>
+                          <AdminDeliveryDetailPage />
+                        </ProtectedRoute>
+                      } />
                      <Route path="/admin/transit" element={
                        <ProtectedRoute requiredRoles={['admin']}>
                          <AdminTransitPage />

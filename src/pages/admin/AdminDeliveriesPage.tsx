@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -57,6 +58,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function AdminDeliveriesPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [missions, setMissions] = useState<DeliveryMission[]>([]);
@@ -285,7 +287,9 @@ export default function AdminDeliveriesPage() {
                       <TableRow key={d.id}>
                         <TableCell className="font-mono text-sm">
                           <div>
-                            <p className="font-medium">{d.id.slice(0, 12)}</p>
+                            <button onClick={() => navigate(`/admin/deliveries/${d.id}`)} className="font-medium text-primary hover:underline">
+                              {d.id.slice(0, 12)}
+                            </button>
                             <p className="text-xs text-muted-foreground">{d.orderId || '—'}</p>
                           </div>
                         </TableCell>
@@ -325,7 +329,7 @@ export default function AdminDeliveriesPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>Voir détails</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate(`/admin/deliveries/${d.id}`)}>Voir détails</DropdownMenuItem>
                               {d.status !== 'delivered' && d.status !== 'cancelled' && (
                                 <DropdownMenuItem
                                   className="text-destructive"
