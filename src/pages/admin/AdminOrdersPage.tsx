@@ -42,6 +42,7 @@ type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancell
 interface Order extends FirestoreDoc {
   orderNumber?: string;
   customerName?: string;
+  customerEmail?: string;
   customerId?: string;
   sellerName?: string;
   sellerId?: string;
@@ -52,6 +53,7 @@ interface Order extends FirestoreDoc {
   pricing?: { total?: number; subtotal?: number; fees?: number };
   status: OrderStatus;
   items?: any[];
+  shippingAddress?: { fullName?: string };
 }
 
 const statusConfig: Record<OrderStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
@@ -74,29 +76,52 @@ export default function AdminOrdersPage() {
   const [statusDialog, setStatusDialog] = useState<{ open: boolean; order: Order | null; newStatus: OrderStatus | '' }>({ open: false, order: null, newStatus: '' });
   const [saving, setSaving] = useState(false);
   const [sellerNames, setSellerNames] = useState<Record<string, string>>({});
+  const [customerInfo, setCustomerInfo] = useState<Record<string, { name: string; email: string }>>({});
 
-  // Load seller/shop names
+  // Load seller/shop names + customer names
   useEffect(() => {
-    const loadSellerNames = async () => {
-      const nameMap: Record<string, string> = {};
+    const loadNames = async () => {
+      const sellerMap: Record<string, string> = {};
+      const customerMap: Record<string, { name: string; email: string }> = {};
       try {
-        const [settingsSnap, sellersSnap] = await Promise.all([
+        const [settingsSnap, sellersSnap, usersSnap] = await Promise.all([
           getDocs(collection(db, 'seller_settings')),
           getDocs(collection(db, 'sellers')),
+          getDocs(collection(db, 'users')),
         ]);
         sellersSnap.docs.forEach(doc => {
           const d = doc.data();
-          nameMap[doc.id] = d.shopName || d.businessName || d.displayName || doc.id.slice(0, 8);
+          sellerMap[doc.id] = d.shopName || d.businessName || d.displayName || doc.id.slice(0, 8);
         });
         settingsSnap.docs.forEach(doc => {
           const d = doc.data();
-          if (d.shopName) nameMap[doc.id] = d.shopName;
+          if (d.shopName) sellerMap[doc.id] = d.shopName;
         });
-      } catch (e) { console.error('Error loading seller names:', e); }
-      setSellerNames(nameMap);
+        usersSnap.docs.forEach(doc => {
+          const d = doc.data();
+          customerMap[doc.id] = {
+            name: d.displayName || d.fullName || d.name || '',
+            email: d.email || '',
+          };
+        });
+      } catch (e) { console.error('Error loading names:', e); }
+      setSellerNames(sellerMap);
+      setCustomerInfo(customerMap);
     };
-    loadSellerNames();
+    loadNames();
   }, []);
+
+  // Helper: get customer display name
+  const getCustomerDisplay = (order: Order): string => {
+    // Priority: order.customerName > shippingAddress.fullName > users collection > email > ID
+    if (order.customerName) return order.customerName;
+    if (order.shippingAddress?.fullName) return order.shippingAddress.fullName;
+    const info = order.customerId ? customerInfo[order.customerId] : null;
+    if (info?.name) return info.name;
+    if (order.customerEmail) return order.customerEmail;
+    if (info?.email) return info.email;
+    return order.customerId?.slice(0, 8) || '—';
+  };
 
   // Helper: get seller info for an order
   const getOrderSellers = (order: Order): { id: string; name: string }[] => {
@@ -272,7 +297,14 @@ export default function AdminOrdersPage() {
                     return (
                       <TableRow key={order.id}>
                         <TableCell className="font-mono font-medium">{order.orderNumber || order.id.slice(0, 12)}</TableCell>
-                        <TableCell>{order.customerName || order.customerId || '—'}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{getCustomerDisplay(order)}</span>
+                            {order.customerId && customerInfo[order.customerId]?.email && getCustomerDisplay(order) !== customerInfo[order.customerId].email && (
+                              <span className="text-xs text-muted-foreground">{customerInfo[order.customerId].email}</span>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {getOrderSellers(order).map((seller, i) => (
