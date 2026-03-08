@@ -79,6 +79,7 @@ const testimonials = [
     content: "Depuis que j'ai rejoint GuineeGo, mes ventes ont triplé. La livraison intégrée me fait gagner un temps précieux !",
     rating: 5,
     initials: "MD",
+    avatar: avatarMariama,
   },
   {
     name: "Ibrahima Sow",
@@ -86,6 +87,7 @@ const testimonials = [
     content: "Le tableau de bord est incroyable. Je vois mes performances en temps réel et je peux ajuster mes prix facilement.",
     rating: 5,
     initials: "IS",
+    avatar: avatarIbrahima,
   },
   {
     name: "Fatoumata Camara",
@@ -93,6 +95,7 @@ const testimonials = [
     content: "Le support client est exceptionnel. Chaque fois que j'ai un souci, l'équipe répond en moins d'une heure.",
     rating: 5,
     initials: "FC",
+    avatar: avatarFatoumata,
   },
 ];
 
