@@ -203,6 +203,9 @@ export function useDailyReports(days: number = 30) {
       const data = snapshot.docs.map(doc => doc.data() as DailyReport);
       setReports(data);
       setLoading(false);
+    }, (error) => {
+      console.error('Error listening to daily reports:', error);
+      setLoading(false);
     });
 
     return () => unsubscribe();
