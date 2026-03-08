@@ -358,7 +358,7 @@ export default function AdminOrdersPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate(`/admin/orders/${order.id}`)}>
                                 <Eye className="w-4 h-4 mr-2" />
                                 Voir détails
                               </DropdownMenuItem>
