@@ -66,7 +66,7 @@ const REQUESTABLE_ROLES: RoleOption[] = [
 type RequestStatus = 'none' | 'pending' | 'approved' | 'rejected';
 
 export function RoleRequestCard() {
-  const { state, userRoles } = useAuth();
+  const { user, userRoles } = useAuth();
   const [selectedRole, setSelectedRole] = useState<RoleOption | null>(null);
   const [motivation, setMotivation] = useState('');
   const [submitting, setSubmitting] = useState(false);
