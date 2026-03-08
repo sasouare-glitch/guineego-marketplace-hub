@@ -334,11 +334,128 @@ export default function AdminOrdersPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Button variant="outline" size="icon">
+                <Button 
+                  variant={hasActiveFilters ? "default" : "outline"} 
+                  size="icon"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
                   <Filter className="w-4 h-4" />
                 </Button>
+                {hasActiveFilters && (
+                  <Button variant="ghost" size="icon" onClick={clearFilters} title="Effacer les filtres">
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
+            
+            {/* Advanced Filters Panel */}
+            {showFilters && (
+              <div className="mt-4 p-4 border rounded-lg bg-muted/30 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Status Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Statut</Label>
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tous les statuts" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les statuts</SelectItem>
+                        <SelectItem value="pending">En attente</SelectItem>
+                        <SelectItem value="confirmed">Confirmées</SelectItem>
+                        <SelectItem value="shipping">En livraison</SelectItem>
+                        <SelectItem value="delivered">Livrées</SelectItem>
+                        <SelectItem value="cancelled">Annulées</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Seller Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Vendeur / Boutique</Label>
+                    <Select value={filterSeller} onValueChange={setFilterSeller}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tous les vendeurs" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les vendeurs</SelectItem>
+                        {uniqueSellers.map(seller => (
+                          <SelectItem key={seller.id} value={seller.id}>
+                            {seller.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Date From */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Date de début</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !filterDateFrom && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {filterDateFrom ? formatDateFns(filterDateFrom, "PPP", { locale: fr }) : "Sélectionner"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={filterDateFrom}
+                          onSelect={setFilterDateFrom}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Date To */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Date de fin</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !filterDateTo && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {filterDateTo ? formatDateFns(filterDateTo, "PPP", { locale: fr }) : "Sélectionner"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={filterDateTo}
+                          onSelect={setFilterDateTo}
+                          initialFocus
+                          disabled={(date) => filterDateFrom ? date < filterDateFrom : false}
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+                
+                {/* Filter Summary */}
+                {hasActiveFilters && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span className="font-medium">{filteredOrders.length}</span>
+                    <span>commande{filteredOrders.length > 1 ? 's' : ''} trouvée{filteredOrders.length > 1 ? 's' : ''}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
