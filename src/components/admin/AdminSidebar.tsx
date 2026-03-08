@@ -19,7 +19,8 @@ import {
   GraduationCap,
   Globe,
   Mail,
-  UserPlus
+  UserPlus,
+  MessageSquare
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -150,6 +151,12 @@ const settingsItems = [
     url: "/admin/security", 
     icon: Shield,
     description: "Accès et permissions"
+  },
+  {
+    title: "SMS Orange",
+    url: "/admin/sms-config",
+    icon: MessageSquare,
+    description: "Configuration API SMS"
   },
 ];
 
