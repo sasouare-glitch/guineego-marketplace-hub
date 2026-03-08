@@ -343,8 +343,12 @@ export default function AdminDeliveryDetailPage() {
                         <DeliveryMap
                           courierPosition={{ lat: courierLocation.lat, lng: courierLocation.lng }}
                           courierName={courierName || 'Coursier'}
-                          pickupLabel={delivery.pickup?.address}
-                          deliveryLabel={delivery.delivery?.address}
+                          pickupAddress={delivery.pickup?.address}
+                          pickupCommune={delivery.pickup?.commune}
+                          pickupLabel={delivery.pickup?.address || 'Point de collecte'}
+                          deliveryAddress={delivery.delivery?.address}
+                          deliveryCommune={delivery.delivery?.commune}
+                          deliveryLabel={delivery.delivery?.address || 'Destination'}
                           className="h-[300px]"
                         />
                         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
