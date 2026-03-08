@@ -92,11 +92,13 @@ export default function AdminSmsConfigPage() {
     }
     setTesting(true);
     try {
-      // Simulate test - in production this would call a Cloud Function
-      await new Promise(r => setTimeout(r, 2000));
-      toast.success(`SMS de test envoyé au ${testPhone}`);
-    } catch {
-      toast.error('Échec de l\'envoi du SMS de test');
+      const sendTestSms = callFunction<{ phoneNumber: string }, { success: boolean; message: string }>('sendTestSms');
+      const result = await sendTestSms({ phoneNumber: testPhone.trim() });
+      toast.success(result.data.message || `SMS de test envoyé au ${testPhone}`);
+    } catch (err: any) {
+      const msg = err?.message || 'Échec de l\'envoi du SMS de test';
+      toast.error(msg);
+      console.error('Test SMS error:', err);
     } finally {
       setTesting(false);
     }
