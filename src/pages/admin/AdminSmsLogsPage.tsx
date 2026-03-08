@@ -11,9 +11,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, RefreshCw, Search, MessageSquare, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { Loader2, RefreshCw, Search, MessageSquare, CheckCircle2, XCircle, Clock, RotateCcw } from 'lucide-react';
 import { collection, query, orderBy, limit, getDocs, where, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { callFunction } from '@/lib/firebase';
+import { toast } from 'sonner';
 
 interface SmsLog {
   id: string;
