@@ -132,3 +132,4 @@ export {
 // SMS FUNCTIONS
 // ============================================
 export { sendTestSms } from './notifications/sendTestSms';
+export { retrySmsScheduled } from './notifications/retrySms';

@@ -116,8 +116,10 @@ export const sendTestSms = functions
         type: 'test',
         to: recipientAddress,
         status: 'sent',
+        message: `[GuineeGo] Ceci est un SMS de test. Votre configuration Orange SMS fonctionne correctement ! ✅`,
         response: JSON.stringify(result),
         sentBy: context.auth.uid,
+        retryCount: 0,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
@@ -128,8 +130,10 @@ export const sendTestSms = functions
         type: 'test',
         to: recipientAddress,
         status: 'failed',
+        message: `[GuineeGo] Ceci est un SMS de test. Votre configuration Orange SMS fonctionne correctement ! ✅`,
         error: err.message || 'Unknown error',
         sentBy: context.auth.uid,
+        retryCount: 0,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
