@@ -116,11 +116,11 @@ export default function AdminSmsConfigPage() {
     <AdminLayout title="Configuration SMS" description="Gérez les credentials de l'API Orange SMS">
       <div className="max-w-3xl space-y-6">
         {/* Status Banner */}
-        <Card className={configured && enabled ? 'border-green-500/30 bg-green-500/5' : 'border-orange-500/30 bg-orange-500/5'}>
+        <Card className={configured && enabled ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}>
           <CardContent className="flex items-center gap-4 py-4">
             {configured && enabled ? (
               <>
-                <CheckCircle2 className="w-8 h-8 text-green-500 shrink-0" />
+                <CheckCircle2 className="w-8 h-8 text-primary shrink-0" />
                 <div>
                   <p className="font-semibold text-foreground">Orange SMS configuré et actif</p>
                   <p className="text-sm text-muted-foreground">
@@ -130,7 +130,7 @@ export default function AdminSmsConfigPage() {
               </>
             ) : (
               <>
-                <XCircle className="w-8 h-8 text-orange-500 shrink-0" />
+                <XCircle className="w-8 h-8 text-destructive shrink-0" />
                 <div>
                   <p className="font-semibold text-foreground">
                     {configured ? 'Orange SMS désactivé' : 'Orange SMS non configuré'}
