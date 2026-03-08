@@ -11,14 +11,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, RefreshCw, Search, MessageSquare, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { Loader2, RefreshCw, Search, MessageSquare, CheckCircle2, XCircle, Clock, RotateCcw } from 'lucide-react';
 import { collection, query, orderBy, limit, getDocs, where, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { callFunction } from '@/lib/firebase';
+import { toast } from 'sonner';
 
 interface SmsLog {
   id: string;
   type: string;
   to: string;
+  message?: string;
   status: string;
   error?: string;
   sentBy?: string;
@@ -88,6 +91,22 @@ export default function AdminSmsLogsPage() {
     total: logs.length,
     sent: logs.filter(l => l.status === 'sent').length,
     failed: logs.filter(l => l.status === 'failed').length,
+  };
+
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+
+  const handleManualRetry = async (log: SmsLog) => {
+    setRetryingId(log.id);
+    try {
+      const retrySms = callFunction<{ logId: string }, { success: boolean; message: string }>('manualRetrySms');
+      const result = await retrySms({ logId: log.id });
+      toast.success(result.data.message || 'SMS renvoyé avec succès');
+      await loadLogs();
+    } catch (err: any) {
+      toast.error(err?.message || 'Échec du renvoi');
+    } finally {
+      setRetryingId(null);
+    }
   };
 
   const StatusBadge = ({ status, retryCount }: { status: string; retryCount?: number }) => {
@@ -181,6 +200,7 @@ export default function AdminSmsLogsPage() {
                       <TableHead>Type</TableHead>
                       <TableHead>Statut</TableHead>
                       <TableHead>Détails</TableHead>
+                      <TableHead className="w-[80px]">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -198,6 +218,24 @@ export default function AdminSmsLogsPage() {
                         <TableCell><StatusBadge status={log.status} retryCount={log.retryCount} /></TableCell>
                         <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
                           {log.error || log.orderId || '—'}
+                        </TableCell>
+                        <TableCell>
+                          {(log.status === 'failed' || log.status === 'permanently_failed') && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleManualRetry(log)}
+                              disabled={retryingId === log.id}
+                              className="h-8 px-2 text-xs"
+                            >
+                              {retryingId === log.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <RotateCcw className="w-3 h-3" />
+                              )}
+                              <span className="ml-1">Retry</span>
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
