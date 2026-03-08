@@ -2,8 +2,14 @@
  * Admin Orders Page - Order Management (Firestore)
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format as formatDateFns } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { CalendarIcon, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -79,6 +85,13 @@ export default function AdminOrdersPage() {
   const [sellerNames, setSellerNames] = useState<Record<string, string>>({});
   const [customerInfo, setCustomerInfo] = useState<Record<string, { name: string; email: string }>>({});
 
+  // Advanced filters state
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterSeller, setFilterSeller] = useState<string>('all');
+  const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(undefined);
+  const [filterDateTo, setFilterDateTo] = useState<Date | undefined>(undefined);
+
   // Load seller/shop names + customer names
   useEffect(() => {
     const loadNames = async () => {
@@ -139,12 +152,75 @@ export default function AdminOrdersPage() {
     return 0;
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = (order.orderNumber || order.id).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (order.customerName || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === 'all' || order.status === activeTab;
-    return matchesSearch && matchesTab;
-  });
+  // Get unique sellers for filter dropdown
+  const uniqueSellers = useMemo(() => {
+    const sellersSet = new Map<string, string>();
+    orders.forEach(order => {
+      const ids = order.sellerIds || (order.sellerId ? [order.sellerId] : []);
+      ids.forEach(id => {
+        if (id && !sellersSet.has(id)) {
+          sellersSet.set(id, sellerNames[id] || id.slice(0, 8));
+        }
+      });
+    });
+    return Array.from(sellersSet.entries()).map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [orders, sellerNames]);
+
+  // Check if any advanced filter is active
+  const hasActiveFilters = filterStatus !== 'all' || filterSeller !== 'all' || filterDateFrom || filterDateTo;
+
+  // Clear all filters
+  const clearFilters = useCallback(() => {
+    setFilterStatus('all');
+    setFilterSeller('all');
+    setFilterDateFrom(undefined);
+    setFilterDateTo(undefined);
+    setActiveTab('all');
+    setSearchQuery('');
+  }, []);
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter(order => {
+      // Search filter
+      const matchesSearch = (order.orderNumber || order.id).toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (order.customerName || '').toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Tab filter (quick status filter)
+      const matchesTab = activeTab === 'all' || order.status === activeTab;
+      
+      // Advanced status filter
+      const matchesStatus = filterStatus === 'all' || order.status === filterStatus;
+      
+      // Seller filter
+      const orderSellerIds = order.sellerIds || (order.sellerId ? [order.sellerId] : []);
+      const matchesSeller = filterSeller === 'all' || orderSellerIds.includes(filterSeller);
+      
+      // Date range filter
+      let matchesDate = true;
+      if (filterDateFrom || filterDateTo) {
+        const orderDate = order.createdAt instanceof Timestamp 
+          ? order.createdAt.toDate() 
+          : order.createdAt ? new Date(order.createdAt) : null;
+        
+        if (orderDate) {
+          if (filterDateFrom) {
+            const fromStart = new Date(filterDateFrom);
+            fromStart.setHours(0, 0, 0, 0);
+            matchesDate = matchesDate && orderDate >= fromStart;
+          }
+          if (filterDateTo) {
+            const toEnd = new Date(filterDateTo);
+            toEnd.setHours(23, 59, 59, 999);
+            matchesDate = matchesDate && orderDate <= toEnd;
+          }
+        } else {
+          matchesDate = false;
+        }
+      }
+      
+      return matchesSearch && matchesTab && matchesStatus && matchesSeller && matchesDate;
+    });
+  }, [orders, searchQuery, activeTab, filterStatus, filterSeller, filterDateFrom, filterDateTo]);
 
   const counts = {
     pending: orders.filter(o => o.status === 'pending').length,
@@ -258,11 +334,128 @@ export default function AdminOrdersPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Button variant="outline" size="icon">
+                <Button 
+                  variant={hasActiveFilters ? "default" : "outline"} 
+                  size="icon"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
                   <Filter className="w-4 h-4" />
                 </Button>
+                {hasActiveFilters && (
+                  <Button variant="ghost" size="icon" onClick={clearFilters} title="Effacer les filtres">
+                    <X className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
+            
+            {/* Advanced Filters Panel */}
+            {showFilters && (
+              <div className="mt-4 p-4 border rounded-lg bg-muted/30 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Status Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Statut</Label>
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tous les statuts" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les statuts</SelectItem>
+                        <SelectItem value="pending">En attente</SelectItem>
+                        <SelectItem value="confirmed">Confirmées</SelectItem>
+                        <SelectItem value="shipping">En livraison</SelectItem>
+                        <SelectItem value="delivered">Livrées</SelectItem>
+                        <SelectItem value="cancelled">Annulées</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Seller Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Vendeur / Boutique</Label>
+                    <Select value={filterSeller} onValueChange={setFilterSeller}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Tous les vendeurs" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les vendeurs</SelectItem>
+                        {uniqueSellers.map(seller => (
+                          <SelectItem key={seller.id} value={seller.id}>
+                            {seller.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Date From */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Date de début</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !filterDateFrom && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {filterDateFrom ? formatDateFns(filterDateFrom, "PPP", { locale: fr }) : "Sélectionner"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={filterDateFrom}
+                          onSelect={setFilterDateFrom}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Date To */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Date de fin</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !filterDateTo && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {filterDateTo ? formatDateFns(filterDateTo, "PPP", { locale: fr }) : "Sélectionner"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={filterDateTo}
+                          onSelect={setFilterDateTo}
+                          initialFocus
+                          disabled={(date) => filterDateFrom ? date < filterDateFrom : false}
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+                
+                {/* Filter Summary */}
+                {hasActiveFilters && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span className="font-medium">{filteredOrders.length}</span>
+                    <span>commande{filteredOrders.length > 1 ? 's' : ''} trouvée{filteredOrders.length > 1 ? 's' : ''}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
