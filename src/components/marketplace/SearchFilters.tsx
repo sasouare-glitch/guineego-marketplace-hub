@@ -40,13 +40,47 @@ const categories = CATEGORIES.map((c) => ({ id: c.id, label: c.label }));
 
 const ratings = [4, 3, 2, 1];
 
-export const SearchFilters = ({ filters, onFiltersChange, onClearFilters }: SearchFiltersProps) => {
+export const SearchFilters = ({ filters, onFiltersChange, onClearFilters, sellerProductCounts = {} }: SearchFiltersProps) => {
+  const [sellers, setSellers] = useState<SellerOption[]>([]);
+  const [loadingSellers, setLoadingSellers] = useState(false);
   const [openSections, setOpenSections] = useState({
     categories: true,
     price: true,
     rating: false,
     sellers: false,
   });
+
+  // Fetch sellers from Firestore
+  useEffect(() => {
+    setLoadingSellers(true);
+    getDocs(collection(db, "seller_settings")).then((snap) => {
+      const list: SellerOption[] = [];
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        const name = data.shopName || data.storeName || data.name;
+        if (name) {
+          list.push({ id: data.userId || d.id, label: name });
+        }
+      });
+      // Fallback: also check 'sellers' collection
+      if (list.length === 0) {
+        getDocs(collection(db, "sellers")).then((sellersSnap) => {
+          sellersSnap.docs.forEach((d) => {
+            const data = d.data();
+            const name = data.shopName || data.storeName || data.businessName || data.name;
+            if (name) {
+              list.push({ id: data.userId || d.id, label: name });
+            }
+          });
+          setSellers(list);
+          setLoadingSellers(false);
+        });
+      } else {
+        setSellers(list);
+        setLoadingSellers(false);
+      }
+    }).catch(() => setLoadingSellers(false));
+  }, []);
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
