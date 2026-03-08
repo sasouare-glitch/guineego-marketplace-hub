@@ -33,7 +33,8 @@ import { toast } from 'sonner';
 import { useRealtimeCollection } from '@/lib/firebase/queries';
 import { updateDocument } from '@/lib/firebase/mutations';
 import type { FirestoreDoc } from '@/lib/firebase/queries';
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 
 type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled';
 
