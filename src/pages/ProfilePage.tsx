@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PersonalInfoCard } from "@/components/profile/PersonalInfoCard";
 import { SavedAddressesCard, Address } from "@/components/profile/SavedAddressesCard";
+import { RoleRequestCard } from "@/components/profile/RoleRequestCard";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -73,6 +74,7 @@ export default function ProfilePage() {
               addresses={addresses}
               onAddressesChange={setAddresses}
             />
+            <RoleRequestCard />
           </div>
 
           {/* Sidebar */}
