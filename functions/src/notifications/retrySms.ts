@@ -139,12 +139,16 @@ export const retrySmsScheduled = functions
           });
           successCount++;
         } else {
+          const newStatus = retryCount >= MAX_RETRIES ? 'permanently_failed' : 'failed';
           await doc.ref.update({
             retryCount,
             lastRetryAt: admin.firestore.FieldValue.serverTimestamp(),
             lastRetryError: result.body,
-            status: retryCount >= MAX_RETRIES ? 'permanently_failed' : 'failed',
+            status: newStatus,
           });
+          if (newStatus === 'permanently_failed') {
+            await createAdminNotification(data.to, doc.id);
+          }
           failCount++;
         }
       } catch (err: any) {
