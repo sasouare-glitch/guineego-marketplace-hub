@@ -23,12 +23,13 @@ import {
   MessageSquare, MapPin, Phone, User, CreditCard, Store, Copy, Check, ExternalLink,
   ChefHat, ShoppingBag, History,
 } from 'lucide-react';
+import { useAuth } from '@/lib/firebase/auth';
 import { useRealtimeOrder, type OrderStatus, type Order as BaseOrder } from '@/hooks/useRealtimeOrder';
 import { OrderTimeline, buildTimelineSteps } from '@/components/orders/OrderTimeline';
 import { useCurrency } from '@/hooks/useCurrency';
 import { updateDocument } from '@/lib/firebase/mutations';
 import { callFunction } from '@/lib/firebase/config';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, arrayUnion, Timestamp as FsTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { toast } from 'sonner';
 
