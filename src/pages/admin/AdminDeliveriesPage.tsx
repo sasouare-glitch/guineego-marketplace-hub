@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -57,6 +58,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function AdminDeliveriesPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [missions, setMissions] = useState<DeliveryMission[]>([]);
@@ -325,7 +327,7 @@ export default function AdminDeliveriesPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem>Voir détails</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigate(`/admin/deliveries/${d.id}`)}>Voir détails</DropdownMenuItem>
                               {d.status !== 'delivered' && d.status !== 'cancelled' && (
                                 <DropdownMenuItem
                                   className="text-destructive"
