@@ -134,3 +134,4 @@ export {
 export { sendTestSms } from './notifications/sendTestSms';
 export { retrySmsScheduled } from './notifications/retrySms';
 export { manualRetrySms } from './notifications/manualRetrySms';
+export { resendOrderSms } from './notifications/resendOrderSms';
