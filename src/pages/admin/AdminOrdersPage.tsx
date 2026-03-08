@@ -2,7 +2,7 @@
  * Admin Orders Page - Order Management (Firestore)
  */
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -33,7 +33,8 @@ import { toast } from 'sonner';
 import { useRealtimeCollection } from '@/lib/firebase/queries';
 import { updateDocument } from '@/lib/firebase/mutations';
 import type { FirestoreDoc } from '@/lib/firebase/queries';
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase/config';
 
 type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled';
 
@@ -43,6 +44,8 @@ interface Order extends FirestoreDoc {
   customerId?: string;
   sellerName?: string;
   sellerId?: string;
+  sellerIds?: string[];
+  sellers?: Record<string, any>;
   total?: number;
   totalAmount?: number;
   pricing?: { total?: number; subtotal?: number; fees?: number };
@@ -69,6 +72,45 @@ export default function AdminOrdersPage() {
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
   const [statusDialog, setStatusDialog] = useState<{ open: boolean; order: Order | null; newStatus: OrderStatus | '' }>({ open: false, order: null, newStatus: '' });
   const [saving, setSaving] = useState(false);
+  const [sellerNames, setSellerNames] = useState<Record<string, string>>({});
+
+  // Load seller/shop names
+  useEffect(() => {
+    const loadSellerNames = async () => {
+      const nameMap: Record<string, string> = {};
+      try {
+        const [settingsSnap, sellersSnap] = await Promise.all([
+          getDocs(collection(db, 'seller_settings')),
+          getDocs(collection(db, 'sellers')),
+        ]);
+        sellersSnap.docs.forEach(doc => {
+          const d = doc.data();
+          nameMap[doc.id] = d.shopName || d.businessName || d.displayName || doc.id.slice(0, 8);
+        });
+        settingsSnap.docs.forEach(doc => {
+          const d = doc.data();
+          if (d.shopName) nameMap[doc.id] = d.shopName;
+        });
+      } catch (e) { console.error('Error loading seller names:', e); }
+      setSellerNames(nameMap);
+    };
+    loadSellerNames();
+  }, []);
+
+  // Helper: get seller display names for an order
+  const getOrderSellerNames = (order: Order): string => {
+    const ids = order.sellerIds || (order.sellerId ? [order.sellerId] : []);
+    if (ids.length === 0) return order.sellerName || '—';
+    return ids.map(id => sellerNames[id] || order.sellerName || id.slice(0, 8)).join(', ');
+  };
+
+  // Helper: count total items
+  const getItemCount = (order: Order): number => {
+    if (order.items && order.items.length > 0) {
+      return order.items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    }
+    return 0;
+  };
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = (order.orderNumber || order.id).toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -206,7 +248,8 @@ export default function AdminOrdersPage() {
                   <TableRow>
                     <TableHead>ID Commande</TableHead>
                     <TableHead>Client</TableHead>
-                    <TableHead>Vendeur</TableHead>
+                    <TableHead>Vendeur / Boutique</TableHead>
+                    <TableHead className="text-center">Articles</TableHead>
                     <TableHead>Montant</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>Date</TableHead>
@@ -216,7 +259,7 @@ export default function AdminOrdersPage() {
                 <TableBody>
                   {filteredOrders.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                      <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
                         <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
                         <p>Aucune commande trouvée</p>
                       </TableCell>
@@ -224,11 +267,15 @@ export default function AdminOrdersPage() {
                   ) : filteredOrders.map((order) => {
                     const status = statusConfig[order.status] || statusConfig.pending;
                     const StatusIcon = status.icon;
+                    const itemCount = getItemCount(order);
                     return (
                       <TableRow key={order.id}>
                         <TableCell className="font-mono font-medium">{order.orderNumber || order.id.slice(0, 12)}</TableCell>
                         <TableCell>{order.customerName || order.customerId || '—'}</TableCell>
-                        <TableCell className="text-muted-foreground">{order.sellerName || order.sellerId || '—'}</TableCell>
+                        <TableCell className="text-muted-foreground">{getOrderSellerNames(order)}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline">{itemCount}</Badge>
+                        </TableCell>
                         <TableCell className="font-medium">{format(order.pricing?.total || order.totalAmount || order.total || 0)}</TableCell>
                         <TableCell>
                           <Badge variant={status.variant} className="gap-1">
