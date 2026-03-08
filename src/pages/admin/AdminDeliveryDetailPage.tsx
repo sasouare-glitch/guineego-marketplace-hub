@@ -24,7 +24,6 @@ import { doc, getDoc, updateDoc, collection, getDocs, query, where, serverTimest
 import { db } from '@/lib/firebase/config';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { toast } from 'sonner';
 
 // Status config for badges
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
