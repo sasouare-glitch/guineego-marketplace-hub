@@ -297,7 +297,14 @@ export default function AdminOrdersPage() {
                     return (
                       <TableRow key={order.id}>
                         <TableCell className="font-mono font-medium">{order.orderNumber || order.id.slice(0, 12)}</TableCell>
-                        <TableCell>{order.customerName || order.customerId || '—'}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{getCustomerDisplay(order)}</span>
+                            {order.customerId && customerInfo[order.customerId]?.email && getCustomerDisplay(order) !== customerInfo[order.customerId].email && (
+                              <span className="text-xs text-muted-foreground">{customerInfo[order.customerId].email}</span>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {getOrderSellers(order).map((seller, i) => (
