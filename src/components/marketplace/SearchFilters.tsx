@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronDown, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
@@ -10,6 +10,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 
 export interface FilterState {
   categories: string[];
@@ -19,22 +21,22 @@ export interface FilterState {
   sellers: string[];
 }
 
+interface SellerOption {
+  id: string;
+  label: string;
+}
+
 interface SearchFiltersProps {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
   onClearFilters: () => void;
+  /** Product counts per sellerId for display */
+  sellerProductCounts?: Record<string, number>;
 }
 
 import { CATEGORIES } from "@/constants/categories";
 
 const categories = CATEGORIES.map((c) => ({ id: c.id, label: c.label }));
-
-const sellers = [
-  { id: "techshop", label: "TechShop GN", count: 45 },
-  { id: "modestyle", label: "Mode Style", count: 89 },
-  { id: "homeplus", label: "Home Plus", count: 34 },
-  { id: "beautyworld", label: "Beauty World", count: 67 },
-];
 
 const ratings = [4, 3, 2, 1];
 
