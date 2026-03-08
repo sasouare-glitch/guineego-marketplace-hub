@@ -25,6 +25,8 @@ interface SmsLog {
   orderId?: string;
   createdAt: Date | null;
   response?: string;
+  retryCount?: number;
+  lastRetryError?: string;
 }
 
 export default function AdminSmsLogsPage() {
@@ -88,9 +90,10 @@ export default function AdminSmsLogsPage() {
     failed: logs.filter(l => l.status === 'failed').length,
   };
 
-  const StatusBadge = ({ status }: { status: string }) => {
-    if (status === 'sent') return <Badge className="bg-primary/15 text-primary border-primary/30"><CheckCircle2 className="w-3 h-3 mr-1" />Envoyé</Badge>;
-    if (status === 'failed') return <Badge variant="destructive" className="bg-destructive/15 text-destructive border-destructive/30"><XCircle className="w-3 h-3 mr-1" />Échoué</Badge>;
+  const StatusBadge = ({ status, retryCount }: { status: string; retryCount?: number }) => {
+    if (status === 'sent') return <Badge className="bg-primary/15 text-primary border-primary/30"><CheckCircle2 className="w-3 h-3 mr-1" />Envoyé{retryCount ? ` (retry ${retryCount})` : ''}</Badge>;
+    if (status === 'permanently_failed') return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Abandon (3/3)</Badge>;
+    if (status === 'failed') return <Badge variant="destructive" className="bg-destructive/15 text-destructive border-destructive/30"><XCircle className="w-3 h-3 mr-1" />Échoué{retryCount !== undefined ? ` (${retryCount}/3)` : ''}</Badge>;
     return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />{status}</Badge>;
   };
 
@@ -192,7 +195,7 @@ export default function AdminSmsLogsPage() {
                         <TableCell>
                           <Badge variant="outline" className="text-xs capitalize">{log.type || '—'}</Badge>
                         </TableCell>
-                        <TableCell><StatusBadge status={log.status} /></TableCell>
+                        <TableCell><StatusBadge status={log.status} retryCount={log.retryCount} /></TableCell>
                         <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
                           {log.error || log.orderId || '—'}
                         </TableCell>
