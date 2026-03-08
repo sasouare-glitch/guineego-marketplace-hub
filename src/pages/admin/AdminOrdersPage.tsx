@@ -27,7 +27,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, MoreHorizontal, Filter, Eye, Package, Truck, CheckCircle, XCircle, Edit, Loader2, ExternalLink } from 'lucide-react';
+import { Search, MoreHorizontal, Filter, Eye, Package, Truck, CheckCircle, XCircle, Edit, Loader2, ExternalLink, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
 import { toast } from 'sonner';
@@ -35,7 +35,7 @@ import { useRealtimeCollection } from '@/lib/firebase/queries';
 import { updateDocument } from '@/lib/firebase/mutations';
 import type { FirestoreDoc } from '@/lib/firebase/queries';
 import { Timestamp, collection, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, callFunction } from '@/lib/firebase/config';
 
 type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled';
 
