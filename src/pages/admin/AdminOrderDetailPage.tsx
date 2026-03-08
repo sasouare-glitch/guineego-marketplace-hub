@@ -3,7 +3,7 @@
  * Full order information with admin actions
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +20,7 @@ import {
 import {
   ArrowLeft, Package, Truck, CheckCircle, XCircle, Clock, Loader2,
   MessageSquare, MapPin, Phone, User, CreditCard, Store, Copy, Check, ExternalLink,
-  ChefHat, ShoppingBag,
+  ChefHat, ShoppingBag, History,
 } from 'lucide-react';
 import { useRealtimeOrder, type OrderStatus, type Order as BaseOrder } from '@/hooks/useRealtimeOrder';
 import { OrderTimeline, buildTimelineSteps } from '@/components/orders/OrderTimeline';
@@ -67,6 +67,7 @@ export default function AdminOrderDetailPage() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [sellerNames, setSellerNames] = useState<Record<string, string>>({});
   const [customerInfo, setCustomerInfo] = useState<{ name: string; email: string } | null>(null);
+  const [userNames, setUserNames] = useState<Record<string, string>>({});
 
   // Load seller names & customer info
   useEffect(() => {
@@ -110,6 +111,33 @@ export default function AdminOrderDetailPage() {
 
     loadExtra();
   }, [order]);
+
+  // Resolve user names from statusHistory performedBy UIDs
+  useEffect(() => {
+    if (!statusHistory || statusHistory.length === 0) return;
+    const uids = [...new Set(statusHistory.map(e => e.performedBy).filter(Boolean))] as string[];
+    const unknown = uids.filter(uid => !userNames[uid]);
+    if (unknown.length === 0) return;
+
+    const load = async () => {
+      const names: Record<string, string> = {};
+      await Promise.all(unknown.map(async (uid) => {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', uid));
+          if (userDoc.exists()) {
+            const d = userDoc.data();
+            names[uid] = d.displayName || d.fullName || d.email || uid.slice(0, 8);
+          } else {
+            names[uid] = uid.slice(0, 8);
+          }
+        } catch {
+          names[uid] = uid.slice(0, 8);
+        }
+      }));
+      setUserNames(prev => ({ ...prev, ...names }));
+    };
+    load();
+  }, [statusHistory]);
 
   const copyId = () => {
     navigator.clipboard.writeText(id || '');
@@ -255,6 +283,73 @@ export default function AdminOrderDetailPage() {
                 <OrderTimeline steps={timelineSteps} />
               </CardContent>
             </Card>
+
+            {/* Status History / Audit Trail */}
+            {statusHistory.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <History className="w-5 h-5" />
+                    Historique des changements de statut
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="relative">
+                    {[...statusHistory].reverse().map((entry, i) => {
+                      const entryStatus = statusConfig[entry.status] || statusConfig.pending;
+                      const EntryIcon = entryStatus.icon;
+                      const ts = entry.timestamp;
+                      const date = ts?.toDate ? ts.toDate() : ts ? new Date(ts as any) : null;
+                      const formattedDate = date
+                        ? date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })
+                        : '—';
+                      const formattedTime = date
+                        ? date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                        : '';
+                      const performer = entry.performedBy ? (userNames[entry.performedBy] || entry.performedBy.slice(0, 8)) : null;
+
+                      return (
+                        <div key={i} className="flex gap-3 pb-4 last:pb-0">
+                          {/* Icon */}
+                          <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-muted ${entryStatus.color}`}>
+                            <EntryIcon className="w-4 h-4" />
+                          </div>
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <Badge variant={entryStatus.variant} className="text-xs">
+                                {entryStatus.label}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                {formattedDate} {formattedTime}
+                              </span>
+                            </div>
+                            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                              {performer && (
+                                <span className="flex items-center gap-1">
+                                  <User className="w-3 h-3" />
+                                  {performer}
+                                </span>
+                              )}
+                              {entry.role && (
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                  {entry.role}
+                                </Badge>
+                              )}
+                            </div>
+                            {entry.note && (
+                              <p className="mt-1 text-xs text-muted-foreground italic">
+                                📝 {entry.note}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Items */}
             <Card>
