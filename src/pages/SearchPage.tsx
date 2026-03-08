@@ -68,6 +68,11 @@ const SearchPage = () => {
         return false;
       }
 
+      // Sellers
+      if (filters.sellers.length > 0 && product.sellerId && !filters.sellers.includes(product.sellerId)) {
+        return false;
+      }
+
       return true;
     });
 
