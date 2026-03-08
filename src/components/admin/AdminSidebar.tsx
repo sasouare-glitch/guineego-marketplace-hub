@@ -18,7 +18,8 @@ import {
   Store,
   GraduationCap,
   Globe,
-  Mail
+  Mail,
+  UserPlus
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -59,6 +60,13 @@ const managementItems = [
     icon: Users,
     badge: null,
     description: "Gestion des comptes"
+  },
+  { 
+    title: "Demandes de rôle", 
+    url: "/admin/role-requests", 
+    icon: UserPlus,
+    badge: null,
+    description: "Approbation des rôles"
   },
   { 
     title: "Commandes", 
