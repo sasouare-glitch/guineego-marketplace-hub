@@ -1,8 +1,8 @@
 /**
- * Admin Deliveries Page - Delivery Mission Management
+ * Admin Deliveries Page - Delivery Mission Management (Firestore)
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,74 +17,168 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Search, MoreHorizontal, Truck, Clock, CheckCircle2, 
-  MapPin, AlertCircle, Package, User, RefreshCw 
+  MapPin, AlertCircle, Package, User, RefreshCw, Loader2
 } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
+import { db } from '@/lib/firebase/config';
+import {
+  collection, query, orderBy, onSnapshot, doc, updateDoc,
+  serverTimestamp, arrayUnion, Timestamp, getDocs, where
+} from 'firebase/firestore';
+import { toast } from 'sonner';
+import { format as formatDate } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
-const mockDeliveries = [
-  { 
-    id: 'DEL-001', orderId: 'GGO-12345678', courier: 'Mamadou Diallo', 
-    customer: 'Fatoumata B.', zone: 'Kaloum', distance: 3.2, 
-    earnings: 15000, status: 'pending', createdAt: '2024-01-20 09:15' 
-  },
-  { 
-    id: 'DEL-002', orderId: 'GGO-12345679', courier: 'Ibrahima Sow', 
-    customer: 'Aissatou C.', zone: 'Ratoma', distance: 5.8, 
-    earnings: 22000, status: 'assigned', createdAt: '2024-01-20 09:32' 
-  },
-  { 
-    id: 'DEL-003', orderId: 'GGO-12345680', courier: 'Oumar Barry', 
-    customer: 'Sekou T.', zone: 'Matam', distance: 2.1, 
-    earnings: 12000, status: 'pickup', createdAt: '2024-01-20 10:05' 
-  },
-  { 
-    id: 'DEL-004', orderId: 'GGO-12345681', courier: 'Alpha Condé', 
-    customer: 'Mariama D.', zone: 'Dixinn', distance: 4.4, 
-    earnings: 18000, status: 'in_transit', createdAt: '2024-01-20 10:20' 
-  },
-  { 
-    id: 'DEL-005', orderId: 'GGO-12345682', courier: 'Mamadou Diallo', 
-    customer: 'Kadiatou B.', zone: 'Kaloum', distance: 1.9, 
-    earnings: 10000, status: 'delivered', createdAt: '2024-01-20 08:00' 
-  },
-  { 
-    id: 'DEL-006', orderId: 'GGO-12345683', courier: '-', 
-    customer: 'Elhadj M.', zone: 'Matoto', distance: 6.2, 
-    earnings: 25000, status: 'failed', createdAt: '2024-01-19 15:45' 
-  },
-];
+interface DeliveryMission {
+  id: string;
+  orderId: string;
+  customerId?: string;
+  assignedCourier: string | null;
+  pickup: { address: string; commune: string; phone: string; instructions?: string };
+  delivery: { address: string; commune: string; phone?: string; fullName?: string };
+  priority: 'normal' | 'express';
+  fee: number;
+  estimatedTime?: number;
+  status: string;
+  statusHistory?: { status: string; timestamp: Timestamp; note?: string }[];
+  createdAt?: Timestamp;
+  deliveredAt?: Timestamp;
+}
 
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType; color: string }> = {
-  pending:    { label: 'En attente', variant: 'secondary', icon: Clock,         color: 'text-muted-foreground' },
-  assigned:   { label: 'Assignée',   variant: 'outline',   icon: User,          color: 'text-blue-600' },
-  pickup:     { label: 'Ramassage',  variant: 'outline',   icon: Package,       color: 'text-yellow-600' },
-  in_transit: { label: 'En route',   variant: 'default',   icon: Truck,         color: 'text-primary' },
-  delivered:  { label: 'Livrée',     variant: 'default',   icon: CheckCircle2,  color: 'text-green-600' },
-  failed:     { label: 'Échouée',    variant: 'destructive', icon: AlertCircle, color: 'text-destructive' },
+const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType }> = {
+  pending:        { label: 'En attente',  variant: 'secondary',    icon: Clock },
+  accepted:       { label: 'Acceptée',    variant: 'outline',      icon: User },
+  pickup_started: { label: 'Ramassage',   variant: 'outline',      icon: Package },
+  picked_up:      { label: 'Récupéré',    variant: 'outline',      icon: Package },
+  in_transit:     { label: 'En route',     variant: 'default',      icon: Truck },
+  arrived:        { label: 'Arrivé',       variant: 'default',      icon: MapPin },
+  delivered:      { label: 'Livrée',       variant: 'default',      icon: CheckCircle2 },
+  cancelled:      { label: 'Annulée',      variant: 'destructive',  icon: AlertCircle },
 };
-
-const tabFilters = ['all', 'pending', 'assigned', 'in_transit', 'delivered', 'failed'];
 
 export default function AdminDeliveriesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [missions, setMissions] = useState<DeliveryMission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [courierNames, setCourierNames] = useState<Record<string, string>>({});
+  const [customerNames, setCustomerNames] = useState<Record<string, string>>({});
   const { format } = useCurrency();
 
-  const filtered = mockDeliveries.filter(d => {
-    const matchSearch = d.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.courier.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.zone.toLowerCase().includes(searchQuery.toLowerCase());
+  // Real-time deliveries listener
+  useEffect(() => {
+    const q = query(collection(db, 'deliveries'), orderBy('createdAt', 'desc'));
+    const unsub = onSnapshot(q, (snap) => {
+      const data = snap.docs.map(d => ({ ...d.data(), id: d.id } as DeliveryMission));
+      setMissions(data);
+      setLoading(false);
+
+      // Collect unique courier & customer IDs to resolve names
+      const courierIds = new Set<string>();
+      const customerIds = new Set<string>();
+      data.forEach(m => {
+        if (m.assignedCourier) courierIds.add(m.assignedCourier);
+        if (m.customerId) customerIds.add(m.customerId);
+      });
+      resolveNames([...courierIds], [...customerIds]);
+    }, (err) => {
+      console.error('Error fetching deliveries:', err);
+      toast.error('Erreur de chargement des livraisons');
+      setLoading(false);
+    });
+    return () => unsub();
+  }, []);
+
+  const resolveNames = async (courierIds: string[], customerIds: string[]) => {
+    try {
+      // Resolve courier names from users collection
+      if (courierIds.length > 0) {
+        const usersSnap = await getDocs(collection(db, 'users'));
+        const map: Record<string, string> = {};
+        usersSnap.docs.forEach(d => {
+          const data = d.data();
+          if (courierIds.includes(d.id)) {
+            map[d.id] = data.displayName || data.fullName || data.email || d.id.slice(0, 8);
+          }
+        });
+        setCourierNames(prev => ({ ...prev, ...map }));
+      }
+
+      // Resolve customer names
+      if (customerIds.length > 0) {
+        const usersSnap = await getDocs(collection(db, 'users'));
+        const map: Record<string, string> = {};
+        usersSnap.docs.forEach(d => {
+          const data = d.data();
+          if (customerIds.includes(d.id)) {
+            map[d.id] = data.displayName || data.fullName || data.email || d.id.slice(0, 8);
+          }
+        });
+        setCustomerNames(prev => ({ ...prev, ...map }));
+      }
+    } catch (err) {
+      console.error('Error resolving names:', err);
+    }
+  };
+
+  const getCourierDisplay = (m: DeliveryMission) => {
+    if (!m.assignedCourier) return null;
+    return courierNames[m.assignedCourier] || m.assignedCourier.slice(0, 8);
+  };
+
+  const getCustomerDisplay = (m: DeliveryMission) => {
+    if (m.delivery?.fullName) return m.delivery.fullName;
+    if (m.customerId && customerNames[m.customerId]) return customerNames[m.customerId];
+    return m.customerId?.slice(0, 8) || '—';
+  };
+
+  const getZone = (m: DeliveryMission) => m.delivery?.commune || '—';
+
+  const getCreatedDate = (m: DeliveryMission) => {
+    if (!m.createdAt) return '—';
+    try {
+      return formatDate(m.createdAt.toDate(), 'dd MMM yyyy HH:mm', { locale: fr });
+    } catch {
+      return '—';
+    }
+  };
+
+  const filtered = missions.filter(d => {
+    const search = searchQuery.toLowerCase();
+    const matchSearch = !search ||
+      d.id.toLowerCase().includes(search) ||
+      d.orderId?.toLowerCase().includes(search) ||
+      getCourierDisplay(d)?.toLowerCase().includes(search) ||
+      getCustomerDisplay(d).toLowerCase().includes(search) ||
+      getZone(d).toLowerCase().includes(search);
     const matchTab = activeTab === 'all' || d.status === activeTab;
     return matchSearch && matchTab;
   });
 
   const stats = {
-    total: mockDeliveries.length,
-    pending: mockDeliveries.filter(d => d.status === 'pending').length,
-    inProgress: mockDeliveries.filter(d => ['assigned','pickup','in_transit'].includes(d.status)).length,
-    delivered: mockDeliveries.filter(d => d.status === 'delivered').length,
-    failed: mockDeliveries.filter(d => d.status === 'failed').length,
+    total: missions.length,
+    pending: missions.filter(d => d.status === 'pending').length,
+    inProgress: missions.filter(d => ['accepted', 'pickup_started', 'picked_up', 'in_transit', 'arrived'].includes(d.status)).length,
+    delivered: missions.filter(d => d.status === 'delivered').length,
+    failed: missions.filter(d => d.status === 'cancelled').length,
+  };
+
+  const handleCancelMission = async (missionId: string) => {
+    try {
+      await updateDoc(doc(db, 'deliveries', missionId), {
+        status: 'cancelled',
+        statusHistory: arrayUnion({
+          status: 'cancelled',
+          timestamp: Timestamp.now(),
+          note: 'Annulée par l\'administrateur',
+        }),
+        updatedAt: serverTimestamp(),
+      });
+      toast.success('Mission annulée');
+    } catch (err) {
+      console.error('Error cancelling mission:', err);
+      toast.error('Erreur lors de l\'annulation');
+    }
   };
 
   return (
@@ -95,7 +189,7 @@ export default function AdminDeliveriesPage() {
           <Card>
             <CardContent className="pt-6">
               <p className="text-2xl font-bold">{stats.total}</p>
-              <p className="text-sm text-muted-foreground">Total aujourd'hui</p>
+              <p className="text-sm text-muted-foreground">Total</p>
             </CardContent>
           </Card>
           <Card className="border-yellow-500/20 bg-yellow-500/5">
@@ -119,7 +213,7 @@ export default function AdminDeliveriesPage() {
           <Card className="border-destructive/20 bg-destructive/5">
             <CardContent className="pt-6">
               <p className="text-2xl font-bold text-destructive">{stats.failed}</p>
-              <p className="text-sm text-muted-foreground">Échouées</p>
+              <p className="text-sm text-muted-foreground">Annulées</p>
             </CardContent>
           </Card>
         </div>
@@ -130,7 +224,7 @@ export default function AdminDeliveriesPage() {
             <div className="flex flex-col sm:flex-row justify-between gap-4">
               <div>
                 <CardTitle>Missions de livraison</CardTitle>
-                <CardDescription>Toutes les missions coursiers</CardDescription>
+                <CardDescription>Données en temps réel depuis Firestore</CardDescription>
               </div>
               <div className="flex gap-2">
                 <div className="relative">
@@ -142,96 +236,113 @@ export default function AdminDeliveriesPage() {
                     onChange={e => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Button variant="outline" size="icon">
-                  <RefreshCw className="w-4 h-4" />
-                </Button>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
               <TabsList className="flex-wrap">
-                <TabsTrigger value="all">Toutes</TabsTrigger>
+                <TabsTrigger value="all">Toutes ({missions.length})</TabsTrigger>
                 <TabsTrigger value="pending">En attente</TabsTrigger>
-                <TabsTrigger value="assigned">Assignées</TabsTrigger>
+                <TabsTrigger value="accepted">Acceptées</TabsTrigger>
                 <TabsTrigger value="in_transit">En route</TabsTrigger>
                 <TabsTrigger value="delivered">Livrées</TabsTrigger>
-                <TabsTrigger value="failed">Échouées</TabsTrigger>
+                <TabsTrigger value="cancelled">Annulées</TabsTrigger>
               </TabsList>
             </Tabs>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Mission</TableHead>
-                  <TableHead>Coursier</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Zone</TableHead>
-                  <TableHead>Distance</TableHead>
-                  <TableHead>Gains</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Créée le</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map(d => {
-                  const s = statusConfig[d.status];
-                  const Icon = s.icon;
-                  return (
-                    <TableRow key={d.id}>
-                      <TableCell className="font-mono text-sm">
-                        <div>
-                          <p className="font-medium">{d.id}</p>
-                          <p className="text-xs text-muted-foreground">{d.orderId}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Truck className="w-4 h-4 text-muted-foreground" />
-                          <span className={d.courier === '-' ? 'text-muted-foreground italic' : ''}>
-                            {d.courier === '-' ? 'Non assigné' : d.courier}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{d.customer}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <MapPin className="w-3.5 h-3.5" />
-                          {d.zone}
-                        </div>
-                      </TableCell>
-                      <TableCell>{d.distance} km</TableCell>
-                      <TableCell className="font-medium">{format(d.earnings)}</TableCell>
-                      <TableCell>
-                        <Badge variant={s.variant} className="gap-1">
-                          <Icon className="w-3 h-3" />
-                          {s.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{d.createdAt}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Voir détails</DropdownMenuItem>
-                            <DropdownMenuItem>Assigner coursier</DropdownMenuItem>
-                            <DropdownMenuItem>Contacter coursier</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">
-                              Annuler mission
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-muted-foreground">Chargement...</span>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Truck className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                <p>Aucune mission de livraison trouvée</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Mission</TableHead>
+                    <TableHead>Coursier</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Zone</TableHead>
+                    <TableHead>Frais</TableHead>
+                    <TableHead>Priorité</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Créée le</TableHead>
+                    <TableHead className="w-12"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map(d => {
+                    const s = statusConfig[d.status] || statusConfig.pending;
+                    const Icon = s.icon;
+                    const courierName = getCourierDisplay(d);
+                    return (
+                      <TableRow key={d.id}>
+                        <TableCell className="font-mono text-sm">
+                          <div>
+                            <p className="font-medium">{d.id.slice(0, 12)}</p>
+                            <p className="text-xs text-muted-foreground">{d.orderId || '—'}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Truck className="w-4 h-4 text-muted-foreground" />
+                            <span className={!courierName ? 'text-muted-foreground italic' : ''}>
+                              {courierName || 'Non assigné'}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{getCustomerDisplay(d)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <MapPin className="w-3.5 h-3.5" />
+                            {getZone(d)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">{format(d.fee)}</TableCell>
+                        <TableCell>
+                          <Badge variant={d.priority === 'express' ? 'destructive' : 'outline'}>
+                            {d.priority === 'express' ? 'Express' : 'Normal'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={s.variant} className="gap-1">
+                            <Icon className="w-3 h-3" />
+                            {s.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{getCreatedDate(d)}</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem>Voir détails</DropdownMenuItem>
+                              {d.status !== 'delivered' && d.status !== 'cancelled' && (
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={() => handleCancelMission(d.id)}
+                                >
+                                  Annuler mission
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>
