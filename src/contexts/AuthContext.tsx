@@ -58,6 +58,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     error: null
   });
   
+  const [activeRole, setActiveRole] = useState<UserRole>('customer');
+
+  
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   // Charger le profil utilisateur depuis Firestore
