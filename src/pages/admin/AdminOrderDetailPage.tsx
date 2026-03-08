@@ -59,6 +59,7 @@ export default function AdminOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { format } = useCurrency();
+  const { user } = useAuth();
   const { order: rawOrder, loading, error, currentStatus, statusHistory } = useRealtimeOrder(id);
   const order = rawOrder as (BaseOrder & { orderNumber?: string }) | null;
 
