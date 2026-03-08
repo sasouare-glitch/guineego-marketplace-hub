@@ -144,8 +144,12 @@ export function CourierTrackingCard({ deliveryMissionId }: CourierTrackingCardPr
             <DeliveryMap
               courierPosition={{ lat: courierLocation.lat, lng: courierLocation.lng }}
               courierName={delivery.courierName || 'Coursier'}
-              pickupLabel={delivery.pickup?.address}
-              deliveryLabel={delivery.delivery?.address}
+              pickupAddress={delivery.pickup?.address}
+              pickupCommune={delivery.pickup?.commune}
+              pickupLabel={delivery.pickup?.address || 'Point de collecte'}
+              deliveryAddress={delivery.delivery?.address}
+              deliveryCommune={delivery.delivery?.commune}
+              deliveryLabel={delivery.delivery?.address || 'Destination'}
               className="h-[220px]"
             />
             <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
