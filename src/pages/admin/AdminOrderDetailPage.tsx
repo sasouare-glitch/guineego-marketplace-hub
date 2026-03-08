@@ -22,7 +22,7 @@ import {
   MessageSquare, MapPin, Phone, User, CreditCard, Store, Copy, Check, ExternalLink,
   ChefHat, ShoppingBag,
 } from 'lucide-react';
-import { useRealtimeOrder, type OrderStatus } from '@/hooks/useRealtimeOrder';
+import { useRealtimeOrder, type OrderStatus, type Order as BaseOrder } from '@/hooks/useRealtimeOrder';
 import { OrderTimeline, buildTimelineSteps } from '@/components/orders/OrderTimeline';
 import { useCurrency } from '@/hooks/useCurrency';
 import { updateDocument } from '@/lib/firebase/mutations';
@@ -57,7 +57,8 @@ export default function AdminOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { format } = useCurrency();
-  const { order, loading, error, currentStatus, statusHistory } = useRealtimeOrder(id);
+  const { order: rawOrder, loading, error, currentStatus, statusHistory } = useRealtimeOrder(id);
+  const order = rawOrder as (BaseOrder & { orderNumber?: string }) | null;
 
   const [copied, setCopied] = useState(false);
   const [newStatus, setNewStatus] = useState<string>('');
@@ -232,15 +233,16 @@ export default function AdminOrderDetailPage() {
                 <XCircle className="w-5 h-5 text-destructive flex-shrink-0" />
                 <div>
                   <p className="font-medium text-destructive">Commande annulée</p>
+
                   <p className="text-sm text-muted-foreground">{order.cancellationReason || 'Aucune raison spécifiée'}</p>
                 </div>
               </div>
             )}
 
             {orderStatus === 'delivered' && (
-              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                <p className="font-medium text-green-600">Commande livrée avec succès</p>
+              <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                <p className="font-medium text-primary">Commande livrée avec succès</p>
               </div>
             )}
 
