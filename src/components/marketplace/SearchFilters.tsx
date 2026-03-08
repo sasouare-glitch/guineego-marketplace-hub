@@ -213,21 +213,34 @@ export const SearchFilters = ({ filters, onFiltersChange, onClearFilters, seller
           <ChevronDown className={cn("w-4 h-4 transition-transform", openSections.sellers && "rotate-180")} />
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-3 space-y-2">
-          {sellers.map((seller) => (
-            <div key={seller.id} className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id={seller.id}
-                  checked={filters.sellers.includes(seller.id)}
-                  onCheckedChange={() => toggleArrayFilter("sellers", seller.id)}
-                />
-                <label htmlFor={seller.id} className="text-sm cursor-pointer">
-                  {seller.label}
-                </label>
-              </div>
-              <span className="text-xs text-muted-foreground">({seller.count})</span>
+          {loadingSellers ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+              <Loader2 className="w-4 h-4 animate-spin" /> Chargement...
             </div>
-          ))}
+          ) : sellers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Aucun vendeur</p>
+          ) : (
+            sellers.map((seller) => {
+              const count = sellerProductCounts[seller.id] || 0;
+              return (
+                <div key={seller.id} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`seller-${seller.id}`}
+                      checked={filters.sellers.includes(seller.id)}
+                      onCheckedChange={() => toggleArrayFilter("sellers", seller.id)}
+                    />
+                    <label htmlFor={`seller-${seller.id}`} className="text-sm cursor-pointer">
+                      {seller.label}
+                    </label>
+                  </div>
+                  {count > 0 && (
+                    <span className="text-xs text-muted-foreground">({count})</span>
+                  )}
+                </div>
+              );
+            })
+          )}
         </CollapsibleContent>
       </Collapsible>
     </div>
