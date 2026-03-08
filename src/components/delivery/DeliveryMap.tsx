@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -202,6 +202,54 @@ export function DeliveryMap({
 
         <FitBounds points={allPoints} />
         {courierPosition && <FollowCourier position={courierPosition} />}
+
+        {/* Route polylines */}
+        {resolvedPickup && resolvedDelivery && !courierPosition && (
+          <Polyline
+            positions={[
+              [resolvedPickup.lat, resolvedPickup.lng],
+              [resolvedDelivery.lat, resolvedDelivery.lng],
+            ]}
+            pathOptions={{ color: '#6366f1', weight: 3, opacity: 0.5, dashArray: '8, 8' }}
+          />
+        )}
+        {courierPosition && resolvedPickup && resolvedDelivery && (
+          <>
+            {/* Courier → next target (pickup or delivery) */}
+            <Polyline
+              positions={[
+                [resolvedPickup.lat, resolvedPickup.lng],
+                [courierPosition.lat, courierPosition.lng],
+              ]}
+              pathOptions={{ color: '#f97316', weight: 3, opacity: 0.4, dashArray: '6, 6' }}
+            />
+            <Polyline
+              positions={[
+                [courierPosition.lat, courierPosition.lng],
+                [resolvedDelivery.lat, resolvedDelivery.lng],
+              ]}
+              pathOptions={{ color: '#22c55e', weight: 3, opacity: 0.7, dashArray: '6, 6' }}
+            />
+          </>
+        )}
+        {courierPosition && resolvedPickup && !resolvedDelivery && (
+          <Polyline
+            positions={[
+              [resolvedPickup.lat, resolvedPickup.lng],
+              [courierPosition.lat, courierPosition.lng],
+            ]}
+            pathOptions={{ color: '#f97316', weight: 3, opacity: 0.6, dashArray: '6, 6' }}
+          />
+        )}
+        {courierPosition && !resolvedPickup && resolvedDelivery && (
+          <Polyline
+            positions={[
+              [courierPosition.lat, courierPosition.lng],
+              [resolvedDelivery.lat, resolvedDelivery.lng],
+            ]}
+            pathOptions={{ color: '#22c55e', weight: 3, opacity: 0.7, dashArray: '6, 6' }}
+          />
+        )}
 
         {/* Courier marker */}
         {courierPosition && (
