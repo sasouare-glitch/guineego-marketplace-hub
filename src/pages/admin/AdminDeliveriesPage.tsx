@@ -392,6 +392,11 @@ export default function AdminDeliveriesPage() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => navigate(`/admin/deliveries/${d.id}`)}>Voir détails</DropdownMenuItem>
+                              {d.status === 'pending' && !d.assignedCourier && (
+                                <DropdownMenuItem onClick={() => openAssignDialog(d.id)}>
+                                  <UserPlus className="w-4 h-4 mr-2" /> Assigner coursier
+                                </DropdownMenuItem>
+                              )}
                               {d.status !== 'delivered' && d.status !== 'cancelled' && (
                                 <DropdownMenuItem
                                   className="text-destructive"
@@ -412,6 +417,47 @@ export default function AdminDeliveriesPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Assign Courier Dialog */}
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assigner un coursier</DialogTitle>
+            <DialogDescription>
+              Mission : {assignMissionId?.slice(0, 12)}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {loadingCouriers ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" /> Chargement des coursiers...
+              </div>
+            ) : couriers.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Aucun coursier enregistré</p>
+            ) : (
+              <Select value={selectedCourierId} onValueChange={setSelectedCourierId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un coursier" />
+                </SelectTrigger>
+                <SelectContent>
+                  {couriers.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name} {c.phone ? `(${c.phone})` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>Annuler</Button>
+            <Button onClick={handleAssignCourier} disabled={!selectedCourierId || assigning} className="gap-2">
+              {assigning ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+              {assigning ? 'Assignation...' : 'Assigner'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }
