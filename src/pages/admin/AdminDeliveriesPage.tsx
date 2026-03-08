@@ -397,6 +397,11 @@ export default function AdminDeliveriesPage() {
                                   <UserPlus className="w-4 h-4 mr-2" /> Assigner coursier
                                 </DropdownMenuItem>
                               )}
+                              {d.assignedCourier && d.status !== 'delivered' && d.status !== 'cancelled' && (
+                                <DropdownMenuItem onClick={() => openAssignDialog(d.id)}>
+                                  <UserPlus className="w-4 h-4 mr-2" /> Réassigner coursier
+                                </DropdownMenuItem>
+                              )}
                               {d.status !== 'delivered' && d.status !== 'cancelled' && (
                                 <DropdownMenuItem
                                   className="text-destructive"
