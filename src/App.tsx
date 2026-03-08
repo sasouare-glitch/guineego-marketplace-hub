@@ -65,6 +65,7 @@ import DeliveryPage from "./pages/DeliveryPage";
 import PaymentPage from "./pages/PaymentPage";
 import ProtectionPage from "./pages/ProtectionPage";
 import CourierJoinPage from "./pages/courier/CourierJoinPage";
+import InvestPage from "./pages/InvestPage";
 // Auth Pages
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
