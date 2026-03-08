@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Truck, Phone, MapPin, Clock, Navigation, User, Loader2 } from "lucide-react";
+import { Truck, Phone, MapPin, Clock, Navigation, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDeliveryTracking } from "@/hooks/useDeliveryTracking";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DeliveryMap } from "@/components/delivery/DeliveryMap";
 
 interface CourierTrackingCardProps {
   deliveryMissionId: string;
@@ -133,34 +134,28 @@ export function CourierTrackingCard({ deliveryMissionId }: CourierTrackingCardPr
           </div>
         )}
 
-        {/* Courier Location */}
+        {/* Courier Map */}
         {courierLocation && (
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <Navigation className="w-4 h-4 text-primary" />
-              <span className="text-muted-foreground">Position du coursier</span>
+              <span className="text-muted-foreground">Position en direct</span>
             </div>
-            <div className="p-3 rounded-lg bg-muted/30 border border-border text-xs space-y-1">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Latitude</span>
-                <span className="font-mono text-foreground">{courierLocation.lat.toFixed(6)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Longitude</span>
-                <span className="font-mono text-foreground">{courierLocation.lng.toFixed(6)}</span>
-              </div>
+            <DeliveryMap
+              courierPosition={{ lat: courierLocation.lat, lng: courierLocation.lng }}
+              courierName={delivery.courierName || 'Coursier'}
+              pickupLabel={delivery.pickup?.address}
+              deliveryLabel={delivery.delivery?.address}
+              className="h-[220px]"
+            />
+            <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
               {courierLocation.speed && courierLocation.speed > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Vitesse</span>
-                  <span className="text-foreground">{Math.round(courierLocation.speed * 3.6)} km/h</span>
-                </div>
+                <span>🏎️ {Math.round(courierLocation.speed * 3.6)} km/h</span>
+              )}
+              {lastLocationUpdate && (
+                <span>🕐 {lastLocationUpdate.toLocaleTimeString("fr-FR")}</span>
               )}
             </div>
-            {lastLocationUpdate && (
-              <p className="text-xs text-muted-foreground">
-                Mise à jour: {lastLocationUpdate.toLocaleTimeString("fr-FR")}
-              </p>
-            )}
           </div>
         )}
 
