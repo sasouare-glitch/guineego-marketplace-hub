@@ -2,8 +2,14 @@
  * Admin Orders Page - Order Management (Firestore)
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format as formatDateFns } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { CalendarIcon, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
