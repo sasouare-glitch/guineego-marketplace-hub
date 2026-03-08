@@ -85,6 +85,13 @@ export default function AdminOrdersPage() {
   const [sellerNames, setSellerNames] = useState<Record<string, string>>({});
   const [customerInfo, setCustomerInfo] = useState<Record<string, { name: string; email: string }>>({});
 
+  // Advanced filters state
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterSeller, setFilterSeller] = useState<string>('all');
+  const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(undefined);
+  const [filterDateTo, setFilterDateTo] = useState<Date | undefined>(undefined);
+
   // Load seller/shop names + customer names
   useEffect(() => {
     const loadNames = async () => {
