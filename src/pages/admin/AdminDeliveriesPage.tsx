@@ -221,6 +221,13 @@ export default function AdminDeliveriesPage() {
     setAssigning(true);
     try {
       const courier = couriers.find(c => c.id === selectedCourierId);
+      const mission = missions.find(m => m.id === assignMissionId);
+      const isReassign = !!mission?.assignedCourier;
+      const prevName = mission?.assignedCourier ? (courierNames[mission.assignedCourier] || mission.assignedCourier.slice(0, 8)) : '';
+      const note = isReassign
+        ? `Réassigné par l'administrateur (ancien: ${prevName})`
+        : 'Assigné manuellement par l\'administrateur';
+
       await updateDoc(doc(db, 'deliveries', assignMissionId), {
         assignedCourier: selectedCourierId,
         assignedCourierId: selectedCourierId,
@@ -231,11 +238,11 @@ export default function AdminDeliveriesPage() {
         statusHistory: arrayUnion({
           status: 'accepted',
           timestamp: Timestamp.now(),
-          note: 'Assigné manuellement par l\'administrateur',
+          note,
         }),
         updatedAt: serverTimestamp(),
       });
-      toast.success(`Coursier ${courier?.name} assigné`);
+      toast.success(`Coursier ${courier?.name} ${isReassign ? 'réassigné' : 'assigné'}`);
       setAssignDialogOpen(false);
     } catch (err) {
       console.error('Error assigning courier:', err);
