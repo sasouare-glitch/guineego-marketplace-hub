@@ -349,6 +349,7 @@ const App = () => (
                       </ProtectedRoute>
                     } />
                     <Route path="/courier/join" element={<CourierJoinPage />} />
+                    <Route path="/invest" element={<InvestPage />} />
                     
                     {/* Admin Routes (Protected - admin role only) */}
                     <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
