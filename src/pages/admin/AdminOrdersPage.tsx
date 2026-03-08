@@ -27,7 +27,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, MoreHorizontal, Filter, Eye, Package, Truck, CheckCircle, XCircle, Edit, Loader2, ExternalLink } from 'lucide-react';
+import { Search, MoreHorizontal, Filter, Eye, Package, Truck, CheckCircle, XCircle, Edit, Loader2, ExternalLink, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
 import { toast } from 'sonner';
@@ -35,7 +35,7 @@ import { useRealtimeCollection } from '@/lib/firebase/queries';
 import { updateDocument } from '@/lib/firebase/mutations';
 import type { FirestoreDoc } from '@/lib/firebase/queries';
 import { Timestamp, collection, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, callFunction } from '@/lib/firebase/config';
 
 type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled';
 
@@ -75,6 +75,7 @@ export default function AdminOrdersPage() {
   const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; title: string; description: string; action: () => void }>({ open: false, title: '', description: '', action: () => {} });
   const [statusDialog, setStatusDialog] = useState<{ open: boolean; order: Order | null; newStatus: OrderStatus | '' }>({ open: false, order: null, newStatus: '' });
   const [saving, setSaving] = useState(false);
+  const [resendingSmsId, setResendingSmsId] = useState<string | null>(null);
   const [sellerNames, setSellerNames] = useState<Record<string, string>>({});
   const [customerInfo, setCustomerInfo] = useState<Record<string, { name: string; email: string }>>({});
 
@@ -186,6 +187,20 @@ export default function AdminOrdersPage() {
     if (!ts) return '—';
     const date = ts instanceof Timestamp ? ts.toDate() : new Date(ts);
     return date.toLocaleDateString('fr-FR');
+  };
+
+  const handleResendSms = async (order: Order) => {
+    const oid = order.orderNumber || order.id;
+    setResendingSmsId(order.id);
+    try {
+      const resend = callFunction<{ orderId: string }, { success: boolean; message: string }>('resendOrderSms');
+      const result = await resend({ orderId: order.id });
+      toast.success(result.data.message || `SMS renvoyé pour ${oid}`);
+    } catch (err: any) {
+      toast.error(err?.message || `Échec du renvoi SMS pour ${oid}`);
+    } finally {
+      setResendingSmsId(null);
+    }
   };
 
   return (
@@ -346,6 +361,13 @@ export default function AdminOrdersPage() {
                               <DropdownMenuItem>
                                 <Eye className="w-4 h-4 mr-2" />
                                 Voir détails
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleResendSms(order)}
+                                disabled={resendingSmsId === order.id}
+                              >
+                                <MessageSquare className="w-4 h-4 mr-2" />
+                                {resendingSmsId === order.id ? 'Envoi...' : 'Renvoyer SMS'}
                               </DropdownMenuItem>
                               {order.status !== 'cancelled' && order.status !== 'delivered' && (
                                 <DropdownMenuItem onClick={() => handleOpenStatusDialog(order)}>
