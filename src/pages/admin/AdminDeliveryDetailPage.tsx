@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   ArrowLeft, Truck, MapPin, Clock, User, Phone, Package,
-  CheckCircle2, AlertCircle, Navigation, XCircle, Check
+  CheckCircle2, AlertCircle, Navigation, XCircle, Check, Loader2, UserPlus
 } from 'lucide-react';
 import { useDeliveryTracking } from '@/hooks/useDeliveryTracking';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -24,7 +24,7 @@ import { doc, getDoc, updateDoc, collection, getDocs, query, where, serverTimest
 import { db } from '@/lib/firebase/config';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Loader2, UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Status config for badges
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
