@@ -156,6 +156,7 @@ const SearchPage = () => {
                 filters={filters}
                 onFiltersChange={setFilters}
                 onClearFilters={clearFilters}
+                sellerProductCounts={sellerProductCounts}
               />
             </div>
           </aside>
@@ -183,6 +184,7 @@ const SearchPage = () => {
                     </SheetHeader>
                     <div className="mt-6">
                       <SearchFilters
+                        sellerProductCounts={sellerProductCounts}
                         filters={filters}
                         onFiltersChange={(newFilters) => {
                           setFilters(newFilters);
