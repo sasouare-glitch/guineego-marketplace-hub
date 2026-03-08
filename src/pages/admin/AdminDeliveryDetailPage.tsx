@@ -19,6 +19,7 @@ import { useDeliveryTracking } from '@/hooks/useDeliveryTracking';
 import { useCurrency } from '@/hooks/useCurrency';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { DeliveryMap } from '@/components/delivery/DeliveryMap';
 import { useEffect, useState } from 'react';
 import { doc, getDoc, updateDoc, collection, getDocs, query, where, serverTimestamp, Timestamp, arrayUnion } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
@@ -321,46 +322,31 @@ export default function AdminDeliveryDetailPage() {
                       </div>
                     </div>
 
-                    {/* GPS location */}
+                    {/* GPS Map */}
                     {courierLocation && (
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm">
                           <Navigation className="w-4 h-4 text-primary" />
                           <span className="font-medium text-foreground">Position GPS en direct</span>
                         </div>
-                        <div className="p-3 rounded-lg bg-muted/30 border border-border text-xs space-y-1.5">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Latitude</span>
-                            <span className="font-mono text-foreground">{courierLocation.lat.toFixed(6)}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Longitude</span>
-                            <span className="font-mono text-foreground">{courierLocation.lng.toFixed(6)}</span>
-                          </div>
-                          {courierLocation.accuracy && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Précision</span>
-                              <span className="text-foreground">±{Math.round(courierLocation.accuracy)} m</span>
-                            </div>
-                          )}
+                        <DeliveryMap
+                          courierPosition={{ lat: courierLocation.lat, lng: courierLocation.lng }}
+                          courierName={courierName || 'Coursier'}
+                          pickupLabel={delivery.pickup?.address}
+                          deliveryLabel={delivery.delivery?.address}
+                          className="h-[300px]"
+                        />
+                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                           {courierLocation.speed && courierLocation.speed > 0 && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Vitesse</span>
-                              <span className="text-foreground">{Math.round(courierLocation.speed * 3.6)} km/h</span>
-                            </div>
+                            <span>🏎️ {Math.round(courierLocation.speed * 3.6)} km/h</span>
                           )}
-                          {courierLocation.heading != null && courierLocation.heading > 0 && (
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Direction</span>
-                              <span className="text-foreground">{Math.round(courierLocation.heading)}°</span>
-                            </div>
+                          {courierLocation.accuracy && (
+                            <span>📡 ±{Math.round(courierLocation.accuracy)} m</span>
+                          )}
+                          {lastLocationUpdate && (
+                            <span>🕐 {lastLocationUpdate.toLocaleTimeString('fr-FR')}</span>
                           )}
                         </div>
-                        {lastLocationUpdate && (
-                          <p className="text-xs text-muted-foreground">
-                            Dernière mise à jour : {lastLocationUpdate.toLocaleString('fr-FR')}
-                          </p>
-                        )}
                       </div>
                     )}
 
