@@ -73,7 +73,7 @@ export function RoleRequestCard() {
   const [requestStatuses, setRequestStatuses] = useState<Record<string, RequestStatus>>({});
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const user = state.user;
+  
 
   const checkRequestStatus = async (role: UserRole): Promise<RequestStatus> => {
     if (!user) return 'none';
