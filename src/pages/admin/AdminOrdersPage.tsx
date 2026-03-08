@@ -248,7 +248,8 @@ export default function AdminOrdersPage() {
                   <TableRow>
                     <TableHead>ID Commande</TableHead>
                     <TableHead>Client</TableHead>
-                    <TableHead>Vendeur</TableHead>
+                    <TableHead>Vendeur / Boutique</TableHead>
+                    <TableHead className="text-center">Articles</TableHead>
                     <TableHead>Montant</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>Date</TableHead>
@@ -258,7 +259,7 @@ export default function AdminOrdersPage() {
                 <TableBody>
                   {filteredOrders.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                      <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
                         <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
                         <p>Aucune commande trouvée</p>
                       </TableCell>
@@ -266,11 +267,15 @@ export default function AdminOrdersPage() {
                   ) : filteredOrders.map((order) => {
                     const status = statusConfig[order.status] || statusConfig.pending;
                     const StatusIcon = status.icon;
+                    const itemCount = getItemCount(order);
                     return (
                       <TableRow key={order.id}>
                         <TableCell className="font-mono font-medium">{order.orderNumber || order.id.slice(0, 12)}</TableCell>
                         <TableCell>{order.customerName || order.customerId || '—'}</TableCell>
-                        <TableCell className="text-muted-foreground">{order.sellerName || order.sellerId || '—'}</TableCell>
+                        <TableCell className="text-muted-foreground">{getOrderSellerNames(order)}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline">{itemCount}</Badge>
+                        </TableCell>
                         <TableCell className="font-medium">{format(order.pricing?.total || order.totalAmount || order.total || 0)}</TableCell>
                         <TableCell>
                           <Badge variant={status.variant} className="gap-1">
