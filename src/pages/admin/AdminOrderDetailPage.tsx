@@ -504,6 +504,12 @@ export default function AdminOrderDetailPage() {
                         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'OK'}
                       </Button>
                     </div>
+                    <Textarea
+                      placeholder="Note optionnelle (ex: raison du changement)…"
+                      value={statusNote}
+                      onChange={(e) => setStatusNote(e.target.value)}
+                      className="text-sm min-h-[60px]"
+                    />
                   </div>
                 )}
 
