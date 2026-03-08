@@ -19,7 +19,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import avatarMariama from "@/assets/avatar-mariama.jpg";
+import avatarIbrahima from "@/assets/avatar-ibrahima.jpg";
+import avatarFatoumata from "@/assets/avatar-fatoumata.jpg";
 import { Badge } from "@/components/ui/badge";
 
 const benefits = [
@@ -76,6 +79,7 @@ const testimonials = [
     content: "Depuis que j'ai rejoint GuineeGo, mes ventes ont triplé. La livraison intégrée me fait gagner un temps précieux !",
     rating: 5,
     initials: "MD",
+    avatar: avatarMariama,
   },
   {
     name: "Ibrahima Sow",
@@ -83,6 +87,7 @@ const testimonials = [
     content: "Le tableau de bord est incroyable. Je vois mes performances en temps réel et je peux ajuster mes prix facilement.",
     rating: 5,
     initials: "IS",
+    avatar: avatarIbrahima,
   },
   {
     name: "Fatoumata Camara",
@@ -90,6 +95,7 @@ const testimonials = [
     content: "Le support client est exceptionnel. Chaque fois que j'ai un souci, l'équipe répond en moins d'une heure.",
     rating: 5,
     initials: "FC",
+    avatar: avatarFatoumata,
   },
 ];
 
@@ -308,6 +314,7 @@ export default function SellStartPage() {
                     <p className="text-sm text-muted-foreground leading-relaxed mb-5">"{t.content}"</p>
                     <div className="flex items-center gap-3">
                       <Avatar className="w-10 h-10">
+                        <AvatarImage src={t.avatar} alt={t.name} className="object-cover" />
                         <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
                           {t.initials}
                         </AvatarFallback>
