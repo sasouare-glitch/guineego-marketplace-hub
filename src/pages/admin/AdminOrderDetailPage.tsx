@@ -65,6 +65,7 @@ export default function AdminOrderDetailPage() {
 
   const [copied, setCopied] = useState(false);
   const [newStatus, setNewStatus] = useState<string>('');
+  const [statusNote, setStatusNote] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [resendingSms, setResendingSms] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
