@@ -99,6 +99,15 @@ export const QuoteCalculator = ({ onQuoteGenerated }: QuoteCalculatorProps) => {
     onQuoteGenerated?.(result);
   };
 
+  const handleRequestCustomQuote = () => {
+    if (!quote) return;
+    
+    // Simulate sending the request
+    toast.success("Demande envoyée", {
+      description: "Un conseiller vous contactera sous peu pour finaliser votre devis personnalisé."
+    });
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -278,7 +287,11 @@ export const QuoteCalculator = ({ onQuoteGenerated }: QuoteCalculatorProps) => {
               <p>Ce devis est estimatif. Le prix final sera confirmé après réception et pesée de vos marchandises.</p>
             </div>
 
-            <Button className="w-full mt-4" variant="outline">
+            <Button 
+              className="w-full mt-4" 
+              variant="outline"
+              onClick={handleRequestCustomQuote}
+            >
               Demander un devis personnalisé
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
