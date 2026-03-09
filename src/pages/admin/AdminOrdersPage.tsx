@@ -33,7 +33,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, MoreHorizontal, Filter, Eye, Package, Truck, CheckCircle, XCircle, Edit, Loader2, ExternalLink, MessageSquare, Download } from 'lucide-react';
+import { Search, MoreHorizontal, Filter, Eye, Package, Truck, CheckCircle, XCircle, Edit, Loader2, ExternalLink, MessageSquare, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
 import { toast } from 'sonner';
@@ -91,6 +91,10 @@ export default function AdminOrdersPage() {
   const [filterSeller, setFilterSeller] = useState<string>('all');
   const [filterDateFrom, setFilterDateFrom] = useState<Date | undefined>(undefined);
   const [filterDateTo, setFilterDateTo] = useState<Date | undefined>(undefined);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   // Load seller/shop names + customer names
   useEffect(() => {
@@ -177,6 +181,7 @@ export default function AdminOrdersPage() {
     setFilterDateTo(undefined);
     setActiveTab('all');
     setSearchQuery('');
+    setCurrentPage(1);
   }, []);
 
   const filteredOrders = useMemo(() => {
@@ -221,6 +226,16 @@ export default function AdminOrdersPage() {
       return matchesSearch && matchesTab && matchesStatus && matchesSeller && matchesDate;
     });
   }, [orders, searchQuery, activeTab, filterStatus, filterSeller, filterDateFrom, filterDateTo]);
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, activeTab, filterStatus, filterSeller, filterDateFrom, filterDateTo]);
+
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const paginatedOrders = useMemo(() => {
+    return filteredOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  }, [filteredOrders, currentPage]);
 
   const counts = {
     pending: orders.filter(o => o.status === 'pending').length,
@@ -554,7 +569,7 @@ export default function AdminOrdersPage() {
                         <p>Aucune commande trouvée</p>
                       </TableCell>
                     </TableRow>
-                  ) : filteredOrders.map((order) => {
+                  ) : paginatedOrders.map((order) => {
                     const status = statusConfig[order.status] || statusConfig.pending;
                     const StatusIcon = status.icon;
                     const itemCount = getItemCount(order);
@@ -639,6 +654,64 @@ export default function AdminOrdersPage() {
                   })}
                 </TableBody>
               </Table>
+            )}
+            )}
+
+            {!loading && !error && filteredOrders.length > 0 && totalPages > 1 && (
+              <div className="flex items-center justify-between mt-6">
+                <div className="text-sm text-muted-foreground hidden md:block">
+                  Affichage de {(currentPage - 1) * itemsPerPage + 1} à {Math.min(currentPage * itemsPerPage, filteredOrders.length)} sur {filteredOrders.length} commandes
+                </div>
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="w-4 h-4 sm:mr-1" />
+                    <span className="hidden sm:inline">Précédent</span>
+                  </Button>
+                  
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                      if (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      ) {
+                        return (
+                          <Button
+                            key={page}
+                            variant={currentPage === page ? "default" : "outline"}
+                            size="sm"
+                            className="w-8 h-8 p-0"
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </Button>
+                        );
+                      } else if (
+                        page === currentPage - 2 ||
+                        page === currentPage + 2
+                      ) {
+                        return <span key={page} className="px-1 text-muted-foreground">...</span>;
+                      }
+                      return null;
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <span className="hidden sm:inline">Suivant</span>
+                    <ChevronRight className="w-4 h-4 sm:ml-1" />
+                  </Button>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
