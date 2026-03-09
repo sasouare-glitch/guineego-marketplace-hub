@@ -33,7 +33,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, MoreHorizontal, Filter, Eye, Package, Truck, CheckCircle, XCircle, Edit, Loader2, ExternalLink, MessageSquare } from 'lucide-react';
+import { Search, MoreHorizontal, Filter, Eye, Package, Truck, CheckCircle, XCircle, Edit, Loader2, ExternalLink, MessageSquare, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
 import { toast } from 'sonner';
@@ -279,6 +279,53 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (filteredOrders.length === 0) {
+      toast.error('Aucune commande à exporter');
+      return;
+    }
+    
+    const headers = [
+      'ID Commande',
+      'Date',
+      'Client',
+      'Vendeurs',
+      'Articles (Qté)',
+      'Total',
+      'Statut'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...filteredOrders.map(order => {
+        const orderDate = order.createdAt instanceof Timestamp 
+          ? order.createdAt.toDate() 
+          : order.createdAt ? new Date(order.createdAt) : new Date();
+        
+        return [
+          `"${order.orderNumber || order.id}"`,
+          `"${orderDate.toLocaleDateString('fr-FR')}"`,
+          `"${getCustomerDisplay(order).replace(/"/g, '""')}"`,
+          `"${getOrderSellers(order).map(s => s.name).join('; ').replace(/"/g, '""')}"`,
+          `"${getItemCount(order)}"`,
+          `"${order.totalAmount || order.total || order.pricing?.total || 0}"`,
+          `"${statusConfig[order.status]?.label || order.status}"`
+        ].join(',');
+      })
+    ].join('\n');
+
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `commandes_${formatDateFns(new Date(), 'yyyy-MM-dd')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success('Export CSV téléchargé');
+  };
+
   return (
     <AdminLayout title="Commandes" description="Suivi et gestion des commandes">
       <div className="space-y-6">
@@ -346,6 +393,15 @@ export default function AdminOrdersPage() {
                     <X className="w-4 h-4" />
                   </Button>
                 )}
+                <Button 
+                  variant="outline" 
+                  onClick={handleExportCSV}
+                  title="Exporter les commandes filtrées en CSV"
+                  className="hidden sm:flex"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Exporter
+                </Button>
               </div>
             </div>
             
