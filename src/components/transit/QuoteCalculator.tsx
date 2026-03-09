@@ -4,7 +4,7 @@ import { Package, Plane, Ship, Truck, Calculator, ArrowRight, Info } from "lucid
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 interface QuoteCalculatorProps {
@@ -98,6 +97,15 @@ export const QuoteCalculator = ({ onQuoteGenerated }: QuoteCalculatorProps) => {
     
     setQuote(result);
     onQuoteGenerated?.(result);
+  };
+
+  const handleRequestCustomQuote = () => {
+    if (!quote) return;
+    
+    // Simulate sending the request
+    toast.success("Demande envoyée", {
+      description: "Un conseiller vous contactera sous peu pour finaliser votre devis personnalisé."
+    });
   };
 
   return (
@@ -279,7 +287,11 @@ export const QuoteCalculator = ({ onQuoteGenerated }: QuoteCalculatorProps) => {
               <p>Ce devis est estimatif. Le prix final sera confirmé après réception et pesée de vos marchandises.</p>
             </div>
 
-            <Button className="w-full mt-4" variant="outline">
+            <Button 
+              className="w-full mt-4" 
+              variant="outline"
+              onClick={handleRequestCustomQuote}
+            >
               Demander un devis personnalisé
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
