@@ -655,7 +655,6 @@ export default function AdminOrdersPage() {
                 </TableBody>
               </Table>
             )}
-            )}
 
             {!loading && !error && filteredOrders.length > 0 && totalPages > 1 && (
               <div className="flex items-center justify-between mt-6">
