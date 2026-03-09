@@ -37,6 +37,9 @@ async function getOrangeToken(clientId: string, clientSecret: string): Promise<s
   return data.access_token;
 }
 
+// Admin emails with bypass (same as client-side)
+const ADMIN_EMAILS = ['sasouare@gmail.com'];
+
 export const sendTestSms = functions
   .region('europe-west1')
   .https.onCall(async (data, context) => {
@@ -45,9 +48,14 @@ export const sendTestSms = functions
       throw new functions.https.HttpsError('unauthenticated', 'Authentification requise');
     }
 
-    // Admin check
+    // Admin check - use email bypass or claims
+    const userEmail = context.auth.token.email || '';
     const claims = context.auth.token;
-    if (claims.role !== 'admin') {
+    const isAdmin = ADMIN_EMAILS.includes(userEmail) || 
+                   claims.role === 'admin' || 
+                   claims.role === 'super_admin';
+    
+    if (!isAdmin) {
       throw new functions.https.HttpsError('permission-denied', 'Accès réservé aux administrateurs');
     }
 
