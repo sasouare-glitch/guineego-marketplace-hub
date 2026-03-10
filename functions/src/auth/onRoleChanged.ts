@@ -65,6 +65,10 @@ export const onUserRoleChanged = functions
           // Admin gets all access
           break;
 
+        case 'super_user':
+          // Super user gets broad access (like admin but restricted)
+          break;
+
         case 'customer':
         default:
           // Clear role-specific IDs
