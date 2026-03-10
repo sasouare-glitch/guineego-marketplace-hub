@@ -41,6 +41,11 @@ service cloud.firestore {
       return hasRole('admin') || hasRole('super_user') || isAdminEmail();
     }
     
+    // True admin only (excludes super_user) — for destructive/sensitive ops
+    function isStrictAdmin() {
+      return hasRole('admin') || isAdminEmail();
+    }
+    
     // Check user doc for role (fallback when custom claims not set)
     function hasRoleInDoc(role) {
       return isAuthenticated() && 
@@ -135,7 +140,7 @@ service cloud.firestore {
       allow read: if isAdmin() || (isSeller() && request.auth.token.ecommerceId == ecommerceId);
       allow create: if isAdmin();
       allow update: if isAdmin() || (isSeller() && request.auth.token.ecommerceId == ecommerceId);
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
@@ -253,7 +258,7 @@ service cloud.firestore {
       allow read: if isOwner(resource.data.userId) || isAdmin();
       allow update: if isOwner(resource.data.userId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow delete: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isStrictAdmin();
     }
     
     // ============================================
@@ -276,7 +281,7 @@ service cloud.firestore {
                     || (isOwner(resource.data.userId) && resource.data.status == 'pending');
       
       // Only admin can delete reviews
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
@@ -356,7 +361,7 @@ service cloud.firestore {
       allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && isSeller();
       allow update: if isOwner(userId) && isSeller();
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
@@ -365,7 +370,7 @@ service cloud.firestore {
     match /courier_settings/{userId} {
       allow read: if isOwner(userId) || isAdmin();
       allow create, update: if isOwner(userId);
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
@@ -375,7 +380,7 @@ service cloud.firestore {
       allow read: if true; // Public storefront
       allow create: if isOwner(sellerId) && isSeller();
       allow update: if isOwner(sellerId) || isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
@@ -417,7 +422,7 @@ service cloud.firestore {
     // ============================================
     match /partnerships/{partnerId} {
       allow read: if true; // Public partners list
-      allow write: if isAdmin();
+      allow write: if isStrictAdmin();
     }
     
     // ============================================
@@ -451,7 +456,7 @@ service cloud.firestore {
       allow read: if isOwner(resource.data.userId) || isAdmin();
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
   }
 }
