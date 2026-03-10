@@ -5,6 +5,8 @@ import { Loader2 } from 'lucide-react';
 
 // Emails with unconditional admin access (mirrors AuthContext logic)
 const ADMIN_EMAILS = ['sasouare@gmail.com'];
+// super_user has access to all protected routes (like admin)
+const SUPER_ROLES: UserRole[] = ['admin', 'super_user'];
 
 export function ProtectedRoute({ 
   children, 
