@@ -65,6 +65,13 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { path: '/investor/investments', icon: TrendingUp, label: 'Invest.' },
     { path: '/profile', icon: User, label: 'Profil' }
   ],
+  super_user: [
+    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/admin/users', icon: User, label: 'Utilisateurs' },
+    { path: '/admin/orders', icon: ClipboardList, label: 'Commandes' },
+    { path: '/admin/analytics', icon: TrendingUp, label: 'Analytics' },
+    { path: '/profile', icon: User, label: 'Profil' }
+  ],
   admin: [
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/users', icon: User, label: 'Utilisateurs' },
