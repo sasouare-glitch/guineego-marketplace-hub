@@ -24,7 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   ShieldCheck, Search, Loader2, Eye, UserX, Clock, Activity,
-  ShieldAlert, CheckCircle2, AlertTriangle, UserPlus
+  ShieldAlert, CheckCircle2, AlertTriangle, UserPlus, CalendarIcon, X
 } from 'lucide-react';
 import {
   collection, query, where, orderBy, limit, onSnapshot,
