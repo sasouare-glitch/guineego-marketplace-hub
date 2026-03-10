@@ -177,6 +177,7 @@ export function MobileFAB() {
     courier: { icon: MapPin, path: '/courier/scan', label: 'Scanner colis' },
     closer: null,
     investor: null,
+    super_user: null,
     admin: null
   };
 
