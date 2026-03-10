@@ -68,7 +68,7 @@ export function verifySeller(context: functions.https.CallableContext): UserClai
  * Verify user is courier
  */
 export function verifyCourier(context: functions.https.CallableContext): UserClaims {
-  return verifyRole(context, ['courier', 'admin']);
+  return verifyRole(context, ['courier', 'admin', 'super_user']);
 }
 
 /**
