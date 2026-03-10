@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { ProtectedRouteProps } from '@/types/auth';
+import { ProtectedRouteProps, UserRole } from '@/types/auth';
 import { Loader2 } from 'lucide-react';
 
 // Emails with unconditional admin access (mirrors AuthContext logic)
