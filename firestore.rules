@@ -38,7 +38,7 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return hasRole('admin') || isAdminEmail();
+      return hasRole('admin') || hasRole('super_user') || isAdminEmail();
     }
     
     // Check user doc for role (fallback when custom claims not set)

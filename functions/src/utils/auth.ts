@@ -6,7 +6,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
 // User roles enum
-export type UserRole = 'customer' | 'ecommerce' | 'closer' | 'courier' | 'investor' | 'admin';
+export type UserRole = 'customer' | 'ecommerce' | 'closer' | 'courier' | 'investor' | 'super_user' | 'admin';
 
 export interface UserClaims {
   role: UserRole;
@@ -54,28 +54,28 @@ export function verifyRole(
  * Verify user is admin
  */
 export function verifyAdmin(context: functions.https.CallableContext): void {
-  verifyRole(context, ['admin']);
+  verifyRole(context, ['admin', 'super_user']);
 }
 
 /**
  * Verify user is e-commerce seller
  */
 export function verifySeller(context: functions.https.CallableContext): UserClaims {
-  return verifyRole(context, ['ecommerce', 'admin']);
+  return verifyRole(context, ['ecommerce', 'admin', 'super_user']);
 }
 
 /**
  * Verify user is courier
  */
 export function verifyCourier(context: functions.https.CallableContext): UserClaims {
-  return verifyRole(context, ['courier', 'admin']);
+  return verifyRole(context, ['courier', 'admin', 'super_user']);
 }
 
 /**
  * Verify user is closer
  */
 export function verifyCloser(context: functions.https.CallableContext): UserClaims {
-  return verifyRole(context, ['closer', 'admin']);
+  return verifyRole(context, ['closer', 'admin', 'super_user']);
 }
 
 /**

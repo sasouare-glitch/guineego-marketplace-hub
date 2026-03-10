@@ -1,10 +1,12 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { ProtectedRouteProps } from '@/types/auth';
+import { ProtectedRouteProps, UserRole } from '@/types/auth';
 import { Loader2 } from 'lucide-react';
 
 // Emails with unconditional admin access (mirrors AuthContext logic)
 const ADMIN_EMAILS = ['sasouare@gmail.com'];
+// super_user has access to all protected routes (like admin)
+const SUPER_ROLES: UserRole[] = ['admin', 'super_user'];
 
 export function ProtectedRoute({ 
   children, 
@@ -44,8 +46,11 @@ export function ProtectedRoute({
       return <>{children}</>;
     }
 
+    // super_user bypass - accès à toutes les routes protégées
+    const effectiveRoles = [...new Set([...requiredRoles, ...SUPER_ROLES])];
+
     // hasAnyRole now also checks profile fallback
-    if (hasAnyRole(requiredRoles)) {
+    if (hasAnyRole(effectiveRoles)) {
       return <>{children}</>;
     }
 

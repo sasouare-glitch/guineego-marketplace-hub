@@ -23,7 +23,7 @@ interface UpdateRoleData {
 export const updateUserRole = functions
   .region('europe-west1')
   .https.onCall(async (data: UpdateRoleData, context) => {
-    // Verify admin
+    // Verify admin or super_user
     verifyAdmin(context);
 
     if (!data.userId || !data.newRole) {
@@ -33,12 +33,35 @@ export const updateUserRole = functions
       );
     }
 
-    const validRoles: UserRole[] = ['customer', 'ecommerce', 'courier', 'closer', 'investor', 'admin'];
+    const validRoles: UserRole[] = ['customer', 'ecommerce', 'courier', 'closer', 'investor', 'super_user', 'admin'];
     if (!validRoles.includes(data.newRole)) {
       throw new functions.https.HttpsError(
         'invalid-argument',
         'Rôle invalide'
       );
+    }
+
+    // Super_user cannot change admin roles
+    const callerClaims = context.auth?.token as { role?: string } | undefined;
+    const callerRole = callerClaims?.role;
+
+    if (callerRole === 'super_user') {
+      // Cannot assign or remove admin role
+      if (data.newRole === 'admin') {
+        throw new functions.https.HttpsError(
+          'permission-denied',
+          'Un super_user ne peut pas attribuer le rôle admin'
+        );
+      }
+
+      // Cannot modify an existing admin's role
+      const targetDoc = await db.collection('users').doc(data.userId).get();
+      if (targetDoc.exists && targetDoc.data()?.role === 'admin') {
+        throw new functions.https.HttpsError(
+          'permission-denied',
+          'Un super_user ne peut pas modifier le rôle d\'un administrateur'
+        );
+      }
     }
 
     try {
