@@ -94,6 +94,8 @@ export default function AdminSuperUsersPage() {
   const [selectedUser, setSelectedUser] = useState<SuperUser | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [revoking, setRevoking] = useState(false);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
 
   // Real-time listener for super_user accounts
   useEffect(() => {
