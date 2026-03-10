@@ -281,7 +281,7 @@ service cloud.firestore {
                     || (isOwner(resource.data.userId) && resource.data.status == 'pending');
       
       // Only admin can delete reviews
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
