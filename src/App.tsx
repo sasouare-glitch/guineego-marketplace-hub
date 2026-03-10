@@ -459,6 +459,11 @@ const App = () => (
                          <AdminRoleRequestsPage />
                        </ProtectedRoute>
                      } />
+                     <Route path="/admin/super-users" element={
+                       <ProtectedRoute requiredRoles={['admin']}>
+                         <AdminSuperUsersPage />
+                       </ProtectedRoute>
+                     } />
                      
                      {/* Catch-all Route */}
                     <Route path="*" element={<NotFound />} />
