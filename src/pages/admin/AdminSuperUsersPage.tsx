@@ -157,12 +157,30 @@ export default function AdminSuperUsersPage() {
     (u.email?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
-  const filteredAuditLogs = superUserAuditLogs.filter(log =>
-    !auditSearch ||
-    (superUserEmails.get(log.performedBy) || '').toLowerCase().includes(auditSearch.toLowerCase()) ||
-    (actionLabels[log.action] ?? log.action).toLowerCase().includes(auditSearch.toLowerCase()) ||
-    (log.details || '').toLowerCase().includes(auditSearch.toLowerCase())
-  );
+  const filteredAuditLogs = superUserAuditLogs.filter(log => {
+    // Text filter
+    const matchesText = !auditSearch ||
+      (superUserEmails.get(log.performedBy) || '').toLowerCase().includes(auditSearch.toLowerCase()) ||
+      (actionLabels[log.action] ?? log.action).toLowerCase().includes(auditSearch.toLowerCase()) ||
+      (log.details || '').toLowerCase().includes(auditSearch.toLowerCase());
+
+    // Date filter
+    let matchesDate = true;
+    if (dateFrom || dateTo) {
+      const logDate = log.createdAt?.toDate?.();
+      if (!logDate) {
+        matchesDate = false;
+      } else {
+        if (dateFrom && logDate < startOfDay(dateFrom)) matchesDate = false;
+        if (dateTo && logDate > endOfDay(dateTo)) matchesDate = false;
+      }
+    }
+
+    return matchesText && matchesDate;
+  });
+
+  const clearDateFilters = () => { setDateFrom(undefined); setDateTo(undefined); };
+  const setPreset = (days: number) => { setDateFrom(subDays(new Date(), days)); setDateTo(new Date()); };
 
   // Revoke super_user role (admin only)
   const handleRevokeSuperUser = async (user: SuperUser) => {
