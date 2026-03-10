@@ -277,7 +277,7 @@ const CourierMissionDetail = () => {
                   variant="outline"
                   size="sm"
                   className="flex-1 gap-2"
-                  onClick={() => window.open(`tel:${mission.delivery.phone}`)}
+                  onClick={() => { window.location.href = `tel:${mission.delivery.phone}`; }}
                 >
                   <Phone className="w-4 h-4" />
                   Appeler
