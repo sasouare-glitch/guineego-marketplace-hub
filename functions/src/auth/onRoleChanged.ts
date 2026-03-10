@@ -102,6 +102,107 @@ export const onUserRoleChanged = functions
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
+      // ── Super User email notifications ──
+      const userEmail = after.email;
+      const userName = after.displayName || after.profile?.firstName || userEmail || 'Utilisateur';
+
+      if (newRole === 'super_user' && oldRole !== 'super_user') {
+        // Super user CREATED
+        console.log(`🔔 Super user created: ${userName} (${userId})`);
+
+        // Email to the new super_user
+        if (userEmail) {
+          const html = wrapInTemplate(`
+            ${sectionTitle('🛡️', 'Rôle Super User activé')}
+            <p style="font-size: 15px; color: ${COLORS.bodyText}; line-height: 1.6;">
+              Bonjour <strong>${userName}</strong>,
+            </p>
+            <p style="font-size: 15px; color: ${COLORS.bodyText}; line-height: 1.6;">
+              Votre compte a été promu au rôle <strong>Super User</strong> sur GuineeGo.
+              Vous avez désormais accès à tous les dashboards et pouvez gérer l'ensemble des données de la plateforme.
+            </p>
+            ${divider()}
+            ${sectionTitle('✅', 'Ce que vous pouvez faire')}
+            <ul style="font-size: 14px; color: ${COLORS.bodyText}; line-height: 1.8; padding-left: 20px;">
+              <li>Accéder à tous les dashboards (admin, vendeur, coursier, investisseur)</li>
+              <li>Voir et modifier les données utilisateurs, commandes, produits</li>
+              <li>Gérer les livraisons, le transit et l'Academy</li>
+            </ul>
+            ${sectionTitle('🚫', 'Restriction')}
+            <p style="font-size: 14px; color: ${COLORS.bodyText};">
+              Vous ne pouvez <strong>pas</strong> modifier le rôle d'un administrateur ni attribuer le rôle admin.
+            </p>
+            ${ctaButton('Accéder au Dashboard', 'https://guineego.app/admin/dashboard')}
+          `);
+          await sendEmailWithFallback({ to: userEmail, subject: '🛡️ Rôle Super User activé — GuineeGo', html });
+        }
+
+        // Notify all admins
+        await notifyAdmins({
+          type: 'order_status_changed',
+          title: '🛡️ Nouveau Super User',
+          body: `${userName} (${userEmail || userId}) a été promu super_user`,
+          data: { userId, role: 'super_user' },
+        });
+
+        // Email to admins
+        const adminsSnap = await db.collection('users').where('role', '==', 'admin').get();
+        for (const adminDoc of adminsSnap.docs) {
+          const adminEmail = adminDoc.data().email;
+          if (adminEmail) {
+            const html = wrapInTemplate(`
+              ${sectionTitle('🛡️', 'Nouveau Super User créé')}
+              <p style="font-size: 15px; color: ${COLORS.bodyText}; line-height: 1.6;">
+                Un nouveau <strong>Super User</strong> a été créé sur la plateforme :
+              </p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${COLORS.lightBg}; border-radius: 8px; margin: 16px 0;">
+                <tr><td style="padding: 16px;">
+                  <p style="margin: 0 0 4px; font-size: 14px; color: ${COLORS.mutedText};">Nom</p>
+                  <p style="margin: 0 0 12px; font-size: 15px; font-weight: 600; color: ${COLORS.darkText};">${userName}</p>
+                  <p style="margin: 0 0 4px; font-size: 14px; color: ${COLORS.mutedText};">Email</p>
+                  <p style="margin: 0 0 12px; font-size: 15px; color: ${COLORS.darkText};">${userEmail || '—'}</p>
+                  <p style="margin: 0 0 4px; font-size: 14px; color: ${COLORS.mutedText};">Ancien rôle</p>
+                  <p style="margin: 0; font-size: 15px; color: ${COLORS.darkText};">${oldRole || 'customer'}</p>
+                </td></tr>
+              </table>
+              ${ctaButton('Gérer les Super Users', 'https://guineego.app/admin/super-users')}
+            `);
+            await sendEmailWithFallback({ to: adminEmail, subject: '🛡️ Nouveau Super User — GuineeGo', html });
+          }
+        }
+      }
+
+      if (oldRole === 'super_user' && newRole !== 'super_user') {
+        // Super user REVOKED
+        console.log(`🔔 Super user revoked: ${userName} (${userId})`);
+
+        // Email to the revoked user
+        if (userEmail) {
+          const html = wrapInTemplate(`
+            ${sectionTitle('🔒', 'Rôle Super User révoqué')}
+            <p style="font-size: 15px; color: ${COLORS.bodyText}; line-height: 1.6;">
+              Bonjour <strong>${userName}</strong>,
+            </p>
+            <p style="font-size: 15px; color: ${COLORS.bodyText}; line-height: 1.6;">
+              Votre accès <strong>Super User</strong> a été révoqué. Votre rôle est maintenant : <strong>${newRole}</strong>.
+            </p>
+            <p style="font-size: 14px; color: ${COLORS.mutedText};">
+              Si vous pensez que c'est une erreur, contactez un administrateur.
+            </p>
+            ${ctaButton('Accéder à GuineeGo', 'https://guineego.app')}
+          `);
+          await sendEmailWithFallback({ to: userEmail, subject: '🔒 Accès Super User révoqué — GuineeGo', html });
+        }
+
+        // Notify admins
+        await notifyAdmins({
+          type: 'order_status_changed',
+          title: '🔒 Super User révoqué',
+          body: `${userName} (${userEmail || userId}) n'est plus super_user → ${newRole}`,
+          data: { userId, role: newRole },
+        });
+      }
+
       console.log(`Custom claims set for user ${userId}:`, claims);
       return { success: true };
     } catch (error) {
