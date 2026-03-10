@@ -13,6 +13,7 @@ import {
   Wallet,
   FileText,
   Shield,
+  ShieldCheck,
   Bell,
   HelpCircle,
   Store,
@@ -61,6 +62,13 @@ const managementItems = [
     icon: Users,
     badge: null,
     description: "Gestion des comptes"
+  },
+  { 
+    title: "Super Users", 
+    url: "/admin/super-users", 
+    icon: ShieldCheck,
+    badge: null,
+    description: "Gestion des super utilisateurs"
   },
   { 
     title: "Demandes de rôle", 

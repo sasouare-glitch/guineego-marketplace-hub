@@ -69,10 +69,11 @@ const roleLabels: Record<string, { label: string; variant: 'default' | 'secondar
   courier: { label: 'Coursier', variant: 'outline', icon: <Truck className="w-3 h-3" /> },
   closer: { label: 'Closer', variant: 'outline', icon: <ShieldCheck className="w-3 h-3" /> },
   investor: { label: 'Investisseur', variant: 'default', icon: <TrendingUp className="w-3 h-3" /> },
+  super_user: { label: 'Super User', variant: 'default', icon: <ShieldCheck className="w-3 h-3" /> },
   admin: { label: 'Admin', variant: 'destructive', icon: <ShieldCheck className="w-3 h-3" /> },
 };
 
-const allRoles: UserRole[] = ['customer', 'ecommerce', 'courier', 'closer', 'investor', 'admin'];
+const allRoles: UserRole[] = ['customer', 'ecommerce', 'courier', 'closer', 'investor', 'super_user', 'admin'];
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();

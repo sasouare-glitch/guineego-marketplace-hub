@@ -89,6 +89,7 @@ import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage";
 import AdminSecurityPage from "./pages/admin/AdminSecurityPage";
 import AdminEmailsPage from "./pages/admin/AdminEmailsPage";
 import AdminRoleRequestsPage from "./pages/admin/AdminRoleRequestsPage";
+import AdminSuperUsersPage from "./pages/admin/AdminSuperUsersPage";
 import AdminSmsConfigPage from "./pages/admin/AdminSmsConfigPage";
 import AdminSmsLogsPage from "./pages/admin/AdminSmsLogsPage";
 import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
@@ -456,6 +457,11 @@ const App = () => (
                      <Route path="/admin/role-requests" element={
                        <ProtectedRoute requiredRoles={['admin']}>
                          <AdminRoleRequestsPage />
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/admin/super-users" element={
+                       <ProtectedRoute requiredRoles={['admin']}>
+                         <AdminSuperUsersPage />
                        </ProtectedRoute>
                      } />
                      
