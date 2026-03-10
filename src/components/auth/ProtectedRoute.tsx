@@ -46,8 +46,11 @@ export function ProtectedRoute({
       return <>{children}</>;
     }
 
+    // super_user bypass - accès à toutes les routes protégées
+    const effectiveRoles = [...new Set([...requiredRoles, ...SUPER_ROLES])];
+
     // hasAnyRole now also checks profile fallback
-    if (hasAnyRole(requiredRoles)) {
+    if (hasAnyRole(effectiveRoles)) {
       return <>{children}</>;
     }
 
