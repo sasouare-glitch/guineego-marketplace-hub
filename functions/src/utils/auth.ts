@@ -6,7 +6,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
 // User roles enum
-export type UserRole = 'customer' | 'ecommerce' | 'closer' | 'courier' | 'investor' | 'admin';
+export type UserRole = 'customer' | 'ecommerce' | 'closer' | 'courier' | 'investor' | 'super_user' | 'admin';
 
 export interface UserClaims {
   role: UserRole;
