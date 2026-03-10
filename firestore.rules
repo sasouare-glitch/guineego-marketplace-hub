@@ -380,7 +380,7 @@ service cloud.firestore {
       allow read: if true; // Public storefront
       allow create: if isOwner(sellerId) && isSeller();
       allow update: if isOwner(sellerId) || isAdmin();
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
