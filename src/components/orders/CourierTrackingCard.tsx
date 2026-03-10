@@ -116,11 +116,9 @@ export function CourierTrackingCard({ deliveryMissionId }: CourierTrackingCardPr
               )}
             </div>
             {delivery.courierPhone && (
-              <a href={`tel:${delivery.courierPhone}`}>
-                <Button variant="outline" size="icon" className="h-9 w-9 shrink-0">
+              <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={() => { window.location.href = `tel:${delivery.courierPhone}`; }}>
                   <Phone className="w-4 h-4" />
                 </Button>
-              </a>
             )}
           </div>
         )}
