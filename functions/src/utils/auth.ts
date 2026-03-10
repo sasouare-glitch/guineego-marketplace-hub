@@ -54,7 +54,7 @@ export function verifyRole(
  * Verify user is admin
  */
 export function verifyAdmin(context: functions.https.CallableContext): void {
-  verifyRole(context, ['admin']);
+  verifyRole(context, ['admin', 'super_user']);
 }
 
 /**
