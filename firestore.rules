@@ -289,7 +289,8 @@ service cloud.firestore {
     // ============================================
     match /config/{configId} {
       allow read: if isAdmin();
-      allow write: if isAdmin();
+      allow create, update: if isStrictAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
@@ -390,7 +391,7 @@ service cloud.firestore {
       allow read: if isAdmin() || isSellerScopeId(resource.data.sellerId);
       allow create: if isSeller() && isSellerScopeId(request.resource.data.sellerId);
       allow update: if isAdmin() || isSellerScopeId(resource.data.sellerId);
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
@@ -400,7 +401,7 @@ service cloud.firestore {
       allow read: if isAdmin() || isSellerScopeId(resource.data.sellerId);
       allow create: if isSeller() && isSellerScopeId(request.resource.data.sellerId);
       allow update: if isAdmin() || isSellerScopeId(resource.data.sellerId);
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
