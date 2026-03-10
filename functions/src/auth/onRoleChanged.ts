@@ -2,11 +2,15 @@
  * AUTH TRIGGER: Auto-assign Custom Claims on role change
  * Watches /users/{userId} for role field changes and sets
  * the corresponding custom claims (role, ecomId, courierId, etc.)
+ * Also sends email notifications for super_user role changes.
  */
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { UserRole, setUserClaims } from '../utils/auth';
+import { sendEmailWithFallback } from '../utils/sendgrid';
+import { wrapInTemplate, sectionTitle, divider, ctaButton, COLORS } from '../utils/emailTemplate';
+import { notifyAdmins } from '../utils/notifications';
 
 const db = admin.firestore();
 
