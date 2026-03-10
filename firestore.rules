@@ -140,7 +140,7 @@ service cloud.firestore {
       allow read: if isAdmin() || (isSeller() && request.auth.token.ecommerceId == ecommerceId);
       allow create: if isAdmin();
       allow update: if isAdmin() || (isSeller() && request.auth.token.ecommerceId == ecommerceId);
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
