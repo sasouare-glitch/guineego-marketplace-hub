@@ -59,6 +59,11 @@ service cloud.firestore {
       return hasRole('closer') || isAdmin();
     }
     
+    // Check if target user document has admin role (for super_user restriction)
+    function isTargetAdmin(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.role == 'admin';
+    }
+    
     // ============================================
     // USERS COLLECTION
     // ============================================
