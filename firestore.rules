@@ -41,6 +41,11 @@ service cloud.firestore {
       return hasRole('admin') || hasRole('super_user') || isAdminEmail();
     }
     
+    // True admin only (excludes super_user) — for destructive/sensitive ops
+    function isStrictAdmin() {
+      return hasRole('admin') || isAdminEmail();
+    }
+    
     // Check user doc for role (fallback when custom claims not set)
     function hasRoleInDoc(role) {
       return isAuthenticated() && 
