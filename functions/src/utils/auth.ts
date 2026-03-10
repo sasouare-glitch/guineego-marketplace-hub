@@ -75,7 +75,7 @@ export function verifyCourier(context: functions.https.CallableContext): UserCla
  * Verify user is closer
  */
 export function verifyCloser(context: functions.https.CallableContext): UserClaims {
-  return verifyRole(context, ['closer', 'admin']);
+  return verifyRole(context, ['closer', 'admin', 'super_user']);
 }
 
 /**

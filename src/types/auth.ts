@@ -7,6 +7,7 @@ export type UserRole =
   | 'courier'       // Coursier / Livreur
   | 'closer'        // Closer (finalisation ventes)
   | 'investor'      // Investisseur
+  | 'super_user'    // Super utilisateur (tout voir/modifier, sauf changer rôle admin)
   | 'admin';        // Administrateur
 
 // Structure des Custom Claims Firebase

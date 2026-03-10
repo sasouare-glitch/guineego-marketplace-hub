@@ -28,25 +28,29 @@ export function RoleGate({ children, allowedRoles, fallback = null }: RoleGatePr
 
 // Composants pré-configurés pour chaque rôle
 export function AdminOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return <RoleGate allowedRoles={['admin']} fallback={fallback}>{children}</RoleGate>;
+  return <RoleGate allowedRoles={['admin', 'super_user']} fallback={fallback}>{children}</RoleGate>;
 }
 
 export function SellerOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return <RoleGate allowedRoles={['ecommerce', 'admin']} fallback={fallback}>{children}</RoleGate>;
+  return <RoleGate allowedRoles={['ecommerce', 'admin', 'super_user']} fallback={fallback}>{children}</RoleGate>;
 }
 
 export function CourierOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return <RoleGate allowedRoles={['courier', 'admin']} fallback={fallback}>{children}</RoleGate>;
+  return <RoleGate allowedRoles={['courier', 'admin', 'super_user']} fallback={fallback}>{children}</RoleGate>;
 }
 
 export function CloserOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return <RoleGate allowedRoles={['closer', 'admin']} fallback={fallback}>{children}</RoleGate>;
+  return <RoleGate allowedRoles={['closer', 'admin', 'super_user']} fallback={fallback}>{children}</RoleGate>;
 }
 
 export function InvestorOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return <RoleGate allowedRoles={['investor', 'admin']} fallback={fallback}>{children}</RoleGate>;
+  return <RoleGate allowedRoles={['investor', 'admin', 'super_user']} fallback={fallback}>{children}</RoleGate>;
 }
 
 export function CustomerOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return <RoleGate allowedRoles={['customer', 'admin']} fallback={fallback}>{children}</RoleGate>;
+  return <RoleGate allowedRoles={['customer', 'admin', 'super_user']} fallback={fallback}>{children}</RoleGate>;
+}
+
+export function SuperUserOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+  return <RoleGate allowedRoles={['super_user', 'admin']} fallback={fallback}>{children}</RoleGate>;
 }
