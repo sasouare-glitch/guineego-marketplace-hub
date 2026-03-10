@@ -442,14 +442,68 @@ export default function AdminSuperUsersPage() {
                       Toutes les actions effectuées par les comptes super_user
                     </CardDescription>
                   </div>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Filtrer les actions..."
-                      className="pl-9 w-64"
-                      value={auditSearch}
-                      onChange={(e) => setAuditSearch(e.target.value)}
-                    />
+                   <div className="flex flex-wrap gap-2 items-center">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Filtrer les actions..."
+                        className="pl-9 w-48"
+                        value={auditSearch}
+                        onChange={(e) => setAuditSearch(e.target.value)}
+                      />
+                    </div>
+
+                    {/* Date From */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", !dateFrom && "text-muted-foreground")}>
+                          <CalendarIcon className="w-3.5 h-3.5" />
+                          {dateFrom ? format(dateFrom, 'dd MMM yyyy', { locale: fr }) : 'Du'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dateFrom}
+                          onSelect={setDateFrom}
+                          disabled={(d) => d > new Date()}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Date To */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", !dateTo && "text-muted-foreground")}>
+                          <CalendarIcon className="w-3.5 h-3.5" />
+                          {dateTo ? format(dateTo, 'dd MMM yyyy', { locale: fr }) : 'Au'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dateTo}
+                          onSelect={setDateTo}
+                          disabled={(d) => d > new Date()}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Presets */}
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="text-xs h-8 px-2" onClick={() => setPreset(7)}>7j</Button>
+                      <Button variant="ghost" size="sm" className="text-xs h-8 px-2" onClick={() => setPreset(30)}>30j</Button>
+                    </div>
+
+                    {(dateFrom || dateTo) && (
+                      <Button variant="ghost" size="sm" className="text-xs h-8 px-2 text-muted-foreground" onClick={clearDateFilters}>
+                        <X className="w-3 h-3 mr-1" /> Effacer
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
