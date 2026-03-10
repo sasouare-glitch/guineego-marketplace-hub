@@ -13,6 +13,7 @@ import {
   Wallet,
   FileText,
   Shield,
+  ShieldCheck,
   Bell,
   HelpCircle,
   Store,
