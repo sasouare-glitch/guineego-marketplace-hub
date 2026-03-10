@@ -401,7 +401,7 @@ service cloud.firestore {
       allow read: if isAdmin() || isSellerScopeId(resource.data.sellerId);
       allow create: if isSeller() && isSellerScopeId(request.resource.data.sellerId);
       allow update: if isAdmin() || isSellerScopeId(resource.data.sellerId);
-      allow delete: if isAdmin();
+      allow delete: if isStrictAdmin();
     }
     
     // ============================================
