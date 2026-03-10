@@ -228,15 +228,15 @@ const CourierMissionDetail = () => {
               )}
             </div>
             <div className="flex gap-2">
-              {mission.pickup.phone && (
+              {mission.delivery.phone && (
                 <Button
                   variant="outline"
                   size="sm"
                   className="flex-1 gap-2"
-                  onClick={() => window.open(`tel:${mission.pickup.phone}`)}
+                  onClick={() => window.open(`tel:${mission.delivery.phone}`)}
                 >
                   <Phone className="w-4 h-4" />
-                  Appeler
+                  Appeler le client
                 </Button>
               )}
               <Button
