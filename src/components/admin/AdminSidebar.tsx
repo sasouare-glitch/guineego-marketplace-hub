@@ -64,6 +64,13 @@ const managementItems = [
     description: "Gestion des comptes"
   },
   { 
+    title: "Super Users", 
+    url: "/admin/super-users", 
+    icon: ShieldCheck,
+    badge: null,
+    description: "Gestion des super utilisateurs"
+  },
+  { 
     title: "Demandes de rôle", 
     url: "/admin/role-requests", 
     icon: UserPlus,
