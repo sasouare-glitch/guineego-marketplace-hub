@@ -61,7 +61,7 @@ export function verifyAdmin(context: functions.https.CallableContext): void {
  * Verify user is e-commerce seller
  */
 export function verifySeller(context: functions.https.CallableContext): UserClaims {
-  return verifyRole(context, ['ecommerce', 'admin']);
+  return verifyRole(context, ['ecommerce', 'admin', 'super_user']);
 }
 
 /**
