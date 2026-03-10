@@ -59,16 +59,23 @@ service cloud.firestore {
       return hasRole('closer') || isAdmin();
     }
     
+    // Check if target user document has admin role (for super_user restriction)
+    function isTargetAdmin(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.role == 'admin';
+    }
+    
     // ============================================
     // USERS COLLECTION
     // ============================================
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      // Permettre la création si l'utilisateur crée son propre document
-      // isOwner vérifie que request.auth.uid == userId
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isOwner(userId) || isAdmin();
-      allow delete: if isAdmin();
+      
+      // Super_user cannot modify an admin's document role field
+      allow update: if isOwner(userId) 
+                    || (hasRole('admin') || isAdminEmail())
+                    || (hasRole('super_user') && !isTargetAdmin(userId));
+      allow delete: if hasRole('admin') || isAdminEmail();
     }
     
     // ============================================
