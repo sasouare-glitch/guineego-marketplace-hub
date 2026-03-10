@@ -239,18 +239,17 @@ const CourierMissionDetail = () => {
                   Appeler le client
                 </Button>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 gap-2"
-                onClick={() => {
-                  const addr = encodeURIComponent(`${mission.pickup.address}, ${mission.pickup.commune}, Conakry, Guinée`);
-                  window.open(`https://www.google.com/maps/dir/?api=1&destination=${addr}`, "_blank");
-                }}
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${mission.pickup.address}, ${mission.pickup.commune}, Conakry, Guinée`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1"
               >
-                <Navigation className="w-4 h-4" />
-                Naviguer
-              </Button>
+                <Button variant="outline" size="sm" className="w-full gap-2">
+                  <Navigation className="w-4 h-4" />
+                  Naviguer
+                </Button>
+              </a>
             </div>
           </CardContent>
         </Card>
