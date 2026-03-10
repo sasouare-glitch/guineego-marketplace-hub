@@ -107,7 +107,6 @@ export default function AdminSuperUsersPage() {
     const q = query(
       collection(db, 'users'),
       where('role', '==', 'super_user'),
-      orderBy('metadata.createdAt', 'desc'),
       limit(100)
     );
 
