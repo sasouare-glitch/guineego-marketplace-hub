@@ -157,7 +157,9 @@ export function useRealtimeCounters() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing realtime counters:', e); }
+    };
   }, []);
 
   return { counters, loading };
