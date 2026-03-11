@@ -256,7 +256,9 @@ export function useRollingMetrics() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing rolling metrics:', e); }
+    };
   }, []);
 
   return { metrics, loading };
