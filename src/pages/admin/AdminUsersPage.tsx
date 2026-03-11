@@ -109,7 +109,7 @@ export default function AdminUsersPage() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
   }, []);
 
   // Filter users

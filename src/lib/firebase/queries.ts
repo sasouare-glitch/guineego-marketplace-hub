@@ -285,6 +285,6 @@ export function useDocumentListener<T extends FirestoreDoc>(
       }
     });
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
   }, [collectionPath, docId, onUpdate]);
 }
