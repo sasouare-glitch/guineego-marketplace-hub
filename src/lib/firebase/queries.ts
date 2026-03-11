@@ -258,7 +258,7 @@ export function useRealtimeCollection<T extends FirestoreDoc>(
       }
     );
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
   }, [collectionPath, JSON.stringify(constraints.map(c => c.toString()))]);
 
   return { data, loading, error };
