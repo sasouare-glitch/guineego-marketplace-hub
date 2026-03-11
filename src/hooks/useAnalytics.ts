@@ -210,7 +210,9 @@ export function useDailyReports(days: number = 30) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing daily reports:', e); }
+    };
   }, [days]);
 
   return { reports, loading };
