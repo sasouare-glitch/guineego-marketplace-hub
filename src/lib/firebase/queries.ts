@@ -219,7 +219,7 @@ export function useRealtimeDoc<T extends FirestoreDoc>(
       }
     );
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
   }, [collectionPath, docId]);
 
   return { data, loading, error };
