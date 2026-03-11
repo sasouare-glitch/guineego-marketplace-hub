@@ -81,7 +81,7 @@ export function useAdminNotifications() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
   }, []);
 
   const sendNotification = useCallback(async (data: {

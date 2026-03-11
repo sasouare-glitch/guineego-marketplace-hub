@@ -79,7 +79,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       console.error("Error listening to notifications:", error);
     });
 
-    return () => unsubscribe();
+    return () => {
+      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing notifications:', e); }
+    };
   }, [user?.uid]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;

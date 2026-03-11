@@ -219,7 +219,7 @@ export function useRealtimeDoc<T extends FirestoreDoc>(
       }
     );
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
   }, [collectionPath, docId]);
 
   return { data, loading, error };
@@ -258,7 +258,7 @@ export function useRealtimeCollection<T extends FirestoreDoc>(
       }
     );
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
   }, [collectionPath, JSON.stringify(constraints.map(c => c.toString()))]);
 
   return { data, loading, error };
@@ -285,6 +285,6 @@ export function useDocumentListener<T extends FirestoreDoc>(
       }
     });
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
   }, [collectionPath, docId, onUpdate]);
 }

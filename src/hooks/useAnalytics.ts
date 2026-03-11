@@ -157,7 +157,9 @@ export function useRealtimeCounters() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing realtime counters:', e); }
+    };
   }, []);
 
   return { counters, loading };
@@ -208,7 +210,9 @@ export function useDailyReports(days: number = 30) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing daily reports:', e); }
+    };
   }, [days]);
 
   return { reports, loading };
@@ -252,7 +256,9 @@ export function useRollingMetrics() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing rolling metrics:', e); }
+    };
   }, []);
 
   return { metrics, loading };
