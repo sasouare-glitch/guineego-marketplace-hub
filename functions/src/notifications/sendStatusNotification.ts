@@ -19,6 +19,7 @@ interface StatusNotificationData {
   customerName?: string;
   commune?: string;
   total?: number;
+  phone?: string;
 }
 
 const statusMessages: Record<NotifiableStatus, { emoji: string; title: string; body: string; sms: string }> = {
@@ -86,10 +87,12 @@ export async function sendStatusNotification(data: StatusNotificationData): Prom
     promises.push(sendStatusEmail(customer.email, orderId, status, msgConfig, customerName));
   }
 
-  // 2. SMS
-  const phone = customer.phone || customer.phoneNumber;
+  // 2. SMS — priorité: phone passé en paramètre > shippingAddress > profil utilisateur
+  const phone = data.phone || customer.phone || customer.phoneNumber;
   if (phone) {
     promises.push(sendStatusSMS(phone, orderId, status, msgConfig));
+  } else {
+    console.warn(`⚠️ Pas de numéro de téléphone trouvé pour le client ${customerId} — SMS non envoyé`);
   }
 
   await Promise.allSettled(promises);

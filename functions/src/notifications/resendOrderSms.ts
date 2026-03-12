@@ -42,6 +42,7 @@ export const resendOrderSms = functions
         customerName: order.shippingAddress?.fullName,
         commune: order.shippingAddress?.commune,
         total: order.pricing?.total,
+        phone: order.shippingAddress?.phone,
       });
 
       return { success: true, message: `SMS renvoyé pour la commande ${orderId}` };
