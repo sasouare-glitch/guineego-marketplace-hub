@@ -191,6 +191,7 @@ export const onOrderStatusChanged = functions
           customerName: after.shippingAddress?.fullName,
           commune: after.shippingAddress?.commune,
           total: after.pricing?.total,
+          phone: after.shippingAddress?.phone,
         });
       }
 
