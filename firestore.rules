@@ -459,5 +459,61 @@ service cloud.firestore {
       allow update: if isAdmin();
       allow delete: if isStrictAdmin();
     }
+    
+    // ============================================
+    // PRODUCT INDEX (search index, Cloud Functions only)
+    // ============================================
+    match /product_index/{docId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // CATEGORIES COLLECTION
+    // ============================================
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // ALERTS COLLECTION (low stock, etc.)
+    // ============================================
+    match /alerts/{alertId} {
+      allow read: if isAdmin() || isSellerScopeId(resource.data.sellerId);
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // DAILY STATS (analytics, Cloud Functions only)
+    // ============================================
+    match /daily_stats/{docId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // REALTIME COUNTERS (analytics dashboard)
+    // ============================================
+    match /realtime_counters/{docId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // COURIER DAILY STATS
+    // ============================================
+    match /courier_daily_stats/{docId} {
+      allow read: if isAdmin() || (isCourier() && resource.data.courierId == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // COUPONS COLLECTION
+    // ============================================
+    match /coupons/{couponId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isStrictAdmin();
+    }
   }
 }
