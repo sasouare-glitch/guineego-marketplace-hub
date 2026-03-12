@@ -4,8 +4,12 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
+const projectRoot = path.resolve(__dirname);
+const indexHtmlEntry = path.resolve(projectRoot, "index.html");
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  root: projectRoot,
   server: {
     host: "::",
     port: 8080,
@@ -135,6 +139,11 @@ export default defineConfig(({ mode }) => ({
       }
     })
   ].filter(Boolean),
+  build: {
+    rollupOptions: {
+      input: indexHtmlEntry,
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
