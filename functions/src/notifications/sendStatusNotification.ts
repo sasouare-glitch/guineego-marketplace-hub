@@ -19,6 +19,7 @@ interface StatusNotificationData {
   customerName?: string;
   commune?: string;
   total?: number;
+  phone?: string;
 }
 
 const statusMessages: Record<NotifiableStatus, { emoji: string; title: string; body: string; sms: string }> = {
