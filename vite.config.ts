@@ -1,11 +1,12 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { fileURLToPath } from "url";
 import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
-const projectRoot = path.resolve(__dirname);
-const indexHtmlEntry = path.resolve(projectRoot, "index.html");
+const projectRoot = fileURLToPath(new URL(".", import.meta.url));
+const indexHtmlEntry = fileURLToPath(new URL("./index.html", import.meta.url));
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
