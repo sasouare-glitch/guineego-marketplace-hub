@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-ignore
+const BUILD_DATE: string = typeof __BUILD_DATE__ !== 'undefined' ? __BUILD_DATE__ : 'dev';
+
 import { Link } from "react-router-dom";
 import { 
   Package, 
@@ -159,7 +163,8 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="container-tight py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/50 text-sm">
-            © 2024 GuineeGo LAT. {t.footer.copyright}.
+            © 2024 GuineeGo LAT. {t.footer.copyright}. 
+            <span className="ml-2 text-white/30 font-mono text-xs">v1.0.0-{BUILD_DATE}</span>
           </p>
           <div className="flex gap-6 text-sm">
             <Link to="/privacy" className="text-white/50 hover:text-guinea-yellow transition-colors">
