@@ -19,6 +19,9 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  css: {
+    postcss: "./postcss.config.cjs",
+  },
   plugins: [
     react(),
     mode === "development" && componentTagger(),
