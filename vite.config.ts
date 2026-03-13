@@ -139,8 +139,30 @@ export default defineConfig(({ mode }) => ({
     })
   ].filter(Boolean),
   build: {
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       input: path.resolve(projectRoot, "index.html"),
+      output: {
+        manualChunks: {
+          'firebase-core': ['firebase/app'],
+          'firebase-auth': ['firebase/auth'],
+          'firebase-firestore': ['firebase/firestore'],
+          'firebase-storage': ['firebase/storage'],
+          'firebase-functions': ['firebase/functions'],
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['framer-motion', 'recharts', '@tanstack/react-query'],
+          'vendor-radix': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-select',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-alert-dialog',
+          ],
+        },
+      },
     },
   },
   resolve: {
