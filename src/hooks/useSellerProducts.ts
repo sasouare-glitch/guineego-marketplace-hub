@@ -66,6 +66,7 @@ export interface NewProductData {
 
 export function useSellerProducts() {
   const { user, claims } = useAuth();
+  const { currentPlan } = useSellerSubscription();
   const [products, setProducts] = useState<SellerProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
