@@ -12,6 +12,8 @@ import {
   Check,
   Trash2,
   X,
+  Megaphone,
+  RefreshCw,
 } from "lucide-react";
 import {
   Popover,
@@ -32,6 +34,7 @@ const iconMap = {
   "map-pin": MapPin,
   tag: Tag,
   info: Info,
+  megaphone: Megaphone,
 };
 
 function NotificationItem({
@@ -87,6 +90,16 @@ function NotificationItem({
         <p className="text-xs text-muted-foreground mt-1">
           {getTimeAgo(notification.createdAt)}
         </p>
+        {notification.type === "sponsoring_expiring" && notification.data?.productId && (
+          <Link
+            to={`/seller/products?sponsor=${notification.data.productId}`}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 text-xs font-medium rounded-md bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 transition-colors"
+          >
+            <RefreshCw className="w-3 h-3" />
+            Renouveler le sponsoring
+          </Link>
+        )}
       </div>
       <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
         {!notification.read && (

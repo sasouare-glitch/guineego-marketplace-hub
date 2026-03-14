@@ -1,9 +1,10 @@
 export interface Notification {
   id: string;
-  type: "order_confirmed" | "order_preparing" | "order_shipped" | "order_delivered" | "promo" | "system";
+  type: "order_confirmed" | "order_preparing" | "order_shipped" | "order_delivered" | "promo" | "system" | "sponsoring_expiring";
   title: string;
   message: string;
   orderId?: string;
+  data?: Record<string, string>;
   read: boolean;
   createdAt: string;
 }
@@ -38,6 +39,11 @@ export const notificationTypeConfig = {
     icon: "info",
     color: "text-muted-foreground",
     bgColor: "bg-secondary",
+  },
+  sponsoring_expiring: {
+    icon: "megaphone",
+    color: "text-amber-600",
+    bgColor: "bg-amber-500/10",
   },
 };
 
