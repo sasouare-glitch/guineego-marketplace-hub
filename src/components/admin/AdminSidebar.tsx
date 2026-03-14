@@ -21,7 +21,8 @@ import {
   Globe,
   Mail,
   UserPlus,
-  MessageSquare
+  MessageSquare,
+  Percent,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -126,6 +127,12 @@ const financeItems = [
     url: "/admin/finances", 
     icon: Wallet,
     description: "Revenus et paiements"
+  },
+  { 
+    title: "Commissions", 
+    url: "/admin/commissions", 
+    icon: Percent,
+    description: "Taux par catégorie"
   },
   { 
     title: "Rapports", 
