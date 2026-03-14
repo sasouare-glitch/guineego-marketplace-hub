@@ -297,6 +297,11 @@ const App = () => (
                         <SellerSettingsPage />
                       </ProtectedRoute>
                     } />
+                    <Route path="/seller/subscription" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerSubscriptionPage />
+                      </ProtectedRoute>
+                    } />
                     
                     {/* Courier Routes (Protected - courier role) */}
                     {/* Mobile-first courier interface */}

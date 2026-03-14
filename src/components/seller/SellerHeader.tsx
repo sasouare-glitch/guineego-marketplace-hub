@@ -150,10 +150,13 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
                 </div>
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium">{displayName}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Store className="h-3 w-3" />
-                    {storeName || "Vendeur Pro"}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Store className="h-3 w-3" />
+                      {storeName || "Ma boutique"}
+                    </span>
+                    <SellerPlanBadge badge={currentPlan.badge} />
+                  </div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>
