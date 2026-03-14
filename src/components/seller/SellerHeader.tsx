@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchDocument } from "@/lib/firebase/queries";
+import { useSellerSubscription } from "@/hooks/useSellerSubscription";
+import { SellerPlanBadge } from "@/components/seller/SellerPlanBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
