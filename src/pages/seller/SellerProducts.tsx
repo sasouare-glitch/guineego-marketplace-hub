@@ -270,6 +270,11 @@ export default function SellerProducts() {
                             <span className="font-medium text-foreground line-clamp-1">
                               {product.name}
                             </span>
+                            {(product as any).isSponsored && (
+                              <Badge className="bg-accent/10 text-accent border-accent/20 text-[10px] ml-1">
+                                <Megaphone className="w-3 h-3 mr-0.5" /> Sponsorisé
+                              </Badge>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 hidden md:table-cell">
