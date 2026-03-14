@@ -33,6 +33,11 @@ function mapDocBasic(doc: any): Product & { _sellerId?: string } {
     ? Math.round(((d.originalPrice - d.price) / d.originalPrice) * 100)
     : d.discount || undefined;
 
+  // Check if sponsorship is still active
+  const now = new Date();
+  const sponsoredUntil = d.sponsoredUntil?.toDate?.() || (d.sponsoredUntil ? new Date(d.sponsoredUntil) : null);
+  const isSponsored = d.isSponsored === true && sponsoredUntil && sponsoredUntil > now;
+
   return {
     id: doc.id,
     name: d.name || '',
@@ -47,6 +52,7 @@ function mapDocBasic(doc: any): Product & { _sellerId?: string } {
     discount,
     isNew: d.isNew ?? false,
     isBestSeller: d.isBestSeller ?? false,
+    isSponsored: isSponsored || false,
     _sellerId: d.sellerId || d.seller || '',
   };
 }
