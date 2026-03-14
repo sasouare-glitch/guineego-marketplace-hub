@@ -40,6 +40,11 @@ export const notificationTypeConfig = {
     color: "text-muted-foreground",
     bgColor: "bg-secondary",
   },
+  sponsoring_expiring: {
+    icon: "megaphone",
+    color: "text-amber-600",
+    bgColor: "bg-amber-500/10",
+  },
 };
 
 // Mock notifications for demo
