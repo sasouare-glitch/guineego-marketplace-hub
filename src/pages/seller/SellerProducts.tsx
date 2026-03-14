@@ -85,6 +85,7 @@ export default function SellerProducts() {
   const [stockDialog, setStockDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
   const [editDialog, setEditDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
+  const [sponsorDialog, setSponsorDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
