@@ -129,6 +129,12 @@ const financeItems = [
     description: "Revenus et paiements"
   },
   { 
+    title: "Commissions", 
+    url: "/admin/commissions", 
+    icon: Percent,
+    description: "Taux par catégorie"
+  },
+  { 
     title: "Rapports", 
     url: "/admin/reports", 
     icon: FileText,
