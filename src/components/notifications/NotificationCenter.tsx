@@ -12,6 +12,8 @@ import {
   Check,
   Trash2,
   X,
+  Megaphone,
+  RefreshCw,
 } from "lucide-react";
 import {
   Popover,
