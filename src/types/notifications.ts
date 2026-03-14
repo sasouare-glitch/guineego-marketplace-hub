@@ -1,9 +1,10 @@
 export interface Notification {
   id: string;
-  type: "order_confirmed" | "order_preparing" | "order_shipped" | "order_delivered" | "promo" | "system";
+  type: "order_confirmed" | "order_preparing" | "order_shipped" | "order_delivered" | "promo" | "system" | "sponsoring_expiring";
   title: string;
   message: string;
   orderId?: string;
+  data?: Record<string, string>;
   read: boolean;
   createdAt: string;
 }
