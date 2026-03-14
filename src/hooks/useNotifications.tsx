@@ -70,6 +70,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           title: data.title || data.body || "",
           message: data.message || data.body || "",
           orderId: data.data?.orderId || data.orderId,
+          data: data.data || undefined,
           read: data.read ?? false,
           createdAt,
         };
