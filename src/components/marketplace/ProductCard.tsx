@@ -22,6 +22,7 @@ export interface Product {
   discount?: number;
   isNew?: boolean;
   isBestSeller?: boolean;
+  isSponsored?: boolean;
 }
 
 interface ProductCardProps {
