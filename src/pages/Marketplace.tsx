@@ -39,7 +39,7 @@ const Marketplace = () => {
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
   const { t } = useTranslation();
-  const { flashSaleProducts, newArrivals, bestSellers, loading } = useMarketplaceProducts();
+  const { flashSaleProducts, newArrivals, bestSellers, sponsoredProducts, loading } = useMarketplaceProducts();
 
   const featuresBar = [
     { icon: Truck, label: t.marketplace.fastDelivery, desc: t.marketplace.everywhereGuinea },
