@@ -18,6 +18,7 @@ import {
   PowerOff,
   BarChart3,
   Loader2,
+  Megaphone,
 } from "lucide-react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ import { useSellerProducts, type SellerProduct } from "@/hooks/useSellerProducts
 import { AddProductDialog } from "@/components/seller/AddProductDialog";
 import { EditProductDialog } from "@/components/seller/EditProductDialog";
 import { EditStockDialog } from "@/components/seller/EditStockDialog";
+import { SponsorProductDialog } from "@/components/seller/SponsorProductDialog";
 
 const statusConfig = {
   active: {
@@ -83,6 +85,7 @@ export default function SellerProducts() {
   const [stockDialog, setStockDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
   const [editDialog, setEditDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
+  const [sponsorDialog, setSponsorDialog] = useState<{ open: boolean; product: SellerProduct | null }>({ open: false, product: null });
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
@@ -267,6 +270,11 @@ export default function SellerProducts() {
                             <span className="font-medium text-foreground line-clamp-1">
                               {product.name}
                             </span>
+                            {(product as any).isSponsored && (
+                              <Badge className="bg-accent/10 text-accent border-accent/20 text-[10px] ml-1">
+                                <Megaphone className="w-3 h-3 mr-0.5" /> Sponsorisé
+                              </Badge>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 hidden md:table-cell">
@@ -326,6 +334,13 @@ export default function SellerProducts() {
                               >
                                 <BarChart3 className="w-4 h-4" />
                                 Gérer le stock
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="flex items-center gap-2"
+                                onClick={() => setSponsorDialog({ open: true, product })}
+                              >
+                                <Megaphone className="w-4 h-4" />
+                                {(product as any).isSponsored ? 'Gérer sponsorisation' : 'Sponsoriser'}
                               </DropdownMenuItem>
                               {product.status === 'active' ? (
                                 <DropdownMenuItem
@@ -524,6 +539,13 @@ export default function SellerProducts() {
           onSubmit={(newStock) => updateStock(stockDialog.product!.id, newStock)}
         />
       )}
+
+      {/* Sponsor Product Dialog */}
+      <SponsorProductDialog
+        open={sponsorDialog.open}
+        onOpenChange={(open) => setSponsorDialog({ open, product: open ? sponsorDialog.product : null })}
+        product={sponsorDialog.product}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ open, product: open ? deleteDialog.product : null })}>

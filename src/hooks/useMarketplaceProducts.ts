@@ -22,6 +22,7 @@ export interface MarketplaceProduct {
   discount?: number;
   isNew?: boolean;
   isBestSeller?: boolean;
+  isSponsored?: boolean;
 }
 
 // Cache store names
@@ -52,6 +53,10 @@ function mapFirestoreProduct(doc: any): MarketplaceProduct & { _sellerId?: strin
     ? Math.round(((d.originalPrice - d.price) / d.originalPrice) * 100)
     : d.discount || undefined;
 
+  const now = new Date();
+  const sponsoredUntil = d.sponsoredUntil?.toDate?.() || (d.sponsoredUntil ? new Date(d.sponsoredUntil) : null);
+  const isSponsored = d.isSponsored === true && sponsoredUntil && sponsoredUntil > now;
+
   return {
     id: doc.id,
     name: d.name || '',
@@ -66,6 +71,7 @@ function mapFirestoreProduct(doc: any): MarketplaceProduct & { _sellerId?: strin
     discount,
     isNew: d.isNew ?? false,
     isBestSeller: d.isBestSeller ?? false,
+    isSponsored: isSponsored || false,
     _sellerId: d.sellerId || d.seller || '',
   };
 }

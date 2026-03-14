@@ -1,4 +1,4 @@
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, Megaphone, ShoppingCart, Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ export interface Product {
   discount?: number;
   isNew?: boolean;
   isBestSeller?: boolean;
+  isSponsored?: boolean;
 }
 
 interface ProductCardProps {
@@ -65,6 +66,12 @@ export const ProductCard = ({
           {product.isBestSeller && (
             <Badge className="bg-guinea-yellow text-foreground text-xs">
               Best-seller
+            </Badge>
+          )}
+          {product.isSponsored && (
+            <Badge className="bg-accent/90 text-accent-foreground text-xs gap-0.5">
+              <Megaphone className="w-3 h-3" />
+              Sponsorisé
             </Badge>
           )}
         </div>
