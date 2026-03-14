@@ -34,6 +34,7 @@ const iconMap = {
   "map-pin": MapPin,
   tag: Tag,
   info: Info,
+  megaphone: Megaphone,
 };
 
 function NotificationItem({
