@@ -22,6 +22,7 @@ export interface MarketplaceProduct {
   discount?: number;
   isNew?: boolean;
   isBestSeller?: boolean;
+  isSponsored?: boolean;
 }
 
 // Cache store names
