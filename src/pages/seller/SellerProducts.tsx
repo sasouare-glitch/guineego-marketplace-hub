@@ -18,6 +18,7 @@ import {
   PowerOff,
   BarChart3,
   Loader2,
+  Megaphone,
 } from "lucide-react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { Button } from "@/components/ui/button";
