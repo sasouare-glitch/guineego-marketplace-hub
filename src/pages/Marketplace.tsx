@@ -105,6 +105,49 @@ const Marketplace = () => {
           </div>
         </div>
 
+        {/* Sponsored Products Carousel */}
+        {sponsoredProducts.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                  <Megaphone className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <h2 className="font-display text-xl font-bold">Produits sponsorisés</h2>
+                  <p className="text-sm text-muted-foreground">Sélection mise en avant par nos vendeurs</p>
+                </div>
+              </div>
+              <Button variant="ghost" asChild>
+                <Link to="/search" className="text-primary">
+                  {t.marketplace.viewAll} <ChevronRight className="w-4 h-4 ml-1" />
+                </Link>
+              </Button>
+            </div>
+            <div className="relative">
+              <Carousel
+                opts={{ align: "start", loop: sponsoredProducts.length > 4 }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-3">
+                  {(sponsoredProducts as Product[]).map((product) => (
+                    <CarouselItem key={product.id} className="pl-3 basis-1/2 md:basis-1/3 lg:basis-1/4">
+                      <ProductCard
+                        product={product}
+                        onAddToCart={() => addItem(product)}
+                        onToggleWishlist={() => toggleItem(product)}
+                        isInWishlist={isInWishlist(product.id)}
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="-left-4 hidden md:flex" />
+                <CarouselNext className="-right-4 hidden md:flex" />
+              </Carousel>
+            </div>
+          </section>
+        )}
+
         {/* Features Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {featuresBar.map((feature, index) => (

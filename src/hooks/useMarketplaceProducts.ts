@@ -140,17 +140,31 @@ export function useBestSellers(count = 4) {
 }
 
 /**
+ * Sponsored products: active sponsorships, sorted by sponsoredAt desc
+ */
+export function useSponsoredProducts(count = 8) {
+  return useFirestoreSection([
+    where('status', '==', 'active'),
+    where('isSponsored', '==', true),
+    orderBy('sponsoredAt', 'desc'),
+    limit(count),
+  ]);
+}
+
+/**
  * All marketplace sections in one call
  */
 export function useMarketplaceProducts() {
   const flashSales = useFlashSaleProducts();
   const newArrivals = useNewArrivals();
   const bestSellers = useBestSellers();
+  const sponsored = useSponsoredProducts();
 
   return {
     flashSaleProducts: flashSales.products,
     newArrivals: newArrivals.products,
     bestSellers: bestSellers.products,
-    loading: flashSales.loading || newArrivals.loading || bestSellers.loading,
+    sponsoredProducts: sponsored.products,
+    loading: flashSales.loading || newArrivals.loading || bestSellers.loading || sponsored.loading,
   };
 }
