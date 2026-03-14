@@ -116,6 +116,14 @@ export function useSellerProducts() {
   const addProduct = async (data: NewProductData) => {
     if (!sellerScopeId) throw new Error('Non authentifié');
 
+    // Enforce product limit based on subscription plan
+    if (products.length >= currentPlan.productLimit) {
+      toast.error(
+        `Limite atteinte (${currentPlan.productLimit} produits). Passez au plan supérieur pour ajouter plus de produits.`
+      );
+      throw new Error('Product limit reached');
+    }
+
     const productData = {
       name: data.name,
       description: data.description,
