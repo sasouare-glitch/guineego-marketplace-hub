@@ -122,6 +122,8 @@ export {
   onUserCreated
 } from './analytics/eventTracking';
 
+export { checkRevenueDrops } from './analytics/revenueAlerts';
+
 export { 
   dailyBigQueryExport,
   generateAccountingExport,
