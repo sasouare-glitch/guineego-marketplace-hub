@@ -20,6 +20,7 @@ import {
 import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { useSellerSubscription } from '@/hooks/useSellerSubscription';
 
 export interface SellerProduct {
   id: string;
