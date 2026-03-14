@@ -335,6 +335,13 @@ export default function SellerProducts() {
                                 <BarChart3 className="w-4 h-4" />
                                 Gérer le stock
                               </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="flex items-center gap-2"
+                                onClick={() => setSponsorDialog({ open: true, product })}
+                              >
+                                <Megaphone className="w-4 h-4" />
+                                {(product as any).isSponsored ? 'Gérer sponsorisation' : 'Sponsoriser'}
+                              </DropdownMenuItem>
                               {product.status === 'active' ? (
                                 <DropdownMenuItem
                                   className="flex items-center gap-2"
