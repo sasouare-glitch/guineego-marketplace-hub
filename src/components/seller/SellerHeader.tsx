@@ -34,6 +34,7 @@ interface SellerHeaderProps {
 
 export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHeaderProps) {
   const { user: firebaseUser, profile, signOut } = useAuth();
+  const { currentPlan } = useSellerSubscription();
   const [storeName, setStoreName] = useState<string>("");
 
   useEffect(() => {
