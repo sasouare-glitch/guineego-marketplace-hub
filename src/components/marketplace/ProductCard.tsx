@@ -68,6 +68,12 @@ export const ProductCard = ({
               Best-seller
             </Badge>
           )}
+          {product.isSponsored && (
+            <Badge className="bg-accent/90 text-accent-foreground text-xs gap-0.5">
+              <Megaphone className="w-3 h-3" />
+              Sponsorisé
+            </Badge>
+          )}
         </div>
 
         {/* Wishlist Button */}
