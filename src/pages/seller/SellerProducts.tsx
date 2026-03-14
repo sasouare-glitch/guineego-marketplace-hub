@@ -53,6 +53,7 @@ import { useSellerProducts, type SellerProduct } from "@/hooks/useSellerProducts
 import { AddProductDialog } from "@/components/seller/AddProductDialog";
 import { EditProductDialog } from "@/components/seller/EditProductDialog";
 import { EditStockDialog } from "@/components/seller/EditStockDialog";
+import { SponsorProductDialog } from "@/components/seller/SponsorProductDialog";
 
 const statusConfig = {
   active: {
