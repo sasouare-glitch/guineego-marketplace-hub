@@ -74,8 +74,10 @@ export function useAllProducts() {
           return { ...p, seller: storeName, sellerId: p._sellerId || '' };
         })
       );
-      // Remove internal field
-      setProducts(enriched.map(({ _sellerId, ...rest }) => rest));
+      // Remove internal field, sort sponsored products first
+      const cleaned = enriched.map(({ _sellerId, ...rest }) => rest);
+      cleaned.sort((a, b) => (b.isSponsored ? 1 : 0) - (a.isSponsored ? 1 : 0));
+      setProducts(cleaned);
       setLoading(false);
     }, (err) => {
       console.error('All products query error:', err);

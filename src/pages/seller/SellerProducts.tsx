@@ -540,6 +540,13 @@ export default function SellerProducts() {
         />
       )}
 
+      {/* Sponsor Product Dialog */}
+      <SponsorProductDialog
+        open={sponsorDialog.open}
+        onOpenChange={(open) => setSponsorDialog({ open, product: open ? sponsorDialog.product : null })}
+        product={sponsorDialog.product}
+      />
+
       {/* Delete Confirmation */}
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ open, product: open ? deleteDialog.product : null })}>
         <AlertDialogContent>
