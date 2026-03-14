@@ -12,6 +12,7 @@ import {
   Bell,
   ChevronLeft,
   Store,
+  Crown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const navigation = [
 ];
 
 const secondaryNav = [
+  { name: "Abonnement", href: "/seller/subscription", icon: Crown },
   { name: "Notifications", href: "/seller/notifications", icon: Bell },
   { name: "Paramètres", href: "/seller/settings", icon: Settings },
 ];

@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchDocument } from "@/lib/firebase/queries";
+import { useSellerSubscription } from "@/hooks/useSellerSubscription";
+import { SellerPlanBadge } from "@/components/seller/SellerPlanBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,6 +34,7 @@ interface SellerHeaderProps {
 
 export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHeaderProps) {
   const { user: firebaseUser, profile, signOut } = useAuth();
+  const { currentPlan } = useSellerSubscription();
   const [storeName, setStoreName] = useState<string>("");
 
   useEffect(() => {
@@ -147,10 +150,13 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
                 </div>
                 <div className="hidden md:block text-left">
                   <p className="text-sm font-medium">{displayName}</p>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Store className="h-3 w-3" />
-                    {storeName || "Vendeur Pro"}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Store className="h-3 w-3" />
+                      {storeName || "Ma boutique"}
+                    </span>
+                    <SellerPlanBadge badge={currentPlan.badge} />
+                  </div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </Button>
