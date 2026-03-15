@@ -373,7 +373,12 @@ service cloud.firestore {
       match /subscription_payments/{paymentId} {
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && isSeller();
-        allow update, delete: if false;
+        // Seller can cancel their own pending payments only
+        allow update: if isOwner(userId) && isSeller()
+                      && resource.data.status == 'pending'
+                      && request.resource.data.status == 'cancelled'
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancelledAt']);
+        allow delete: if false;
       }
     }
     
