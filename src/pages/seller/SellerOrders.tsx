@@ -14,6 +14,7 @@ import {
   ChefHat,
   ShoppingBag,
   Loader2,
+  QrCode,
 } from "lucide-react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { OrderQRCode } from "@/components/orders/OrderQRCode";
 import { db } from "@/lib/firebase/config";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -650,6 +652,13 @@ export default function SellerOrders() {
                       )}
                     </div>
                   </div>
+
+                  {/* QR Code for courier pickup — show when order is ready or shipped */}
+                  {["ready", "shipped"].includes(order.status) && (
+                    <div className="px-4 pb-4">
+                      <OrderQRCode orderId={order.id} purpose="pickup" size={120} />
+                    </div>
+                  )}
 
                   {/* Progress bar for seller-actionable statuses */}
                   {["pending", "confirmed", "preparing", "ready"].includes(order.status) && (

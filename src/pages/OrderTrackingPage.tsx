@@ -12,6 +12,7 @@ import { OrderStatusCard } from "@/components/orders/OrderStatusCard";
 import { OrderItemsList } from "@/components/orders/OrderItemsList";
 import { CancelOrderDialog } from "@/components/orders/CancelOrderDialog";
 import { CourierTrackingCard } from "@/components/orders/CourierTrackingCard";
+import { OrderQRCode } from "@/components/orders/OrderQRCode";
 import { toast } from "sonner";
 import { useRealtimeOrder } from "@/hooks/useRealtimeOrder";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -265,6 +266,11 @@ export default function OrderTrackingPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* QR Code for delivery confirmation — show when order is shipped/in_delivery */}
+            {["shipped", "in_delivery", "arrived"].includes(orderStatus) && (
+              <OrderQRCode orderId={orderId} purpose="delivery" />
+            )}
+
             {/* Courier Tracking */}
             {order.deliveryMissionId && (
               <CourierTrackingCard deliveryMissionId={order.deliveryMissionId} />
