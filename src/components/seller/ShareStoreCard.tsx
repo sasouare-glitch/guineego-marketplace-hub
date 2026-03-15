@@ -60,21 +60,6 @@ export function ShareStoreCard() {
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
   };
 
-  const canShare = typeof navigator !== 'undefined' && !!navigator.share;
-
-  const handleNativeShare = async () => {
-    const shareText = `Découvrez ma boutique "${storeName}" sur GuineeGo ! ${storeUrl}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: storeName, text: shareText, url: storeUrl });
-        return;
-      } catch (err: any) {
-        if (err?.name === 'AbortError') return;
-      }
-    }
-    // Fallback: open WhatsApp web share
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
-  };
 
   return (
     <motion.div
