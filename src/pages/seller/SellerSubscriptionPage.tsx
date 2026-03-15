@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { SellerLayout } from '@/components/seller/SellerLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSellerSubscription } from '@/hooks/useSellerSubscription';
-import { SELLER_PLANS, type SellerPlanId } from '@/constants/sellerPlans';
+import { SELLER_PLANS, type SellerPlanId, type SellerPlan } from '@/constants/sellerPlans';
 import { SellerPlanBadge } from '@/components/seller/SellerPlanBadge';
+import { SubscriptionConfirmDialog } from '@/components/seller/SubscriptionConfirmDialog';
 import { Check, Crown, Zap, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +17,8 @@ const planIcons: Record<SellerPlanId, React.ReactNode> = {
 };
 
 export default function SellerSubscriptionPage() {
-  const { planId, loading, upgradePlan } = useSellerSubscription();
+  const { planId, currentPlan, loading, upgradePlan } = useSellerSubscription();
+  const [selectedPlan, setSelectedPlan] = useState<SellerPlan | null>(null);
 
   const formatPrice = (price: number) => {
     if (price === 0) return 'Gratuit';
@@ -88,7 +91,7 @@ export default function SellerSubscriptionPage() {
                     className="w-full"
                     variant={isCurrent ? 'outline' : plan.recommended ? 'default' : 'secondary'}
                     disabled={isCurrent || loading}
-                    onClick={() => upgradePlan(plan.id)}
+                    onClick={() => setSelectedPlan(plan)}
                   >
                     {isCurrent ? 'Plan actuel' : isUpgrade ? 'Passer à ce plan' : 'Rétrograder'}
                   </Button>
@@ -117,6 +120,19 @@ export default function SellerSubscriptionPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Confirmation dialog */}
+        {selectedPlan && (
+          <SubscriptionConfirmDialog
+            open={!!selectedPlan}
+            onOpenChange={(open) => !open && setSelectedPlan(null)}
+            plan={selectedPlan}
+            currentPlanName={currentPlan.name}
+            onConfirm={async () => {
+              await upgradePlan(selectedPlan.id);
+            }}
+          />
+        )}
       </div>
     </SellerLayout>
   );
