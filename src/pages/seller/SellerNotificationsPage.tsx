@@ -121,19 +121,34 @@ const SellerNotificationsPage = () => {
       ? notifications.filter((n) => !n.read)
       : notifications.filter((n) => n.type === activeTab);
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
+  const markAllRead = useCallback(async () => {
+    if (!user?.uid) return;
+    try {
+      const batch = writeBatch(db);
+      notifications.filter((n) => !n.read).forEach((n) => {
+        batch.update(doc(db, "notifications", n.id), { read: true });
+      });
+      await batch.commit();
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  }, [user?.uid, notifications]);
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
+  const markAsRead = useCallback(async (id: string) => {
+    try {
+      await updateDoc(doc(db, "notifications", id), { read: true });
+    } catch (error) {
+      console.error("Error marking as read:", error);
+    }
+  }, []);
 
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
+  const deleteNotification = useCallback(async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "notifications", id));
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+    }
+  }, []);
 
   return (
     <SellerLayout>
