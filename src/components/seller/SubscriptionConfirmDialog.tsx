@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Smartphone, CreditCard, Loader2 } from 'lucide-react';
 import { type SellerPlan } from '@/constants/sellerPlans';
 
@@ -22,17 +23,22 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   plan: SellerPlan;
   currentPlanName: string;
-  onConfirm: (paymentMethod: PaymentMethod) => Promise<void>;
+  onConfirm: (paymentMethod: PaymentMethod, phone?: string) => Promise<void>;
 }
 
 export function SubscriptionConfirmDialog({ open, onOpenChange, plan, currentPlanName, onConfirm }: Props) {
   const [method, setMethod] = useState<PaymentMethod>('orange_money');
+  const [phone, setPhone] = useState('');
   const [processing, setProcessing] = useState(false);
 
+  const isMobileMoney = method === 'orange_money' || method === 'mtn_money';
+  const needsPhone = plan.price > 0 && isMobileMoney;
+
   const handleConfirm = async () => {
+    if (needsPhone && !phone.trim()) return;
     setProcessing(true);
     try {
-      await onConfirm(method);
+      await onConfirm(method, needsPhone ? phone.trim() : undefined);
       onOpenChange(false);
     } finally {
       setProcessing(false);
@@ -90,11 +96,33 @@ export function SubscriptionConfirmDialog({ open, onOpenChange, plan, currentPla
           </div>
         )}
 
+        {/* Phone number for mobile money */}
+        {needsPhone && (
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-sm font-semibold">
+              Numéro {method === 'orange_money' ? 'Orange Money' : 'MTN Money'}
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="Ex: 620 00 00 00"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="text-base"
+            />
+            <p className="text-xs text-muted-foreground">
+              {method === 'orange_money'
+                ? 'Vous serez redirigé vers la page de paiement Orange Money.'
+                : 'Un prompt USSD sera envoyé sur ce numéro pour confirmer le paiement.'}
+            </p>
+          </div>
+        )}
+
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={processing}>
             Annuler
           </Button>
-          <Button onClick={handleConfirm} disabled={processing}>
+          <Button onClick={handleConfirm} disabled={processing || (needsPhone && !phone.trim())}>
             {processing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             {plan.price === 0 ? 'Confirmer' : 'Payer & activer'}
           </Button>
