@@ -7,6 +7,7 @@ import { useSellerSubscription } from '@/hooks/useSellerSubscription';
 import { SELLER_PLANS, type SellerPlanId, type SellerPlan } from '@/constants/sellerPlans';
 import { SellerPlanBadge } from '@/components/seller/SellerPlanBadge';
 import { SubscriptionConfirmDialog } from '@/components/seller/SubscriptionConfirmDialog';
+import { SubscriptionHistory } from '@/components/seller/SubscriptionHistory';
 import { Check, Crown, Zap, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
