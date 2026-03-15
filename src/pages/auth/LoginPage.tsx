@@ -25,7 +25,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const { signIn, signInWithGoogle, loading, user, profile } = useAuth();
+  const { signIn, signInWithGoogle, loading, user, claims } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
