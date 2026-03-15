@@ -72,6 +72,14 @@
         { "fieldPath": "sellerId", "order": "ASCENDING" },
         { "fieldPath": "totalStock", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "products",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "sellerId", "order": "ASCENDING" },
+        { "fieldPath": "totalSales", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []
