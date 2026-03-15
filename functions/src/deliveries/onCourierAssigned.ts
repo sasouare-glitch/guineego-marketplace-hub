@@ -94,6 +94,8 @@ async function sendCourierSMS(
     clientPhone: string;
     fee: number;
     priorityLabel: string;
+    deliveryMapsLink: string;
+    pickupMapsLink: string;
   }
 ): Promise<void> {
   // Get courier phone number
@@ -113,6 +115,7 @@ async function sendCourierSMS(
     `Mission: ${missionId}\n` +
     `Pickup: ${details.pickupAddress || 'Voir app'}\n` +
     `Livraison: ${details.deliveryAddress || 'Voir app'}\n` +
+    `📍 Maps client: ${details.deliveryMapsLink}\n` +
     `Client: ${details.clientPhone || 'N/A'}\n` +
     `Gain: ${details.fee.toLocaleString()} GNF`;
 
