@@ -93,12 +93,6 @@ export function ShareStoreCard() {
 
       {/* Action buttons */}
       <div className="flex gap-2">
-        {canShare && (
-          <Button onClick={handleNativeShare} className="flex-1 gap-2">
-            <Share2 className="w-4 h-4" />
-            Partager
-          </Button>
-        )}
         <Button
           variant={showQR ? "secondary" : "outline"}
           onClick={() => setShowQR(!showQR)}
