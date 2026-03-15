@@ -266,6 +266,11 @@ export default function OrderTrackingPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* QR Code for delivery confirmation — show when order is shipped/in_delivery */}
+            {["shipped", "in_delivery", "arrived"].includes(orderStatus) && (
+              <OrderQRCode orderId={orderId} purpose="delivery" />
+            )}
+
             {/* Courier Tracking */}
             {order.deliveryMissionId && (
               <CourierTrackingCard deliveryMissionId={order.deliveryMissionId} />
