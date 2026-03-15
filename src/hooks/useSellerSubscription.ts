@@ -38,6 +38,13 @@ export function useSellerSubscription() {
   const [planId, setPlanId] = useState<SellerPlanId>('free');
   const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingPayment, setPendingPayment] = useState<{
+    planId: string;
+    planName: string;
+    amount: number;
+    paymentMethod: string;
+    createdAt: Date | null;
+  } | null>(null);
 
   useEffect(() => {
     if (!user?.uid) {
