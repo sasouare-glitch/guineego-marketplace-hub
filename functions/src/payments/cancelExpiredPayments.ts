@@ -1,0 +1,45 @@
+/**
+ * Scheduled function: cancels pending subscription payments
+ * older than 15 minutes without webhook confirmation.
+ * Runs every 5 minutes.
+ */
+
+import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
+
+const db = admin.firestore();
+const TIMEOUT_MINUTES = 15;
+
+export const cancelExpiredPayments = functions.pubsub
+  .schedule('every 5 minutes')
+  .onRun(async () => {
+    const cutoff = new Date(Date.now() - TIMEOUT_MINUTES * 60 * 1000);
+
+    // Query all seller_settings documents
+    const sellersSnap = await db.collection('seller_settings').get();
+
+    let cancelled = 0;
+
+    for (const sellerDoc of sellersSnap.docs) {
+      const paymentsSnap = await sellerDoc.ref
+        .collection('subscription_payments')
+        .where('status', '==', 'pending')
+        .where('createdAt', '<=', cutoff)
+        .get();
+
+      for (const paymentDoc of paymentsSnap.docs) {
+        await paymentDoc.ref.update({
+          status: 'cancelled',
+          cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+          cancelReason: 'timeout_15min',
+        });
+        cancelled++;
+      }
+    }
+
+    if (cancelled > 0) {
+      functions.logger.info(`Cancelled ${cancelled} expired pending payment(s).`);
+    }
+
+    return null;
+  });
