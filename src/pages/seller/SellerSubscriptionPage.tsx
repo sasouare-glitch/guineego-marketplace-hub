@@ -120,6 +120,19 @@ export default function SellerSubscriptionPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Confirmation dialog */}
+        {selectedPlan && (
+          <SubscriptionConfirmDialog
+            open={!!selectedPlan}
+            onOpenChange={(open) => !open && setSelectedPlan(null)}
+            plan={selectedPlan}
+            currentPlanName={currentPlan.name}
+            onConfirm={async () => {
+              await upgradePlan(selectedPlan.id);
+            }}
+          />
+        )}
       </div>
     </SellerLayout>
   );
