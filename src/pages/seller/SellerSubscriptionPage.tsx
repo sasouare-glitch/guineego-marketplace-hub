@@ -104,13 +104,38 @@ export default function SellerSubscriptionPage() {
 
         {/* Current plan info */}
         <Card className="mt-8">
-          <CardContent className="p-6 flex items-center justify-between">
+          <CardContent className="p-6 flex items-center justify-between flex-wrap gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Votre plan actuel</p>
               <p className="text-lg font-semibold text-foreground">
                 {SELLER_PLANS.find(p => p.id === planId)?.name || 'Gratuit'}
               </p>
             </div>
+
+            {/* Expiry badge */}
+            {daysRemaining !== null && planId !== 'free' && (
+              <div>
+                {daysRemaining <= 3 ? (
+                  <Badge variant="destructive" className="gap-1.5 px-3 py-1.5 text-sm">
+                    <AlertTriangle className="h-4 w-4" />
+                    {daysRemaining === 0
+                      ? 'Expire aujourd\'hui'
+                      : `Expire dans ${daysRemaining} jour${daysRemaining > 1 ? 's' : ''}`}
+                  </Badge>
+                ) : daysRemaining <= 7 ? (
+                  <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 text-sm border-yellow-500/50 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400">
+                    <Clock className="h-4 w-4" />
+                    {`${daysRemaining} jours restants`}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="gap-1.5 px-3 py-1.5 text-sm">
+                    <Clock className="h-4 w-4" />
+                    {`${daysRemaining} jours restants`}
+                  </Badge>
+                )}
+              </div>
+            )}
+
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Limite de produits</p>
               <p className="text-lg font-semibold text-foreground">
