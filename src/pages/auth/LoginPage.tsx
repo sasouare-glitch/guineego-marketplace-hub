@@ -31,42 +31,41 @@ export default function LoginPage() {
   
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
   const from = (location.state as { from?: Location })?.from?.pathname;
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (user && claims && !loading) {
-      const roleRoutes: Record<string, string> = {
-        ecommerce: '/seller/dashboard',
-        courier: '/courier',
-        investor: '/investor/dashboard',
-        admin: '/admin/dashboard',
-      };
-      const role = claims.role || 'customer';
-      const dest = from || roleRoutes[role] || '/';
-      navigate(dest, { replace: true });
-    }
-  }, [user, claims, loading, from, navigate]);
+  const getRoleRoute = (role: string): string => {
+    const roleRoutes: Record<string, string> = {
+      ecommerce: '/seller/dashboard',
+      courier: '/courier',
+      investor: '/investor/dashboard',
+      admin: '/admin/dashboard',
+    };
+    return roleRoutes[role] || '/';
+  };
 
   const getRedirectByRole = async (uid: string): Promise<string> => {
     try {
       const userDoc = await getDoc(doc(db, 'users', uid));
       const data = userDoc.data();
-      const roles: string[] = data?.roles || [data?.role || 'customer'];
-      const primaryRole = data?.role || roles[0] || 'customer';
-      
-      const roleRoutes: Record<string, string> = {
-        ecommerce: '/seller/dashboard',
-        courier: '/courier',
-        investor: '/investor/dashboard',
-        admin: '/admin/dashboard',
-      };
-      return roleRoutes[primaryRole] || '/';
+      const primaryRole = data?.role || 'customer';
+      return getRoleRoute(primaryRole);
     } catch {
       return '/';
     }
   };
+
+  // Redirect if already authenticated (covers page refresh while logged in)
+  useEffect(() => {
+    if (isRedirecting) return; // Don't interfere with form-based redirect
+    if (user && claims && !loading) {
+      const role = claims.role || 'customer';
+      const dest = from || getRoleRoute(role);
+      console.log('[LoginPage] Already authenticated, redirecting to:', dest, 'role:', role);
+      navigate(dest, { replace: true });
+    }
+  }, [user, claims, loading, from, navigate, isRedirecting]);
   
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema)
@@ -75,10 +74,14 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError(null);
+      setIsRedirecting(true);
       const uid = await signIn(data.email, data.password);
       const dest = from || await getRedirectByRole(uid);
-      navigate(dest, { replace: true });
+      console.log('[LoginPage] Post-login redirect to:', dest);
+      // Use window.location for a hard redirect to avoid React state race conditions
+      window.location.href = dest;
     } catch (err: any) {
+      setIsRedirecting(false);
       const errorMessages: Record<string, string> = {
         'auth/user-not-found': 'Aucun compte trouvé avec cet email',
         'auth/wrong-password': 'Mot de passe incorrect',
@@ -93,10 +96,13 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       setError(null);
+      setIsRedirecting(true);
       await signInWithGoogle();
       const dest = from || await getRedirectByRole(auth.currentUser?.uid || '');
-      navigate(dest, { replace: true });
+      console.log('[LoginPage] Google redirect to:', dest);
+      window.location.href = dest;
     } catch (err: any) {
+      setIsRedirecting(false);
       setError('Erreur de connexion avec Google');
     }
   };
