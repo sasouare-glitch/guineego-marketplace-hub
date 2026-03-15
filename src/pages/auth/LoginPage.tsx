@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase/config';
@@ -25,7 +25,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const { signIn, signInWithGoogle, loading } = useAuth();
+  const { signIn, signInWithGoogle, loading, user, claims } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -33,6 +33,21 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   
   const from = (location.state as { from?: Location })?.from?.pathname;
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user && claims && !loading) {
+      const roleRoutes: Record<string, string> = {
+        ecommerce: '/seller/dashboard',
+        courier: '/courier',
+        investor: '/investor/dashboard',
+        admin: '/admin/dashboard',
+      };
+      const role = claims.role || 'customer';
+      const dest = from || roleRoutes[role] || '/';
+      navigate(dest, { replace: true });
+    }
+  }, [user, claims, loading, from, navigate]);
 
   const getRedirectByRole = async (uid: string): Promise<string> => {
     try {
