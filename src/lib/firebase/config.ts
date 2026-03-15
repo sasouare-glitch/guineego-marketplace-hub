@@ -99,6 +99,15 @@ export const callFunction = <TData = unknown, TResult = unknown>(
   return httpsCallable<TData, TResult>(functions, name);
 };
 
+// Initialize Firebase Analytics (only in browser, check support)
+if (typeof window !== 'undefined') {
+  isSupported().then((supported) => {
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
+  }).catch(() => {});
+}
+
 // Export initialized services
-export { app, auth, db, storage, functions };
+export { app, auth, db, storage, functions, analytics };
 export default app;
