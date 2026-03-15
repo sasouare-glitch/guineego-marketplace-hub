@@ -71,6 +71,14 @@ const statusConfig = {
   },
 };
 
+/** Returns days until sponsoring expires, or null if not sponsored */
+const getSponsorDaysLeft = (product: any): number | null => {
+  if (!product.isSponsored || !product.sponsoredUntil) return null;
+  const until = product.sponsoredUntil?.toDate ? product.sponsoredUntil.toDate() : new Date(product.sponsoredUntil);
+  const diff = Math.ceil((until.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  return diff;
+};
+
 const formatPrice = (price: number) => {
   return price.toLocaleString("fr-GN") + " GNF";
 };
