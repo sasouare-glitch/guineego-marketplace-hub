@@ -30,6 +30,7 @@ async function resolveSellerInfo(sellerId: string) {
 
 export interface ProductDetail {
   id: string;
+  sellerId: string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -72,6 +73,7 @@ export function useProductDetail(productId: string | undefined) {
 
       setProduct({
         id: snap.id,
+        sellerId,
         name: d.name || '',
         price: d.price || d.basePrice || 0,
         originalPrice: d.originalPrice || undefined,

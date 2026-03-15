@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useProductDetail } from "@/hooks/useProductDetail";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { toast } from "sonner";
 
 const ProductDetail = () => {
@@ -45,6 +46,18 @@ const ProductDetail = () => {
   const [selectedStorage, setSelectedStorage] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+
+  // Track real visitor for this seller's product
+  const trackingOptions = useMemo(() => {
+    if (!product) return null;
+    return {
+      sellerId: product.sellerId,
+      productId: product.id,
+      productName: product.name,
+      page: 'product_detail' as const,
+    };
+  }, [product?.id, product?.sellerId, product?.name]);
+  useVisitorTracking(trackingOptions);
 
   // Set defaults when product loads
   const colors = product?.colors || [];

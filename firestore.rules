@@ -520,5 +520,16 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create, update, delete: if isStrictAdmin();
     }
+    
+    // ============================================
+    // SELLER VISITS (visitor tracking counters)
+    // ============================================
+    match /seller_visits/{docId} {
+      // Sellers can read their own visit stats; admin reads all
+      allow read: if isAdmin() || isSellerScopeId(resource.data.sellerId);
+      // Any visitor can write (merge increment) — fire-and-forget tracking
+      allow create, update: if true;
+      allow delete: if isStrictAdmin();
+    }
   }
 }

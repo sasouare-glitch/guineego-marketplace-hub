@@ -28,6 +28,11 @@ import {
   httpsCallable,
   type Functions
 } from 'firebase/functions';
+import {
+  getAnalytics,
+  isSupported,
+  type Analytics
+} from 'firebase/analytics';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -46,6 +51,7 @@ let auth: Auth;
 let db: Firestore;
 let storage: FirebaseStorage;
 let functions: Functions;
+let analytics: Analytics | null = null;
 
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
@@ -93,6 +99,15 @@ export const callFunction = <TData = unknown, TResult = unknown>(
   return httpsCallable<TData, TResult>(functions, name);
 };
 
+// Initialize Firebase Analytics (only in browser, check support)
+if (typeof window !== 'undefined') {
+  isSupported().then((supported) => {
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
+  }).catch(() => {});
+}
+
 // Export initialized services
-export { app, auth, db, storage, functions };
+export { app, auth, db, storage, functions, analytics };
 export default app;

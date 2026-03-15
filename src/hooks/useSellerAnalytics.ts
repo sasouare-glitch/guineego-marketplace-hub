@@ -63,6 +63,7 @@ export function useSellerAnalytics(periodDays: number) {
 
   const [orders, setOrders] = useState<OrderDoc[]>([]);
   const [products, setProducts] = useState<ProductDoc[]>([]);
+  const [visitorsByDay, setVisitorsByDay] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
   // Listen to orders
@@ -119,12 +120,35 @@ export function useSellerAnalytics(periodDays: number) {
     return () => { try { unsub(); } catch {} };
   }, [sellerScopeId]);
 
+  // Listen to real visitor data
+  useEffect(() => {
+    if (!sellerScopeId) { setVisitorsByDay({}); return; }
+
+    const q = query(
+      collection(db, 'seller_visits'),
+      where('sellerId', '==', sellerScopeId),
+    );
+
+    const unsub = onSnapshot(q,
+      (snap) => {
+        const byDay: Record<string, number> = {};
+        snap.docs.forEach(d => {
+          const data = d.data();
+          if (data.date) byDay[data.date] = data.views || 0;
+        });
+        setVisitorsByDay(byDay);
+      },
+      (err) => console.warn('Analytics visits error:', err)
+    );
+
+    return () => { try { unsub(); } catch {} };
+  }, [sellerScopeId]);
+
   const analytics = useMemo<AnalyticsData>(() => {
     const now = new Date();
     const cutoff = new Date();
     cutoff.setDate(now.getDate() - periodDays);
 
-    // Filter orders in period
     const periodOrders = orders.filter(o => {
       if (!o.createdAt) return false;
       return o.createdAt.toDate() >= cutoff;
@@ -133,7 +157,14 @@ export function useSellerAnalytics(periodDays: number) {
     const completedOrders = periodOrders.filter(o => o.status !== 'cancelled');
     const totalRevenue = completedOrders.reduce((s, o) => s + (o.totalAmount || o.total), 0);
     const totalOrders = completedOrders.length;
-    const estimatedVisitors = Math.max(totalOrders * 12, totalOrders);
+
+    // Real visitors from Firestore counters
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    let realVisitors = 0;
+    Object.entries(visitorsByDay).forEach(([date, views]) => {
+      if (date >= cutoffStr) realVisitors += views;
+    });
+    const estimatedVisitors = realVisitors > 0 ? realVisitors : Math.max(totalOrders * 12, totalOrders);
     const conversionRate = estimatedVisitors > 0 ? (totalOrders / estimatedVisitors) * 100 : 0;
 
     // Group orders by time bucket
@@ -236,7 +267,7 @@ export function useSellerAnalytics(periodDays: number) {
     ];
 
     return { totalRevenue, totalOrders, estimatedVisitors, conversionRate, chartData, categoryData, topProducts, funnel };
-  }, [orders, products, periodDays]);
+  }, [orders, products, visitorsByDay, periodDays]);
 
   return { analytics, loading };
 }
