@@ -7,6 +7,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Receipt, Smartphone, CreditCard, Download } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { toast } from 'sonner';
+import logoGuineego from '@/assets/logo-guineego.png';
+
+function loadImageAsBase64(src: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas.getContext('2d')!.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
 
 const methodLabels: Record<string, { label: string; icon: React.ReactNode }> = {
   orange_money: { label: 'Orange Money', icon: <Smartphone className="h-4 w-4 text-orange-500" /> },
