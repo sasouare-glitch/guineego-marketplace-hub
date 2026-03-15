@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { SellerLayout } from '@/components/seller/SellerLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSellerSubscription } from '@/hooks/useSellerSubscription';
-import { SELLER_PLANS, type SellerPlanId } from '@/constants/sellerPlans';
+import { SELLER_PLANS, type SellerPlanId, type SellerPlan } from '@/constants/sellerPlans';
 import { SellerPlanBadge } from '@/components/seller/SellerPlanBadge';
+import { SubscriptionConfirmDialog } from '@/components/seller/SubscriptionConfirmDialog';
 import { Check, Crown, Zap, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
