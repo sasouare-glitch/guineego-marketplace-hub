@@ -443,10 +443,15 @@ const App = () => (
                        </ProtectedRoute>
                      } />
                      <Route path="/admin/commissions" element={
-                       <ProtectedRoute requiredRoles={['admin']}>
-                         <AdminCommissionsPage />
-                       </ProtectedRoute>
-                     } />
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminCommissionsPage />
+                      </ProtectedRoute>
+                    } />
+                     <Route path="/admin/payments" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminPaymentsPage />
+                      </ProtectedRoute>
+                    } />
                      <Route path="/admin/reports" element={
                        <ProtectedRoute requiredRoles={['admin']}>
                          <AdminReportsPage />

@@ -129,6 +129,12 @@ const financeItems = [
     description: "Revenus et paiements"
   },
   { 
+    title: "Paiements", 
+    url: "/admin/payments", 
+    icon: CreditCard,
+    description: "Suivi des paiements en temps réel"
+  },
+  { 
     title: "Commissions", 
     url: "/admin/commissions", 
     icon: Percent,
