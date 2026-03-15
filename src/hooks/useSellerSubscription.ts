@@ -46,10 +46,18 @@ export function useSellerSubscription() {
     if (!user?.uid) return;
     try {
       const newPlan = getPlanById(newPlanId);
+
+      // Calculate expiry: 30 days from now for paid plans
+      const expiresAt = newPlan.price > 0
+        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        : null;
+
       await updateDoc(doc(db, 'seller_settings', user.uid), {
         subscription: {
           planId: newPlanId,
+          planName: newPlan.name,
           subscribedAt: serverTimestamp(),
+          ...(expiresAt ? { expiresAt } : {}),
         },
         updatedAt: serverTimestamp(),
       });
