@@ -14,6 +14,7 @@ import { StatCard } from "@/components/seller/StatCard";
 import { SalesChart } from "@/components/seller/SalesChart";
 import { RecentOrders } from "@/components/seller/RecentOrders";
 import { LowStockAlert } from "@/components/seller/LowStockAlert";
+import { ShareStoreCard } from "@/components/seller/ShareStoreCard";
 import { useSellerDashboard } from "@/hooks/useSellerDashboard";
 import { useCurrency } from "@/hooks/useCurrency";
 
@@ -107,8 +108,9 @@ export default function SellerDashboard() {
           <div className="xl:col-span-2">
             <SalesChart data={salesChartData} />
           </div>
-          <div>
+          <div className="space-y-6">
             <LowStockAlert products={lowStockProducts} />
+            <ShareStoreCard />
           </div>
         </div>
 
