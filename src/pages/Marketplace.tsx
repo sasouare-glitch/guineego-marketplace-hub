@@ -12,12 +12,13 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { ChevronRight, Zap, TrendingUp, Clock, Truck, Megaphone } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ChevronRight, Zap, TrendingUp, Clock, Truck, Megaphone, Store, ArrowLeft } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useMarketplaceProducts } from "@/hooks/useMarketplaceProducts";
+import { useSellerStoreProducts } from "@/hooks/useSellerStoreProducts";
 
 const ProductGridSkeleton = () => (
   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
