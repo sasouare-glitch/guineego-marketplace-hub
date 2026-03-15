@@ -24,6 +24,15 @@ interface OrangePaymentResult {
   payToken: string;
 }
 
+interface MTNPaymentResult {
+  success: boolean;
+  paymentId: string;
+  referenceId: string;
+  status: 'SUCCESSFUL' | 'FAILED' | 'PENDING';
+  autoConfirmed?: boolean;
+  reason?: string;
+}
+
 export function useSellerSubscription() {
   const { user } = useAuth();
   const [planId, setPlanId] = useState<SellerPlanId>('free');
