@@ -142,6 +142,10 @@ export function ShareStoreCard() {
               fgColor="#1a1a1a"
             />
           </div>
+          <Button variant="outline" size="sm" onClick={handleDownloadQR} className="gap-2">
+            <Download className="w-4 h-4" />
+            Télécharger en PNG
+          </Button>
           <p className="text-xs text-muted-foreground text-center max-w-[200px]">
             Imprimez ou affichez ce QR code en magasin pour diriger les clients vers votre boutique
           </p>
