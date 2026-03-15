@@ -151,3 +151,4 @@ export { checkExpiringSubscriptions } from './sponsoring/checkExpiringSubscripti
 export { confirmSubscriptionPayment } from './payments/subscriptionWebhooks';
 export { initiateOrangeMoneyPayment } from './payments/initiateOrangeMoneyPayment';
 export { initiateMTNMoMoPayment, checkMTNPaymentStatus } from './payments/initiateMTNMoMoPayment';
+export { cancelExpiredPayments } from './payments/cancelExpiredPayments';
