@@ -12,12 +12,13 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { ChevronRight, Zap, TrendingUp, Clock, Truck, Megaphone } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ChevronRight, Zap, TrendingUp, Clock, Truck, Megaphone, Store, ArrowLeft } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useMarketplaceProducts } from "@/hooks/useMarketplaceProducts";
+import { useSellerStoreProducts } from "@/hooks/useSellerStoreProducts";
 
 const ProductGridSkeleton = () => (
   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -36,10 +37,13 @@ const ProductGridSkeleton = () => (
 );
 
 const Marketplace = () => {
+  const [searchParams] = useSearchParams();
+  const sellerFilter = searchParams.get('seller');
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
   const { t } = useTranslation();
   const { flashSaleProducts, newArrivals, bestSellers, sponsoredProducts, loading } = useMarketplaceProducts();
+  const sellerStore = useSellerStoreProducts(sellerFilter);
 
   const featuresBar = [
     { icon: Truck, label: t.marketplace.fastDelivery, desc: t.marketplace.everywhereGuinea },
@@ -77,6 +81,54 @@ const Marketplace = () => {
       <Header />
       <CategoryBar />
 
+      {sellerFilter ? (
+        <main className="container-tight py-6 space-y-8">
+          {/* Seller Store Header */}
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/marketplace"><ArrowLeft className="w-5 h-5" /></Link>
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Store className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="font-display text-2xl font-bold">
+                  {sellerStore.storeName || 'Boutique'}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {sellerStore.products.length} produit{sellerStore.products.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Seller Products Grid */}
+          {sellerStore.loading ? (
+            <ProductGridSkeleton />
+          ) : sellerStore.products.length === 0 ? (
+            <div className="text-center py-16 text-muted-foreground">
+              <Store className="w-12 h-12 mx-auto mb-4 opacity-40" />
+              <p className="text-lg font-medium">Cette boutique n'a pas encore de produits</p>
+              <Button variant="outline" className="mt-4" asChild>
+                <Link to="/marketplace">Retour au marketplace</Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {sellerStore.products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onAddToCart={() => addItem(product)}
+                  onToggleWishlist={() => toggleItem(product)}
+                  isInWishlist={isInWishlist(product.id)}
+                />
+              ))}
+            </div>
+          )}
+        </main>
+      ) : (
       <main className="container-tight py-6 space-y-10">
         {/* Hero Banner */}
         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-guinea-green to-guinea-green/80 text-white p-6 md:p-10">
@@ -252,6 +304,7 @@ const Marketplace = () => {
           {renderProductGrid(bestSellers as Product[], loading)}
         </section>
       </main>
+      )}
 
       <Footer />
     </div>
