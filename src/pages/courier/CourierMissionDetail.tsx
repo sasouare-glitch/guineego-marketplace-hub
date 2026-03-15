@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, onSnapshot, getDoc } from "firebase/firestore";
 import { CourierLayout } from "@/components/courier/CourierLayout";
 import { SwipeStatusButton } from "@/components/courier/SwipeStatusButton";
 import { Button } from "@/components/ui/button";
