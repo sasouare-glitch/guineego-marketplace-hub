@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
-import { Copy, Check, Share2, QrCode, Download } from "lucide-react";
+import { Copy, Check, QrCode, Download, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -60,21 +60,6 @@ export function ShareStoreCard() {
     img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
   };
 
-  const canShare = typeof navigator !== 'undefined' && !!navigator.share;
-
-  const handleNativeShare = async () => {
-    const shareText = `Découvrez ma boutique "${storeName}" sur GuineeGo ! ${storeUrl}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: storeName, text: shareText, url: storeUrl });
-        return;
-      } catch (err: any) {
-        if (err?.name === 'AbortError') return;
-      }
-    }
-    // Fallback: open WhatsApp web share
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
-  };
 
   return (
     <motion.div
@@ -85,7 +70,7 @@ export function ShareStoreCard() {
     >
       <div className="flex items-center gap-3 mb-4">
         <div className="p-2 bg-primary/10 rounded-lg">
-          <Share2 className="w-5 h-5 text-primary" />
+          <Link2 className="w-5 h-5 text-primary" />
         </div>
         <div>
           <h3 className="text-lg font-semibold text-foreground">Partager ma boutique</h3>
@@ -108,12 +93,6 @@ export function ShareStoreCard() {
 
       {/* Action buttons */}
       <div className="flex gap-2">
-        {canShare && (
-          <Button onClick={handleNativeShare} className="flex-1 gap-2">
-            <Share2 className="w-4 h-4" />
-            Partager
-          </Button>
-        )}
         <Button
           variant={showQR ? "secondary" : "outline"}
           onClick={() => setShowQR(!showQR)}
