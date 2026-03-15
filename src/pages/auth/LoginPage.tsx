@@ -102,6 +102,7 @@ export default function LoginPage() {
       console.log('[LoginPage] Google redirect to:', dest);
       window.location.href = dest;
     } catch (err: any) {
+      setIsRedirecting(false);
       setError('Erreur de connexion avec Google');
     }
   };
