@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/firebase/config";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, getDoc } from "firebase/firestore";
 import { useCourierMissions, DeliveryMission, DeliveryStatus } from "@/hooks/useCourierMissions";
 import { useCourierGPS } from "@/hooks/useCourierGPS";
 
@@ -44,6 +44,7 @@ const CourierMissionDetail = () => {
   const [mission, setMission] = useState<DeliveryMission | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [itemCount, setItemCount] = useState<number | null>(null);
 
   // Extract GPS coordinates from mission if available
   const pickupCoords = mission?.pickup && 'lat' in mission.pickup
@@ -72,6 +73,19 @@ const CourierMissionDetail = () => {
     });
     return () => unsub();
   }, [id]);
+
+  // Fetch order items count
+  useEffect(() => {
+    if (!mission?.orderId) return;
+    getDoc(doc(db, "orders", mission.orderId)).then((snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        const items = data.items || data.orderItems || [];
+        const total = items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
+        setItemCount(total);
+      }
+    }).catch(() => {});
+  }, [mission?.orderId]);
 
   if (loading) {
     return (
@@ -147,6 +161,30 @@ const CourierMissionDetail = () => {
             </Badge>
           )}
         </div>
+
+        {/* Items count indicator */}
+        {itemCount !== null && itemCount > 0 && (
+          <Card className="bg-accent/10 border-accent/20">
+            <CardContent className="py-3 px-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+                  <Package className="w-5 h-5 text-accent" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-foreground">
+                    {itemCount} article{itemCount > 1 ? 's' : ''} à récupérer
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Vérifiez que tous les articles sont dans le colis
+                  </p>
+                </div>
+                <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
+                  {itemCount}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Status Timeline */}
         {!isPending && (
