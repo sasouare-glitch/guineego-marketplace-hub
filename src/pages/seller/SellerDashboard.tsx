@@ -108,8 +108,9 @@ export default function SellerDashboard() {
           <div className="xl:col-span-2">
             <SalesChart data={salesChartData} />
           </div>
-          <div>
+          <div className="space-y-6">
             <LowStockAlert products={lowStockProducts} />
+            <ShareStoreCard />
           </div>
         </div>
 
