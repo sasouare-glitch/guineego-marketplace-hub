@@ -91,7 +91,7 @@ export default function SellerSubscriptionPage() {
                     className="w-full"
                     variant={isCurrent ? 'outline' : plan.recommended ? 'default' : 'secondary'}
                     disabled={isCurrent || loading}
-                    onClick={() => upgradePlan(plan.id)}
+                    onClick={() => setSelectedPlan(plan)}
                   >
                     {isCurrent ? 'Plan actuel' : isUpgrade ? 'Passer à ce plan' : 'Rétrograder'}
                   </Button>
