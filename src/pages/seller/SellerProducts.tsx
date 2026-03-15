@@ -279,11 +279,23 @@ export default function SellerProducts() {
                             <span className="font-medium text-foreground line-clamp-1">
                               {product.name}
                             </span>
-                            {(product as any).isSponsored && (
-                              <Badge className="bg-accent/10 text-accent border-accent/20 text-[10px] ml-1">
-                                <Megaphone className="w-3 h-3 mr-0.5" /> Sponsorisé
-                              </Badge>
-                            )}
+                            {(product as any).isSponsored && (() => {
+                              const daysLeft = getSponsorDaysLeft(product);
+                              const expiringSoon = daysLeft !== null && daysLeft <= 3;
+                              return (
+                                <>
+                                  <Badge className="bg-accent/10 text-accent border-accent/20 text-[10px] ml-1">
+                                    <Megaphone className="w-3 h-3 mr-0.5" /> Sponsorisé
+                                  </Badge>
+                                  {expiringSoon && (
+                                    <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] ml-1 animate-pulse">
+                                      <AlertTriangle className="w-3 h-3 mr-0.5" />
+                                      {daysLeft! <= 0 ? 'Expiré' : `Expire dans ${daysLeft}j`}
+                                    </Badge>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                         </td>
                         <td className="px-6 py-4 hidden md:table-cell">
