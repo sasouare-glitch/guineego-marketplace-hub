@@ -106,21 +106,37 @@ export function useSellerSubscription() {
         return;
       }
 
-      // ── MTN Money: pending payment (no API integration yet) ──
+      // ── MTN Money: initiate real payment via Cloud Function ──
       if (!isFree && paymentMethod === 'mtn_money') {
-        await addDoc(collection(db, 'seller_settings', user.uid, 'subscription_payments'), {
+        if (!phone) {
+          toast.error('Veuillez entrer votre numéro MTN Money.');
+          return;
+        }
+
+        toast.info('Initiation du paiement MTN MoMo...', { duration: 3000 });
+
+        const initiatePayment = callFunction<
+          { planId: string; planName: string; amount: number; phone: string },
+          MTNPaymentResult
+        >('initiateMTNMoMoPayment');
+
+        const result = await initiatePayment({
           planId: newPlanId,
           planName: newPlan.name,
           amount: newPlan.price,
-          paymentMethod,
-          status: 'pending',
-          createdAt: serverTimestamp(),
+          phone,
         });
 
-        toast.info(
-          'Paiement en attente — suivez les instructions USSD pour confirmer. Votre plan sera mis à jour après réception du paiement.',
-          { duration: 8000 }
-        );
+        if (result.data.autoConfirmed && result.data.status === 'SUCCESSFUL') {
+          toast.success(`Paiement confirmé ! Plan ${newPlan.name} activé.`, { duration: 6000 });
+        } else if (result.data.status === 'FAILED') {
+          toast.error(result.data.reason || 'Le paiement MTN MoMo a échoué. Veuillez réessayer.');
+        } else {
+          toast.info(
+            'Un prompt USSD a été envoyé sur votre téléphone. Confirmez le paiement pour activer votre plan.',
+            { duration: 8000 }
+          );
+        }
         return;
       }
 
