@@ -368,6 +368,13 @@ service cloud.firestore {
       allow create: if isOwner(userId) && isSeller();
       allow update: if isOwner(userId) && isSeller();
       allow delete: if isStrictAdmin();
+
+      // Subscription payment history
+      match /subscription_payments/{paymentId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isSeller();
+        allow update, delete: if false;
+      }
     }
     
     // ============================================
