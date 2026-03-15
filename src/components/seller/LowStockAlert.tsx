@@ -1,40 +1,31 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { AlertTriangle, ArrowRight, Package } from "lucide-react";
+import { AlertTriangle, ArrowRight, Package, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import type { LowStockProduct } from "@/hooks/useSellerDashboard";
 
-interface LowStockProduct {
-  id: string;
-  name: string;
-  stock: number;
-  minStock: number;
-  image?: string;
+interface LowStockAlertProps {
+  products: LowStockProduct[];
 }
 
-const lowStockProducts: LowStockProduct[] = [
-  {
-    id: "1",
-    name: "iPhone 15 Pro Max 256GB",
-    stock: 2,
-    minStock: 10,
-  },
-  {
-    id: "2",
-    name: "Samsung Galaxy S24 Ultra",
-    stock: 3,
-    minStock: 10,
-  },
-  {
-    id: "3",
-    name: "MacBook Air M3 13\"",
-    stock: 1,
-    minStock: 5,
-  },
-];
-
-export function LowStockAlert() {
-  if (lowStockProducts.length === 0) return null;
+export function LowStockAlert({ products }: LowStockAlertProps) {
+  if (products.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.4 }}
+        className="bg-card rounded-xl border border-border shadow-sm p-6"
+      >
+        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+          <CheckCircle2 className="w-8 h-8 mb-2 text-primary" />
+          <p className="text-sm font-medium text-foreground">Stock OK</p>
+          <p className="text-xs">Tous vos produits sont bien approvisionnés</p>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -49,16 +40,14 @@ export function LowStockAlert() {
             <AlertTriangle className="w-5 h-5 text-destructive" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-foreground">
-              Stock faible
-            </h3>
+            <h3 className="text-lg font-semibold text-foreground">Stock faible</h3>
             <p className="text-sm text-muted-foreground">
-              {lowStockProducts.length} produits à réapprovisionner
+              {products.length} produit{products.length > 1 ? 's' : ''} à réapprovisionner
             </p>
           </div>
         </div>
         <Button variant="ghost" size="sm" asChild>
-          <Link to="/seller/products?filter=low-stock" className="flex items-center gap-1">
+          <Link to="/seller/products" className="flex items-center gap-1">
             Gérer
             <ArrowRight className="w-4 h-4" />
           </Link>
@@ -66,13 +55,13 @@ export function LowStockAlert() {
       </div>
 
       <div className="divide-y divide-border">
-        {lowStockProducts.map((product) => {
-          const stockPercentage = (product.stock / product.minStock) * 100;
+        {products.map((product) => {
+          const stockPercentage = Math.min((product.stock / product.minStock) * 100, 100);
 
           return (
             <Link
               key={product.id}
-              to={`/seller/products/${product.id}`}
+              to="/seller/products"
               className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-4">
@@ -89,7 +78,7 @@ export function LowStockAlert() {
                       className="h-1.5 w-20 bg-destructive/20"
                     />
                     <span className="text-xs text-destructive font-medium">
-                      {product.stock} restants
+                      {product.stock} restant{product.stock > 1 ? 's' : ''}
                     </span>
                   </div>
                 </div>
