@@ -19,6 +19,7 @@ interface SellerSubscriptionData {
 export function useSellerSubscription() {
   const { user } = useAuth();
   const [planId, setPlanId] = useState<SellerPlanId>('free');
+  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,6 +33,8 @@ export function useSellerSubscription() {
       (snap) => {
         const data = snap.data();
         setPlanId((data?.subscription?.planId as SellerPlanId) || 'free');
+        const exp = data?.subscription?.expiresAt;
+        setExpiresAt(exp?.toDate?.() || null);
         setLoading(false);
       },
       () => setLoading(false)
@@ -79,5 +82,9 @@ export function useSellerSubscription() {
     }
   };
 
-  return { planId, currentPlan, loading, upgradePlan };
+  const daysRemaining = expiresAt
+    ? Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null;
+
+  return { planId, currentPlan, loading, upgradePlan, expiresAt, daysRemaining };
 }
