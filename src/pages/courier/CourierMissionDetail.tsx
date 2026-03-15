@@ -249,6 +249,27 @@ const CourierMissionDetail = () => {
                   </a>
                 </>
               )}
+              {mission.delivery.phone && (
+                <>
+                  <a href={`tel:${mission.delivery.phone}`} className="flex-1 min-w-[120px]">
+                    <Button variant="outline" size="sm" className="w-full gap-2">
+                      <Phone className="w-4 h-4" />
+                      Appeler client
+                    </Button>
+                  </a>
+                  <a
+                    href={`https://wa.me/${mission.delivery.phone.replace(/[^0-9+]/g, '').replace(/^\+/, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 min-w-[120px]"
+                  >
+                    <Button variant="outline" size="sm" className="w-full gap-2 text-guinea-green border-guinea-green/30 hover:bg-guinea-green/10">
+                      <MessageCircle className="w-4 h-4" />
+                      WhatsApp client
+                    </Button>
+                  </a>
+                </>
+              )}
               <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${mission.pickup.address}, ${mission.pickup.commune}, Conakry, Guinée`)}`}
                 target="_blank"
