@@ -28,6 +28,11 @@ import {
   httpsCallable,
   type Functions
 } from 'firebase/functions';
+import {
+  getAnalytics,
+  isSupported,
+  type Analytics
+} from 'firebase/analytics';
 
 // Firebase Configuration
 const firebaseConfig = {
