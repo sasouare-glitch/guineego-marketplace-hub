@@ -7,6 +7,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Receipt, Smartphone, CreditCard, Download } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { toast } from 'sonner';
+import logoGuineego from '@/assets/logo-guineego.png';
+
+function loadImageAsBase64(src: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      canvas.getContext('2d')!.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
 
 const methodLabels: Record<string, { label: string; icon: React.ReactNode }> = {
   orange_money: { label: 'Orange Money', icon: <Smartphone className="h-4 w-4 text-orange-500" /> },
@@ -32,7 +49,7 @@ const statusLabel: Record<string, string> = {
   failed: 'Échoué',
 };
 
-function generateInvoicePDF(payment: SubscriptionPayment) {
+async function generateInvoicePDF(payment: SubscriptionPayment) {
   const doc = new jsPDF();
   const dateStr = payment.createdAt.toLocaleDateString('fr-FR', {
     day: '2-digit', month: 'long', year: 'numeric',
@@ -40,14 +57,20 @@ function generateInvoicePDF(payment: SubscriptionPayment) {
   const invoiceNum = `GGO-${payment.id.slice(0, 8).toUpperCase()}`;
   const amountStr = payment.amount === 0 ? 'Gratuit' : `${payment.amount.toLocaleString('fr-GN')} GNF`;
 
-  // Header
+  // Header with logo
+  try {
+    const logoData = await loadImageAsBase64(logoGuineego);
+    doc.addImage(logoData, 'PNG', 20, 12, 22, 22);
+  } catch {
+    // fallback: no logo
+  }
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('GuineeGo', 20, 25);
+  doc.text('GuineeGo', 46, 25);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(120, 120, 120);
-  doc.text('Marketplace & Services', 20, 32);
+  doc.text('Marketplace & Services', 46, 32);
 
   // Invoice title
   doc.setFontSize(16);
