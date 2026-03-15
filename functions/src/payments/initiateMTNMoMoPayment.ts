@@ -130,7 +130,7 @@ export const initiateMTNMoMoPayment = functions
         });
 
       const paymentDocId = paymentRef.id;
-      const referenceId = uuidv4(); // MTN requires a UUID for each request
+      const referenceId = crypto.randomUUID(); // MTN requires a UUID for each request
 
       // 6. Call MTN MoMo RequestToPay
       const requestBody = {
