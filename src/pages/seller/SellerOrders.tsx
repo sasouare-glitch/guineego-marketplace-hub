@@ -653,6 +653,13 @@ export default function SellerOrders() {
                     </div>
                   </div>
 
+                  {/* QR Code for courier pickup — show when order is ready or shipped */}
+                  {["ready", "shipped"].includes(order.status) && (
+                    <div className="px-4 pb-4">
+                      <OrderQRCode orderId={order.id} purpose="pickup" size={120} />
+                    </div>
+                  )}
+
                   {/* Progress bar for seller-actionable statuses */}
                   {["pending", "confirmed", "preparing", "ready"].includes(order.status) && (
                     <div className="px-4 pb-4">
