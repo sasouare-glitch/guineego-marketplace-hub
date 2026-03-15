@@ -23,6 +23,7 @@ import {
   UserPlus,
   MessageSquare,
   Percent,
+  CreditCard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -127,6 +128,12 @@ const financeItems = [
     url: "/admin/finances", 
     icon: Wallet,
     description: "Revenus et paiements"
+  },
+  { 
+    title: "Paiements", 
+    url: "/admin/payments", 
+    icon: CreditCard,
+    description: "Suivi des paiements en temps réel"
   },
   { 
     title: "Commissions", 
