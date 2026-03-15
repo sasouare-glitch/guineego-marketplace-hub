@@ -143,3 +143,8 @@ export { resendOrderSms } from './notifications/resendOrderSms';
 // SPONSORING FUNCTIONS
 // ============================================
 export { checkExpiringSponsorships } from './sponsoring/checkExpiringSponsorships';
+
+// ============================================
+// SUBSCRIPTION FUNCTIONS
+// ============================================
+export { checkExpiringSubscriptions } from './sponsoring/checkExpiringSubscriptions';
