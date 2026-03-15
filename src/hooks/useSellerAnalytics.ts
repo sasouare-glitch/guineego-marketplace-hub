@@ -63,6 +63,7 @@ export function useSellerAnalytics(periodDays: number) {
 
   const [orders, setOrders] = useState<OrderDoc[]>([]);
   const [products, setProducts] = useState<ProductDoc[]>([]);
+  const [visitorsByDay, setVisitorsByDay] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
   // Listen to orders
