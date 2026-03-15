@@ -49,7 +49,7 @@ const statusLabel: Record<string, string> = {
   failed: 'Échoué',
 };
 
-function generateInvoicePDF(payment: SubscriptionPayment) {
+async function generateInvoicePDF(payment: SubscriptionPayment) {
   const doc = new jsPDF();
   const dateStr = payment.createdAt.toLocaleDateString('fr-FR', {
     day: '2-digit', month: 'long', year: 'numeric',
@@ -57,14 +57,20 @@ function generateInvoicePDF(payment: SubscriptionPayment) {
   const invoiceNum = `GGO-${payment.id.slice(0, 8).toUpperCase()}`;
   const amountStr = payment.amount === 0 ? 'Gratuit' : `${payment.amount.toLocaleString('fr-GN')} GNF`;
 
-  // Header
+  // Header with logo
+  try {
+    const logoData = await loadImageAsBase64(logoGuineego);
+    doc.addImage(logoData, 'PNG', 20, 12, 22, 22);
+  } catch {
+    // fallback: no logo
+  }
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('GuineeGo', 20, 25);
+  doc.text('GuineeGo', 46, 25);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(120, 120, 120);
-  doc.text('Marketplace & Services', 20, 32);
+  doc.text('Marketplace & Services', 46, 32);
 
   // Invoice title
   doc.setFontSize(16);
