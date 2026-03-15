@@ -37,6 +37,8 @@ export function ShareStoreCard() {
     }
   };
 
+  const [showQR, setShowQR] = useState(false);
+
   const canShare = typeof navigator !== 'undefined' && !!navigator.share;
 
   const handleNativeShare = async () => {
