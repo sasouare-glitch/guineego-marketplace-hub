@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import logoGuineego from "@/assets/logo-guineego.png";
 import { motion } from "framer-motion";
 import { Copy, Check, QrCode, Download, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
