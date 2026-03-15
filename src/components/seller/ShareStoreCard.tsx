@@ -38,6 +38,27 @@ export function ShareStoreCard() {
   };
 
   const [showQR, setShowQR] = useState(false);
+  const qrRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadQR = () => {
+    const svg = qrRef.current?.querySelector("svg");
+    if (!svg) return;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = 320;
+      canvas.height = 320;
+      ctx?.drawImage(img, 0, 0, 320, 320);
+      const a = document.createElement("a");
+      a.download = `qr-${storeName.replace(/\s+/g, "-").toLowerCase()}.png`;
+      a.href = canvas.toDataURL("image/png");
+      a.click();
+      toast.success("QR code téléchargé !");
+    };
+    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+  };
 
   const canShare = typeof navigator !== 'undefined' && !!navigator.share;
 
