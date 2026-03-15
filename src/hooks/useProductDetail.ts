@@ -30,6 +30,7 @@ async function resolveSellerInfo(sellerId: string) {
 
 export interface ProductDetail {
   id: string;
+  sellerId: string;
   name: string;
   price: number;
   originalPrice?: number;
