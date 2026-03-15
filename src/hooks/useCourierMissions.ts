@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db } from "@/lib/firebase/config";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAlertSound } from "@/hooks/useAlertSound";
 import {
   collection,
   query,
@@ -64,8 +65,11 @@ export function useCourierMissions() {
   const [available, setAvailable] = useState<DeliveryMission[]>([]);
   const [myMissions, setMyMissions] = useState<DeliveryMission[]>([]);
   const [loading, setLoading] = useState(true);
+  const { playUrgentAlert } = useAlertSound();
+  const prevMissionIdsRef = useRef<Set<string>>(new Set());
+  const isInitialLoadRef = useRef(true);
 
-  // Fetch available (pending) missions
+  // Fetch available (pending) missions + play sound for new express ones
   useEffect(() => {
     const q = query(
       collection(db, "deliveries"),
@@ -73,14 +77,37 @@ export function useCourierMissions() {
       orderBy("createdAt", "desc")
     );
     const unsub = onSnapshot(q, (snap) => {
-      setAvailable(snap.docs.map((d) => ({ ...d.data(), id: d.id } as DeliveryMission)));
+      const missions = snap.docs.map((d) => ({ ...d.data(), id: d.id } as DeliveryMission));
+      
+      // Detect new express missions (skip initial load)
+      if (!isInitialLoadRef.current) {
+        const prevIds = prevMissionIdsRef.current;
+        const hasNewUrgent = missions.some(
+          (m) => !prevIds.has(m.id) && m.priority === "express"
+        );
+        if (hasNewUrgent) {
+          playUrgentAlert();
+          toast.warning("⚡ Nouvelle mission EXPRESS disponible !", {
+            duration: 6000,
+          });
+        } else {
+          const hasNewNormal = missions.some((m) => !prevIds.has(m.id));
+          if (hasNewNormal) {
+            toast.info("📦 Nouvelle mission disponible");
+          }
+        }
+      }
+      isInitialLoadRef.current = false;
+      prevMissionIdsRef.current = new Set(missions.map((m) => m.id));
+
+      setAvailable(missions);
       setLoading(false);
     }, (err) => {
       console.error("Error fetching available missions:", err);
       setLoading(false);
     });
     return () => unsub();
-  }, []);
+  }, [playUrgentAlert]);
 
   // Fetch courier's own missions (accepted+)
   useEffect(() => {
