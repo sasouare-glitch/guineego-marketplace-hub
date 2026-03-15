@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,27 @@ import {
   CheckCheck,
   Trash2,
   Clock,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+  writeBatch,
+  Timestamp,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 
-interface Notification {
+interface SellerNotification {
   id: string;
   type: "order" | "stock" | "message" | "report" | "system";
   title: string;
@@ -25,73 +42,6 @@ interface Notification {
   time: string;
   read: boolean;
 }
-
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "order",
-    title: "Nouvelle commande #CMD-2847",
-    description: "Mamadou Diallo a passé une commande de 3 articles pour 185 000 GNF",
-    time: "Il y a 5 min",
-    read: false,
-  },
-  {
-    id: "2",
-    type: "stock",
-    title: "Stock faible — Sac en cuir tressé",
-    description: "Il ne reste que 2 unités en stock. Pensez à réapprovisionner.",
-    time: "Il y a 30 min",
-    read: false,
-  },
-  {
-    id: "3",
-    type: "message",
-    title: "Nouveau message de Aissatou B.",
-    description: "« Bonjour, est-ce que le tissu Bazin est disponible en bleu ? »",
-    time: "Il y a 1h",
-    read: false,
-  },
-  {
-    id: "4",
-    type: "order",
-    title: "Commande #CMD-2845 livrée",
-    description: "La commande a été livrée avec succès à Kaloum.",
-    time: "Il y a 2h",
-    read: true,
-  },
-  {
-    id: "5",
-    type: "report",
-    title: "Rapport hebdomadaire disponible",
-    description: "Vos ventes ont augmenté de 12% cette semaine. Consultez le détail.",
-    time: "Il y a 5h",
-    read: true,
-  },
-  {
-    id: "6",
-    type: "system",
-    title: "Mise à jour des conditions vendeur",
-    description: "Les nouvelles conditions générales de vente entrent en vigueur le 15 mars.",
-    time: "Hier",
-    read: true,
-  },
-  {
-    id: "7",
-    type: "stock",
-    title: "Rupture de stock — Huile de palme 1L",
-    description: "Ce produit est en rupture. Il a été masqué de la boutique.",
-    time: "Hier",
-    read: true,
-  },
-  {
-    id: "8",
-    type: "order",
-    title: "Nouvelle commande #CMD-2843",
-    description: "Fatou Camara — 1 article, 45 000 GNF. Paiement Orange Money confirmé.",
-    time: "Il y a 2 jours",
-    read: true,
-  },
-];
 
 const typeConfig = {
   order: { icon: ShoppingBag, color: "text-primary", bg: "bg-primary/10", label: "Commandes" },
@@ -101,9 +51,66 @@ const typeConfig = {
   system: { icon: Bell, color: "text-muted-foreground", bg: "bg-muted", label: "Système" },
 };
 
+// Map Firestore notification types to local seller types
+function mapNotificationType(type: string): SellerNotification["type"] {
+  if (type.includes("order") || type === "order_created" || type === "order_status_changed") return "order";
+  if (type.includes("stock") || type === "low_stock") return "stock";
+  if (type.includes("message") || type === "new_message") return "message";
+  if (type.includes("report") || type.includes("revenue") || type === "sponsoring_expiring") return "report";
+  return "system";
+}
+
 const SellerNotificationsPage = () => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<SellerNotification[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
+
+  // Real-time Firestore listener
+  useEffect(() => {
+    if (!user?.uid) {
+      setNotifications([]);
+      setLoading(false);
+      return;
+    }
+
+    const q = query(
+      collection(db, "notifications"),
+      where("userId", "==", user.uid),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const notifs: SellerNotification[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          const createdAt = data.createdAt instanceof Timestamp
+            ? data.createdAt.toDate()
+            : data.createdAt ? new Date(data.createdAt) : new Date();
+
+          return {
+            id: docSnap.id,
+            type: mapNotificationType(data.type || "system"),
+            title: data.title || "",
+            description: data.message || data.body || "",
+            time: formatDistanceToNow(createdAt, { addSuffix: true, locale: fr }),
+            read: data.read ?? false,
+          };
+        });
+        setNotifications(notifs);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error listening to seller notifications:", error);
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      try { unsubscribe(); } catch (e) { console.warn(e); }
+    };
+  }, [user?.uid]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -114,24 +121,43 @@ const SellerNotificationsPage = () => {
       ? notifications.filter((n) => !n.read)
       : notifications.filter((n) => n.type === activeTab);
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
+  const markAllRead = useCallback(async () => {
+    if (!user?.uid) return;
+    try {
+      const batch = writeBatch(db);
+      notifications.filter((n) => !n.read).forEach((n) => {
+        batch.update(doc(db, "notifications", n.id), { read: true });
+      });
+      await batch.commit();
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  }, [user?.uid, notifications]);
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
+  const markAsRead = useCallback(async (id: string) => {
+    try {
+      await updateDoc(doc(db, "notifications", id), { read: true });
+    } catch (error) {
+      console.error("Error marking as read:", error);
+    }
+  }, []);
 
-  const deleteNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
+  const deleteNotification = useCallback(async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "notifications", id));
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+    }
+  }, []);
 
   return (
     <SellerLayout>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
@@ -244,6 +270,7 @@ const SellerNotificationsPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+      )}
     </SellerLayout>
   );
 };
