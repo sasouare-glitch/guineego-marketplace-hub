@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -19,6 +19,7 @@ import {
   BarChart3,
   Loader2,
   Megaphone,
+  AlertTriangle,
 } from "lucide-react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,14 @@ const statusConfig = {
     label: "Rupture",
     variant: "bg-destructive/10 text-destructive border-destructive/20",
   },
+};
+
+/** Returns days until sponsoring expires, or null if not sponsored */
+const getSponsorDaysLeft = (product: any): number | null => {
+  if (!product.isSponsored || !product.sponsoredUntil) return null;
+  const until = product.sponsoredUntil?.toDate ? product.sponsoredUntil.toDate() : new Date(product.sponsoredUntil);
+  const diff = Math.ceil((until.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  return diff;
 };
 
 const formatPrice = (price: number) => {
@@ -270,11 +279,23 @@ export default function SellerProducts() {
                             <span className="font-medium text-foreground line-clamp-1">
                               {product.name}
                             </span>
-                            {(product as any).isSponsored && (
-                              <Badge className="bg-accent/10 text-accent border-accent/20 text-[10px] ml-1">
-                                <Megaphone className="w-3 h-3 mr-0.5" /> Sponsorisé
-                              </Badge>
-                            )}
+                            {(product as any).isSponsored && (() => {
+                              const daysLeft = getSponsorDaysLeft(product);
+                              const expiringSoon = daysLeft !== null && daysLeft <= 3;
+                              return (
+                                <>
+                                  <Badge className="bg-accent/10 text-accent border-accent/20 text-[10px] ml-1">
+                                    <Megaphone className="w-3 h-3 mr-0.5" /> Sponsorisé
+                                  </Badge>
+                                  {expiringSoon && (
+                                    <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] ml-1 animate-pulse">
+                                      <AlertTriangle className="w-3 h-3 mr-0.5" />
+                                      {daysLeft! <= 0 ? 'Expiré' : `Expire dans ${daysLeft}j`}
+                                    </Badge>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                         </td>
                         <td className="px-6 py-4 hidden md:table-cell">
@@ -406,6 +427,23 @@ export default function SellerProducts() {
                     >
                       {status.label}
                     </Badge>
+                    {(product as any).isSponsored && (() => {
+                      const daysLeft = getSponsorDaysLeft(product);
+                      const expiringSoon = daysLeft !== null && daysLeft <= 3;
+                      return (
+                        <div className="absolute top-3 left-3 flex flex-col gap-1">
+                          <Badge className="bg-accent/10 text-accent border-accent/20 text-[10px]">
+                            <Megaphone className="w-3 h-3 mr-0.5" /> Sponsorisé
+                          </Badge>
+                          {expiringSoon && (
+                            <Badge className="bg-destructive/10 text-destructive border-destructive/20 text-[10px] animate-pulse">
+                              <AlertTriangle className="w-3 h-3 mr-0.5" />
+                              {daysLeft! <= 0 ? 'Expiré' : `${daysLeft}j restants`}
+                            </Badge>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div className="p-4 space-y-3">
                     <div>
