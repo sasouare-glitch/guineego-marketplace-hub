@@ -228,23 +228,23 @@ const CourierMissionDetail = () => {
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {mission.delivery.phone && (
+              {(mission.pickup as any).phone && (
                 <>
-                  <a href={`tel:${mission.delivery.phone}`} className="flex-1 min-w-[120px]">
+                  <a href={`tel:${(mission.pickup as any).phone}`} className="flex-1 min-w-[120px]">
                     <Button variant="outline" size="sm" className="w-full gap-2">
                       <Phone className="w-4 h-4" />
-                      Appeler client
+                      Appeler vendeur
                     </Button>
                   </a>
                   <a
-                    href={`https://wa.me/${mission.delivery.phone.replace(/[^0-9+]/g, '').replace(/^\+/, '')}`}
+                    href={`https://wa.me/${(mission.pickup as any).phone.replace(/[^0-9+]/g, '').replace(/^\+/, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 min-w-[120px]"
                   >
                     <Button variant="outline" size="sm" className="w-full gap-2 text-guinea-green border-guinea-green/30 hover:bg-guinea-green/10">
                       <MessageCircle className="w-4 h-4" />
-                      WhatsApp
+                      WhatsApp vendeur
                     </Button>
                   </a>
                 </>
