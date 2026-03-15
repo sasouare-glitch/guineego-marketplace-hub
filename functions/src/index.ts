@@ -149,3 +149,4 @@ export { checkExpiringSponsorships } from './sponsoring/checkExpiringSponsorship
 // ============================================
 export { checkExpiringSubscriptions } from './sponsoring/checkExpiringSubscriptions';
 export { confirmSubscriptionPayment } from './payments/subscriptionWebhooks';
+export { initiateOrangeMoneyPayment } from './payments/initiateOrangeMoneyPayment';

@@ -1,11 +1,12 @@
 /**
  * Hook to manage seller subscription plan
  * Reads/writes to seller_settings document in Firestore
+ * Integrates with Orange Money API via Cloud Function for paid plans
  */
 
 import { useState, useEffect } from 'react';
 import { doc, onSnapshot, updateDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 import { type SellerPlanId, getPlanById, type SellerPlan } from '@/constants/sellerPlans';
 import { toast } from 'sonner';
@@ -14,6 +15,13 @@ interface SellerSubscriptionData {
   planId: SellerPlanId;
   subscribedAt?: Date;
   expiresAt?: Date;
+}
+
+interface OrangePaymentResult {
+  success: boolean;
+  paymentId: string;
+  paymentUrl: string;
+  payToken: string;
 }
 
 export function useSellerSubscription() {
@@ -45,16 +53,52 @@ export function useSellerSubscription() {
 
   const currentPlan: SellerPlan = getPlanById(planId);
 
-  const upgradePlan = async (newPlanId: SellerPlanId, paymentMethod?: string) => {
+  const upgradePlan = async (newPlanId: SellerPlanId, paymentMethod?: string, phone?: string) => {
     if (!user?.uid) return;
     try {
       const newPlan = getPlanById(newPlanId);
       const isFree = newPlan.price === 0;
 
-      // For paid plans with mobile money, record a PENDING payment first
-      // The plan will NOT change until payment is confirmed
-      if (!isFree && (paymentMethod === 'orange_money' || paymentMethod === 'mtn_money')) {
-        // Log pending payment — plan stays unchanged
+      // ── Orange Money: initiate real payment via Cloud Function ──
+      if (!isFree && paymentMethod === 'orange_money') {
+        if (!phone) {
+          toast.error('Veuillez entrer votre numéro Orange Money.');
+          return;
+        }
+
+        toast.info('Initiation du paiement Orange Money...', { duration: 3000 });
+
+        const initiatePayment = callFunction<
+          { planId: string; planName: string; amount: number; phone: string; paymentMethod: string },
+          OrangePaymentResult
+        >('initiateOrangeMoneyPayment');
+
+        const result = await initiatePayment({
+          planId: newPlanId,
+          planName: newPlan.name,
+          amount: newPlan.price,
+          phone,
+          paymentMethod: 'orange_money',
+        });
+
+        if (result.data.success && result.data.paymentUrl) {
+          // Redirect to Orange Money payment page
+          toast.success(
+            'Redirection vers Orange Money... Complétez le paiement pour activer votre plan.',
+            { duration: 6000 }
+          );
+          window.open(result.data.paymentUrl, '_blank');
+        } else {
+          toast.info(
+            'Paiement en attente — suivez les instructions USSD pour confirmer. Votre plan sera mis à jour après réception du paiement.',
+            { duration: 8000 }
+          );
+        }
+        return;
+      }
+
+      // ── MTN Money: pending payment (no API integration yet) ──
+      if (!isFree && paymentMethod === 'mtn_money') {
         await addDoc(collection(db, 'seller_settings', user.uid, 'subscription_payments'), {
           planId: newPlanId,
           planName: newPlan.name,
@@ -71,7 +115,7 @@ export function useSellerSubscription() {
         return;
       }
 
-      // For free plans or card payments: apply immediately
+      // ── Free plans or card payments: apply immediately ──
       const newExpiresAt = newPlan.price > 0
         ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
         : null;
@@ -96,9 +140,10 @@ export function useSellerSubscription() {
       });
 
       toast.success(`Abonnement mis à jour : ${newPlan.name}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error upgrading plan:', err);
-      toast.error("Erreur lors de la mise à jour de l'abonnement");
+      const message = err?.message || "Erreur lors de la mise à jour de l'abonnement";
+      toast.error(message);
     }
   };
 

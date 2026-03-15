@@ -1,5 +1,6 @@
 /**
  * SUBSCRIPTION WEBHOOKS: Mobile Money Callback Handlers for Seller Plans
+ * Handles callbacks from Orange Money API and MTN MoMo API
  * Confirms pending subscription payments and activates the new plan
  */
 
@@ -9,20 +10,15 @@ import { sendNotification } from '../utils/notifications';
 
 const db = admin.firestore();
 
-interface SubscriptionWebhookData {
-  transactionId: string;
-  amount: number;
-  phone: string;
-  status: 'SUCCESS' | 'FAILED' | 'PENDING' | 'SUCCESSFUL';
-  reference: string; // paymentDocId
-  sellerId: string;
-  provider: 'orange_money' | 'mtn_money';
-  reason?: string;
-}
-
 /**
- * Confirm a pending subscription payment and activate the plan
- * REST endpoint: /confirmSubscriptionPayment
+ * Orange Money Webhook for Subscription Payments
+ * Called by Orange Money API when payment status changes
+ * 
+ * Orange Money sends a POST with:
+ * - status: "SUCCESS" | "FAILED" | "CANCELLED"
+ * - order_id: our paymentDocId
+ * - pay_token: token we received at initiation
+ * - txnid: Orange transaction ID
  */
 export const confirmSubscriptionPayment = functions
   .region('europe-west1')
@@ -33,38 +29,65 @@ export const confirmSubscriptionPayment = functions
     }
 
     try {
-      const data = req.body as SubscriptionWebhookData;
-      console.log('Subscription webhook received:', data);
+      const body = req.body;
+      console.log('Subscription webhook received:', JSON.stringify(body));
 
-      // Normalize status (MTN uses SUCCESSFUL, OM uses SUCCESS)
-      const normalizedStatus = data.status === 'SUCCESSFUL' ? 'SUCCESS' : data.status;
+      // Orange Money callback format
+      const status = body.status as string;
+      const orderId = body.order_id as string; // This is our paymentDocId
+      const payToken = body.pay_token as string;
+      const txnId = body.txnid as string;
 
-      // Find the pending subscription payment
-      // Strategy: search by reference (paymentDocId) or by sellerId + pending status
+      // Also support our manual/generic format for testing & MTN
+      const fallbackReference = body.reference as string;
+      const fallbackSellerId = body.sellerId as string;
+      const fallbackTransactionId = body.transactionId as string;
+
       let paymentDoc: admin.firestore.QueryDocumentSnapshot | null = null;
-      let sellerId: string | null = data.sellerId || null;
+      let sellerId: string | null = null;
 
-      if (data.reference) {
-        // Direct lookup by payment doc ID across all seller_settings
-        const allSettingsSnap = await db.collectionGroup('subscription_payments')
+      // Strategy 1: Find by order_id (paymentDocId) — scan all sellers
+      const searchId = orderId || fallbackReference;
+      if (searchId) {
+        const allPendingSnap = await db.collectionGroup('subscription_payments')
           .where('status', '==', 'pending')
           .get();
 
-        for (const doc of allSettingsSnap.docs) {
-          if (doc.id === data.reference) {
+        for (const doc of allPendingSnap.docs) {
+          if (doc.id === searchId) {
             paymentDoc = doc;
-            // Extract sellerId from path: seller_settings/{sellerId}/subscription_payments/{paymentId}
+            sellerId = doc.ref.parent.parent?.id || null;
+            break;
+          }
+          // Also match by payToken if available
+          if (payToken && doc.data().payToken === payToken) {
+            paymentDoc = doc;
             sellerId = doc.ref.parent.parent?.id || null;
             break;
           }
         }
       }
 
-      // Fallback: find by sellerId
-      if (!paymentDoc && sellerId) {
+      // Strategy 2: Find by payToken only
+      if (!paymentDoc && payToken) {
+        const tokenQuery = await db.collectionGroup('subscription_payments')
+          .where('payToken', '==', payToken)
+          .where('status', '==', 'pending')
+          .limit(1)
+          .get();
+
+        if (!tokenQuery.empty) {
+          paymentDoc = tokenQuery.docs[0];
+          sellerId = paymentDoc.ref.parent.parent?.id || null;
+        }
+      }
+
+      // Strategy 3: Fallback by sellerId
+      if (!paymentDoc && fallbackSellerId) {
+        sellerId = fallbackSellerId;
         const pendingQuery = await db
           .collection('seller_settings')
-          .doc(sellerId)
+          .doc(fallbackSellerId)
           .collection('subscription_payments')
           .where('status', '==', 'pending')
           .orderBy('createdAt', 'desc')
@@ -77,22 +100,25 @@ export const confirmSubscriptionPayment = functions
       }
 
       if (!paymentDoc || !sellerId) {
-        console.error('Pending subscription payment not found:', data);
+        console.error('Pending subscription payment not found:', body);
         res.status(404).json({ success: false, error: 'Pending payment not found' });
         return;
       }
 
       const paymentData = paymentDoc.data();
 
+      // Normalize status across providers
+      const normalizedStatus = normalizeStatus(status);
+
       if (normalizedStatus === 'SUCCESS') {
         // 1. Mark payment as completed
         await paymentDoc.ref.update({
           status: 'completed',
-          providerTransactionId: data.transactionId,
+          providerTransactionId: txnId || fallbackTransactionId || '',
           completedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
 
-        // 2. Activate the new plan on seller_settings
+        // 2. Activate the new plan
         const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
         await db.collection('seller_settings').doc(sellerId).update({
@@ -118,10 +144,9 @@ export const confirmSubscriptionPayment = functions
         res.status(200).json({ success: true, planId: paymentData.planId });
 
       } else if (normalizedStatus === 'FAILED') {
-        // Mark payment as failed — plan stays unchanged
         await paymentDoc.ref.update({
           status: 'failed',
-          failureReason: data.reason || 'Paiement mobile money échoué',
+          failureReason: body.reason || 'Paiement mobile money échoué',
           failedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
 
@@ -137,8 +162,16 @@ export const confirmSubscriptionPayment = functions
         res.status(200).json({ success: true, status: 'failed' });
 
       } else {
-        // Still pending
-        res.status(200).json({ success: true, status: 'pending' });
+        // Still pending or cancelled
+        if (normalizedStatus === 'CANCELLED') {
+          await paymentDoc.ref.update({
+            status: 'cancelled',
+            cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          res.status(200).json({ success: true, status: 'cancelled' });
+        } else {
+          res.status(200).json({ success: true, status: 'pending' });
+        }
       }
 
     } catch (error) {
@@ -146,3 +179,14 @@ export const confirmSubscriptionPayment = functions
       res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   });
+
+/**
+ * Normalize payment status across providers
+ */
+function normalizeStatus(status: string): 'SUCCESS' | 'FAILED' | 'PENDING' | 'CANCELLED' {
+  const upper = (status || '').toUpperCase();
+  if (upper === 'SUCCESS' || upper === 'SUCCESSFUL') return 'SUCCESS';
+  if (upper === 'FAILED' || upper === 'FAILURE') return 'FAILED';
+  if (upper === 'CANCELLED' || upper === 'CANCELED') return 'CANCELLED';
+  return 'PENDING';
+}
