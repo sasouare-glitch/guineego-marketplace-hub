@@ -122,7 +122,8 @@ export default function SellerSubscriptionPage() {
           </CardContent>
         </Card>
 
-        {/* Confirmation dialog */}
+        {/* Payment history */}
+        <SubscriptionHistory />
         {selectedPlan && (
           <SubscriptionConfirmDialog
             open={!!selectedPlan}
