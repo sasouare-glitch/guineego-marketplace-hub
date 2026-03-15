@@ -43,7 +43,7 @@ export default function LoginPage() {
       
       const roleRoutes: Record<string, string> = {
         ecommerce: '/seller/dashboard',
-        courier: '/courier/dashboard',
+        courier: '/courier',
         investor: '/investor/dashboard',
         admin: '/admin/dashboard',
       };
