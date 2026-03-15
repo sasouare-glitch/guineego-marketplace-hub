@@ -49,9 +49,30 @@ export function useSellerSubscription() {
     if (!user?.uid) return;
     try {
       const newPlan = getPlanById(newPlanId);
+      const isFree = newPlan.price === 0;
 
-      // Calculate expiry: 30 days from now for paid plans
-      const expiresAt = newPlan.price > 0
+      // For paid plans with mobile money, record a PENDING payment first
+      // The plan will NOT change until payment is confirmed
+      if (!isFree && (paymentMethod === 'orange_money' || paymentMethod === 'mtn_money')) {
+        // Log pending payment — plan stays unchanged
+        await addDoc(collection(db, 'seller_settings', user.uid, 'subscription_payments'), {
+          planId: newPlanId,
+          planName: newPlan.name,
+          amount: newPlan.price,
+          paymentMethod,
+          status: 'pending',
+          createdAt: serverTimestamp(),
+        });
+
+        toast.info(
+          'Paiement en attente — suivez les instructions USSD pour confirmer. Votre plan sera mis à jour après réception du paiement.',
+          { duration: 8000 }
+        );
+        return;
+      }
+
+      // For free plans or card payments: apply immediately
+      const newExpiresAt = newPlan.price > 0
         ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
         : null;
 
@@ -60,12 +81,11 @@ export function useSellerSubscription() {
           planId: newPlanId,
           planName: newPlan.name,
           subscribedAt: serverTimestamp(),
-          ...(expiresAt ? { expiresAt } : {}),
+          ...(newExpiresAt ? { expiresAt: newExpiresAt } : {}),
         },
         updatedAt: serverTimestamp(),
       });
 
-      // Log payment in subscription_payments sub-collection
       await addDoc(collection(db, 'seller_settings', user.uid, 'subscription_payments'), {
         planId: newPlanId,
         planName: newPlan.name,
