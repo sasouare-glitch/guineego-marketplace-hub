@@ -14,6 +14,7 @@ import {
   ChefHat,
   ShoppingBag,
   Loader2,
+  QrCode,
 } from "lucide-react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { Button } from "@/components/ui/button";
