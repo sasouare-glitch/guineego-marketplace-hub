@@ -8,7 +8,7 @@ import { SELLER_PLANS, type SellerPlanId, type SellerPlan } from '@/constants/se
 import { SellerPlanBadge } from '@/components/seller/SellerPlanBadge';
 import { SubscriptionConfirmDialog } from '@/components/seller/SubscriptionConfirmDialog';
 import { SubscriptionHistory } from '@/components/seller/SubscriptionHistory';
-import { Check, Crown, Zap, Package } from 'lucide-react';
+import { Check, Crown, Zap, Package, Clock, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const planIcons: Record<SellerPlanId, React.ReactNode> = {
