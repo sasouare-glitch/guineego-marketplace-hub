@@ -49,6 +49,7 @@ export function useSellerDashboard() {
 
   const [orders, setOrders] = useState<DashboardOrder[]>([]);
   const [lowStockProducts, setLowStockProducts] = useState<LowStockProduct[]>([]);
+  const [totalVisitors, setTotalVisitors] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Listen to seller's recent orders
