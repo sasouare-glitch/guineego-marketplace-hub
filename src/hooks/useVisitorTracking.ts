@@ -30,12 +30,14 @@ export function useVisitorTracking(options: TrackVisitOptions | null) {
     // 1. Firebase Analytics event
     if (analytics) {
       try {
-        logEvent(analytics, options.page === 'product_detail' ? 'view_item' : 'page_view', {
+        const eventName = options.page === 'product_detail' ? 'view_item' : 'page_view';
+        const params: Record<string, string> = {
           page_title: options.page,
           seller_id: options.sellerId,
-          ...(options.productId && { item_id: options.productId }),
-          ...(options.productName && { item_name: options.productName }),
-        });
+        };
+        if (options.productId) params.item_id = options.productId;
+        if (options.productName) params.item_name = options.productName;
+        logEvent(analytics, eventName as string, params);
       } catch (e) {
         console.warn('Analytics logEvent error:', e);
       }
