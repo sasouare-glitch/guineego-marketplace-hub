@@ -36,18 +36,18 @@ export default function LoginPage() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (user && profile && !loading) {
+    if (user && claims && !loading) {
       const roleRoutes: Record<string, string> = {
         ecommerce: '/seller/dashboard',
         courier: '/courier',
         investor: '/investor/dashboard',
         admin: '/admin/dashboard',
       };
-      const role = profile.role || 'customer';
+      const role = claims.role || 'customer';
       const dest = from || roleRoutes[role] || '/';
       navigate(dest, { replace: true });
     }
-  }, [user, profile, loading, from, navigate]);
+  }, [user, claims, loading, from, navigate]);
 
   const getRedirectByRole = async (uid: string): Promise<string> => {
     try {
