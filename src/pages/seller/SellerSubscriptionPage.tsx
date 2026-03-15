@@ -17,7 +17,8 @@ const planIcons: Record<SellerPlanId, React.ReactNode> = {
 };
 
 export default function SellerSubscriptionPage() {
-  const { planId, loading, upgradePlan } = useSellerSubscription();
+  const { planId, currentPlan, loading, upgradePlan } = useSellerSubscription();
+  const [selectedPlan, setSelectedPlan] = useState<SellerPlan | null>(null);
 
   const formatPrice = (price: number) => {
     if (price === 0) return 'Gratuit';
