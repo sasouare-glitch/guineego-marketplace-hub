@@ -148,3 +148,4 @@ export { checkExpiringSponsorships } from './sponsoring/checkExpiringSponsorship
 // SUBSCRIPTION FUNCTIONS
 // ============================================
 export { checkExpiringSubscriptions } from './sponsoring/checkExpiringSubscriptions';
+export { confirmSubscriptionPayment } from './payments/subscriptionWebhooks';
