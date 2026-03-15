@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { doc, onSnapshot, updateDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, serverTimestamp, collection, addDoc, query, where, orderBy, limit } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 import { type SellerPlanId, getPlanById, type SellerPlan } from '@/constants/sellerPlans';
@@ -38,6 +38,13 @@ export function useSellerSubscription() {
   const [planId, setPlanId] = useState<SellerPlanId>('free');
   const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingPayment, setPendingPayment] = useState<{
+    planId: string;
+    planName: string;
+    amount: number;
+    paymentMethod: string;
+    createdAt: Date | null;
+  } | null>(null);
 
   useEffect(() => {
     if (!user?.uid) {
@@ -55,6 +62,42 @@ export function useSellerSubscription() {
         setLoading(false);
       },
       () => setLoading(false)
+    );
+
+    return () => unsub();
+  }, [user?.uid]);
+
+  // Listen for pending payments
+  useEffect(() => {
+    if (!user?.uid) {
+      setPendingPayment(null);
+      return;
+    }
+
+    const pendingQuery = query(
+      collection(db, 'seller_settings', user.uid, 'subscription_payments'),
+      where('status', '==', 'pending'),
+      orderBy('createdAt', 'desc'),
+      limit(1)
+    );
+
+    const unsub = onSnapshot(
+      pendingQuery,
+      (snap) => {
+        if (snap.empty) {
+          setPendingPayment(null);
+        } else {
+          const data = snap.docs[0].data();
+          setPendingPayment({
+            planId: data.planId,
+            planName: data.planName,
+            amount: data.amount,
+            paymentMethod: data.paymentMethod,
+            createdAt: data.createdAt?.toDate?.() || null,
+          });
+        }
+      },
+      () => setPendingPayment(null)
     );
 
     return () => unsub();
@@ -176,5 +219,5 @@ export function useSellerSubscription() {
     ? Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : null;
 
-  return { planId, currentPlan, loading, upgradePlan, expiresAt, daysRemaining };
+  return { planId, currentPlan, loading, upgradePlan, expiresAt, daysRemaining, pendingPayment };
 }

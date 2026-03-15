@@ -3,12 +3,13 @@ import { SellerLayout } from '@/components/seller/SellerLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useSellerSubscription } from '@/hooks/useSellerSubscription';
 import { SELLER_PLANS, type SellerPlanId, type SellerPlan } from '@/constants/sellerPlans';
 import { SellerPlanBadge } from '@/components/seller/SellerPlanBadge';
 import { SubscriptionConfirmDialog } from '@/components/seller/SubscriptionConfirmDialog';
 import { SubscriptionHistory } from '@/components/seller/SubscriptionHistory';
-import { Check, Crown, Zap, Package, Clock, AlertTriangle } from 'lucide-react';
+import { Check, Crown, Zap, Package, Clock, AlertTriangle, Loader2, Smartphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const planIcons: Record<SellerPlanId, React.ReactNode> = {
@@ -18,7 +19,7 @@ const planIcons: Record<SellerPlanId, React.ReactNode> = {
 };
 
 export default function SellerSubscriptionPage() {
-  const { planId, currentPlan, loading, upgradePlan, daysRemaining } = useSellerSubscription();
+  const { planId, currentPlan, loading, upgradePlan, daysRemaining, pendingPayment } = useSellerSubscription();
   const [selectedPlan, setSelectedPlan] = useState<SellerPlan | null>(null);
 
   const formatPrice = (price: number) => {
@@ -35,6 +36,31 @@ export default function SellerSubscriptionPage() {
             Choisissez le plan qui correspond à la taille de votre activité
           </p>
         </div>
+
+        {/* Pending payment banner */}
+        {pendingPayment && (
+          <Alert className="mb-6 border-yellow-500/50 bg-yellow-500/10">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Smartphone className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-yellow-500 animate-pulse" />
+              </div>
+              <div className="flex-1">
+                <AlertTitle className="text-yellow-700 dark:text-yellow-300 font-semibold">
+                  Paiement en attente
+                </AlertTitle>
+                <AlertDescription className="text-yellow-600 dark:text-yellow-400 text-sm">
+                  Votre paiement de{' '}
+                  <strong>{pendingPayment.amount.toLocaleString('fr-GN')} GNF</strong> pour le plan{' '}
+                  <strong>{pendingPayment.planName}</strong> via{' '}
+                  {pendingPayment.paymentMethod === 'orange_money' ? 'Orange Money' : 'MTN Money'}{' '}
+                  est en cours de traitement. Le plan sera activé dès confirmation du paiement.
+                </AlertDescription>
+              </div>
+              <Loader2 className="h-5 w-5 text-yellow-500 animate-spin flex-shrink-0" />
+            </div>
+          </Alert>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {SELLER_PLANS.map((plan) => {
