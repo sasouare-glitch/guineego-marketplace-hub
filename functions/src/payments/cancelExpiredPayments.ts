@@ -29,11 +29,22 @@ export const cancelExpiredPayments = functions.pubsub
         .get();
 
       for (const paymentDoc of paymentsSnap.docs) {
+        const paymentData = paymentDoc.data();
         await paymentDoc.ref.update({
           status: 'cancelled',
           cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
           cancelReason: 'timeout_15min',
         });
+
+        // Notify seller
+        await sendNotification({
+          userId: sellerDoc.id,
+          type: 'payment_received',
+          title: 'Paiement expiré',
+          body: `Votre paiement de ${(paymentData.amount || 0).toLocaleString()} GNF pour le plan ${paymentData.plan || ''} a été annulé après 15 min sans confirmation.`,
+          data: { paymentId: paymentDoc.id, reason: 'timeout_15min' },
+        });
+
         cancelled++;
       }
     }
