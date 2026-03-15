@@ -73,6 +73,7 @@ export function useProductDetail(productId: string | undefined) {
 
       setProduct({
         id: snap.id,
+        sellerId,
         name: d.name || '',
         price: d.price || d.basePrice || 0,
         originalPrice: d.originalPrice || undefined,
