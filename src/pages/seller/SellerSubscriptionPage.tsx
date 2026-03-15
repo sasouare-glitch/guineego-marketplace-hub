@@ -3,12 +3,13 @@ import { SellerLayout } from '@/components/seller/SellerLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useSellerSubscription } from '@/hooks/useSellerSubscription';
 import { SELLER_PLANS, type SellerPlanId, type SellerPlan } from '@/constants/sellerPlans';
 import { SellerPlanBadge } from '@/components/seller/SellerPlanBadge';
 import { SubscriptionConfirmDialog } from '@/components/seller/SubscriptionConfirmDialog';
 import { SubscriptionHistory } from '@/components/seller/SubscriptionHistory';
-import { Check, Crown, Zap, Package, Clock, AlertTriangle } from 'lucide-react';
+import { Check, Crown, Zap, Package, Clock, AlertTriangle, Loader2, Smartphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const planIcons: Record<SellerPlanId, React.ReactNode> = {
