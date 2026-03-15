@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/useCart";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useProductDetail } from "@/hooks/useProductDetail";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { toast } from "sonner";
 
 const ProductDetail = () => {
