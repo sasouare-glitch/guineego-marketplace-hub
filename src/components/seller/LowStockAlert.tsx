@@ -9,7 +9,7 @@ interface LowStockAlertProps {
   products: LowStockProduct[];
 }
 
-export function LowStockAlert({ products }: LowStockAlertProps) {
+export function LowStockAlert({ products = [] }: LowStockAlertProps) {
   if (products.length === 0) {
     return (
       <motion.div
