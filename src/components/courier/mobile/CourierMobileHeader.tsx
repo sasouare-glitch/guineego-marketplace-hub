@@ -1,7 +1,8 @@
-import { ArrowLeft, Bell, Power } from "lucide-react";
+import { ArrowLeft, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { cn } from "@/lib/utils";
 
 interface CourierMobileHeaderProps {
