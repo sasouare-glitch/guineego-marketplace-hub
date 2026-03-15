@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { db } from "@/lib/firebase/config";
 import { useAuth } from "@/contexts/AuthContext";
-import { useAlertSound } from "@/hooks/useAlertSound";
+import { useAlertSound, type AlertSoundType } from "@/hooks/useAlertSound";
 import {
   collection,
   query,
@@ -10,6 +10,7 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  getDoc,
   arrayUnion,
   serverTimestamp,
   Timestamp,
@@ -68,6 +69,28 @@ export function useCourierMissions() {
   const { playUrgentAlert } = useAlertSound();
   const prevMissionIdsRef = useRef<Set<string>>(new Set());
   const isInitialLoadRef = useRef(true);
+  const courierSettingsRef = useRef<{
+    soundAlerts: boolean;
+    alertVolume: number;
+    alertSoundType: AlertSoundType;
+    vibrationEnabled: boolean;
+  }>({ soundAlerts: true, alertVolume: 0.5, alertSoundType: "classic", vibrationEnabled: true });
+
+  // Load courier alert preferences
+  useEffect(() => {
+    if (!user?.uid) return;
+    getDoc(doc(db, "courier_settings", user.uid)).then((snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        courierSettingsRef.current = {
+          soundAlerts: data.soundAlerts ?? true,
+          alertVolume: data.alertVolume ?? 0.5,
+          alertSoundType: data.alertSoundType ?? "classic",
+          vibrationEnabled: data.vibrationEnabled ?? true,
+        };
+      }
+    }).catch(() => {});
+  }, [user?.uid]);
 
   // Fetch available (pending) missions + play sound for new express ones
   useEffect(() => {
@@ -86,7 +109,14 @@ export function useCourierMissions() {
           (m) => !prevIds.has(m.id) && m.priority === "express"
         );
         if (hasNewUrgent) {
-          playUrgentAlert();
+          const prefs = courierSettingsRef.current;
+          if (prefs.soundAlerts) {
+            playUrgentAlert({
+              volume: prefs.alertVolume,
+              soundType: prefs.alertSoundType,
+              vibrate: prefs.vibrationEnabled,
+            });
+          }
           toast.warning("⚡ Nouvelle mission EXPRESS disponible !", {
             duration: 6000,
           });
