@@ -3,13 +3,15 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bell, Shield, Smartphone, Loader2, Save } from "lucide-react";
+import { Bell, Shield, Smartphone, Loader2, Save, Volume2, Play } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase/config";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useAlertSound, ALERT_SOUND_OPTIONS, type AlertSoundType } from "@/hooks/useAlertSound";
 
 interface CourierSettings {
   pushNotifications: boolean;
@@ -18,6 +20,9 @@ interface CourierSettings {
   darkMode: boolean;
   language: string;
   autoAccept: boolean;
+  alertVolume: number;
+  alertSoundType: AlertSoundType;
+  vibrationEnabled: boolean;
 }
 
 const defaults: CourierSettings = {
@@ -27,6 +32,9 @@ const defaults: CourierSettings = {
   darkMode: false,
   language: "fr",
   autoAccept: false,
+  alertVolume: 0.5,
+  alertSoundType: "classic",
+  vibrationEnabled: true,
 };
 
 export default function CourierSettingsPage() {
@@ -34,6 +42,7 @@ export default function CourierSettingsPage() {
   const [settings, setSettings] = useState<CourierSettings>(defaults);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { previewSound } = useAlertSound();
 
   useEffect(() => {
     if (!user) return;
@@ -105,6 +114,70 @@ export default function CourierSettingsPage() {
           <div className="flex items-center justify-between">
             <Label>Alertes nouvelles missions</Label>
             <Switch checked={settings.missionAlerts} onCheckedChange={() => toggle("missionAlerts")} />
+          </div>
+        </Card>
+
+        {/* Sound & Vibration Settings */}
+        <Card className="p-6 space-y-5">
+          <h3 className="font-semibold flex items-center gap-2">
+            <Volume2 className="w-5 h-5 text-primary" /> Son & Vibration
+          </h3>
+
+          {/* Sound type selector */}
+          <div className="space-y-2">
+            <Label>Type de son d'alerte</Label>
+            <div className="flex items-center gap-3">
+              <Select
+                value={settings.alertSoundType}
+                onValueChange={(v) => setSettings((s) => ({ ...s, alertSoundType: v as AlertSoundType }))}
+              >
+                <SelectTrigger className="flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ALERT_SOUND_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => previewSound(settings.alertSoundType, settings.alertVolume)}
+                title="Écouter"
+              >
+                <Play className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Volume slider */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label>Volume</Label>
+              <span className="text-sm text-muted-foreground font-medium">
+                {Math.round(settings.alertVolume * 100)}%
+              </span>
+            </div>
+            <Slider
+              value={[settings.alertVolume * 100]}
+              onValueChange={([v]) => setSettings((s) => ({ ...s, alertVolume: v / 100 }))}
+              max={100}
+              min={0}
+              step={5}
+              className="w-full"
+            />
+          </div>
+
+          {/* Vibration toggle */}
+          <div className="flex items-center justify-between">
+            <div>
+              <Label>Vibration</Label>
+              <p className="text-xs text-muted-foreground">Vibrer pour les missions express</p>
+            </div>
+            <Switch checked={settings.vibrationEnabled} onCheckedChange={() => toggle("vibrationEnabled")} />
           </div>
         </Card>
 
