@@ -42,9 +42,10 @@ export function useSellerSubscription() {
 
   const currentPlan: SellerPlan = getPlanById(planId);
 
-  const upgradePlan = async (newPlanId: SellerPlanId) => {
+  const upgradePlan = async (newPlanId: SellerPlanId, paymentMethod?: string) => {
     if (!user?.uid) return;
     try {
+      const newPlan = getPlanById(newPlanId);
       await updateDoc(doc(db, 'seller_settings', user.uid), {
         subscription: {
           planId: newPlanId,
@@ -52,7 +53,18 @@ export function useSellerSubscription() {
         },
         updatedAt: serverTimestamp(),
       });
-      toast.success(`Abonnement mis à jour : ${getPlanById(newPlanId).name}`);
+
+      // Log payment in subscription_payments sub-collection
+      await addDoc(collection(db, 'seller_settings', user.uid, 'subscription_payments'), {
+        planId: newPlanId,
+        planName: newPlan.name,
+        amount: newPlan.price,
+        paymentMethod: paymentMethod || 'unknown',
+        status: 'completed',
+        createdAt: serverTimestamp(),
+      });
+
+      toast.success(`Abonnement mis à jour : ${newPlan.name}`);
     } catch (err) {
       console.error('Error upgrading plan:', err);
       toast.error("Erreur lors de la mise à jour de l'abonnement");

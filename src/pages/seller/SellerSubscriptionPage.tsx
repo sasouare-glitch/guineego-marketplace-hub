@@ -130,8 +130,8 @@ export default function SellerSubscriptionPage() {
             onOpenChange={(open) => !open && setSelectedPlan(null)}
             plan={selectedPlan}
             currentPlanName={currentPlan.name}
-            onConfirm={async () => {
-              await upgradePlan(selectedPlan.id);
+            onConfirm={async (paymentMethod) => {
+              await upgradePlan(selectedPlan.id, paymentMethod);
             }}
           />
         )}
