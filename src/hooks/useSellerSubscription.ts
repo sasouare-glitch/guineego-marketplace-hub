@@ -219,5 +219,5 @@ export function useSellerSubscription() {
     ? Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : null;
 
-  return { planId, currentPlan, loading, upgradePlan, expiresAt, daysRemaining };
+  return { planId, currentPlan, loading, upgradePlan, expiresAt, daysRemaining, pendingPayment };
 }
