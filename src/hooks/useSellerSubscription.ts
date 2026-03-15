@@ -19,6 +19,7 @@ interface SellerSubscriptionData {
 export function useSellerSubscription() {
   const { user } = useAuth();
   const [planId, setPlanId] = useState<SellerPlanId>('free');
+  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
