@@ -270,6 +270,7 @@ const SellerNotificationsPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+      )}
     </SellerLayout>
   );
 };
