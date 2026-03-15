@@ -31,6 +31,20 @@ export const onCourierAssigned = functions
     const pickupAddress = [pickup.address, pickup.commune].filter(Boolean).join(', ');
     const clientPhone = delivery.phone || '';
 
+    // Build Google Maps link from GPS coordinates or address
+    const deliveryLat = delivery.latitude || delivery.lat;
+    const deliveryLng = delivery.longitude || delivery.lng;
+    const pickupLat = pickup.latitude || pickup.lat;
+    const pickupLng = pickup.longitude || pickup.lng;
+
+    const deliveryMapsLink = deliveryLat && deliveryLng
+      ? `https://www.google.com/maps?q=${deliveryLat},${deliveryLng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(deliveryAddress || delivery.commune || 'Conakry')}`;
+
+    const pickupMapsLink = pickupLat && pickupLng
+      ? `https://www.google.com/maps?q=${pickupLat},${pickupLng}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(pickupAddress || pickup.commune || 'Conakry')}`;
+
     try {
       // 1. Send in-app + push notification
       await sendNotification({
@@ -44,18 +58,22 @@ export const onCourierAssigned = functions
           pickupAddress,
           deliveryAddress,
           clientPhone,
+          deliveryMapsLink,
+          pickupMapsLink,
           fee: fee.toString(),
           priority: after.priority || 'normal',
         },
       });
 
-      // 2. Send SMS to courier with client location
+      // 2. Send SMS to courier with client location + Maps link
       await sendCourierSMS(courierId, missionId, {
         pickupAddress,
         deliveryAddress,
         clientPhone,
         fee,
         priorityLabel,
+        deliveryMapsLink,
+        pickupMapsLink,
       });
 
       console.log(`✅ Courier ${courierId} notified for mission ${missionId}`);
