@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -53,8 +53,22 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const { t } = useTranslation();
-  const { signUp, signInWithGoogle, loading } = useAuth();
+  const { signUp, signInWithGoogle, loading, user, claims } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user && claims && !loading) {
+      const roleRoutes: Record<string, string> = {
+        ecommerce: '/seller/dashboard',
+        courier: '/courier',
+        investor: '/investor/dashboard',
+        admin: '/admin/dashboard',
+      };
+      const role = claims.role || 'customer';
+      navigate(roleRoutes[role] || '/', { replace: true });
+    }
+  }, [user, claims, loading, navigate]);
   
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
