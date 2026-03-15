@@ -37,10 +37,13 @@ const ProductGridSkeleton = () => (
 );
 
 const Marketplace = () => {
+  const [searchParams] = useSearchParams();
+  const sellerFilter = searchParams.get('seller');
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
   const { t } = useTranslation();
   const { flashSaleProducts, newArrivals, bestSellers, sponsoredProducts, loading } = useMarketplaceProducts();
+  const sellerStore = useSellerStoreProducts(sellerFilter);
 
   const featuresBar = [
     { icon: Truck, label: t.marketplace.fastDelivery, desc: t.marketplace.everywhereGuinea },
