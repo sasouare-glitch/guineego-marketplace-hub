@@ -64,36 +64,8 @@ export const CourierHeader = ({ onMenuClick }: CourierHeaderProps) => {
 
       {/* Actions */}
       <div className="flex items-center gap-2">
-        {/* Notifications */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-guinea-red text-white text-xs">
-                4
-              </Badge>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80 bg-card border-border">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium text-guinea-green">Nouvelle mission disponible</span>
-              <span className="text-sm text-muted-foreground">Kaloum → Ratoma • 25 000 GNF</span>
-              <span className="text-xs text-muted-foreground">Il y a 2 min</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium">Paiement reçu</span>
-              <span className="text-sm text-muted-foreground">+45 000 GNF crédité sur votre wallet</span>
-              <span className="text-xs text-muted-foreground">Il y a 1h</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 py-3">
-              <span className="font-medium text-guinea-yellow">Mission urgente</span>
-              <span className="text-sm text-muted-foreground">Bonus +10 000 GNF • Matam → Dixinn</span>
-              <span className="text-xs text-muted-foreground">Il y a 15 min</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Notifications Firestore */}
+        <NotificationCenter />
 
         {/* Profile */}
         <DropdownMenu>

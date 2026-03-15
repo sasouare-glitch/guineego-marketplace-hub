@@ -51,17 +51,8 @@ export const CourierMobileHeader = ({ title, showBack }: CourierMobileHeaderProp
           </h1>
         )}
 
-        {/* Right: Notifications */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="w-12 h-12 rounded-2xl relative"
-        >
-          <Bell className="w-7 h-7" strokeWidth={2.5} />
-          <span className="absolute top-2 right-2 w-4 h-4 bg-guinea-red rounded-full flex items-center justify-center text-[10px] text-white font-bold">
-            3
-          </span>
-        </Button>
+        {/* Right: Notifications Firestore */}
+        <NotificationCenter />
       </div>
     </header>
   );
