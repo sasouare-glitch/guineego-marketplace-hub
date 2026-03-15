@@ -132,7 +132,7 @@ export function ShareStoreCard() {
           exit={{ opacity: 0, height: 0 }}
           className="flex flex-col items-center gap-3 pt-4 border-t border-border mt-3"
         >
-          <div className="bg-white p-4 rounded-xl border border-border shadow-sm">
+          <div ref={qrRef} className="bg-white p-4 rounded-xl border border-border shadow-sm">
             <QRCodeSVG
               value={storeUrl}
               size={160}
