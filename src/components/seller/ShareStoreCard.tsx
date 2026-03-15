@@ -85,12 +85,46 @@ export function ShareStoreCard() {
         </Button>
       </div>
 
-      {/* Native share button */}
-      {canShare && (
-        <Button onClick={handleNativeShare} className="w-full gap-2">
-          <Share2 className="w-4 h-4" />
-          Partager
+      {/* Action buttons */}
+      <div className="flex gap-2">
+        {canShare && (
+          <Button onClick={handleNativeShare} className="flex-1 gap-2">
+            <Share2 className="w-4 h-4" />
+            Partager
+          </Button>
+        )}
+        <Button
+          variant={showQR ? "secondary" : "outline"}
+          onClick={() => setShowQR(!showQR)}
+          className="gap-2"
+        >
+          <QrCode className="w-4 h-4" />
+          QR Code
         </Button>
+      </div>
+
+      {/* QR Code */}
+      {showQR && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          className="flex flex-col items-center gap-3 pt-4 border-t border-border mt-3"
+        >
+          <div className="bg-white p-4 rounded-xl border border-border shadow-sm">
+            <QRCodeSVG
+              value={storeUrl}
+              size={160}
+              level="M"
+              includeMargin={false}
+              bgColor="#FFFFFF"
+              fgColor="#1a1a1a"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground text-center max-w-[200px]">
+            Imprimez ou affichez ce QR code en magasin pour diriger les clients vers votre boutique
+          </p>
+        </motion.div>
       )}
     </motion.div>
   );
