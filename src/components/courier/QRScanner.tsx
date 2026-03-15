@@ -50,8 +50,21 @@ export default function QRScanner({ onScan, onClose, mode = 'scan' }: QRScannerP
   // Parse QR code content
   const parseQRContent = useCallback((content: string): ScanResult => {
     try {
-      // Try to parse as JSON first
       const data = JSON.parse(content);
+
+      // GuineeGo OrderQRCode format: { app, orderId, purpose, token }
+      if (data.app === 'guineego' && data.orderId && data.purpose) {
+        return {
+          type: data.purpose === 'pickup' ? 'delivery' : 'delivery',
+          id: data.orderId,
+          data: {
+            orderId: data.orderId,
+            status: data.purpose,
+            // Pass full parsed data for downstream processing
+            ...(data as any),
+          }
+        };
+      }
       
       if (data.missionId || data.deliveryId) {
         return {
@@ -78,8 +91,6 @@ export default function QRScanner({ onScan, onClose, mode = 'scan' }: QRScannerP
       
       return { type: 'unknown', id: content };
     } catch {
-      // Not JSON, try to parse as GuineeGo format
-      // Format: GGO-XXXXX or MIS-XXXXX
       if (content.startsWith('GGO-')) {
         return { type: 'package', id: content };
       }
