@@ -67,6 +67,42 @@ export function useSellerSubscription() {
     return () => unsub();
   }, [user?.uid]);
 
+  // Listen for pending payments
+  useEffect(() => {
+    if (!user?.uid) {
+      setPendingPayment(null);
+      return;
+    }
+
+    const pendingQuery = query(
+      collection(db, 'seller_settings', user.uid, 'subscription_payments'),
+      where('status', '==', 'pending'),
+      orderBy('createdAt', 'desc'),
+      limit(1)
+    );
+
+    const unsub = onSnapshot(
+      pendingQuery,
+      (snap) => {
+        if (snap.empty) {
+          setPendingPayment(null);
+        } else {
+          const data = snap.docs[0].data();
+          setPendingPayment({
+            planId: data.planId,
+            planName: data.planName,
+            amount: data.amount,
+            paymentMethod: data.paymentMethod,
+            createdAt: data.createdAt?.toDate?.() || null,
+          });
+        }
+      },
+      () => setPendingPayment(null)
+    );
+
+    return () => unsub();
+  }, [user?.uid]);
+
   const currentPlan: SellerPlan = getPlanById(planId);
 
   const upgradePlan = async (newPlanId: SellerPlanId, paymentMethod?: string, phone?: string) => {
