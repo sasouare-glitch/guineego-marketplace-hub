@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import logoGuineego from "@/assets/logo-guineego.png";
 import { motion } from "framer-motion";
 import { Copy, Check, QrCode, Download, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -114,11 +115,19 @@ export function ShareStoreCard() {
           <div ref={qrRef} className="bg-white p-4 rounded-xl border border-border shadow-sm">
             <QRCodeSVG
               value={storeUrl}
-              size={160}
-              level="M"
+              size={180}
+              level="H"
               includeMargin={false}
               bgColor="#FFFFFF"
               fgColor="#1a1a1a"
+              imageSettings={{
+                src: logoGuineego,
+                x: undefined,
+                y: undefined,
+                height: 36,
+                width: 36,
+                excavate: true,
+              }}
             />
           </div>
           <Button variant="outline" size="sm" onClick={handleDownloadQR} className="gap-2">
