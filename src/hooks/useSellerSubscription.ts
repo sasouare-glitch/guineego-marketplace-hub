@@ -82,5 +82,9 @@ export function useSellerSubscription() {
     }
   };
 
-  return { planId, currentPlan, loading, upgradePlan };
+  const daysRemaining = expiresAt
+    ? Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null;
+
+  return { planId, currentPlan, loading, upgradePlan, expiresAt, daysRemaining };
 }
