@@ -36,6 +36,22 @@ export function ShareStoreCard() {
     }
   };
 
+  const canShare = typeof navigator !== 'undefined' && !!navigator.share;
+
+  const handleNativeShare = async () => {
+    try {
+      await navigator.share({
+        title: storeName,
+        text: `Découvrez ma boutique "${storeName}" sur GuineeGo !`,
+        url: storeUrl,
+      });
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') {
+        toast.error("Partage impossible");
+      }
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -49,12 +65,12 @@ export function ShareStoreCard() {
         </div>
         <div>
           <h3 className="text-lg font-semibold text-foreground">Partager ma boutique</h3>
-          <p className="text-sm text-muted-foreground">Copiez le lien de votre boutique</p>
+          <p className="text-sm text-muted-foreground">Copiez ou partagez le lien de votre boutique</p>
         </div>
       </div>
 
       {/* Copy link */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 mb-3">
         <Input
           readOnly
           value={storeUrl}
@@ -65,6 +81,14 @@ export function ShareStoreCard() {
           {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
         </Button>
       </div>
+
+      {/* Native share button */}
+      {canShare && (
+        <Button onClick={handleNativeShare} className="w-full gap-2">
+          <Share2 className="w-4 h-4" />
+          Partager
+        </Button>
+      )}
     </motion.div>
   );
 }
