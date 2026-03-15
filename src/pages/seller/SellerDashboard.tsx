@@ -14,6 +14,7 @@ import { StatCard } from "@/components/seller/StatCard";
 import { SalesChart } from "@/components/seller/SalesChart";
 import { RecentOrders } from "@/components/seller/RecentOrders";
 import { LowStockAlert } from "@/components/seller/LowStockAlert";
+import { ShareStoreCard } from "@/components/seller/ShareStoreCard";
 import { useSellerDashboard } from "@/hooks/useSellerDashboard";
 import { useCurrency } from "@/hooks/useCurrency";
 
