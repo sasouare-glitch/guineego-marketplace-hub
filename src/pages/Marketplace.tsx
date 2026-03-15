@@ -304,6 +304,7 @@ const Marketplace = () => {
           {renderProductGrid(bestSellers as Product[], loading)}
         </section>
       </main>
+      )}
 
       <Footer />
     </div>
