@@ -48,6 +48,11 @@ export function useAlertSound() {
       playTone(1100, t + 0.15, 0.12);
       playTone(880, t + 0.45, 0.12);
       playTone(1100, t + 0.6, 0.12);
+
+      // Vibrate on mobile (long-short-long pattern)
+      if ("vibrate" in navigator) {
+        navigator.vibrate([300, 100, 300, 100, 500]);
+      }
     } catch (e) {
       console.warn("Could not play alert sound:", e);
     }
