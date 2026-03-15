@@ -12,6 +12,7 @@ import { OrderStatusCard } from "@/components/orders/OrderStatusCard";
 import { OrderItemsList } from "@/components/orders/OrderItemsList";
 import { CancelOrderDialog } from "@/components/orders/CancelOrderDialog";
 import { CourierTrackingCard } from "@/components/orders/CourierTrackingCard";
+import { OrderQRCode } from "@/components/orders/OrderQRCode";
 import { toast } from "sonner";
 import { useRealtimeOrder } from "@/hooks/useRealtimeOrder";
 import { Skeleton } from "@/components/ui/skeleton";
