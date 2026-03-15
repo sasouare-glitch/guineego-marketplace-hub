@@ -57,6 +57,7 @@ export interface DeliveryMission {
 // Map delivery status → order status
 const orderStatusMap: Record<string, string> = {
   accepted: "shipped",
+  picked_up: "in_delivery",
   in_transit: "in_delivery",
   delivered: "delivered",
 };
