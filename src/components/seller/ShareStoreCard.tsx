@@ -115,16 +115,14 @@ export function ShareStoreCard() {
       {/* Social buttons */}
       <div className="flex gap-2">
         {socials.map((s) => (
-          <a
+          <button
             key={s.name}
-            href={s.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`${s.color} w-9 h-9 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity`}
+            onClick={() => window.open(s.href, '_blank', 'noopener,noreferrer')}
+            className={`${s.color} w-9 h-9 rounded-lg flex items-center justify-center hover:opacity-80 transition-opacity cursor-pointer border-0`}
             title={`Partager sur ${s.name}`}
           >
             {s.icon}
-          </a>
+          </button>
         ))}
       </div>
     </motion.div>
