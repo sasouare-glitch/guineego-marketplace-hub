@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
-import { Copy, Check, Share2, QrCode } from "lucide-react";
+import { Copy, Check, Share2, QrCode, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -38,6 +38,27 @@ export function ShareStoreCard() {
   };
 
   const [showQR, setShowQR] = useState(false);
+  const qrRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadQR = () => {
+    const svg = qrRef.current?.querySelector("svg");
+    if (!svg) return;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = 320;
+      canvas.height = 320;
+      ctx?.drawImage(img, 0, 0, 320, 320);
+      const a = document.createElement("a");
+      a.download = `qr-${storeName.replace(/\s+/g, "-").toLowerCase()}.png`;
+      a.href = canvas.toDataURL("image/png");
+      a.click();
+      toast.success("QR code téléchargé !");
+    };
+    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+  };
 
   const canShare = typeof navigator !== 'undefined' && !!navigator.share;
 
@@ -111,7 +132,7 @@ export function ShareStoreCard() {
           exit={{ opacity: 0, height: 0 }}
           className="flex flex-col items-center gap-3 pt-4 border-t border-border mt-3"
         >
-          <div className="bg-white p-4 rounded-xl border border-border shadow-sm">
+          <div ref={qrRef} className="bg-white p-4 rounded-xl border border-border shadow-sm">
             <QRCodeSVG
               value={storeUrl}
               size={160}
@@ -121,6 +142,10 @@ export function ShareStoreCard() {
               fgColor="#1a1a1a"
             />
           </div>
+          <Button variant="outline" size="sm" onClick={handleDownloadQR} className="gap-2">
+            <Download className="w-4 h-4" />
+            Télécharger en PNG
+          </Button>
           <p className="text-xs text-muted-foreground text-center max-w-[200px]">
             Imprimez ou affichez ce QR code en magasin pour diriger les clients vers votre boutique
           </p>
