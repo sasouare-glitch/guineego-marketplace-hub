@@ -6,6 +6,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { sendNotification } from '../utils/notifications';
 
 const db = admin.firestore();
 const TIMEOUT_MINUTES = 15;
