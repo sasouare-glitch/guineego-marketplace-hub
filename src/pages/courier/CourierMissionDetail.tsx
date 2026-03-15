@@ -162,6 +162,30 @@ const CourierMissionDetail = () => {
           )}
         </div>
 
+        {/* Items count indicator */}
+        {itemCount !== null && itemCount > 0 && (
+          <Card className="bg-accent/10 border-accent/20">
+            <CardContent className="py-3 px-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+                  <Package className="w-5 h-5 text-accent" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-foreground">
+                    {itemCount} article{itemCount > 1 ? 's' : ''} à récupérer
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Vérifiez que tous les articles sont dans le colis
+                  </p>
+                </div>
+                <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
+                  {itemCount}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Status Timeline */}
         {!isPending && (
           <Card className="bg-card border-border">
