@@ -33,6 +33,8 @@ export function useSellerSubscription() {
       (snap) => {
         const data = snap.data();
         setPlanId((data?.subscription?.planId as SellerPlanId) || 'free');
+        const exp = data?.subscription?.expiresAt;
+        setExpiresAt(exp?.toDate?.() || null);
         setLoading(false);
       },
       () => setLoading(false)
