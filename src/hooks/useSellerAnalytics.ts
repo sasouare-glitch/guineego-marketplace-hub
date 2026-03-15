@@ -267,7 +267,7 @@ export function useSellerAnalytics(periodDays: number) {
     ];
 
     return { totalRevenue, totalOrders, estimatedVisitors, conversionRate, chartData, categoryData, topProducts, funnel };
-  }, [orders, products, periodDays]);
+  }, [orders, products, visitorsByDay, periodDays]);
 
   return { analytics, loading };
 }
