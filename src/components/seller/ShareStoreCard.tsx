@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Copy, Check, Share2 } from "lucide-react";
+import { Copy, Check, Share2, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchDocument } from "@/lib/firebase/queries";
+import { QRCodeSVG } from "qrcode.react";
 
 export function ShareStoreCard() {
   const { user, claims } = useAuth();
