@@ -227,23 +227,33 @@ const CourierMissionDetail = () => {
                 </p>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {mission.delivery.phone && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 gap-2"
-                  onClick={() => { window.location.href = `tel:${mission.delivery.phone}`; }}
-                >
-                  <Phone className="w-4 h-4" />
-                  Appeler le client
-                </Button>
+                <>
+                  <a href={`tel:${mission.delivery.phone}`} className="flex-1 min-w-[120px]">
+                    <Button variant="outline" size="sm" className="w-full gap-2">
+                      <Phone className="w-4 h-4" />
+                      Appeler client
+                    </Button>
+                  </a>
+                  <a
+                    href={`https://wa.me/${mission.delivery.phone.replace(/[^0-9+]/g, '').replace(/^\+/, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 min-w-[120px]"
+                  >
+                    <Button variant="outline" size="sm" className="w-full gap-2 text-guinea-green border-guinea-green/30 hover:bg-guinea-green/10">
+                      <MessageCircle className="w-4 h-4" />
+                      WhatsApp
+                    </Button>
+                  </a>
+                </>
               )}
               <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${mission.pickup.address}, ${mission.pickup.commune}, Conakry, Guinée`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1"
+                className="flex-1 min-w-[120px]"
               >
                 <Button variant="outline" size="sm" className="w-full gap-2">
                   <Navigation className="w-4 h-4" />
@@ -270,23 +280,33 @@ const CourierMissionDetail = () => {
               <p className="text-sm font-medium">{mission.delivery.commune}</p>
               <p className="text-sm text-muted-foreground">{mission.delivery.address}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {mission.delivery.phone && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 gap-2"
-                  onClick={() => { window.location.href = `tel:${mission.delivery.phone}`; }}
-                >
-                  <Phone className="w-4 h-4" />
-                  Appeler
-                </Button>
+                <>
+                  <a href={`tel:${mission.delivery.phone}`} className="flex-1 min-w-[120px]">
+                    <Button variant="outline" size="sm" className="w-full gap-2">
+                      <Phone className="w-4 h-4" />
+                      Appeler
+                    </Button>
+                  </a>
+                  <a
+                    href={`https://wa.me/${mission.delivery.phone.replace(/[^0-9+]/g, '').replace(/^\+/, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 min-w-[120px]"
+                  >
+                    <Button variant="outline" size="sm" className="w-full gap-2 text-guinea-green border-guinea-green/30 hover:bg-guinea-green/10">
+                      <MessageCircle className="w-4 h-4" />
+                      WhatsApp
+                    </Button>
+                  </a>
+                </>
               )}
               <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${mission.delivery.address}, ${mission.delivery.commune}, Conakry, Guinée`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1"
+                className="flex-1 min-w-[120px]"
               >
                 <Button variant="outline" size="sm" className="w-full gap-2">
                   <Navigation className="w-4 h-4" />
