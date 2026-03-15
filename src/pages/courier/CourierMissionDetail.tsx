@@ -74,6 +74,19 @@ const CourierMissionDetail = () => {
     return () => unsub();
   }, [id]);
 
+  // Fetch order items count
+  useEffect(() => {
+    if (!mission?.orderId) return;
+    getDoc(doc(db, "orders", mission.orderId)).then((snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        const items = data.items || data.orderItems || [];
+        const total = items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
+        setItemCount(total);
+      }
+    }).catch(() => {});
+  }, [mission?.orderId]);
+
   if (loading) {
     return (
       <CourierLayout>
