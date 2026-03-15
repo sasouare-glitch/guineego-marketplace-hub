@@ -119,7 +119,40 @@ export function useSellerDashboard() {
     return () => { try { unsub(); } catch {} };
   }, [sellerScopeId]);
 
-  // Compute stats from orders
+  // Listen to seller visits (last 30 days)
+  useEffect(() => {
+    if (!sellerScopeId) { setTotalVisitors(0); return; }
+
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    const startKey = `${sellerScopeId}_${thirtyDaysAgo.toISOString().slice(0, 10)}`;
+    const endKey = `${sellerScopeId}_${today.toISOString().slice(0, 10)}\uf8ff`;
+
+    const q = query(
+      collection(db, 'seller_visits'),
+      where('sellerId', '==', sellerScopeId),
+    );
+
+    const unsub = onSnapshot(q,
+      (snap) => {
+        let total = 0;
+        snap.docs.forEach(d => {
+          const data = d.data();
+          // Only count last 30 days
+          if (data.date >= thirtyDaysAgo.toISOString().slice(0, 10)) {
+            total += data.views || 0;
+          }
+        });
+        setTotalVisitors(total);
+      },
+      (err) => console.warn('Visits tracking error:', err)
+    );
+
+    return () => { try { unsub(); } catch {} };
+  }, [sellerScopeId]);
+
+  // Compute stats from orders + real visitors
   const stats = useMemo<DashboardStats>(() => {
     const now = new Date();
     const thisMonth = orders.filter(o => {
@@ -130,16 +163,18 @@ export function useSellerDashboard() {
 
     const totalRevenue = thisMonth.reduce((s, o) => s + o.amount, 0);
     const totalOrders = thisMonth.length;
+    const visitors = totalVisitors || totalOrders * 10; // fallback to estimate if no tracking data yet
+    const conversionRate = visitors > 0 ? (totalOrders / visitors) * 100 : 0;
 
     return {
       totalRevenue,
       totalOrders,
-      activeProducts: 0, // filled from products listener
-      conversionRate: totalOrders > 0 ? Math.min((totalOrders / Math.max(totalOrders * 10, 1)) * 100, 100) : 0,
-      uniqueVisitors: totalOrders * 10,
+      activeProducts: 0,
+      conversionRate: Math.min(conversionRate, 100),
+      uniqueVisitors: visitors,
       newCustomers: Math.ceil(totalOrders * 0.4),
     };
-  }, [orders]);
+  }, [orders, totalVisitors]);
 
   // Sales chart data (group orders by day for last 7 days)
   const salesChartData = useMemo<SalesDataPoint[]>(() => {
