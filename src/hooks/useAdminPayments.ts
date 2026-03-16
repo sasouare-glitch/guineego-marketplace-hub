@@ -106,6 +106,10 @@ export function useAdminPayments() {
           createdAt: ts,
           completedAt: d.completedAt instanceof Timestamp ? d.completedAt.toDate() : undefined,
           reference: `PAY-${doc.id.slice(0, 8).toUpperCase()}`,
+          stripePaymentIntentId: d.stripePaymentIntentId,
+          refundId: d.refundId,
+          refundAmount: d.refundAmount,
+          refundReason: d.refundReason,
         };
       });
       orderLoaded = true;
