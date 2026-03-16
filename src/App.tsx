@@ -96,6 +96,7 @@ import AdminSmsLogsPage from "./pages/admin/AdminSmsLogsPage";
 import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
 import AdminCommissionsPage from "./pages/admin/AdminCommissionsPage";
 import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
+import AdminStripeDashboardPage from "./pages/admin/AdminStripeDashboardPage";
 // Mobile Components
 import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
 import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";
@@ -450,6 +451,11 @@ const App = () => (
                      <Route path="/admin/payments" element={
                       <ProtectedRoute requiredRoles={['admin']}>
                         <AdminPaymentsPage />
+                      </ProtectedRoute>
+                    } />
+                     <Route path="/admin/stripe" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminStripeDashboardPage />
                       </ProtectedRoute>
                     } />
                      <Route path="/admin/reports" element={

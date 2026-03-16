@@ -136,6 +136,12 @@ const financeItems = [
     description: "Suivi des paiements en temps réel"
   },
   { 
+    title: "Stripe", 
+    url: "/admin/stripe", 
+    icon: CreditCard,
+    description: "Sessions et conversions Stripe"
+  },
+  { 
     title: "Commissions", 
     url: "/admin/commissions", 
     icon: Percent,
