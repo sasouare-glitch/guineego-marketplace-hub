@@ -194,6 +194,10 @@ export default function AdminPaymentsPage() {
                     <SelectItem value="order">Commandes</SelectItem>
                   </SelectContent>
                 </Select>
+                <Button variant="outline" size="sm" onClick={() => exportCSV(filtered)} disabled={filtered.length === 0}>
+                  <Download className="w-4 h-4 mr-1" />
+                  Export CSV ({filtered.length})
+                </Button>
               </div>
             </div>
           </CardHeader>
