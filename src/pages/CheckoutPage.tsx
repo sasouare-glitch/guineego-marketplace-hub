@@ -93,6 +93,34 @@ export default function CheckoutPage() {
           paymentMethod: selectedPayment as string,
         });
 
+        // For card payments, redirect to Stripe Checkout
+        if (selectedPayment === 'card') {
+          try {
+            const { callFunction } = await import('@/lib/firebase/config');
+            const createStripeCheckout = callFunction<
+              { orderId: string; paymentId: string; successUrl: string; cancelUrl: string },
+              { success: boolean; checkoutUrl: string }
+            >('createStripeCheckout');
+
+            const stripeResult = await createStripeCheckout({
+              orderId: result.orderId,
+              paymentId: result.paymentId || result.orderId,
+              successUrl: `${window.location.origin}/orders/${result.orderId}?payment=success`,
+              cancelUrl: `${window.location.origin}/orders/${result.orderId}?payment=cancelled`,
+            });
+
+            if (stripeResult.data.checkoutUrl) {
+              window.location.href = stripeResult.data.checkoutUrl;
+              return;
+            }
+          } catch (stripeError: any) {
+            console.error('Stripe checkout error:', stripeError);
+            toast.error("Erreur Stripe: " + (stripeError.message || "Impossible de créer la session de paiement"));
+            setIsProcessing(false);
+            return;
+          }
+        }
+
         setOrderNumber(result.orderId);
         clearCart();
         setCurrentStep(3);
