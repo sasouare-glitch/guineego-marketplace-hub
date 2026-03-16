@@ -453,6 +453,11 @@ const App = () => (
                         <AdminPaymentsPage />
                       </ProtectedRoute>
                     } />
+                     <Route path="/admin/stripe" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminStripeDashboardPage />
+                      </ProtectedRoute>
+                    } />
                      <Route path="/admin/reports" element={
                        <ProtectedRoute requiredRoles={['admin']}>
                          <AdminReportsPage />
