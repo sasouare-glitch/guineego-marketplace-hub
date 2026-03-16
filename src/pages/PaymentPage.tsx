@@ -43,6 +43,14 @@ const paymentMethods = [
     badge: null,
     badgeVariant: "secondary" as const,
   },
+  {
+    icon: CreditCard,
+    name: "Visa / Mastercard",
+    description: "Payez par carte bancaire via Stripe. Accepte Visa, Mastercard et cartes internationales. Confirmation instantanée.",
+    color: "bg-blue-500/10 text-blue-600",
+    badge: "International",
+    badgeVariant: "secondary" as const,
+  },
 ];
 
 const securityFeatures = [
