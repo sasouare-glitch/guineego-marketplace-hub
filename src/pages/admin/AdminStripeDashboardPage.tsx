@@ -193,9 +193,9 @@ export default function AdminStripeDashboardPage() {
 
         {/* Secondary KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="border-green-200 dark:border-green-900">
+          <Card className="border-primary/30">
             <CardContent className="pt-4 pb-4 flex items-center gap-3">
-              <CheckCircle className="w-4 h-4 text-green-600" />
+              <CheckCircle className="w-4 h-4 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">Complétés</p>
                 <p className="text-lg font-semibold text-foreground">{kpis.completed}</p>
