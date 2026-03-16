@@ -257,7 +257,7 @@ export const PaymentForm = ({
         </motion.div>
       )}
 
-      {/* Card Form Placeholder */}
+      {/* Card - Stripe Redirect */}
       {selectedPayment && selectedPayment.type === "card" && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -265,28 +265,23 @@ export const PaymentForm = ({
           className="bg-card rounded-2xl p-6 border border-border"
         >
           <div className="flex items-center gap-3 mb-4">
-            <CreditCard className="w-6 h-6 text-muted-foreground" />
-            <h3 className="font-semibold text-foreground">{t.checkout.paymentMethod}</h3>
+            <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center">
+              <CreditCard className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Paiement par carte Visa / Mastercard</h3>
+              <p className="text-sm text-muted-foreground">Redirection sécurisée vers Stripe</p>
+            </div>
           </div>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="cardNumber">{t.checkout.cardNumber}</Label>
-              <Input id="cardNumber" placeholder="1234 5678 9012 3456" className="mt-1.5" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="expiry">{t.checkout.expiryDate}</Label>
-                <Input id="expiry" placeholder="MM/AA" className="mt-1.5" />
-              </div>
-              <div>
-                <Label htmlFor="cvv">CVV</Label>
-                <Input id="cvv" placeholder="123" className="mt-1.5" />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="cardName">{t.checkout.cardName}</Label>
-              <Input id="cardName" placeholder="MAMADOU DIALLO" className="mt-1.5" />
-            </div>
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm text-muted-foreground space-y-1">
+            <p className="font-medium text-foreground flex items-center gap-2">
+              <Shield className="w-4 h-4 text-primary" />
+              Paiement 100% sécurisé
+            </p>
+            <p>• Vous serez redirigé vers la page de paiement Stripe</p>
+            <p>• Accepte Visa, Mastercard et cartes internationales</p>
+            <p>• Frais de traitement : +2%</p>
+            <p>• Confirmation instantanée après paiement</p>
           </div>
         </motion.div>
       )}
