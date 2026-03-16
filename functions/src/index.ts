@@ -73,6 +73,11 @@ export { processOMWebhook, processMTNWebhook } from './payments/webhooks';
 export { createPayout } from './payments/createPayout';
 export { onPaymentCompleted } from './payments/paymentTriggers';
 
+// Stripe Payments
+export { createStripeCheckout } from './payments/stripeCheckout';
+export { stripeWebhook } from './payments/stripeWebhook';
+export { createStripeSubscriptionCheckout } from './payments/stripeSubscription';
+
 // Seller Payouts
 export { transferToEcommercant, onDeliveryConfirmed } from './payments/transferToEcommercant';
 
