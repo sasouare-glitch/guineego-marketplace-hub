@@ -1,5 +1,5 @@
 /**
- * Admin Payments Page - Real-time payment tracking with filters
+ * Admin Payments Page - Real-time payment tracking with filters & Stripe refund
  */
 
 import { useState, useMemo } from 'react';
@@ -15,19 +15,28 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import {
   Search, Clock, CheckCircle2, XCircle, AlertTriangle, Loader2,
-  CreditCard, Smartphone, Wallet, Banknote, RefreshCw, Download,
+  CreditCard, Smartphone, Wallet, Banknote, RefreshCw, Download, Undo2,
 } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useAdminPayments, type PaymentRecord } from '@/hooks/useAdminPayments';
 import { cn } from '@/lib/utils';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '@/lib/firebase/config';
+import { toast } from 'sonner';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ElementType; color: string }> = {
-  completed:  { label: 'Complété',   variant: 'default',     icon: CheckCircle2,  color: 'text-primary' },
-  pending:    { label: 'En attente', variant: 'secondary',   icon: Clock,         color: 'text-yellow-600' },
-  processing: { label: 'En cours',  variant: 'outline',     icon: RefreshCw,     color: 'text-blue-600' },
-  cancelled:  { label: 'Annulé',    variant: 'destructive', icon: XCircle,       color: 'text-destructive' },
-  failed:     { label: 'Échoué',    variant: 'destructive', icon: AlertTriangle, color: 'text-destructive' },
+  completed:  { label: 'Complété',    variant: 'default',     icon: CheckCircle2,  color: 'text-primary' },
+  pending:    { label: 'En attente',  variant: 'secondary',   icon: Clock,         color: 'text-yellow-600' },
+  processing: { label: 'En cours',   variant: 'outline',     icon: RefreshCw,     color: 'text-blue-600' },
+  cancelled:  { label: 'Annulé',     variant: 'destructive', icon: XCircle,       color: 'text-destructive' },
+  failed:     { label: 'Échoué',     variant: 'destructive', icon: AlertTriangle, color: 'text-destructive' },
+  refunded:   { label: 'Remboursé',  variant: 'outline',     icon: Undo2,         color: 'text-blue-600' },
 };
 
 const methodConfig: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -76,6 +85,11 @@ export default function AdminPaymentsPage() {
   const { format } = useCurrency();
   const { payments, loading } = useAdminPayments();
 
+  // Refund dialog state
+  const [refundPayment, setRefundPayment] = useState<PaymentRecord | null>(null);
+  const [refundReason, setRefundReason] = useState('');
+  const [refundLoading, setRefundLoading] = useState(false);
+
   const filtered = useMemo(() => {
     return payments.filter(p => {
       const matchSearch = searchQuery === '' ||
@@ -90,23 +104,45 @@ export default function AdminPaymentsPage() {
     });
   }, [payments, searchQuery, statusFilter, methodFilter, typeFilter]);
 
-  // Stats
   const stats = useMemo(() => {
-    const total = payments.reduce((s, p) => s + p.amount, 0);
     const completed = payments.filter(p => p.status === 'completed');
     const pending = payments.filter(p => p.status === 'pending');
     const failed = payments.filter(p => p.status === 'failed' || p.status === 'cancelled');
+    const refunded = payments.filter(p => p.status === 'refunded');
     const completedAmount = completed.reduce((s, p) => s + p.amount, 0);
     const pendingAmount = pending.reduce((s, p) => s + p.amount, 0);
-    
-    // Method breakdown
+
     const byMethod: Record<string, number> = {};
     payments.forEach(p => {
       byMethod[p.method] = (byMethod[p.method] || 0) + 1;
     });
 
-    return { total, completedAmount, pendingAmount, completedCount: completed.length, pendingCount: pending.length, failedCount: failed.length, byMethod };
+    return { completedAmount, pendingAmount, completedCount: completed.length, pendingCount: pending.length, failedCount: failed.length, refundedCount: refunded.length, byMethod };
   }, [payments]);
+
+  const canRefund = (p: PaymentRecord) =>
+    p.method === 'card' && p.status === 'completed' && p.stripePaymentIntentId;
+
+  const handleRefund = async () => {
+    if (!refundPayment) return;
+    setRefundLoading(true);
+    try {
+      const stripeRefundFn = httpsCallable(functions, 'stripeRefund');
+      const result = await stripeRefundFn({
+        paymentId: refundPayment.id,
+        reason: refundReason || undefined,
+      });
+      const data = result.data as any;
+      toast.success(`Remboursement effectué (${data.refundId})`);
+      setRefundPayment(null);
+      setRefundReason('');
+    } catch (err: any) {
+      console.error('Refund error:', err);
+      toast.error(err.message || 'Erreur lors du remboursement');
+    } finally {
+      setRefundLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -172,6 +208,12 @@ export default function AdminPaymentsPage() {
                     </div>
                   );
                 })}
+                {stats.refundedCount > 0 && (
+                  <div className="flex items-center justify-between text-sm pt-1 border-t border-border">
+                    <span className="text-muted-foreground">Remboursés</span>
+                    <Badge variant="outline" className="text-xs">{stats.refundedCount}</Badge>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -228,13 +270,13 @@ export default function AdminPaymentsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {/* Status tabs */}
             <Tabs value={statusFilter} onValueChange={setStatusFilter} className="mb-4">
               <TabsList>
                 <TabsTrigger value="all">Tous ({payments.length})</TabsTrigger>
                 <TabsTrigger value="pending">En attente ({stats.pendingCount})</TabsTrigger>
                 <TabsTrigger value="processing">En cours</TabsTrigger>
                 <TabsTrigger value="completed">Complétés ({stats.completedCount})</TabsTrigger>
+                <TabsTrigger value="refunded">Remboursés ({stats.refundedCount})</TabsTrigger>
                 <TabsTrigger value="cancelled">Annulés</TabsTrigger>
                 <TabsTrigger value="failed">Échoués</TabsTrigger>
               </TabsList>
@@ -259,6 +301,7 @@ export default function AdminPaymentsPage() {
                       <TableHead>Téléphone</TableHead>
                       <TableHead>Plan / Détail</TableHead>
                       <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -288,6 +331,9 @@ export default function AdminPaymentsPage() {
                               <StatusIcon className="w-3 h-3" />
                               {status.label}
                             </Badge>
+                            {p.refundReason && (
+                              <p className="text-xs text-muted-foreground mt-0.5">{p.refundReason}</p>
+                            )}
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
                             {p.phone || '—'}
@@ -300,6 +346,22 @@ export default function AdminPaymentsPage() {
                               day: '2-digit', month: 'short', year: 'numeric',
                               hour: '2-digit', minute: '2-digit',
                             })}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {canRefund(p) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => {
+                                  setRefundPayment(p);
+                                  setRefundReason('');
+                                }}
+                              >
+                                <Undo2 className="w-4 h-4 mr-1" />
+                                Rembourser
+                              </Button>
+                            )}
                           </TableCell>
                         </TableRow>
                       );
@@ -317,6 +379,78 @@ export default function AdminPaymentsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* ── Refund Dialog ── */}
+      <Dialog open={!!refundPayment} onOpenChange={(open) => !open && setRefundPayment(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Undo2 className="w-5 h-5 text-destructive" />
+              Rembourser ce paiement
+            </DialogTitle>
+            <DialogDescription>
+              Le remboursement sera effectué via Stripe sur la carte utilisée.
+            </DialogDescription>
+          </DialogHeader>
+
+          {refundPayment && (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-border p-4 space-y-2 bg-muted/30">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Référence</span>
+                  <span className="font-mono font-medium">{refundPayment.reference}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Montant</span>
+                  <span className="font-bold text-primary">{format(refundPayment.amount)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Méthode</span>
+                  <span>{getMethodInfo(refundPayment.method).label}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Date</span>
+                  <span>{refundPayment.createdAt.toLocaleDateString('fr-FR')}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="refund-reason">Raison du remboursement</Label>
+                <Textarea
+                  id="refund-reason"
+                  placeholder="Ex: Produit défectueux, erreur de commande..."
+                  value={refundReason}
+                  onChange={e => setRefundReason(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRefundPayment(null)} disabled={refundLoading}>
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRefund}
+              disabled={refundLoading}
+            >
+              {refundLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  Remboursement...
+                </>
+              ) : (
+                <>
+                  <Undo2 className="w-4 h-4 mr-1" />
+                  Confirmer le remboursement
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }
