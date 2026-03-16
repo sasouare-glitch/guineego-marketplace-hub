@@ -14,7 +14,7 @@ export interface PaymentRecord {
   sellerName?: string;
   customerId?: string;
   amount: number;
-  status: 'pending' | 'completed' | 'cancelled' | 'failed' | 'processing';
+  status: 'pending' | 'completed' | 'cancelled' | 'failed' | 'processing' | 'refunded';
   method: 'orange_money' | 'mtn_money' | 'card' | 'wallet' | 'cash' | string;
   phone?: string;
   planName?: string;
@@ -23,6 +23,10 @@ export interface PaymentRecord {
   completedAt?: Date;
   cancelReason?: string;
   reference?: string;
+  stripePaymentIntentId?: string;
+  refundId?: string;
+  refundAmount?: number;
+  refundReason?: string;
 }
 
 export function useAdminPayments() {

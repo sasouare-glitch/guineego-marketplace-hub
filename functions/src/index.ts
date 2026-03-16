@@ -77,6 +77,7 @@ export { onPaymentCompleted } from './payments/paymentTriggers';
 export { createStripeCheckout } from './payments/stripeCheckout';
 export { stripeWebhook } from './payments/stripeWebhook';
 export { createStripeSubscriptionCheckout } from './payments/stripeSubscription';
+export { stripeRefund } from './payments/stripeRefund';
 
 // Seller Payouts
 export { transferToEcommercant, onDeliveryConfirmed } from './payments/transferToEcommercant';
