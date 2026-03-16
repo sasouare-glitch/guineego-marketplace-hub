@@ -42,6 +42,32 @@ function getMethodInfo(method: string) {
   return methodConfig[method] || { label: method, icon: Banknote, color: 'bg-muted text-muted-foreground' };
 }
 
+function exportCSV(data: PaymentRecord[]) {
+  const headers = ['Référence', 'Type', 'Méthode', 'Montant (GNF)', 'Statut', 'Téléphone', 'Plan/Détail', 'Date'];
+  const rows = data.map(p => [
+    p.reference || '',
+    p.type === 'subscription' ? 'Abonnement' : 'Commande',
+    getMethodInfo(p.method).label,
+    p.amount.toString(),
+    statusConfig[p.status]?.label || p.status,
+    p.phone || '',
+    p.planName || p.cancelReason || '',
+    p.createdAt.toLocaleString('fr-FR'),
+  ]);
+
+  const csvContent = [headers, ...rows]
+    .map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(';'))
+    .join('\n');
+
+  const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `paiements_${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function AdminPaymentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -194,6 +220,10 @@ export default function AdminPaymentsPage() {
                     <SelectItem value="order">Commandes</SelectItem>
                   </SelectContent>
                 </Select>
+                <Button variant="outline" size="sm" onClick={() => exportCSV(filtered)} disabled={filtered.length === 0}>
+                  <Download className="w-4 h-4 mr-1" />
+                  Export CSV ({filtered.length})
+                </Button>
               </div>
             </div>
           </CardHeader>
