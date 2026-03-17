@@ -169,6 +169,7 @@ export default function PreferencesSettings() {
                       {preferences.language === "fr" && "Personnalisez l'apparence de l'application"}
                       {preferences.language === "en" && "Customize the application appearance"}
                       {preferences.language === "ar" && "تخصيص مظهر التطبيق"}
+                      {preferences.language === "nqo" && "ߝ "}
                     </CardDescription>
                   </div>
                 </div>
