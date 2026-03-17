@@ -5,12 +5,12 @@ import type { TranslationKeys } from "./fr";
  * Script: N'Ko (U+07C0 – U+07FF) — RTL
  * Language: Manding (Maninka/Bambara variant spoken in Guinea)
  * Font: Noto Sans NKo (Google Fonts)
- * 
+ *
  * NOTE: These translations should be reviewed by a native N'Ko speaker
  * for full linguistic accuracy and natural phrasing.
  */
 export const nqo: TranslationKeys = {
-  // ߞߎ߲߬ߠߊ߬ߝߋ߲ — Common / Mots courants
+  // ߞߎ߲߬ߠߊ߬ߝߋ߲ — Common
   common: {
     loading: "ߊ߬ ߦߋ߫ ߟߊߞߎ߬ ߟߊ...",
     error: "ߝߐ߬ߟߌ ߘߏ߫ ߞߍ߫ ߘߊ",
@@ -90,106 +90,106 @@ export const nqo: TranslationKeys = {
     calculateQuote: "ߛߐ߲ ߖߊ߬ߕߋ߬ ߞߍ߫",
     trackPackage: "ߓߏ߬ ߟߏ ߟߊ߬ ߕߎ߲߰ ߠߌ",
     myShipments: "ߒ ߠߊ ߛߊ ߝߋ߲ ߠߎ߬",
-    courierSpace: "ߟߊ߬ ߛߋ߬ ߙߌ߬ ߟߊ ߟߊ",
-    missions: "ߓߊ߯ ߙߊ ߠߎ߬",
+    courierSpace: "ߟߊ߬ߛߋ߬ߙߌ߬ߟߊ ߟߊ",
+    missions: "ߓߊ߯ߙߊ ߠߎ߬",
     myEarnings: "ߒ ߠߊ ߛߐ߲ ߠߎ߬",
-    allCourses: "ߞߊ߬ ߙߊ߲ ߓߍ߯",
-    freeCourses: "ߞߊ߬ ߙߊ߲ ߝߎ߯ ߠߎ߬",
-    myPortfolio: "ߒ ߠߊ ߖߊ߬ ߞߊ",
-    opportunities: "ߕߌ߲ ߞߍ ߦߙߐ ߠߎ߬",
-    myInvestments: "ߒ ߠߊ ߡߊ߬ ߞߍ ߠߎ߬",
+    allCourses: "ߞߊ߬ߙߊ߲ ߓߍ߯",
+    freeCourses: "ߞߊ߬ߙߊ߲ ߝߎ߯ ߠߎ߬",
+    myPortfolio: "ߒ ߠߊ ߖߊ߬ߞߊ",
+    opportunities: "ߕߌ߲ߞߍ ߦߙߐ ߠߎ߬",
+    myInvestments: "ߒ ߠߊ ߡߊ߬ߞߍ ߠߎ߬",
     searchPackage: "ߓߏ߬ ߟߏ ߢߌ߬ߣߌ߲߬ ߞߊ...",
   },
 
-  // ߓߏ߬ ߟߏ / ߛߏ — Home page / Hero
+  // ߛߏ — Home page
   home: {
-    heroTitle: "ߟߊ߬ ߛߋ߬ ߟߌ ߕߟߋ߬ ߦߊ ߞߐ߬ ߣߊ߬ ߞߙߌ ߓߍ߯ ߘߐ߫",
-    heroSubtitle: "ߌ ߟߊ ߝߋ߲ ߘߌ߬ ߢߍ ߕߊ ߠߎ߬ ߛߊ߲߬ ߞߊ߬ ߊ ߠߎ߬ ߛߐ߬ ߕߎ ߂ ߟߊ",
+    heroTitle: "ߟߊ߬ߛߋ߬ߟߌ ߕߟߋ߬ߦߊ ߞߐ߬ߣߊ߬ߞߙߌ ߓߍ߯ ߘߐ߫",
+    heroSubtitle: "ߌ ߟߊ ߝߋ߲ ߘߌ߬ߢߍ ߕߊ ߠߎ߬ ߛߊ߲߬ ߞߊ߬ ߊ߬ ߠߎ߬ ߛߐ߬ ߕߎ ߂ ߟߊ",
     shopNow: "ߛߊ߲ ߞߍ߫ ߓߌ߬",
-    becomeSeller: "ߝߋ߬ ߙߋ߬ ߓߊ߬ ߟߊ ߞߍ߫",
-    features: "ߝߊ߬ ߘߊ ߠߎ߬",
+    becomeSeller: "ߝߋ߬ߙߋ߬ߓߊ߬ߟߊ ߞߍ߫",
+    features: "ߝߊ߬ߘߊ ߠߎ߬",
     categories: "ߛߎ߲ ߠߎ߬",
-    partners: "ߊ߲ ߘߍ߬ ߟߊ ߠߎ߬",
+    partners: "ߊ߲ ߘߍ߬ߟߊ ߠߎ߬",
   },
 
   // ߞߎ߲߬ ߛߏ — Hero Section
   hero: {
-    badge: "ߜߋ߬ ߣߍ ߝߟߐ ߝߋ߬ ߙߋ ߦߙߐ",
-    title1: "ߛߊ߲߬, ߝߋ߬ ߙߋ߬,",
-    title2: "ߜߋ߬ ߣߍ ߟߊ ߞߍ ߞߋ߲",
-    description: "GuineeGo LAT ߦߋ߫ ߝߋ߬ ߙߋ߬ ߓߊ ߠߎ߬ ߣߌ߬ ߛߊ߲ ߓߊ ߠߎ߬ ߣߌ߬ ߟߊ߬ ߛߋ ߙߌ ߠߎ߬ ߣߌ߬ ߡߊ߬ ߞߍ ߟߊ ߠߎ ߟߊ߲ ߓߍ ߞߍ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬. ߛ߭ߌ߲ ߕߊ߬ ߡߌ߲, ߥߍ߫ ߓ ߞߏ ߞߊ߬ ߙߊ߲, ߡߏ߬ ߓߊ߬ ߦߌ ߛߊ߬ ߙߊ ߕߌ߲ ߢߍ.",
-    exploreStore: "ߝߋ߲ ߠߎ ߞߐ߬ ߟߐ߲ ߞߍ",
-    becomeSeller: "ߝߋ߬ ߙߋ߬ ߓߊ ߟߊ ߞߍ",
-    products: "ߝߋ߲ ߠߎ",
-    sellers: "ߝߋ߬ ߙߋ ߓߊ ߠߎ",
-    customers: "ߛߊ߲ ߓߊ ߠߎ",
-    delivery: "ߟߊ߬ ߛߋ ߟߌ",
-    marketplace: "ߝߋ߬ ߙߋ ߦߙߐ",
-    transitChina: "ߛ߭ߌ߲ ߕߊ߬ ߡߌ߲",
-    transitDesc: "ߝߋ߲ ߣߊ ߞߍ ߣߐ߬ ߦߊ ߟߊ",
-    deliveryService: "ߟߊ߬ ߛߋ ߟߌ",
-    deliveryDesc: "ߞߐ߬ ߣߊ߬ ߞߙߌ ߣߌ ߡߊ߬ ߙߊ ߘߐ",
-    secure: "ߕߌ߲ ߢߍ ߕߊ",
+    badge: "ߜߋ߬ߣߍ ߝߟߐ ߝߋ߬ߙߋ ߦߙߐ",
+    title1: "ߛߊ߲߬, ߝߋ߬ߙߋ߬,",
+    title2: "ߜߋ߬ߣߍ ߟߊߞߍ ߞߋ߲",
+    description: "GuineeGo LAT ߦߋ߫ ߝߋ߬ߙߋ߬ߓߊ ߠߎ߬ ߣߌ߬ ߛߊ߲ߓߊ ߠߎ߬ ߣߌ߬ ߟߊ߬ߛߋ߬ߙߌ ߠߎ߬ ߣߌ߬ ߡߊ߬ߞߍ߬ߟߊ ߠߎ߬ ߟߊ߲ߓߍ ߞߍ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬. ߛ߭ߌ߲ ߕߊ߬ߡߌ߲, ߥߍ߫ߓ ߞߏ ߞߊ߬ߙߊ߲, ߡߏ߬ߓߊ߬ߦߌ ߛߊ߬ߙߊ ߕߌ߲ߢߍ.",
+    exploreStore: "ߝߋ߲ ߠߎ߬ ߞߐ߬ߟߐ߲ ߞߍ߫",
+    becomeSeller: "ߝߋ߬ߙߋ߬ߓߊ߬ߟߊ ߞߍ߫",
+    products: "ߝߋ߲ ߠߎ߬",
+    sellers: "ߝߋ߬ߙߋ߬ߓߊ ߠߎ߬",
+    customers: "ߛߊ߲ߓߊ ߠߎ߬",
+    delivery: "ߟߊ߬ߛߋ߬ߟߌ",
+    marketplace: "ߝߋ߬ߙߋ ߦߙߐ",
+    transitChina: "ߛ߭ߌ߲ ߕߊ߬ߡߌ߲",
+    transitDesc: "ߝߋ߲ ߣߊ߬ ߞߍ ߣߐ߬ߦߊ ߟߊ",
+    deliveryService: "ߟߊ߬ߛߋ߬ߟߌ",
+    deliveryDesc: "ߞߐ߬ߣߊ߬ߞߙߌ ߣߌ߬ ߡߊ߬ߙߊ ߘߐ",
+    secure: "ߕߌ߲ߢߍ ߕߊ",
     secureDesc: "Orange & MTN Money",
   },
 
   // ߛߎ߲ ߠߎ — Categories Section
   categories: {
     badge: "ߛߎ߲ ߠߎ߬",
-    title: "ߊ߲ ߠߊ ߘߎ߬ ߣߌ ߠߎ ߞߐ߬ ߟߐ߲ ߞߍ",
-    subtitle: "ߝߋ߲ ߥߊ ߗߍ ߢߊ ߓߍ ߣߍ ߦߌ ߙߐ ߞ ߕ, ߊ ߠ ߟ ߞ ߌ ߡ ߞ ߓ ߝ .",
-    electronics: "ߡߊ ߛߌ߲ ߝߋ ߠ",
-    fashion: "ߝߊ ߣ ߣ ߝ .",
-    home: "ߛ ߘ .",
-    beauty: "ߞ ߖ .",
-    sports: "ߕ ߡ .",
-    auto: "ߡ ߓ .",
-    kids: "ߘ ߝ .",
-    books: "ߟ ߛ .",
-    products: "ߝ .",
-    viewAll: "ߛ .",
+    title: "ߊ߲ ߠߊ ߘߎ߬ߣߌ ߠߎ߬ ߞߐ߬ߟߐ߲ ߞߍ߫",
+    subtitle: "ߝߋ߲ ߥߊ߫ߗߍ ߢߊ ߓߍ߯ ߣߍ߲ ߠߎ߬ ߦߙߐ ߞߋ߬ߕߊ ߘߐ߫, ߊ߬ ߠߎ߬ ߟߊߞߎ߬ ߘߊ ߌ ߡߊ߬ ߞߏ ߓߍ߯ ߡߊ߬.",
+    electronics: "ߡߊ߬ߛߌ߲ ߝߋ߲ ߠߎ߬",
+    fashion: "ߝߊ߬ߣߌ ߣߌ߬ ߡߊ߬ߝߊ߬ߟߌ ߠߎ߬",
+    home: "ߛߏ ߘߐ߬ ߝߋ߲ ߠߎ߬",
+    beauty: "ߞߊ߬ߖߌ ߣߌ߬ ߞߍ߬ߣߦߊ",
+    sports: "ߕߎ߬ߟߏ߲ ߣߌ߬ ߡߍ߲ ߞߍ ߠߎ߬",
+    auto: "ߡߏ߬ߓߌ߬ߟߌ ߣߌ߬ ߡߏ߬ߕߏ",
+    kids: "ߘߋ߲ ߣߌ߬ ߘߋ߲ ߡߛߏ ߝߋ߲ ߠߎ߬",
+    books: "ߟߍ߬ߙߋ ߣߌ߬ ߡߋ߬ ߘߌ߬ ߦߊ",
+    products: "ߝߋ߲ ߠߎ߬",
+    viewAll: "ߛߎ߲ ߓߍ߯ ߦߋ߫",
   },
 
-  // ߝ ߘ — Features Section
+  // ߝߊ߬ ߘߊ ߠߎ — Features Section
   features: {
-    badge: "ߊ߲ ߠ ߓ .",
-    title: "ߌ ߡ .",
-    subtitle: "ߟ .",
-    multiVendor: "ߝ .",
-    multiVendorDesc: "ߌ .",
-    becomeSeller: "ߝ .",
-    transitChina: "ߛ .",
-    transitChinaDesc: "ߌ .",
-    getQuote: "ߛ .",
-    expressDelivery: "ߟ .",
-    expressDeliveryDesc: "ߟ .",
-    trackPackage: "ߓ .",
-    academy: "GuineeGo .",
-    academyDesc: "ߞ .",
-    viewCourses: "ߞ .",
-    mobilePayment: "ߡ .",
-    mobilePaymentDesc: "Orange Money, MTN Money .",
-    learnMore: "ߞ .",
-    buyerProtection: "ߛ .",
-    buyerProtectionDesc: "ߌ .",
-    ourGuarantee: "ߊ .",
+    badge: "ߊ߲ ߠߊ ߓߊ߯ ߙߊ ߠߎ߬",
+    title: "ߌ ߡߊ߬ ߞߏ ߓߍ߯ ߦߋ߫ ߦߊ߲߬",
+    subtitle: "ߞߍ߬ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬ ߛߊ߲ ߣߌ߬ ߝߋ߬ ߙߋ ߣߌ߬ ߛ߭ߌ߲ ߕߊ߬ ߡߌ߲ ߣߌ߬ ߞߊ߬ ߙߊ߲ ߜߋ߬ ߣߍ ߥߍ߫ ߓ ߝߋ߬ ߙߋ ߘߐ߫.",
+    multiVendor: "ߝߋ߬ߙߋ ߓߊ ߞߊ߬ ߡߊ",
+    multiVendorDesc: "ߌ ߟߊ ߓߎ߬ ߕߌ߬ ߞߌ ߟߊ߬ ߝߐ ߡߌ߬ ߣߌ߬ ߕߌ ߞߋ ߞߋ ߘߐ߫. ߌ ߟߊ ߝߋ߲ ߠߎ߬, ߛߊ߲ ߝߋ߲ ߠߎ߬ ߣߌ߬ ߥߊ߬ ߙߌ ߞߏ ߠߎ ߡߊ߬ ߟߊ ߌ ߟߊ ߘߊ߬ ߡߊ ߓߏ ߟߏ ߟߊ.",
+    becomeSeller: "ߝߋ߬ ߙߋ ߓߊ ߟߊ ߞߍ߫",
+    transitChina: "ߛ߭ߌ߲-ߜߋ߬ ߣߍ ߕߊ߬ ߡߌ߲ ߠߊ",
+    transitChinaDesc: "ߌ ߟߊ ߡߊ߬ ߙߊ ߠߎ߬ ߣߊ ߞߍ ߣߐ߬ ߦߊ ߟߊ. ߛߐ߲ ߖߊ߬ ߕߍ ߘߏ ߡߊ ߞߍ ߘߊ, ߟߊ ߕߎ߲ ߠߌ ߕߎ ߕߊ ߟߊ, ߛߐ߲ ߖߊ߬ ߕߋ ߞߌ ߟߏ ߥߟߊ ߓߐ ߟߎ ߡߎ ߟߊ.",
+    getQuote: "ߛߐ߲ ߖߊ߬ ߕߋ ߘߏ ߡߊ ߢߌ߬ ߣߌ߲",
+    expressDelivery: "ߟߊ߬ ߛߋ ߟߌ ߕߟߋ ߦߊ",
+    expressDeliveryDesc: "ߟߊ߬ ߛߋ ߙߌ ߟߊ ߠߎ߬ ߟߊ߲ ߓߍ ߢߐ ߦߋ ߟߊ ߞߐ߬ ߣߊ߬ ߞߙߌ ߣߌ ߡߊ ߙߊ ߘߐ ߓߍ ߘߐ. GPS ߟߊ߬ ߕߎ߲ ߠߌ ߕߎ ߕߊ ߟߊ.",
+    trackPackage: "ߓߏ ߟߏ ߟߊ ߕߎ߲ ߠߌ ߞߍ",
+    academy: "GuineeGo ߞߊ߬ ߙߊ߲ ߘߊ",
+    academyDesc: "ߞߊ߬ ߙߊ߲ ߞߍ ߥߍ߫ ߓ ߝߋ ߙߋ, ߡߊ߬ ߙߊ ߞߋ ߕߌ߲ ߘߌ߬ ߖߌ ߕߊ ߟߌ, ߟߊ ߘߊ ߟߌ. ߝߌ ߘߋ ߦߏ ߠߎ, PDF ߠߎ, ߛߙ ߕߌ ߝߌ ߞߊ ߠߎ.",
+    viewCourses: "ߞߊ߬ ߙߊ߲ ߠߎ ߦߋ",
+    mobilePayment: "ߡߏ߬ ߓߊ߬ ߦߌ ߛߊ߬ ߙߊ ߟߌ",
+    mobilePaymentDesc: "Orange Money, MTN Money, ߓߊ߲ ߞߌ ߞߊ ߙߌ ߕ ߠߎ ߣߌ ߖߊ ߓߌ ߥߊ ߟߍ ߕߌ. ߛߊ ߙߊ ߟߌ ߕߌ߲ ߢߍ ߕߊ ߣߌ ߕߟ ߦ.",
+    learnMore: "ߘߏ ߟߐ߲ ߞߍ",
+    buyerProtection: "ߛߊ߲ ߓߊ ߕߌ߲ ߢߍ ߟߌ",
+    buyerProtectionDesc: "ߌ ߟߊ ߛߊ߲ ߝߋ߲ ߠߎ ߕߌ߲ ߢߍ ߘߊ. ߥߊ ߙߌ ߛߊ ߦߌ ߟ ߟ ߝ .",
+    ourGuarantee: "ߊ߲ ߠ .",
   },
 
-  // ߞߊ߬ ߙߊ߲ ߘ — Academy Section
+  // ߞߊ߬ ߙߊ߲ ߘߊ — Academy Section
   academy: {
-    title: "GuineeGo ߞߊ߬ ߙߊ߲ ߘ",
-    subtitle: "ߥ .",
-    description: "ߝ .",
-    viewCourses: "ߞ .",
-    students: "ߞ .",
-    courses: "ߞ .",
+    title: "GuineeGo ߞߊ߬ ߙߊ߲ ߘߊ",
+    subtitle: "ߞߊ߬ ߙߊ߲ ߞߍ߫ ߥߍ߫ ߓ ߝߋ ߙߋ ߘߐ",
+    description: "ߞߊ߬ ߙߊ߲ ߞߍ߫ ߝߋ߬ ߙߋ ߟߊ ߢߊ ߊ߲ ߠߊ ߞߊ߬ ߙߊ߲ ߝߎ߯ ߠߎ ߣߌ ߛ .",
+    viewCourses: "ߞߊ߬ ߙߊ߲ ߠߎ ߦߋ߫",
+    students: "ߞߊ߬ ߙߊ߲ ߘߋ ߠ",
+    courses: "ߞߊ߬ ߙߊ߲ ߠ",
     certified: "ߛ .",
   },
 
-  // ߘ ߟ — Partners Section
+  // ߘ ، ، — Partners Section
   partners: {
-    title: "ߊ .",
-    subtitle: "ߊ .",
+    title: "ߊ߬ ߠ ߊ . .",
+    subtitle: "ߊ߲ .",
   },
 
   // CTA Section
@@ -201,18 +201,18 @@ export const nqo: TranslationKeys = {
     comingSoon: "ߣ .",
   },
 
-  // ߝ ߦ — Marketplace
+  // ߝߋ߬ ߙߋ ߦߙߐ — Marketplace
   marketplace: {
-    title: "ߝ .",
-    flashSales: "ߝ .",
-    endsIn: "ߊ .",
-    newArrivals: "ߝ .",
-    bestSellers: "ߝ .",
-    recommended: "ߟ .",
-    addToCart: "ߊ .",
-    addedToCart: "ߊ .",
-    outOfStock: "ߊ .",
-    inStock: "ߊ .",
+    title: "ߝߋ߬ ߙߋ ߦߙߐ",
+    flashSales: "ߝߋ߬ ߙߋ ߕߟߋ߬ ߦߊ",
+    endsIn: "ߊ߬ ߓߊ߲ ߕߊ ߦߋ",
+    newArrivals: "ߝߋ߲ ߞߎ߬ ߙߊ ߠߎ߬",
+    bestSellers: "ߝߋ߲ ߝߋ߬ ߙߋ ߕߊ ߢߐ߲ ߠߎ߬",
+    recommended: "ߟߊ߬ ߝߐ ߘߊ ߌ ߦߋ߫",
+    addToCart: "ߊ߬ ߘߏ߲ ߖߊ߬ ߞߌ ߘߐ",
+    addedToCart: "ߊ߬ ߘߏ߲ ߘߊ ߖߊ߬ ߞߌ ߘߐ",
+    outOfStock: "ߊ߬ ߓߊ߲ ߘߊ",
+    inStock: "ߊ߬ ߦߋ ߛ .",
     freeDelivery: "ߟ .",
     filters: "ߛ .",
     priceRange: "ߛ .",
@@ -225,13 +225,13 @@ export const nqo: TranslationKeys = {
     newest: "ߞ .",
     viewAll: "ߓ .",
     specialOffer: "ߛ .",
-    upToOff: "-{percent}% .",
+    upToOff: "-{percent}%",
     heroBannerDesc: "ߝ .",
     discoverOffers: "ߛ .",
     fastDelivery: "ߟ .",
     everywhereGuinea: "ߜ .",
     securePayment: "ߛ .",
-    support247: "24/7 .",
+    support247: "24/7",
     customerSupport: "ߘ .",
     bestPrices: "ߛ .",
     guaranteed: "ߟ .",
@@ -241,7 +241,7 @@ export const nqo: TranslationKeys = {
     equipYourHome: "ߌ .",
   },
 
-  // ߝ — Product
+  // ، ، — Product
   product: {
     description: "ߞ .",
     specifications: "ߛ .",
@@ -264,9 +264,9 @@ export const nqo: TranslationKeys = {
     sellerProducts: "ߝ .",
   },
 
-  // ߖ — Cart
+  // ، ، — Cart
   cart: {
-    title: "ߒ .",
+    title: "ߒ ߠ .",
     empty: "ߌ .",
     emptyMessage: "ߊ .",
     continueShopping: "ߛ .",
@@ -290,7 +290,7 @@ export const nqo: TranslationKeys = {
     encryptedTransactions: "ߕ .",
   },
 
-  // ߘ ߝ — Wishlist
+  // Wishlist
   wishlist: {
     title: "ߒ .",
     backToHome: "ߛ .",
@@ -304,7 +304,7 @@ export const nqo: TranslationKeys = {
     exploreMarketplace: "ߝ .",
   },
 
-  // ߢ — Search
+  // Search
   search: {
     placeholder: "ߝ .",
     productsFound: "ߝ .",
@@ -320,7 +320,7 @@ export const nqo: TranslationKeys = {
     newest: "ߞ .",
   },
 
-  // ߛ ߓ — Checkout
+  // Checkout
   checkout: {
     title: "ߛ .",
     step1: "ߟ .",
@@ -389,7 +389,7 @@ export const nqo: TranslationKeys = {
     addProductsToOrder: "ߝ .",
   },
 
-  // ߛ ߠ — Orders
+  // Orders
   orders: {
     title: "ߒ .",
     noOrders: "ߛ .",
@@ -424,7 +424,7 @@ export const nqo: TranslationKeys = {
     others: "ߘ .",
   },
 
-  // ߞ — Profile
+  // Profile
   profile: {
     title: "ߒ .",
     personalInfo: "ߡ .",
@@ -446,7 +446,7 @@ export const nqo: TranslationKeys = {
     contactSupport: "ߘ .",
   },
 
-  // ߝ — Settings
+  // Settings
   settings: {
     title: "ߝ .",
     notifications: "ߖ .",
@@ -464,7 +464,7 @@ export const nqo: TranslationKeys = {
     currencyNote: "ߛ .",
   },
 
-  // ߖ — Notifications
+  // Notifications
   notifications: {
     title: "ߖ .",
     empty: "ߖ .",
@@ -475,7 +475,7 @@ export const nqo: TranslationKeys = {
     pushBlocked: "ߓ .",
   },
 
-  // ߘ — Footer
+  // Footer
   footer: {
     about: "ߊ .",
     contact: "ߟ .",
@@ -509,7 +509,7 @@ export const nqo: TranslationKeys = {
     legalNotice: "ߛ .",
   },
 
-  // ߕ — Time
+  // Time
   time: {
     minutesAgo: "ߡߌ߬ ߣߌ߬ ߕߌ {count} ߢߍ߫",
     hoursAgo: "ߟߍ߬ ߙߍ {count} ߢߍ߫",
