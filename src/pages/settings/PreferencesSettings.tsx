@@ -283,7 +283,7 @@ export default function PreferencesSettings() {
               onClick={handleReset}
               className="flex-1"
             >
-              {preferences.language === "fr" ? "Réinitialiser" : preferences.language === "en" ? "Reset" : "إعادة تعيين"}
+              {preferences.language === "fr" ? "Réinitialiser" : preferences.language === "en" ? "Reset" : preferences.language === "nqo" ? "ߟ ." : "إعادة تعيين"}
             </Button>
             <Button
               onClick={handleSave}
