@@ -56,7 +56,39 @@ export function CTASection() {
               </Button>
             </div>
 
-            {/* App download badges */}
+            {/* QR Code du site */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.15 }}
+              className="flex flex-col items-center gap-3 mb-10"
+            >
+              <div className="bg-white p-3 rounded-2xl shadow-lg">
+                <QRCodeSVG
+                  value={siteUrl}
+                  size={140}
+                  level="H"
+                  includeMargin={false}
+                  bgColor="#FFFFFF"
+                  fgColor="#1a1a1a"
+                  imageSettings={{
+                    src: logoGuineego,
+                    x: undefined,
+                    y: undefined,
+                    height: 28,
+                    width: 28,
+                    excavate: true,
+                  }}
+                />
+              </div>
+              <span className="text-white/70 text-sm flex items-center gap-1.5">
+                <Download className="w-3.5 h-3.5" />
+                Scannez pour accéder au site
+              </span>
+            </motion.div>
+
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
