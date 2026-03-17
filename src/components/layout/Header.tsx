@@ -54,6 +54,7 @@ export function Header() {
     { code: "en" as const, label: "English", flag: "🇬🇧" },
     { code: "ar" as const, label: "العربية", flag: "🇸🇦" },
     { code: "zh" as const, label: "中文", flag: "🇨🇳" },
+    { code: "nqo" as const, label: "ߒߞߏ", flag: "🇬🇳" },
   ];
 
   const navigation = [
