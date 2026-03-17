@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 
-export type Language = "fr" | "en" | "ar" | "zh";
+export type Language = "fr" | "en" | "ar" | "zh" | "nqo";
 export type Theme = "light" | "dark" | "system";
 export type Currency = "GNF" | "USD" | "EUR" | "XOF";
 
@@ -60,7 +60,15 @@ function applyTheme(theme: Theme) {
 
 function applyLanguage(language: Language) {
   document.documentElement.lang = language;
-  document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+  const isRtl = language === "ar" || language === "nqo";
+  document.documentElement.dir = isRtl ? "rtl" : "ltr";
+  
+  // Apply N'Ko font family when nqo is selected
+  if (language === "nqo") {
+    document.body.style.fontFamily = "'Noto Sans NKo', 'Inter', sans-serif";
+  } else {
+    document.body.style.fontFamily = "";
+  }
 }
 
 export function PreferencesProvider({ children }: { children: ReactNode }) {

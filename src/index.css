@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700;800&family=Noto+Sans+NKo:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -126,6 +126,21 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
+  }
+  
+  /* N'Ko script support */
+  [lang="nqo"] body,
+  [lang="nqo"] {
+    font-family: 'Noto Sans NKo', 'Inter', sans-serif;
+  }
+  
+  [lang="nqo"] h1,
+  [lang="nqo"] h2,
+  [lang="nqo"] h3,
+  [lang="nqo"] h4,
+  [lang="nqo"] h5,
+  [lang="nqo"] h6 {
+    font-family: 'Noto Sans NKo', 'Poppins', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
