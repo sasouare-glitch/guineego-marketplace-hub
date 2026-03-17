@@ -237,6 +237,7 @@ export default function PreferencesSettings() {
                       {preferences.language === "fr" && "Devise utilisée pour l'affichage des prix"}
                       {preferences.language === "en" && "Currency used for price display"}
                       {preferences.language === "ar" && "العملة المستخدمة لعرض الأسعار"}
+                      {preferences.language === "nqo" && "ߥ "}
                     </CardDescription>
                   </div>
                 </div>
