@@ -184,7 +184,9 @@ const App = () => (
                       </ProtectedRoute>
                     } />
                     <Route path="/settings/preferences" element={
-                      <PreferencesSettings />
+                      <ProtectedRoute>
+                        <PreferencesSettings />
+                      </ProtectedRoute>
                     } />
                     
                     {/* Investor Routes (Protected - investor role) */}
