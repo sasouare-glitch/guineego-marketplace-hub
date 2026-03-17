@@ -10,7 +10,7 @@ import type { TranslationKeys } from "./fr";
  * for full linguistic accuracy and natural phrasing.
  */
 export const nqo: TranslationKeys = {
-  // ߞߎ߲߬ߠߊ߬ߝߋ߲ — Common / Mots courants
+  // ߞߎ߲߬ߠߊ߬ߝߋ߲ — Common
   common: {
     loading: "ߊ߬ ߦߋ߫ ߟߊߞߎ߬ ߟߊ...",
     error: "ߝߐ߬ߟߌ ߘߏ߫ ߞߍ߫ ߘߊ",
@@ -101,7 +101,7 @@ export const nqo: TranslationKeys = {
     searchPackage: "ߓߏ߬ ߟߏ ߢߌ߬ߣߌ߲߬ ߞߊ...",
   },
 
-  // ߓߏ߬ ߟߏ / ߛߏ — Home page / Hero
+  // ߓߏ߬ ߟߏ / ߛߏ — Home page
   home: {
     heroTitle: "ߟߊ߬ ߛߋ߬ ߟߌ ߕߟߋ߬ ߦߊ ߞߐ߬ ߣߊ߬ ߞߙߌ ߓߍ߯ ߘߐ߫",
     heroSubtitle: "ߌ ߟߊ ߝߋ߲ ߘߌ߬ ߢߍ ߕߊ ߠߎ߬ ߛߊ߲߬ ߞߊ߬ ߊ ߠߎ߬ ߛߐ߬ ߕߎ ߂ ߟߊ",
@@ -137,50 +137,50 @@ export const nqo: TranslationKeys = {
   categories: {
     badge: "ߛߎ߲ ߠߎ߬",
     title: "ߊ߲ ߠߊ ߘߎ߬ ߣߌ ߠߎ ߞߐ߬ ߟߐ߲ ߞߍ",
-    subtitle: "ߝߋ߲ ߥߊ ߗߍ ߢߊ ߓߍ ߣߍ ߦߌ ߙߐ ߞ ߕ, ߊ ߠ ߟ ߞ ߌ ߡ ߞ ߓ ߝ .",
-    electronics: "ߡߊ ߛߌ߲ ߝߋ ߠ",
-    fashion: "ߝߊ ߣ ߣ ߝ .",
-    home: "ߛ ߘ .",
-    beauty: "ߞ ߖ .",
-    sports: "ߕ ߡ .",
-    auto: "ߡ ߓ .",
-    kids: "ߘ ߝ .",
-    books: "ߟ ߛ .",
-    products: "ߝ .",
-    viewAll: "ߛ .",
+    subtitle: "ߝߋ߲ ߥߊ߫ ߗߍ ߢߊ ߓߍ߯ ߣߍ߲ ߦߙߐ ߞߋ߬ ߕߊ, ߊ ߠߎ߬ ߟߊߞߎ߬ ߘߊ ߌ ߡߊ߬ ߞߏ ߓߍ߯ ߡߊ߬.",
+    electronics: "ߡߊ߬ ߛߌ߲ ߝߋ߲ ߠߎ߬",
+    fashion: "ߝߊ߬ ߣߌ ߣߌ߬ ߝߊ߬ ߣߌ ߠߎ߬",
+    home: "ߛߏ ߘߐ߬ ߝߋ߲ ߠߎ߬",
+    beauty: "ߞߊ߬ ߖߌ ߣߌ߬ ߞߍ߬ ߣߦߊ",
+    sports: "ߕߎ߬ ߟߏ߲ ߣߌ߬ ߡߍ߲ ߞߍ ߠߎ߬",
+    auto: "ߡߏ߬ ߓߌ߬ ߟߌ ߣߌ߬ ߡߏ߬ ߕߏ",
+    kids: "ߘߋ߲ ߣߌ߬ ߘߋ߲ ߡߛߏ ߝߋ߲ ߠߎ߬",
+    books: "ߟߍ߬ ߙߋ ߣߌ߬ ߡߋ߬ ߘߌ߬ ߦߊ",
+    products: "ߝߋ߲ ߠߎ߬",
+    viewAll: "ߛߎ߲ ߓߍ߯ ߦߋ߫",
   },
 
-  // ߝ ߘ — Features Section
+  // ߝߊ߬ ߘߊ ߠߎ — Features Section
   features: {
-    badge: "ߊ߲ ߠ ߓ .",
-    title: "ߌ ߡ .",
-    subtitle: "ߟ .",
-    multiVendor: "ߝ .",
-    multiVendorDesc: "ߌ .",
-    becomeSeller: "ߝ .",
-    transitChina: "ߛ .",
-    transitChinaDesc: "ߌ .",
-    getQuote: "ߛ .",
-    expressDelivery: "ߟ .",
-    expressDeliveryDesc: "ߟ .",
-    trackPackage: "ߓ .",
-    academy: "GuineeGo .",
-    academyDesc: "ߞ .",
-    viewCourses: "ߞ .",
-    mobilePayment: "ߡ .",
-    mobilePaymentDesc: "Orange Money, MTN Money .",
-    learnMore: "ߞ .",
-    buyerProtection: "ߛ .",
-    buyerProtectionDesc: "ߌ .",
-    ourGuarantee: "ߊ .",
+    badge: "ߊ߲ ߠߊ ߓߊ߯ ߙߊ ߠߎ߬",
+    title: "ߌ ߡߊ߬ ߞߏ ߓߍ߯ ߦߋ߫ ߦߊ߲߬",
+    subtitle: "ߞߍ߬ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬ ߛߊ߲ ߣߌ߬ ߝߋ߬ ߙߋ ߣߌ߬ ߛ߭ߌ߲ ߕߊ߬ ߡߌ߲ ߣߌ߬ ߞߊ߬ ߙߊ߲ ߜߋ߬ ߣߍ ߥߍ߫ ߓ ߝߋ߬ ߙߋ ߘߐ߫.",
+    multiVendor: "ߝߋ߬ ߙߋ ߓߊ ߞߊ߬ ߡߊ",
+    multiVendorDesc: "ߌ ߟߊ ߓߎ߬ ߕߌ߬ ߞߌ ߟߊ߬ ߝߐ ߡߌ߬ ߣߌ߬ ߕߌ ߞߋ ߞߋ ߘߐ߫. ߌ ߟߊ ߝߋ߲ ߠߎ߬, ߛߊ߲ ߝߋ߲ ߠߎ߬ ߣߌ߬ ߥߊ߬ ߙߌ ߞߏ ߠߎ ߡߊ߬ ߟߊ ߌ ߟߊ ߘߊ߬ ߡߊ ߓߏ ߟߏ ߟߊ.",
+    becomeSeller: "ߝߋ߬ ߙߋ ߓߊ ߟߊ ߞߍ߫",
+    transitChina: "ߛ߭ߌ߲-ߜߋ߬ ߣߍ ߕߊ߬ ߡߌ߲ ߠߊ",
+    transitChinaDesc: "ߌ ߟߊ ߡߊ߬ ߙߊ ߠߎ߬ ߣߊ ߞߍ ߣߐ߬ ߦߊ ߟߊ. ߛߐ߲ ߖߊ߬ ߕߍ ߘߏ ߡߊ ߞߍ ߘߊ, ߟߊ ߕߎ߲ ߠߌ ߕߎ ߕߊ ߟߊ, ߛߐ߲ ߖߊ߬ ߕߋ ߞߌ ߟߏ ߥߟߊ ߓߐ ߟߎ ߡߎ ߟߊ.",
+    getQuote: "ߛߐ߲ ߖߊ߬ ߕߋ ߘߏ ߡߊ ߢߌ߬ߣߌ߲",
+    expressDelivery: "ߟߊ߬ ߛߋ ߟߌ ߕߟߋ ߦߊ",
+    expressDeliveryDesc: "ߟߊ߬ ߛߋ ߙߌ ߟߊ ߠߎ ߟߊ߲ ߓߍ ߢߐ ߦߋ ߟߊ ߞߐ߬ ߣߊ߬ ߞߙߌ ߣߌ ߡߊ ߙߊ ߘߐ ߓߍ ߘߐ. GPS ߟߊ߬ ߕߎ߲ ߠߌ ߕߎ ߕߊ ߟߊ.",
+    trackPackage: "ߓߏ ߟߏ ߟߊ ߕߎ߲ ߠߌ ߞߍ",
+    academy: "GuineeGo ߞߊ߬ ߙߊ߲ ߘߊ",
+    academyDesc: "ߞߊ߬ ߙߊ߲ ߞߍ ߥߍ߫ ߓ ߝߋ ߙߋ, ߡߊ߬ ߙߊ ߞߋ ߕߌ߲ ߘߌ߬ ߖߌ ߕߊ ߟߌ, ߟߊ ߘߊ ߟߌ. ߝߌ ߘߋ ߦߏ ߠߎ, PDF ߠߎ, ߛߙ ߕߌ ߝߌ ߞߊ ߠߎ.",
+    viewCourses: "ߞߊ߬ ߙߊ߲ ߠߎ ߦߋ",
+    mobilePayment: "ߡߏ ߓߊ ߦߌ ߛߊ ߙߊ ߟߌ",
+    mobilePaymentDesc: "Orange Money, MTN Money, ߓߊ߲ ߞߌ ߞߊ ߙߌ ߕ ߠߎ ߣߌ ߖߊ ߓߌ ߥߊ ߟߍ ߕߌ. ߛߊ ߙߊ ߟߌ ߕߌ߲ ߢߍ ߕߊ ߣߌ ߕ ߟ ߦ.",
+    learnMore: "ߘߏ ߟߐ߲ ߞߍ",
+    buyerProtection: "ߛߊ߲ ߓߊ ߕߌ߲ ߢߍ ߟߌ",
+    buyerProtectionDesc: "ߌ ߟߊ ߛߊ߲ ߝߋ߲ ߠߎ ߕߌ߲ ߢߍ ߘߊ. ߥߊ ߙߌ ߛ ߦ ߟ ߟ ߣ ‐ ß ß ß ß .",
+    ourGuarantee: "ߊ߲ ߠ ߟ ߖ .",
   },
 
-  // ߞߊ߬ ߙߊ߲ ߘ — Academy Section
+  // ߞߊ߬ ߙߊ߲ ߘߊ — Academy Section
   academy: {
-    title: "GuineeGo ߞߊ߬ ߙߊ߲ ߘ",
-    subtitle: "ߥ .",
-    description: "ߝ .",
-    viewCourses: "ߞ .",
+    title: "GuineeGo ߞߊ߬ ߙߊ߲ ߘߊ",
+    subtitle: "ߞߊ߬ ߙߊ߲ ߞߍ ߥߍ߫ ߓ ߝߋ ߙߋ ߘߐ",
+    description: "ߞߊ ߙߊ߲ ߞߍ ߝ ߙ ߟ ߢ ߊ߲ ߠ ߞ ߙ ߝ .",
+    viewCourses: "ߞ ߙ ߠ .",
     students: "ߞ .",
     courses: "ߞ .",
     certified: "ߛ .",
@@ -201,13 +201,13 @@ export const nqo: TranslationKeys = {
     comingSoon: "ߣ .",
   },
 
-  // ߝ ߦ — Marketplace
+  // ߝߋ߬ ߙߋ ߦߙߐ — Marketplace
   marketplace: {
-    title: "ߝ .",
-    flashSales: "ߝ .",
-    endsIn: "ߊ .",
-    newArrivals: "ߝ .",
-    bestSellers: "ߝ .",
+    title: "ߝߋ߬ ߙߋ ߦߙߐ",
+    flashSales: "ߝߋ ߙߋ ߕߟ ߦ",
+    endsIn: "ߊ߬ ߓߊ߲ ߕߊ ߦߋ",
+    newArrivals: "ߝߋ߲ ߞߎ ߙߊ ߠߎ",
+    bestSellers: "ߝߋ߲ ߝ ߙ ߕ .",
     recommended: "ߟ .",
     addToCart: "ߊ .",
     addedToCart: "ߊ .",
@@ -241,9 +241,9 @@ export const nqo: TranslationKeys = {
     equipYourHome: "ߌ .",
   },
 
-  // ߝ — Product
+  // ߝߋ߲ — Product
   product: {
-    description: "ߞ .",
+    description: "ߞߏ ߝߐ ߟ",
     specifications: "ߛ .",
     reviews: "ߖ .",
     relatedProducts: "ߝ .",
@@ -264,9 +264,9 @@ export const nqo: TranslationKeys = {
     sellerProducts: "ߝ .",
   },
 
-  // ߖ — Cart
+  // ߖߊ߬ ߞߌ — Cart
   cart: {
-    title: "ߒ .",
+    title: "ߒ ߠ .",
     empty: "ߌ .",
     emptyMessage: "ߊ .",
     continueShopping: "ߛ .",
@@ -290,7 +290,7 @@ export const nqo: TranslationKeys = {
     encryptedTransactions: "ߕ .",
   },
 
-  // ߘ ߝ — Wishlist
+  // ߘ ، ß ý ß — Wishlist
   wishlist: {
     title: "ߒ .",
     backToHome: "ߛ .",
@@ -320,7 +320,7 @@ export const nqo: TranslationKeys = {
     newest: "ߞ .",
   },
 
-  // ߛ ߓ — Checkout
+  // ߛ ، ß ¹ ß — Checkout
   checkout: {
     title: "ߛ .",
     step1: "ߟ .",
@@ -389,7 +389,7 @@ export const nqo: TranslationKeys = {
     addProductsToOrder: "ߝ .",
   },
 
-  // ߛ ߠ — Orders
+  // ߛ ، ß ² ¬ ® — Orders
   orders: {
     title: "ߒ .",
     noOrders: "ߛ .",
@@ -424,7 +424,7 @@ export const nqo: TranslationKeys = {
     others: "ߘ .",
   },
 
-  // ߞ — Profile
+  // ߞ ، ß ³ — Profile
   profile: {
     title: "ߒ .",
     personalInfo: "ߡ .",
@@ -446,7 +446,7 @@ export const nqo: TranslationKeys = {
     contactSupport: "ߘ .",
   },
 
-  // ߝ — Settings
+  // ، ß ´ — Settings
   settings: {
     title: "ߝ .",
     notifications: "ߖ .",
@@ -464,7 +464,7 @@ export const nqo: TranslationKeys = {
     currencyNote: "ߛ .",
   },
 
-  // ߖ — Notifications
+  // ، ß µ — Notifications
   notifications: {
     title: "ߖ .",
     empty: "ߖ .",
@@ -475,7 +475,7 @@ export const nqo: TranslationKeys = {
     pushBlocked: "ߓ .",
   },
 
-  // ߘ — Footer
+  // ، ß ¶ — Footer
   footer: {
     about: "ߊ .",
     contact: "ߟ .",
@@ -509,7 +509,7 @@ export const nqo: TranslationKeys = {
     legalNotice: "ߛ .",
   },
 
-  // ߕ — Time
+  // ، ß · — Time
   time: {
     minutesAgo: "ߡߌ߬ ߣߌ߬ ߕߌ {count} ߢߍ߫",
     hoursAgo: "ߟߍ߬ ߙߍ {count} ߢߍ߫",
