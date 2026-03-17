@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 
-export type Language = "fr" | "en" | "ar" | "zh";
+export type Language = "fr" | "en" | "ar" | "zh" | "nqo";
 export type Theme = "light" | "dark" | "system";
 export type Currency = "GNF" | "USD" | "EUR" | "XOF";
 
