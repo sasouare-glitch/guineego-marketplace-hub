@@ -324,6 +324,7 @@ export default function PreferencesSettings() {
                     {preferences.language === "fr" && "Exemple de prix:"}
                     {preferences.language === "en" && "Price example:"}
                     {preferences.language === "ar" && "مثال على السعر:"}
+                    {preferences.language === "nqo" && "ߛ :"}
                   </p>
                   <p className="text-lg font-bold text-primary">{format(examplePrice)}</p>
                 </div>
