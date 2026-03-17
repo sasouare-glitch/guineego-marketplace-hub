@@ -113,6 +113,7 @@ export default function PreferencesSettings() {
                       {preferences.language === "fr" && "Choisissez la langue de l'interface"}
                       {preferences.language === "en" && "Choose the interface language"}
                       {preferences.language === "ar" && "اختر لغة الواجهة"}
+                      {preferences.language === "nqo" && "ߞߊ߲ ߛߎ߲ߞߎ߲ ߛߏ ߞ"}
                     </CardDescription>
                   </div>
                 </div>
