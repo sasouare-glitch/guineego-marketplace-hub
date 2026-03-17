@@ -273,6 +273,24 @@ export default function CheckoutPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                 >
+                  {/* Sandbox Toggle */}
+                  <div className="flex items-center gap-3 mb-4 p-3 rounded-xl border-2 border-dashed border-guinea-yellow/40 bg-guinea-yellow/5">
+                    <FlaskConical className="w-5 h-5 text-guinea-yellow" />
+                    <Label htmlFor="sandbox-toggle" className="text-sm font-medium text-foreground cursor-pointer flex-1">
+                      Mode Sandbox (simulation)
+                    </Label>
+                    <Switch
+                      id="sandbox-toggle"
+                      checked={isSandboxMode}
+                      onCheckedChange={toggleSandbox}
+                    />
+                  </div>
+                  {isSandboxMode && (
+                    <p className="text-xs text-guinea-yellow mb-4 -mt-2 ml-1">
+                      🧪 Les paiements Mobile Money seront simulés sans appeler l'API réelle
+                    </p>
+                  )}
+
                   <PaymentForm 
                     selectedMethod={selectedPayment}
                     onSelectMethod={setSelectedPayment}
@@ -281,6 +299,17 @@ export default function CheckoutPage() {
                     walletBalance={wallet?.balance || 0}
                     walletLoading={walletLoading}
                   />
+
+                  {/* Sandbox Simulator */}
+                  {isSandboxMode && (selectedPayment === "orange_money" || selectedPayment === "mtn_money") && (
+                    <SandboxPaymentSimulator
+                      status={sandboxStatus}
+                      progress={sandboxProgress}
+                      method={selectedPayment}
+                      phone={phoneNumber}
+                      amount={subtotal}
+                    />
+                  )}
                 </motion.div>
               )}
 
