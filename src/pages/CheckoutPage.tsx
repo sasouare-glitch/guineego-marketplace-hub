@@ -29,6 +29,7 @@ export default function CheckoutPage() {
   const { user } = useAuth();
   const { addresses, loading: addressesLoading, addAddress, defaultAddress } = useUserAddresses();
   const { wallet, loading: walletLoading } = useWallet();
+  const { isSandboxMode, toggleSandbox, sandboxStatus, sandboxProgress, simulatePayment, resetSandbox } = usePaymentSandbox();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
