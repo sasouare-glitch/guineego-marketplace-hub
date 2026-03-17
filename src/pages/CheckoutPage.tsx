@@ -1,20 +1,24 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, ShoppingBag, LogIn } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShoppingBag, LogIn, FlaskConical } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 import { AddressForm } from "@/components/checkout/AddressForm";
 import { PaymentForm } from "@/components/checkout/PaymentForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
+import { SandboxPaymentSimulator } from "@/components/checkout/SandboxPaymentSimulator";
 import { useCart } from "@/hooks/useCart";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserAddresses } from "@/hooks/useUserAddresses";
 import { useWallet } from "@/hooks/useWallet";
+import { usePaymentSandbox } from "@/hooks/usePaymentSandbox";
 import { createOrderDirect } from "@/lib/firebase/orders";
 import { toast } from "sonner";
 
@@ -25,6 +29,7 @@ export default function CheckoutPage() {
   const { user } = useAuth();
   const { addresses, loading: addressesLoading, addAddress, defaultAddress } = useUserAddresses();
   const { wallet, loading: walletLoading } = useWallet();
+  const { isSandboxMode, toggleSandbox, sandboxStatus, sandboxProgress, simulatePayment, resetSandbox } = usePaymentSandbox();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
@@ -67,6 +72,29 @@ export default function CheckoutPage() {
         const address = addresses.find(a => a.id === selectedAddress);
         if (!address) {
           toast.error("Veuillez sélectionner une adresse");
+          setIsProcessing(false);
+          return;
+        }
+
+        // SANDBOX MODE: simulate mobile money payment
+        const isMobileMoney = selectedPayment === "orange_money" || selectedPayment === "mtn_money";
+        if (isSandboxMode && isMobileMoney) {
+          const sandboxResult = await simulatePayment({
+            method: selectedPayment as "orange_money" | "mtn_money",
+            phone: phoneNumber,
+            amount: subtotal,
+            orderId: `SANDBOX_ORD_${Date.now()}`,
+          });
+
+          if (sandboxResult.success) {
+            setOrderNumber(sandboxResult.orderId);
+            clearCart();
+            toast.success("🧪 [SANDBOX] Paiement simulé avec succès !");
+            // Small delay so user sees the success state
+            await new Promise(r => setTimeout(r, 1500));
+            setCurrentStep(3);
+            resetSandbox();
+          }
           setIsProcessing(false);
           return;
         }
@@ -245,6 +273,24 @@ export default function CheckoutPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                 >
+                  {/* Sandbox Toggle */}
+                  <div className="flex items-center gap-3 mb-4 p-3 rounded-xl border-2 border-dashed border-guinea-yellow/40 bg-guinea-yellow/5">
+                    <FlaskConical className="w-5 h-5 text-guinea-yellow" />
+                    <Label htmlFor="sandbox-toggle" className="text-sm font-medium text-foreground cursor-pointer flex-1">
+                      Mode Sandbox (simulation)
+                    </Label>
+                    <Switch
+                      id="sandbox-toggle"
+                      checked={isSandboxMode}
+                      onCheckedChange={toggleSandbox}
+                    />
+                  </div>
+                  {isSandboxMode && (
+                    <p className="text-xs text-guinea-yellow mb-4 -mt-2 ml-1">
+                      🧪 Les paiements Mobile Money seront simulés sans appeler l'API réelle
+                    </p>
+                  )}
+
                   <PaymentForm 
                     selectedMethod={selectedPayment}
                     onSelectMethod={setSelectedPayment}
@@ -253,6 +299,17 @@ export default function CheckoutPage() {
                     walletBalance={wallet?.balance || 0}
                     walletLoading={walletLoading}
                   />
+
+                  {/* Sandbox Simulator */}
+                  {isSandboxMode && (selectedPayment === "orange_money" || selectedPayment === "mtn_money") && (
+                    <SandboxPaymentSimulator
+                      status={sandboxStatus}
+                      progress={sandboxProgress}
+                      method={selectedPayment}
+                      phone={phoneNumber}
+                      amount={subtotal}
+                    />
+                  )}
                 </motion.div>
               )}
 
