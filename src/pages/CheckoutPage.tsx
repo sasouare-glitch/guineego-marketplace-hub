@@ -1,20 +1,24 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, ShoppingBag, LogIn } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShoppingBag, LogIn, FlaskConical } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 import { AddressForm } from "@/components/checkout/AddressForm";
 import { PaymentForm } from "@/components/checkout/PaymentForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
+import { SandboxPaymentSimulator } from "@/components/checkout/SandboxPaymentSimulator";
 import { useCart } from "@/hooks/useCart";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserAddresses } from "@/hooks/useUserAddresses";
 import { useWallet } from "@/hooks/useWallet";
+import { usePaymentSandbox } from "@/hooks/usePaymentSandbox";
 import { createOrderDirect } from "@/lib/firebase/orders";
 import { toast } from "sonner";
 
