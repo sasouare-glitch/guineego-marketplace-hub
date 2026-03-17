@@ -305,6 +305,7 @@ export default function PreferencesSettings() {
                   {preferences.language === "fr" && "Aperçu de vos préférences"}
                   {preferences.language === "en" && "Preview of your preferences"}
                   {preferences.language === "ar" && "معاينة تفضيلاتك"}
+                  {preferences.language === "nqo" && "ߌ "}
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-background rounded-full text-sm">
