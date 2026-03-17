@@ -76,6 +76,29 @@ export default function CheckoutPage() {
           return;
         }
 
+        // SANDBOX MODE: simulate mobile money payment
+        const isMobileMoney = selectedPayment === "orange_money" || selectedPayment === "mtn_money";
+        if (isSandboxMode && isMobileMoney) {
+          const sandboxResult = await simulatePayment({
+            method: selectedPayment as "orange_money" | "mtn_money",
+            phone: phoneNumber,
+            amount: subtotal,
+            orderId: `SANDBOX_ORD_${Date.now()}`,
+          });
+
+          if (sandboxResult.success) {
+            setOrderNumber(sandboxResult.orderId);
+            clearCart();
+            toast.success("🧪 [SANDBOX] Paiement simulé avec succès !");
+            // Small delay so user sees the success state
+            await new Promise(r => setTimeout(r, 1500));
+            setCurrentStep(3);
+            resetSandbox();
+          }
+          setIsProcessing(false);
+          return;
+        }
+
         const result = await createOrderDirect({
           uid: user!.uid,
           items: items.map(item => ({
