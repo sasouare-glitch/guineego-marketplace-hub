@@ -1,7 +1,16 @@
 import type { TranslationKeys } from "./fr";
 
+/**
+ * ߒߞߏ (N'Ko) Translations for GuineeGo LAT
+ * Script: N'Ko (U+07C0 – U+07FF) — RTL
+ * Language: Manding (Maninka/Bambara variant spoken in Guinea)
+ * Font: Noto Sans NKo (Google Fonts)
+ * 
+ * NOTE: These translations should be reviewed by a native N'Ko speaker
+ * for full linguistic accuracy and natural phrasing.
+ */
 export const nqo: TranslationKeys = {
-  // ߞߎ߲߬ߠߊ߬ߝߋ߲ — Common
+  // ߞߎ߲߬ߠߊ߬ߝߋ߲ — Common / Mots courants
   common: {
     loading: "ߊ߬ ߦߋ߫ ߟߊߞߎ߬ ߟߊ...",
     error: "ߝߐ߬ߟߌ ߘߏ߫ ߞߍ߫ ߘߊ",
@@ -46,7 +55,7 @@ export const nqo: TranslationKeys = {
     sell: "ߝߋ߬ߙߋ߬",
     transit: "ߛ߭ߌ߲ ߕߊ߬ߡߌ߲߬ߠߊ",
     delivery: "ߟߊ߬ߛߋ߬ߟߌ",
-    invest: "ߡߊ߬ߞߍ߬ߟߌ",
+    invest: "ߡߊ߬ߞߍ߬ߟߌ ߞߍ߫",
   },
 
   // ߘߏ߲߬ߠߊ — Authentication
@@ -77,11 +86,11 @@ export const nqo: TranslationKeys = {
     myProducts: "ߒ ߠߊ ߝߋ߲ ߠߎ߬",
     ordersMenu: "ߛߊ߲߬ߝߋ߲ ߠߎ߬",
     finances: "ߥߊ߬ߙߌ ߞߏ ߟߎ߬",
-    dashboard: "ߘߊ߬ ߡߊ߬ ߓߏ߬ ߟߏ",
+    dashboard: "ߘߊ߬ߡߊ߬ ߓߏ߬ ߟߏ",
     calculateQuote: "ߛߐ߲ ߖߊ߬ߕߋ߬ ߞߍ߫",
     trackPackage: "ߓߏ߬ ߟߏ ߟߊ߬ ߕߎ߲߰ ߠߌ",
     myShipments: "ߒ ߠߊ ߛߊ ߝߋ߲ ߠߎ߬",
-    courierSpace: "ߟߊ߬ ߛߋ߬ ߙߌ ߟߊ",
+    courierSpace: "ߟߊ߬ ߛߋ߬ ߙߌ߬ ߟߊ ߟߊ",
     missions: "ߓߊ߯ ߙߊ ߠߎ߬",
     myEarnings: "ߒ ߠߊ ߛߐ߲ ߠߎ߬",
     allCourses: "ߞߊ߬ ߙߊ߲ ߓߍ߯",
@@ -108,8 +117,8 @@ export const nqo: TranslationKeys = {
     badge: "ߜߋ߬ ߣߍ ߝߟߐ ߝߋ߬ ߙߋ ߦߙߐ",
     title1: "ߛߊ߲߬, ߝߋ߬ ߙߋ߬,",
     title2: "ߜߋ߬ ߣߍ ߟߊ ߞߍ ߞߋ߲",
-    description: "GuineeGo LAT ߦߋ߫ ߝߋ߬ ߙߋ߬ ߓߊ ߠߎ߬ ߣߌ߬ ߛߊ߲ ߓߊ ߠߎ߬ ߣߌ߬ ߟߊ߬ ߛߋ ߙߌ ߠߎ߬ ߣߌ߬ ߡߊ߬ ߞߍ ߟߊ ߠߎ ߟߊ߲ ߓߍ ߞߍ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬. ߛ߭ߌ߲ ߕߊ߬ ߡߌ߲, ߞߊ߬ ߙߊ߲ ߥߍ߫ ߓ ߞߏ ߟߊ, ߥߊ߬ ߙߌ ߛߊ߬ ߙߊ ߕߌ߲ ߢߍ.",
-    exploreStore: "ߝߋ߲ ߠߎ ߞߐ߬ ߟߐ߲",
+    description: "GuineeGo LAT ߦߋ߫ ߝߋ߬ ߙߋ߬ ߓߊ ߠߎ߬ ߣߌ߬ ߛߊ߲ ߓߊ ߠߎ߬ ߣߌ߬ ߟߊ߬ ߛߋ ߙߌ ߠߎ߬ ߣߌ߬ ߡߊ߬ ߞߍ ߟߊ ߠߎ ߟߊ߲ ߓߍ ߞߍ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬. ߛ߭ߌ߲ ߕߊ߬ ߡߌ߲, ߥߍ߫ ߓ ߞߏ ߞߊ߬ ߙߊ߲, ߡߏ߬ ߓߊ߬ ߦߌ ߛߊ߬ ߙߊ ߕߌ߲ ߢߍ.",
+    exploreStore: "ߝߋ߲ ߠߎ ߞߐ߬ ߟߐ߲ ߞߍ",
     becomeSeller: "ߝߋ߬ ߙߋ߬ ߓߊ ߟߊ ߞߍ",
     products: "ߝߋ߲ ߠߎ",
     sellers: "ߝߋ߬ ߙߋ ߓߊ ߠߎ",
@@ -117,7 +126,7 @@ export const nqo: TranslationKeys = {
     delivery: "ߟߊ߬ ߛߋ ߟߌ",
     marketplace: "ߝߋ߬ ߙߋ ߦߙߐ",
     transitChina: "ߛ߭ߌ߲ ߕߊ߬ ߡߌ߲",
-    transitDesc: "ߝߋ߲ ߣߊ ߞߍ ߣߐ߬ ߦߊ",
+    transitDesc: "ߝߋ߲ ߣߊ ߞߍ ߣߐ߬ ߦߊ ߟߊ",
     deliveryService: "ߟߊ߬ ߛߋ ߟߌ",
     deliveryDesc: "ߞߐ߬ ߣߊ߬ ߞߙߌ ߣߌ ߡߊ߬ ߙߊ ߘߐ",
     secure: "ߕߌ߲ ߢߍ ߕߊ",
@@ -128,26 +137,26 @@ export const nqo: TranslationKeys = {
   categories: {
     badge: "ߛߎ߲ ߠߎ߬",
     title: "ߊ߲ ߠߊ ߘߎ߬ ߣߌ ߠߎ ߞߐ߬ ߟߐ߲ ߞߍ",
-    subtitle: "ߝߋ߲ ߥߊ ߗߍ ߢߊ ߓߍ ߣߍ, ߦߌ ߙߐ ߞ ߕߊ ߣߌ ߝߋ ߙߊ ߕ, ߊ ߟ ߣ ߦ ߞ ߌ ߡ ߞ ߓ .",
+    subtitle: "ߝߋ߲ ߥߊ ߗߍ ߢߊ ߓߍ ߣߍ ߦߌ ߙߐ ߞ ߕ, ߊ ߠ ߟ ߞ ߌ ߡ ߞ ߓ ߝ .",
     electronics: "ߡߊ ߛߌ߲ ߝߋ ߠ",
-    fashion: "ߝߊ ߣߌ ߝ",
-    home: "ߛ ߘ",
-    beauty: "ߞ ߖ",
-    sports: "ߕ ߡ",
-    auto: "ߡ ߓ",
-    kids: "ߘ ߝ",
-    books: "ߟ ߛ",
-    products: "ߝ",
-    viewAll: "ߛ ߓ .",
+    fashion: "ߝߊ ߣ ߣ ߝ .",
+    home: "ߛ ߘ .",
+    beauty: "ߞ ߖ .",
+    sports: "ߕ ߡ .",
+    auto: "ߡ ߓ .",
+    kids: "ߘ ߝ .",
+    books: "ߟ ߛ .",
+    products: "ߝ .",
+    viewAll: "ߛ .",
   },
 
   // ߝ ߘ — Features Section
   features: {
-    badge: "ߊ ߓ .",
+    badge: "ߊ߲ ߠ ߓ .",
     title: "ߌ ߡ .",
     subtitle: "ߟ .",
     multiVendor: "ߝ .",
-    multiVendorDesc: "ߌ ߟ .",
+    multiVendorDesc: "ߌ .",
     becomeSeller: "ߝ .",
     transitChina: "ߛ .",
     transitChinaDesc: "ߌ .",
@@ -155,12 +164,12 @@ export const nqo: TranslationKeys = {
     expressDelivery: "ߟ .",
     expressDeliveryDesc: "ߟ .",
     trackPackage: "ߓ .",
-    academy: "GuineeGo ߞ .",
+    academy: "GuineeGo .",
     academyDesc: "ߞ .",
     viewCourses: "ߞ .",
     mobilePayment: "ߡ .",
     mobilePaymentDesc: "Orange Money, MTN Money .",
-    learnMore: "ߘ .",
+    learnMore: "ߞ .",
     buyerProtection: "ߛ .",
     buyerProtectionDesc: "ߌ .",
     ourGuarantee: "ߊ .",
@@ -168,9 +177,9 @@ export const nqo: TranslationKeys = {
 
   // ߞߊ߬ ߙߊ߲ ߘ — Academy Section
   academy: {
-    title: "GuineeGo ߞߊ߬ ߙߊ߲ ߘߊ",
-    subtitle: "ߥߍ߫ ߓ ߞߏ ߞߊ߬ ߙߊ߲ ߞߍ",
-    description: "ߝߋ߲ ߝߋ߬ ߙߋ ߞߊ߬ ߙߊ߲ ߞߍ ߊ߲ ߠ ߞ .",
+    title: "GuineeGo ߞߊ߬ ߙߊ߲ ߘ",
+    subtitle: "ߥ .",
+    description: "ߝ .",
     viewCourses: "ߞ .",
     students: "ߞ .",
     courses: "ߞ .",
@@ -194,7 +203,7 @@ export const nqo: TranslationKeys = {
 
   // ߝ ߦ — Marketplace
   marketplace: {
-    title: "ߝߋ߬ ߙߋ ߦߙߐ",
+    title: "ߝ .",
     flashSales: "ߝ .",
     endsIn: "ߊ .",
     newArrivals: "ߝ .",
@@ -239,8 +248,8 @@ export const nqo: TranslationKeys = {
     reviews: "ߖ .",
     relatedProducts: "ߝ .",
     quantity: "ߖ .",
-    addToWishlist: "ߝ .",
-    removeFromWishlist: "ߝ .",
+    addToWishlist: "ߘ .",
+    removeFromWishlist: "ߘ .",
     shareProduct: "ߟ .",
     sellerInfo: "ߝ .",
     deliveryInfo: "ߛ .",
@@ -257,7 +266,7 @@ export const nqo: TranslationKeys = {
 
   // ߖ — Cart
   cart: {
-    title: "ߒ ߠ .",
+    title: "ߒ .",
     empty: "ߌ .",
     emptyMessage: "ߊ .",
     continueShopping: "ߛ .",
@@ -276,7 +285,7 @@ export const nqo: TranslationKeys = {
     apply: "ߟ .",
     acceptedPayments: "ߛ .",
     fastDelivery: "ߟ .",
-    deliveryDays: "ߕ ߂ - ߄ .",
+    deliveryDays: "ߕ ߂ - ߄",
     securePayment: "ߛ .",
     encryptedTransactions: "ߕ .",
   },
@@ -317,7 +326,7 @@ export const nqo: TranslationKeys = {
     step1: "ߟ .",
     step2: "ߛ .",
     step3: "ߟ .",
-    deliveryAddress: "ߟ .",
+    deliveryAddress: "ߛ .",
     paymentMethod: "ߛ .",
     orderSummary: "ߛ .",
     placeOrder: "ߛ .",
@@ -329,7 +338,7 @@ export const nqo: TranslationKeys = {
     addNewAddress: "ߊ .",
     newAddress: "ߊ .",
     addressType: "ߊ .",
-    homeAddress: "ߓ .",
+    homeAddress: "ߛ .",
     workAddress: "ߓ .",
     otherAddress: "ߘ .",
     fullName: "ߕ .",
@@ -359,7 +368,7 @@ export const nqo: TranslationKeys = {
     cardName: "ߕ .",
     items: "ߝ .",
     expressDelivery: "ߟ .",
-    deliveryTime: "ߕ ߂߄ - ߄߈ .",
+    deliveryTime: "ߕ .",
     securePayment: "ߛ .",
     encryptedData: "ߕ .",
     orderConfirmedTitle: "ߛ !",
@@ -410,7 +419,7 @@ export const nqo: TranslationKeys = {
     total: "ߓ .",
     article: "ߝ .",
     articles: "ߝ .",
-    andOther: "ߊ .",
+    andOther: "ߣ",
     other: "ߘ .",
     others: "ߘ .",
   },
@@ -433,7 +442,7 @@ export const nqo: TranslationKeys = {
     totalOrders: "ߛ .",
     inProgress: "ߛ .",
     memberSince: "ߡ .",
-    needHelp: "ߌ ߡ .",
+    needHelp: "ߌ ߡ ?",
     contactSupport: "ߘ .",
   },
 
@@ -489,7 +498,7 @@ export const nqo: TranslationKeys = {
     pricing: "ߛ .",
     servicesTitle: "ߓ .",
     transitChina: "ߛ .",
-    academy: "GuineeGo .",
+    academy: "GuineeGo ߞ",
     expressDelivery: "ߟ .",
     invest: "ߡ .",
     helpTitle: "ߘ .",
