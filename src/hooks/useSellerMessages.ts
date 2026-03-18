@@ -82,24 +82,29 @@ export function useSellerMessages() {
       orderBy('lastMessageAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const convs = snapshot.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        })) as ConversationDoc[];
-        setConversations(convs);
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Conversations listener error:', err);
-        setLoading(false);
-      }
-    );
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const convs = snapshot.docs.map((d) => ({
+            id: d.id,
+            ...d.data(),
+          })) as ConversationDoc[];
+          setConversations(convs);
+          setLoading(false);
+        },
+        (err) => {
+          console.error('Conversations listener error:', err);
+          setLoading(false);
+        }
+      );
+    } catch (e) {
+      console.error('SellerMessages: Failed to attach conversations listener:', e);
+      setLoading(false);
+    }
 
-    return () => unsubscribe();
-  }, [sellerId]);
+    return () => { try { unsubscribe?.(); } catch (e) { /* ignore */ } };
 
   // ---- Subscribe to messages of selected conversation ----
   useEffect(() => {

@@ -91,84 +91,85 @@ export default function AdminSellersPage() {
     setLoading(true);
     const q = query(collection(db, 'users'), where('role', '==', 'ecommerce'));
 
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const userDocs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as SellerUser));
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onSnapshot(q, async (snapshot) => {
+        const userDocs = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as SellerUser));
 
-      // Enrich with real Firestore data: seller_settings, sellers, products count, orders revenue
-      const enriched = await Promise.all(userDocs.map(async (user) => {
-        const sellerId = user.ecomId || user.id;
-        let shopName = '';
-        let category = '';
-        let avgRating = 0;
-        let statusFromSeller = '';
+        const enriched = await Promise.all(userDocs.map(async (user) => {
+          const sellerId = user.ecomId || user.id;
+          let shopName = '';
+          let category = '';
+          let avgRating = 0;
+          let statusFromSeller = '';
 
-        // 1. Try seller_settings for shop name
-        try {
-          const settingsSnap = await getDoc(doc(db, 'seller_settings', sellerId));
-          if (settingsSnap.exists()) {
-            const name = settingsSnap.data()?.storeInfo?.name;
-            if (name) shopName = name;
-          }
-        } catch {}
-
-        // 2. Fallback to sellers collection
-        try {
-          const sellerSnap = await getDoc(doc(db, 'sellers', sellerId));
-          if (sellerSnap.exists()) {
-            const sd = sellerSnap.data();
-            if (!shopName) shopName = sd.storeName || sd.shopName || sd.businessName || '';
-            avgRating = sd.stats?.avgRating || sd.avgRating || 0;
-            category = sd.category || '';
-            if (sd.status) statusFromSeller = sd.status;
-          }
-        } catch {}
-
-        // 3. Count real products from products collection
-        let totalProducts = 0;
-        try {
-          const prodQuery = query(collection(db, 'products'), where('sellerId', '==', sellerId));
-          const prodSnap = await getDocs(prodQuery);
-          totalProducts = prodSnap.size;
-        } catch {}
-
-        // 4. Sum revenue from orders collection
-        let totalRevenue = 0;
-        let totalOrders = 0;
-        try {
-          const ordersQuery = query(collection(db, 'orders'), where('sellerId', '==', sellerId));
-          const ordersSnap = await getDocs(ordersQuery);
-          totalOrders = ordersSnap.size;
-          ordersSnap.docs.forEach(d => {
-            const data = d.data();
-            if (data.status !== 'cancelled') {
-              totalRevenue += data.total || data.totalAmount || 0;
+          try {
+            const settingsSnap = await getDoc(doc(db, 'seller_settings', sellerId));
+            if (settingsSnap.exists()) {
+              const name = settingsSnap.data()?.storeInfo?.name;
+              if (name) shopName = name;
             }
-          });
-        } catch {}
+          } catch {}
 
-        user.sellerStats = {
-          shopName: shopName || undefined,
-          totalProducts,
-          totalOrders,
-          totalRevenue,
-          avgRating,
-          category,
-        };
-        if (statusFromSeller) user.status = statusFromSeller as any;
-        if (!user.status) user.status = 'active';
-        return user;
-      }));
+          try {
+            const sellerSnap = await getDoc(doc(db, 'sellers', sellerId));
+            if (sellerSnap.exists()) {
+              const sd = sellerSnap.data();
+              if (!shopName) shopName = sd.storeName || sd.shopName || sd.businessName || '';
+              avgRating = sd.stats?.avgRating || sd.avgRating || 0;
+              category = sd.category || '';
+              if (sd.status) statusFromSeller = sd.status;
+            }
+          } catch {}
 
-      setSellers(enriched);
+          let totalProducts = 0;
+          try {
+            const prodQuery = query(collection(db, 'products'), where('sellerId', '==', sellerId));
+            const prodSnap = await getDocs(prodQuery);
+            totalProducts = prodSnap.size;
+          } catch {}
+
+          let totalRevenue = 0;
+          let totalOrders = 0;
+          try {
+            const ordersQuery = query(collection(db, 'orders'), where('sellerId', '==', sellerId));
+            const ordersSnap = await getDocs(ordersQuery);
+            totalOrders = ordersSnap.size;
+            ordersSnap.docs.forEach(d => {
+              const data = d.data();
+              if (data.status !== 'cancelled') {
+                totalRevenue += data.total || data.totalAmount || 0;
+              }
+            });
+          } catch {}
+
+          user.sellerStats = {
+            shopName: shopName || undefined,
+            totalProducts,
+            totalOrders,
+            totalRevenue,
+            avgRating,
+            category,
+          };
+          if (statusFromSeller) user.status = statusFromSeller as any;
+          if (!user.status) user.status = 'active';
+          return user;
+        }));
+
+        setSellers(enriched);
+        setLoading(false);
+        setError(null);
+      }, (err) => {
+        console.error('Error fetching sellers:', err);
+        setError(err);
+        setLoading(false);
+      });
+    } catch (e) {
+      console.error('AdminSellers: Failed to attach listener:', e);
       setLoading(false);
-      setError(null);
-    }, (err) => {
-      console.error('Error fetching sellers:', err);
-      setError(err);
-      setLoading(false);
-    });
+    }
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe?.(); } catch (e) { /* ignore */ } };
   }, []);
 
   const getDisplayName = (seller: SellerUser) => {
