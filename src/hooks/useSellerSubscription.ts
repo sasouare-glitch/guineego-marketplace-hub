@@ -5,8 +5,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { doc, onSnapshot, updateDoc, serverTimestamp, collection, addDoc, query, where, orderBy, limit } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, collection, addDoc, query, where, orderBy, limit } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import { useAuth } from '@/contexts/AuthContext';
 import { type SellerPlanId, getPlanById, type SellerPlan } from '@/constants/sellerPlans';
 import { toast } from 'sonner';
