@@ -80,10 +80,10 @@ const SellerNotificationsPage = () => {
       orderBy("createdAt", "desc")
     );
 
-    const unsubscribe = onSnapshot(
+    const unsubscribe = safeOnSnapshot(
       q,
-      (snapshot) => {
-        const notifs: SellerNotification[] = snapshot.docs.map((docSnap) => {
+      (snapshot: any) => {
+        const notifs: SellerNotification[] = snapshot.docs.map((docSnap: any) => {
           const data = docSnap.data();
           const createdAt = data.createdAt instanceof Timestamp
             ? data.createdAt.toDate()
@@ -104,7 +104,8 @@ const SellerNotificationsPage = () => {
       (error) => {
         console.error("Error listening to seller notifications:", error);
         setLoading(false);
-      }
+      },
+      'sellerNotifications'
     );
 
     return () => {
