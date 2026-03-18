@@ -165,8 +165,8 @@ export function useCustomerOrders(customerId: string | null | undefined) {
     }
 
     setLoading(true);
+    let unsub: (() => void) | undefined;
     
-    // Import query functions
     import('firebase/firestore').then(({ collection, query, where, orderBy, onSnapshot }) => {
       const q = query(
         collection(db, 'orders'),
@@ -174,26 +174,31 @@ export function useCustomerOrders(customerId: string | null | undefined) {
         orderBy('createdAt', 'desc')
       );
 
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          const ordersList = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          } as Order));
-          setOrders(ordersList);
-          setLoading(false);
-          setError(null);
-        },
-        (err) => {
-          console.error('Error fetching customer orders:', err);
-          setError(err);
-          setLoading(false);
-        }
-      );
-
-      return () => unsubscribe();
+      try {
+        unsub = onSnapshot(
+          q,
+          (snapshot) => {
+            const ordersList = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            } as Order));
+            setOrders(ordersList);
+            setLoading(false);
+            setError(null);
+          },
+          (err) => {
+            console.error('Error fetching customer orders:', err);
+            setError(err);
+            setLoading(false);
+          }
+        );
+      } catch (e) {
+        console.error('useCustomerOrders: Failed to attach listener:', e);
+        setLoading(false);
+      }
     });
+
+    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
   }, [customerId]);
 
   return { orders, loading, error };
