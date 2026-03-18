@@ -81,7 +81,10 @@ export default function RegisterPage() {
   const { register, handleSubmit, watch, formState: { errors, isSubmitting }, setValue } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      acceptTerms: false
+      acceptTerms: false,
+      role: prefillName ? 'customer' as const : undefined,
+      displayName: prefillName,
+      phone: prefillPhone,
     }
   });
 
