@@ -65,3 +65,6 @@ export {
   useFileUpload,
   useProductImageUpload
 } from './storage';
+
+// Safe snapshot utility
+export { safeOnSnapshot } from './safeSnapshot';

@@ -4,8 +4,9 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface UserAddress {
@@ -34,16 +35,17 @@ export function useUserAddresses() {
       return;
     }
 
-    const unsub = onSnapshot(
+    const unsub = safeOnSnapshot(
       doc(db, 'users', user.uid),
-      (snap) => {
+      (snap: any) => {
         if (snap.exists()) {
           const data = snap.data();
           setAddresses(data.addresses || []);
         }
         setLoading(false);
       },
-      () => setLoading(false)
+      () => setLoading(false),
+      'userAddresses'
     );
 
     return () => unsub();

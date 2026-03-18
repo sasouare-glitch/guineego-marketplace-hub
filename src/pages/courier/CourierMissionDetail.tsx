@@ -65,13 +65,22 @@ const CourierMissionDetail = () => {
   // Real-time listener on this delivery document
   useEffect(() => {
     if (!id) return;
-    const unsub = onSnapshot(doc(db, "deliveries", id), (snap) => {
-      if (snap.exists()) {
-        setMission({ ...snap.data(), id: snap.id } as DeliveryMission);
-      }
+    let unsub: (() => void) | undefined;
+    try {
+      unsub = onSnapshot(doc(db, "deliveries", id), (snap) => {
+        if (snap.exists()) {
+          setMission({ ...snap.data(), id: snap.id } as DeliveryMission);
+        }
+        setLoading(false);
+      }, (err) => {
+        console.error('CourierMissionDetail listener error:', err);
+        setLoading(false);
+      });
+    } catch (e) {
+      console.error('CourierMissionDetail: Failed to attach listener:', e);
       setLoading(false);
-    });
-    return () => unsub();
+    }
+    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
   }, [id]);
 
   // Fetch order items count

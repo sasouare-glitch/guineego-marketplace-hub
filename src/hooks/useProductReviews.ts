@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface Review {
@@ -29,10 +30,10 @@ export function useProductReviews(productId: string | undefined) {
       orderBy('createdAt', 'desc')
     );
 
-    const unsub = onSnapshot(q, (snap) => {
-      setReviews(snap.docs.map(d => ({ id: d.id, ...d.data() } as Review)));
+    const unsub = safeOnSnapshot(q, (snap: any) => {
+      setReviews(snap.docs.map((d: any) => ({ id: d.id, ...d.data() } as Review)));
       setLoading(false);
-    }, () => setLoading(false));
+    }, () => setLoading(false), 'productReviews');
 
     return () => unsub();
   }, [productId]);

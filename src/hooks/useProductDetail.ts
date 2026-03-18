@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { doc, onSnapshot, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 
 const storeCache = new Map<string, { name: string; rating: number; productCount: number }>();
 
@@ -58,7 +59,7 @@ export function useProductDetail(productId: string | undefined) {
   useEffect(() => {
     if (!productId) { setLoading(false); return; }
 
-    const unsub = onSnapshot(doc(db, 'products', productId), async (snap) => {
+    const unsub = safeOnSnapshot(doc(db, 'products', productId), async (snap: any) => {
       if (!snap.exists()) { setProduct(null); setLoading(false); return; }
 
       const d = snap.data();
@@ -99,7 +100,7 @@ export function useProductDetail(productId: string | undefined) {
         reviews: d.reviews || [],
       });
       setLoading(false);
-    }, () => setLoading(false));
+    }, () => setLoading(false), 'productDetail');
 
     return () => unsub();
   }, [productId]);

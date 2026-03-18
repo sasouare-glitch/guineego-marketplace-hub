@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import type { Product } from '@/components/marketplace/ProductCard';
 
 interface SellerStoreData {
@@ -40,8 +41,8 @@ export function useSellerStoreProducts(sellerId: string | null): SellerStoreData
       orderBy('createdAt', 'desc')
     );
 
-    const unsub = onSnapshot(q, (snap) => {
-      const items: Product[] = snap.docs.map(d => {
+    const unsub = safeOnSnapshot(q, (snap: any) => {
+      const items: Product[] = snap.docs.map((d: any) => {
         const data = d.data();
         const discount = data.originalPrice && data.originalPrice > data.price
           ? Math.round(((data.originalPrice - data.price) / data.originalPrice) * 100)
@@ -63,7 +64,7 @@ export function useSellerStoreProducts(sellerId: string | null): SellerStoreData
       });
       setProducts(items);
       setLoading(false);
-    }, () => setLoading(false));
+    }, () => setLoading(false), 'sellerStoreProducts');
 
     return () => unsub();
   }, [sellerId]);

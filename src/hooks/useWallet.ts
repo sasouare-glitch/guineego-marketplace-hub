@@ -91,41 +91,46 @@ export function useWallet() {
 
     const walletRef = doc(db, 'wallets', user.uid);
     
-    const unsubscribe = onSnapshot(
-      walletRef,
-      (snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          setWallet({
-            ...data,
-            lastTransactionAt: data.lastTransactionAt?.toDate(),
-            createdAt: data.createdAt?.toDate(),
-            updatedAt: data.updatedAt?.toDate()
-          } as Wallet);
-        } else {
-          // No wallet yet - will be created on first transaction
-          setWallet({
-            userId: user.uid,
-            balance: 0,
-            currency: 'GNF',
-            totalEarnings: 0,
-            totalWithdrawals: 0,
-            pendingWithdrawals: 0,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          });
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onSnapshot(
+        walletRef,
+        (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.data();
+            setWallet({
+              ...data,
+              lastTransactionAt: data.lastTransactionAt?.toDate(),
+              createdAt: data.createdAt?.toDate(),
+              updatedAt: data.updatedAt?.toDate()
+            } as Wallet);
+          } else {
+            setWallet({
+              userId: user.uid,
+              balance: 0,
+              currency: 'GNF',
+              totalEarnings: 0,
+              totalWithdrawals: 0,
+              pendingWithdrawals: 0,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+          }
+          setLoading(false);
+          setError(null);
+        },
+        (err) => {
+          console.error('Wallet subscription error:', err);
+          setError(err);
+          setLoading(false);
         }
-        setLoading(false);
-        setError(null);
-      },
-      (err) => {
-        console.error('Wallet subscription error:', err);
-        setError(err);
-        setLoading(false);
-      }
-    );
+      );
+    } catch (e) {
+      console.error('useWallet: Failed to attach listener:', e);
+      setLoading(false);
+    }
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe?.(); } catch (e) { /* ignore */ } };
   }, [user]);
 
   return { wallet, loading, error };

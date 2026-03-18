@@ -5,8 +5,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { doc, onSnapshot, updateDoc, serverTimestamp, collection, addDoc, query, where, orderBy, limit } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, collection, addDoc, query, where, orderBy, limit } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import { useAuth } from '@/contexts/AuthContext';
 import { type SellerPlanId, getPlanById, type SellerPlan } from '@/constants/sellerPlans';
 import { toast } from 'sonner';
@@ -52,16 +53,17 @@ export function useSellerSubscription() {
       return;
     }
 
-    const unsub = onSnapshot(
+    const unsub = safeOnSnapshot(
       doc(db, 'seller_settings', user.uid),
-      (snap) => {
+      (snap: any) => {
         const data = snap.data();
         setPlanId((data?.subscription?.planId as SellerPlanId) || 'free');
         const exp = data?.subscription?.expiresAt;
         setExpiresAt(exp?.toDate?.() || null);
         setLoading(false);
       },
-      () => setLoading(false)
+      () => setLoading(false),
+      'sellerSubscription'
     );
 
     return () => unsub();
@@ -81,9 +83,9 @@ export function useSellerSubscription() {
       limit(1)
     );
 
-    const unsub = onSnapshot(
+    const unsub = safeOnSnapshot(
       pendingQuery,
-      (snap) => {
+      (snap: any) => {
         if (snap.empty) {
           setPendingPayment(null);
         } else {
@@ -97,7 +99,8 @@ export function useSellerSubscription() {
           });
         }
       },
-      () => setPendingPayment(null)
+      () => setPendingPayment(null),
+      'sellerPendingPayment'
     );
 
     return () => unsub();

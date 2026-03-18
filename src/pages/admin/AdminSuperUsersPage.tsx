@@ -110,17 +110,23 @@ export default function AdminSuperUsersPage() {
       limit(100)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as SuperUser[];
-      setSuperUsers(data);
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as SuperUser[];
+        setSuperUsers(data);
+        setLoading(false);
+      }, (error) => {
+        console.error('Error loading super users:', error);
+        toast.error('Erreur de chargement des super utilisateurs');
+        setLoading(false);
+      });
+    } catch (e) {
+      console.error('AdminSuperUsers: Failed to attach listener:', e);
       setLoading(false);
-    }, (error) => {
-      console.error('Error loading super users:', error);
-      toast.error('Erreur de chargement des super utilisateurs');
-      setLoading(false);
-    });
+    }
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe?.(); } catch (e) { /* ignore */ } };
   }, []);
 
   // Audit logs for super_user actions
@@ -134,17 +140,22 @@ export default function AdminSuperUsersPage() {
       limit(200)
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const allLogs = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as AuditEntry[];
-      // Filter logs performed by super_users (by matching performedBy with super user IDs)
-      setAuditLogs(allLogs);
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onSnapshot(q, (snapshot) => {
+        const allLogs = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as AuditEntry[];
+        setAuditLogs(allLogs);
+        setLoadingAudit(false);
+      }, (error) => {
+        console.error('Error loading audit logs:', error);
+        setLoadingAudit(false);
+      });
+    } catch (e) {
+      console.error('AdminSuperUsers: Failed to attach audit listener:', e);
       setLoadingAudit(false);
-    }, (error) => {
-      console.error('Error loading audit logs:', error);
-      setLoadingAudit(false);
-    });
+    }
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe?.(); } catch (e) { /* ignore */ } };
   }, []);
 
   // Computed: super user IDs for filtering audit logs

@@ -16,8 +16,8 @@ import {
   query,
   where,
   orderBy,
-  onSnapshot,
 } from "firebase/firestore";
+import { safeOnSnapshot } from "@/lib/firebase/safeSnapshot";
 
 const ACTIVE_STATUSES: OrderStatus[] = [
   "pending",
@@ -50,10 +50,10 @@ export default function MyOrdersPage() {
       orderBy("createdAt", "desc")
     );
 
-    const unsub = onSnapshot(
+    const unsub = safeOnSnapshot(
       q,
-      (snap) => {
-        const docs = snap.docs.map((d) => {
+      (snap: any) => {
+        const docs = snap.docs.map((d: any) => {
           const data = d.data();
           return {
             id: d.id,
@@ -78,7 +78,8 @@ export default function MyOrdersPage() {
       (err) => {
         console.error("Error fetching orders:", err);
         setLoading(false);
-      }
+      },
+      'myOrders'
     );
 
     return () => unsub();

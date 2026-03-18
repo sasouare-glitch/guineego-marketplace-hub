@@ -97,46 +97,52 @@ export function useSellerCustomers() {
     const customersRef = collection(db, 'seller_customers', sellerId, 'customers');
     const q = query(customersRef, orderBy('updatedAt', 'desc'));
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const data: SellerCustomer[] = snapshot.docs.map((d) => {
-          const raw = d.data();
-          const lastOrderAt = raw.lastOrderAt instanceof Timestamp ? raw.lastOrderAt.toDate() : null;
-          const createdAt = raw.createdAt instanceof Timestamp ? raw.createdAt.toDate() : new Date();
-          const updatedAt = raw.updatedAt instanceof Timestamp ? raw.updatedAt.toDate() : new Date();
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const data: SellerCustomer[] = snapshot.docs.map((d) => {
+            const raw = d.data();
+            const lastOrderAt = raw.lastOrderAt instanceof Timestamp ? raw.lastOrderAt.toDate() : null;
+            const createdAt = raw.createdAt instanceof Timestamp ? raw.createdAt.toDate() : new Date();
+            const updatedAt = raw.updatedAt instanceof Timestamp ? raw.updatedAt.toDate() : new Date();
 
-          return {
-            id: d.id,
-            customerId: raw.customerId || d.id,
-            name: raw.name || '',
-            email: raw.email || '',
-            phone: raw.phone || '',
-            city: raw.city || '',
-            country: raw.country || 'Guinée',
-            orders: raw.orders || 0,
-            totalSpent: raw.totalSpent || 0,
-            lastOrderAt,
-            segment: computeSegment(raw.orders || 0, lastOrderAt),
-            rating: raw.rating || 0,
-            notes: raw.notes || '',
-            tags: raw.tags || [],
-            createdAt,
-            updatedAt,
-          };
-        });
-        setCustomers(data);
-        setLoading(false);
-        setError(null);
-      },
-      (err) => {
-        console.error('Error listening to seller customers:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    );
+            return {
+              id: d.id,
+              customerId: raw.customerId || d.id,
+              name: raw.name || '',
+              email: raw.email || '',
+              phone: raw.phone || '',
+              city: raw.city || '',
+              country: raw.country || 'Guinée',
+              orders: raw.orders || 0,
+              totalSpent: raw.totalSpent || 0,
+              lastOrderAt,
+              segment: computeSegment(raw.orders || 0, lastOrderAt),
+              rating: raw.rating || 0,
+              notes: raw.notes || '',
+              tags: raw.tags || [],
+              createdAt,
+              updatedAt,
+            };
+          });
+          setCustomers(data);
+          setLoading(false);
+          setError(null);
+        },
+        (err) => {
+          console.error('Error listening to seller customers:', err);
+          setError(err.message);
+          setLoading(false);
+        }
+      );
+    } catch (e) {
+      console.error('SellerCustomers: Failed to attach listener:', e);
+      setLoading(false);
+    }
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe?.(); } catch (e) { /* ignore */ } };
   }, [sellerId]);
 
   // Computed stats

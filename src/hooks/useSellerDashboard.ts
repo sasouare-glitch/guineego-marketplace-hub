@@ -3,9 +3,10 @@
  */
 import { useState, useEffect, useMemo } from 'react';
 import {
-  collection, query, where, orderBy, onSnapshot, limit,
+  collection, query, where, orderBy, limit,
   Timestamp, getDocs
 } from 'firebase/firestore';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -63,9 +64,9 @@ export function useSellerDashboard() {
       limit(10)
     );
 
-    const unsub = onSnapshot(q,
-      (snap) => {
-        const docs = snap.docs.map(d => {
+    const unsub = safeOnSnapshot(q,
+      (snap: any) => {
+        const docs = snap.docs.map((d: any) => {
           const data = d.data();
           const itemsArr = data.items || data.orderItems || [];
           const itemCount = itemsArr.reduce((sum: number, it: any) => sum + (it.quantity || 1), 0);
@@ -81,10 +82,11 @@ export function useSellerDashboard() {
         setOrders(docs);
         setLoading(false);
       },
-      (err) => { console.error('Dashboard orders error:', err); setLoading(false); }
+      (err) => { console.error('Dashboard orders error:', err); setLoading(false); },
+      'sellerDashboardOrders'
     );
 
-    return () => { try { unsub(); } catch {} };
+    return () => unsub();
   }, [sellerScopeId]);
 
   // Listen to seller's products for low stock
@@ -98,10 +100,10 @@ export function useSellerDashboard() {
       limit(10)
     );
 
-    const unsub = onSnapshot(q,
-      (snap) => {
+    const unsub = safeOnSnapshot(q,
+      (snap: any) => {
         const low = snap.docs
-          .map(d => {
+          .map((d: any) => {
             const data = d.data();
             return {
               id: d.id,
@@ -110,13 +112,14 @@ export function useSellerDashboard() {
               minStock: data.minStock ?? 5,
             };
           })
-          .filter(p => p.stock < p.minStock);
+          .filter((p: any) => p.stock < p.minStock);
         setLowStockProducts(low);
       },
-      (err) => console.error('Low stock error:', err)
+      (err) => console.error('Low stock error:', err),
+      'sellerDashboardLowStock'
     );
 
-    return () => { try { unsub(); } catch {} };
+    return () => unsub();
   }, [sellerScopeId]);
 
   // Listen to seller visits (last 30 days)
@@ -134,22 +137,22 @@ export function useSellerDashboard() {
       where('sellerId', '==', sellerScopeId),
     );
 
-    const unsub = onSnapshot(q,
-      (snap) => {
+    const unsub = safeOnSnapshot(q,
+      (snap: any) => {
         let total = 0;
-        snap.docs.forEach(d => {
+        snap.docs.forEach((d: any) => {
           const data = d.data();
-          // Only count last 30 days
           if (data.date >= thirtyDaysAgo.toISOString().slice(0, 10)) {
             total += data.views || 0;
           }
         });
         setTotalVisitors(total);
       },
-      (err) => console.warn('Visits tracking error:', err)
+      (err) => console.warn('Visits tracking error:', err),
+      'sellerDashboardVisits'
     );
 
-    return () => { try { unsub(); } catch {} };
+    return () => unsub();
   }, [sellerScopeId]);
 
   // Compute stats from orders + real visitors

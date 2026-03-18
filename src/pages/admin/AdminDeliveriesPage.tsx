@@ -80,25 +80,29 @@ export default function AdminDeliveriesPage() {
   // Real-time deliveries listener
   useEffect(() => {
     const q = query(collection(db, 'deliveries'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snap) => {
-      const data = snap.docs.map(d => ({ ...d.data(), id: d.id } as DeliveryMission));
-      setMissions(data);
-      setLoading(false);
-
-      // Collect unique courier & customer IDs to resolve names
-      const courierIds = new Set<string>();
-      const customerIds = new Set<string>();
-      data.forEach(m => {
-        if (m.assignedCourier) courierIds.add(m.assignedCourier);
-        if (m.customerId) customerIds.add(m.customerId);
+    let unsub: (() => void) | undefined;
+    try {
+      unsub = onSnapshot(q, (snap) => {
+        const data = snap.docs.map(d => ({ ...d.data(), id: d.id } as DeliveryMission));
+        setMissions(data);
+        setLoading(false);
+        const courierIds = new Set<string>();
+        const customerIds = new Set<string>();
+        data.forEach(m => {
+          if (m.assignedCourier) courierIds.add(m.assignedCourier);
+          if (m.customerId) customerIds.add(m.customerId);
+        });
+        resolveNames([...courierIds], [...customerIds]);
+      }, (err) => {
+        console.error('Error fetching deliveries:', err);
+        toast.error('Erreur de chargement des livraisons');
+        setLoading(false);
       });
-      resolveNames([...courierIds], [...customerIds]);
-    }, (err) => {
-      console.error('Error fetching deliveries:', err);
-      toast.error('Erreur de chargement des livraisons');
+    } catch (e) {
+      console.error('AdminDeliveries: Failed to attach listener:', e);
       setLoading(false);
-    });
-    return () => unsub();
+    }
+    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
   }, []);
 
   const resolveNames = async (courierIds: string[], customerIds: string[]) => {

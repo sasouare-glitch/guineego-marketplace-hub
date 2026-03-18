@@ -91,25 +91,31 @@ export function useSellerProducts() {
       orderBy('createdAt', 'desc')
     );
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const docs = snapshot.docs.map((d) => ({
-          id: d.id,
-          ...d.data()
-        })) as SellerProduct[];
-        setProducts(docs);
-        setLoading(false);
-        setError(null);
-      },
-      (err) => {
-        console.error('Error loading seller products:', err);
-        setError(err);
-        setLoading(false);
-      }
-    );
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const docs = snapshot.docs.map((d) => ({
+            id: d.id,
+            ...d.data()
+          })) as SellerProduct[];
+          setProducts(docs);
+          setLoading(false);
+          setError(null);
+        },
+        (err) => {
+          console.error('Error loading seller products:', err);
+          setError(err);
+          setLoading(false);
+        }
+      );
+    } catch (e) {
+      console.error('useSellerProducts: Failed to attach listener:', e);
+      setLoading(false);
+    }
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe?.(); } catch (e) { /* ignore */ } };
   }, [sellerScopeId]);
 
   // Add a new product

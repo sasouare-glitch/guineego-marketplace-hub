@@ -207,29 +207,11 @@ export default function SellerOrders() {
       orderBy("createdAt", "desc")
     );
 
-    const unsub = onSnapshot(
-      q,
-      (snap) => {
-        const docs = snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            ...data,
-            totalAmount: data.totalAmount || data.pricing?.total || 0,
-          };
-        }) as FirestoreOrder[];
-        setOrders(docs);
-        setLoading(false);
-      },
-      (err) => {
-        console.error("Error fetching seller orders:", err);
-        // Fallback: try with sellerId field
-        const q2 = query(
-          collection(db, "orders"),
-          where("sellerId", "==", sellerId),
-          orderBy("createdAt", "desc")
-        );
-        onSnapshot(q2, (snap) => {
+    let unsub: (() => void) | undefined;
+    try {
+      unsub = onSnapshot(
+        q,
+        (snap) => {
           const docs = snap.docs.map((d) => {
             const data = d.data();
             return {
@@ -240,11 +222,43 @@ export default function SellerOrders() {
           }) as FirestoreOrder[];
           setOrders(docs);
           setLoading(false);
-        });
-      }
-    );
+        },
+        (err) => {
+          console.error("Error fetching seller orders:", err);
+          // Fallback: try with sellerId field
+          const q2 = query(
+            collection(db, "orders"),
+            where("sellerId", "==", sellerId),
+            orderBy("createdAt", "desc")
+          );
+          try {
+            onSnapshot(q2, (snap) => {
+              const docs = snap.docs.map((d) => {
+                const data = d.data();
+                return {
+                  id: d.id,
+                  ...data,
+                  totalAmount: data.totalAmount || data.pricing?.total || 0,
+                };
+              }) as FirestoreOrder[];
+              setOrders(docs);
+              setLoading(false);
+            }, (fallbackErr) => {
+              console.error("Fallback seller orders error:", fallbackErr);
+              setLoading(false);
+            });
+          } catch (e) {
+            console.error("Failed to attach fallback seller orders listener:", e);
+            setLoading(false);
+          }
+        }
+      );
+    } catch (e) {
+      console.error("SellerOrders: Failed to attach listener:", e);
+      setLoading(false);
+    }
 
-    return () => unsub();
+    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
   }, [user, claims]);
 
   // Update order status directly in Firestore
