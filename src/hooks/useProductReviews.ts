@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface Review {
