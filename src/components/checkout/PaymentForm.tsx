@@ -74,10 +74,12 @@ export const PaymentForm = ({
   phoneNumber, 
   onPhoneChange,
   walletBalance = 0,
-  walletLoading = false
+  walletLoading = false,
+  excludeMethods = []
 }: PaymentFormProps) => {
   const { t } = useTranslation();
-  const selectedPayment = paymentMethods.find(m => m.id === selectedMethod);
+  const filteredMethods = paymentMethods.filter(m => !excludeMethods.includes(m.id));
+  const selectedPayment = filteredMethods.find(m => m.id === selectedMethod);
 
   const getDescription = (method: PaymentMethod) => {
     if (method.id === "orange_money") return "Orange Money";
