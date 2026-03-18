@@ -30,11 +30,11 @@ export function useSubscriptionHistory() {
       orderBy('createdAt', 'desc')
     );
 
-    const unsub = onSnapshot(
+    const unsub = safeOnSnapshot(
       q,
-      (snap) => {
+      (snap: any) => {
         setPayments(
-          snap.docs.map((doc) => {
+          snap.docs.map((doc: any) => {
             const d = doc.data();
             return {
               id: doc.id,
@@ -49,7 +49,8 @@ export function useSubscriptionHistory() {
         );
         setLoading(false);
       },
-      () => setLoading(false)
+      () => setLoading(false),
+      'subscriptionHistory'
     );
 
     return () => unsub();
