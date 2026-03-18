@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, ShoppingBag, LogIn, FlaskConical } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShoppingBag, FlaskConical } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 import { AddressForm } from "@/components/checkout/AddressForm";
+import { GuestAddressForm, GuestAddress } from "@/components/checkout/GuestAddressForm";
 import { PaymentForm } from "@/components/checkout/PaymentForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
@@ -31,6 +32,8 @@ export default function CheckoutPage() {
   const { wallet, loading: walletLoading } = useWallet();
   const { isSandboxMode, toggleSandbox, sandboxStatus, sandboxProgress, simulatePayment, resetSandbox } = usePaymentSandbox();
 
+  const isGuest = !user;
+
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
@@ -38,8 +41,18 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
 
-  // Auto-select default address when loaded
-  if (!selectedAddress && defaultAddress && !addressesLoading) {
+  // Guest address state
+  const [guestAddress, setGuestAddress] = useState<GuestAddress>({
+    fullName: "",
+    phone: "",
+    address: "",
+    commune: "",
+    city: "Conakry",
+    instructions: "",
+  });
+
+  // Auto-select default address when loaded (authenticated only)
+  if (!isGuest && !selectedAddress && defaultAddress && !addressesLoading) {
     setSelectedAddress(defaultAddress.id);
   }
 
@@ -49,8 +62,20 @@ export default function CheckoutPage() {
     { id: 3, name: t.checkout.step3, description: t.checkout.orderConfirmed },
   ];
 
+  const isGuestAddressValid = () => {
+    return (
+      guestAddress.fullName.trim().length >= 2 &&
+      guestAddress.phone.trim().length >= 9 &&
+      guestAddress.address.trim().length >= 3 &&
+      guestAddress.commune.length > 0
+    );
+  };
+
   const canProceed = () => {
-    if (currentStep === 1) return selectedAddress !== null;
+    if (currentStep === 1) {
+      if (isGuest) return isGuestAddressValid();
+      return selectedAddress !== null;
+    }
     if (currentStep === 2) {
       if (!selectedPayment) return false;
       if (selectedPayment === "orange_money" || selectedPayment === "mtn_money") {
@@ -58,6 +83,7 @@ export default function CheckoutPage() {
       }
       if (selectedPayment === "cash") return true;
       if (selectedPayment === "wallet") {
+        if (isGuest) return false; // Wallet not available for guests
         return (wallet?.balance || 0) >= subtotal;
       }
       return true;
@@ -65,18 +91,41 @@ export default function CheckoutPage() {
     return true;
   };
 
+  const getShippingAddress = () => {
+    if (isGuest) {
+      return {
+        fullName: guestAddress.fullName.trim(),
+        phone: guestAddress.phone.trim(),
+        commune: guestAddress.commune,
+        quartier: guestAddress.address,
+        address: `${guestAddress.address}, ${guestAddress.commune}, ${guestAddress.city}`,
+        instructions: guestAddress.instructions || '',
+      };
+    }
+    const address = addresses.find(a => a.id === selectedAddress);
+    if (!address) return null;
+    return {
+      fullName: address.fullName,
+      phone: address.phone,
+      commune: address.commune,
+      quartier: address.address,
+      address: `${address.address}, ${address.commune}, ${address.city}`,
+      instructions: address.instructions || '',
+    };
+  };
+
   const handleNext = async () => {
     if (currentStep === 2) {
       setIsProcessing(true);
       try {
-        const address = addresses.find(a => a.id === selectedAddress);
-        if (!address) {
-          toast.error("Veuillez sélectionner une adresse");
+        const shippingAddress = getShippingAddress();
+        if (!shippingAddress) {
+          toast.error("Veuillez renseigner une adresse de livraison");
           setIsProcessing(false);
           return;
         }
 
-        // SANDBOX MODE: simulate mobile money payment
+        // SANDBOX MODE
         const isMobileMoney = selectedPayment === "orange_money" || selectedPayment === "mtn_money";
         if (isSandboxMode && isMobileMoney) {
           const sandboxResult = await simulatePayment({
@@ -90,7 +139,6 @@ export default function CheckoutPage() {
             setOrderNumber(sandboxResult.orderId);
             clearCart();
             toast.success("🧪 [SANDBOX] Paiement simulé avec succès !");
-            // Small delay so user sees the success state
             await new Promise(r => setTimeout(r, 1500));
             setCurrentStep(3);
             resetSandbox();
@@ -100,7 +148,8 @@ export default function CheckoutPage() {
         }
 
         const result = await createOrderDirect({
-          uid: user!.uid,
+          uid: user?.uid,
+          isGuest,
           items: items.map(item => ({
             productId: item.productId,
             variantSku: item.variant || 'default',
@@ -110,14 +159,7 @@ export default function CheckoutPage() {
             sellerId: item.sellerId || item.seller || 'unknown',
             thumbnail: item.image,
           })),
-          shippingAddress: {
-            fullName: address.fullName,
-            phone: address.phone,
-            commune: address.commune,
-            quartier: address.address,
-            address: `${address.address}, ${address.commune}, ${address.city}`,
-            instructions: address.instructions || '',
-          },
+          shippingAddress,
           paymentMethod: selectedPayment as string,
         });
 
@@ -170,32 +212,6 @@ export default function CheckoutPage() {
     }
   };
 
-  // Not authenticated
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container-tight pt-24 pb-16">
-          <div className="text-center py-16">
-            <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
-              <LogIn className="w-10 h-10 text-muted-foreground" />
-            </div>
-            <h1 className="text-2xl font-display font-bold text-foreground mb-2">
-              Connexion requise
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              Connectez-vous pour passer votre commande
-            </p>
-            <Button asChild>
-              <Link to="/auth/login">Se connecter</Link>
-            </Button>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
   // Empty cart state
   if (items.length === 0 && currentStep !== 3) {
     return (
@@ -221,6 +237,9 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
+  // Filter payment methods for guests (no wallet)
+  const guestExcludedPayments = isGuest ? ['wallet'] : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -256,13 +275,20 @@ export default function CheckoutPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                 >
-                  <AddressForm 
-                    selectedAddress={selectedAddress}
-                    onSelectAddress={setSelectedAddress}
-                    addresses={addresses}
-                    loading={addressesLoading}
-                    onAddAddress={addAddress}
-                  />
+                  {isGuest ? (
+                    <GuestAddressForm
+                      address={guestAddress}
+                      onChange={setGuestAddress}
+                    />
+                  ) : (
+                    <AddressForm 
+                      selectedAddress={selectedAddress}
+                      onSelectAddress={setSelectedAddress}
+                      addresses={addresses}
+                      loading={addressesLoading}
+                      onAddAddress={addAddress}
+                    />
+                  )}
                 </motion.div>
               )}
 
@@ -298,6 +324,7 @@ export default function CheckoutPage() {
                     onPhoneChange={setPhoneNumber}
                     walletBalance={wallet?.balance || 0}
                     walletLoading={walletLoading}
+                    excludeMethods={guestExcludedPayments}
                   />
 
                   {/* Sandbox Simulator */}
@@ -322,6 +349,7 @@ export default function CheckoutPage() {
                   <OrderConfirmation 
                     orderNumber={orderNumber}
                     estimatedDelivery={t.time.today + ", 14h - 18h"}
+                    isGuest={isGuest}
                   />
                 </motion.div>
               )}
