@@ -4,8 +4,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, limit, onSnapshot, doc, getDoc, type QueryConstraint } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, doc, getDoc, type QueryConstraint } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 
 export interface MarketplaceProduct {
   id: string;
