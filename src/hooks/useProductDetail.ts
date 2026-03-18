@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { doc, onSnapshot, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 
 const storeCache = new Map<string, { name: string; rating: number; productCount: number }>();
 
