@@ -137,22 +137,22 @@ export function useSellerDashboard() {
       where('sellerId', '==', sellerScopeId),
     );
 
-    const unsub = onSnapshot(q,
-      (snap) => {
+    const unsub = safeOnSnapshot(q,
+      (snap: any) => {
         let total = 0;
-        snap.docs.forEach(d => {
+        snap.docs.forEach((d: any) => {
           const data = d.data();
-          // Only count last 30 days
           if (data.date >= thirtyDaysAgo.toISOString().slice(0, 10)) {
             total += data.views || 0;
           }
         });
         setTotalVisitors(total);
       },
-      (err) => console.warn('Visits tracking error:', err)
+      (err) => console.warn('Visits tracking error:', err),
+      'sellerDashboardVisits'
     );
 
-    return () => { try { unsub(); } catch {} };
+    return () => unsub();
   }, [sellerScopeId]);
 
   // Compute stats from orders + real visitors
