@@ -4,19 +4,19 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { 
-  collection, 
-  doc, 
-  onSnapshot, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  query,
+  where,
+  orderBy,
   limit,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/firebase/auth';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 
 // ============================================
 // EVENT TRACKING
@@ -76,9 +76,9 @@ export function useTrackEvent() {
   const trackPurchase = useCallback((orderId: string, total: number, items: any[]) => {
     trackEvent({
       event: 'purchase',
-      properties: { 
-        orderId, 
-        value: total, 
+      properties: {
+        orderId,
+        value: total,
         itemCount: items.length,
         items: items.map(i => ({ id: i.productId, name: i.name, price: i.price, quantity: i.quantity }))
       }
@@ -138,28 +138,31 @@ export function useRealtimeCounters() {
     const today = new Date().toISOString().split('T')[0];
     const docRef = doc(db, 'realtime_counters', today);
 
-    const unsubscribe = onSnapshot(docRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setCounters(snapshot.data() as RealtimeCounters);
-      } else {
-        setCounters({
-          purchases: 0,
-          revenue: 0,
-          addToCart: 0,
-          checkouts: 0,
-          signups: { total: 0 },
-          hourly: {}
-        });
-      }
-      setLoading(false);
-    }, (error) => {
-      console.error('Error listening to realtime counters:', error);
-      setLoading(false);
-    });
+    const unsubscribe = safeOnSnapshot(
+      docRef,
+      (snapshot: any) => {
+        if (snapshot.exists()) {
+          setCounters(snapshot.data() as RealtimeCounters);
+        } else {
+          setCounters({
+            purchases: 0,
+            revenue: 0,
+            addToCart: 0,
+            checkouts: 0,
+            signups: { total: 0 },
+            hourly: {}
+          });
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error listening to realtime counters:', error);
+        setLoading(false);
+      },
+      'useRealtimeCounters'
+    );
 
-    return () => {
-      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing realtime counters:', e); }
-    };
+    return unsubscribe;
   }, []);
 
   return { counters, loading };
@@ -201,18 +204,21 @@ export function useDailyReports(days: number = 30) {
       orderBy('date', 'desc')
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => doc.data() as DailyReport);
-      setReports(data);
-      setLoading(false);
-    }, (error) => {
-      console.error('Error listening to daily reports:', error);
-      setLoading(false);
-    });
+    const unsubscribe = safeOnSnapshot(
+      q,
+      (snapshot: any) => {
+        const data = snapshot.docs.map((docSnap: any) => docSnap.data() as DailyReport);
+        setReports(data);
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error listening to daily reports:', error);
+        setLoading(false);
+      },
+      'useDailyReports'
+    );
 
-    return () => {
-      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing daily reports:', e); }
-    };
+    return unsubscribe;
   }, [days]);
 
   return { reports, loading };
@@ -246,19 +252,22 @@ export function useRollingMetrics() {
   useEffect(() => {
     const docRef = doc(db, 'rolling_metrics', 'current');
 
-    const unsubscribe = onSnapshot(docRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setMetrics(snapshot.data() as RollingMetrics);
-      }
-      setLoading(false);
-    }, (error) => {
-      console.error('Error listening to rolling metrics:', error);
-      setLoading(false);
-    });
+    const unsubscribe = safeOnSnapshot(
+      docRef,
+      (snapshot: any) => {
+        if (snapshot.exists()) {
+          setMetrics(snapshot.data() as RollingMetrics);
+        }
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Error listening to rolling metrics:', error);
+        setLoading(false);
+      },
+      'useRollingMetrics'
+    );
 
-    return () => {
-      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing rolling metrics:', e); }
-    };
+    return unsubscribe;
   }, []);
 
   return { metrics, loading };
@@ -288,10 +297,10 @@ export function useEcomPerformance(ecomId: string, startDate?: Date, endDate?: D
     queryKey: ['ecomPerformance', ecomId, startDate?.toISOString(), endDate?.toISOString()],
     queryFn: async () => {
       const calculateEcomPerformance = httpsCallable<any, EcomPerformance>(
-        functions, 
+        functions,
         'calculateEcomPerformance'
       );
-      
+
       const result = await calculateEcomPerformance({
         ecomId,
         startDate: startDate?.toISOString(),
@@ -328,10 +337,10 @@ export function useCourierPerformance(courierId: string, startDate?: Date, endDa
     queryKey: ['courierPerformance', courierId, startDate?.toISOString(), endDate?.toISOString()],
     queryFn: async () => {
       const calculateCourierPerformance = httpsCallable<any, CourierPerformance>(
-        functions, 
+        functions,
         'calculateCourierPerformance'
       );
-      
+
       const result = await calculateCourierPerformance({
         courierId,
         startDate: startDate?.toISOString(),
@@ -368,10 +377,10 @@ export function useCloserPerformance(closerId: string, startDate?: Date, endDate
     queryKey: ['closerPerformance', closerId, startDate?.toISOString(), endDate?.toISOString()],
     queryFn: async () => {
       const calculateCloserPerformance = httpsCallable<any, CloserPerformance>(
-        functions, 
+        functions,
         'calculateCloserPerformance'
       );
-      
+
       const result = await calculateCloserPerformance({
         closerId,
         startDate: startDate?.toISOString(),
