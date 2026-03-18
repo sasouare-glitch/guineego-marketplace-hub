@@ -32,6 +32,7 @@ import { useCart } from "@/hooks/useCart";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useProductDetail } from "@/hooks/useProductDetail";
 import { useVisitorTracking } from "@/hooks/useVisitorTracking";
+import { ProductChatAgent } from "@/components/product/ProductChatAgent";
 import { toast } from "sonner";
 
 const ProductDetail = () => {
@@ -434,6 +435,14 @@ const ProductDetail = () => {
       </main>
 
       <Footer />
+
+      {/* AI Chat Agent */}
+      <ProductChatAgent
+        productName={product.name}
+        productPrice={product.price}
+        productImage={product.images[0]}
+        sellerName={product.seller.name}
+      />
     </div>
   );
 };
