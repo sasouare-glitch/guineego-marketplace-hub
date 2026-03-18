@@ -92,7 +92,7 @@ export function useAdminPayments() {
       merge();
     });
 
-    const unsubOrder = onSnapshot(orderPayQuery, (snap) => {
+    const unsubOrder = safeOnSnapshot(orderPayQuery, (snap: any) => {
       orderPayments = snap.docs.map(doc => {
         const d = doc.data();
         const ts = d.createdAt instanceof Timestamp ? d.createdAt.toDate() : new Date();
