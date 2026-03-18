@@ -4,8 +4,9 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface UserAddress {
