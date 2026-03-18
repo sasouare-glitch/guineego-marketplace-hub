@@ -42,6 +42,7 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderTrackingPage from "./pages/OrderTrackingPage";
 import PublicOrderTrackingPage from "./pages/PublicOrderTrackingPage";
+import TrackOrderPage from "./pages/TrackOrderPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import WishlistPage from "./pages/WishlistPage";
 import Academy from "./pages/Academy";
