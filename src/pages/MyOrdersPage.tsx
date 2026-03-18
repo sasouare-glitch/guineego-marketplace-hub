@@ -16,8 +16,8 @@ import {
   query,
   where,
   orderBy,
-  onSnapshot,
 } from "firebase/firestore";
+import { safeOnSnapshot } from "@/lib/firebase/safeSnapshot";
 
 const ACTIVE_STATUSES: OrderStatus[] = [
   "pending",
