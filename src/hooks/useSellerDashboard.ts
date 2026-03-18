@@ -64,9 +64,9 @@ export function useSellerDashboard() {
       limit(10)
     );
 
-    const unsub = onSnapshot(q,
-      (snap) => {
-        const docs = snap.docs.map(d => {
+    const unsub = safeOnSnapshot(q,
+      (snap: any) => {
+        const docs = snap.docs.map((d: any) => {
           const data = d.data();
           const itemsArr = data.items || data.orderItems || [];
           const itemCount = itemsArr.reduce((sum: number, it: any) => sum + (it.quantity || 1), 0);
@@ -82,10 +82,11 @@ export function useSellerDashboard() {
         setOrders(docs);
         setLoading(false);
       },
-      (err) => { console.error('Dashboard orders error:', err); setLoading(false); }
+      (err) => { console.error('Dashboard orders error:', err); setLoading(false); },
+      'sellerDashboardOrders'
     );
 
-    return () => { try { unsub(); } catch {} };
+    return () => unsub();
   }, [sellerScopeId]);
 
   // Listen to seller's products for low stock
