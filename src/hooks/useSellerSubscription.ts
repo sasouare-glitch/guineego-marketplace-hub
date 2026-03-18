@@ -53,16 +53,17 @@ export function useSellerSubscription() {
       return;
     }
 
-    const unsub = onSnapshot(
+    const unsub = safeOnSnapshot(
       doc(db, 'seller_settings', user.uid),
-      (snap) => {
+      (snap: any) => {
         const data = snap.data();
         setPlanId((data?.subscription?.planId as SellerPlanId) || 'free');
         const exp = data?.subscription?.expiresAt;
         setExpiresAt(exp?.toDate?.() || null);
         setLoading(false);
       },
-      () => setLoading(false)
+      () => setLoading(false),
+      'sellerSubscription'
     );
 
     return () => unsub();
