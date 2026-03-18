@@ -1,12 +1,14 @@
 /**
  * useMarketplaceProducts Hook
  * Fetch products from Firestore for the marketplace page sections
+ * Uses getDocs (one-time fetch) instead of onSnapshot to avoid
+ * creating watch targets that can corrupt the Firestore SDK state
+ * when composite indexes are missing.
  */
 
 import { useState, useEffect } from 'react';
-import { collection, query, where, orderBy, limit, doc, getDoc, type QueryConstraint } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, doc, getDoc, getDocs, type QueryConstraint } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 
 export interface MarketplaceProduct {
   id: string;
@@ -48,8 +50,8 @@ async function resolveStoreName(sellerId: string): Promise<string> {
   return 'Vendeur';
 }
 
-function mapFirestoreProduct(doc: any): MarketplaceProduct & { _sellerId?: string } {
-  const d = doc.data();
+function mapFirestoreProduct(docSnap: any): MarketplaceProduct & { _sellerId?: string } {
+  const d = docSnap.data();
   const discount = d.originalPrice && d.originalPrice > d.price
     ? Math.round(((d.originalPrice - d.price) / d.originalPrice) * 100)
     : d.discount || undefined;
@@ -59,7 +61,7 @@ function mapFirestoreProduct(doc: any): MarketplaceProduct & { _sellerId?: strin
   const isSponsored = d.isSponsored === true && sponsoredUntil && sponsoredUntil > now;
 
   return {
-    id: doc.id,
+    id: docSnap.id,
     name: d.name || '',
     price: d.price || d.basePrice || 0,
     originalPrice: d.originalPrice || undefined,
@@ -77,27 +79,65 @@ function mapFirestoreProduct(doc: any): MarketplaceProduct & { _sellerId?: strin
   };
 }
 
-function useFirestoreSection(constraints: QueryConstraint[]) {
+/**
+ * Fetch products once (no realtime listener) with fallback on query failure.
+ * If the primary query fails (e.g. missing composite index), falls back to
+ * a simpler query that only requires single-field indexes.
+ */
+function useFirestoreSection(
+  constraints: QueryConstraint[],
+  fallbackConstraints?: QueryConstraint[]
+) {
   const [products, setProducts] = useState<MarketplaceProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, 'products'), ...constraints);
-    const unsub = safeOnSnapshot(q, async (snap: any) => {
-      const raw = snap.docs.map(mapFirestoreProduct);
-      const enriched = await Promise.all(
-        raw.map(async (p: any) => {
-          const storeName = p.seller !== 'Vendeur' ? p.seller : await resolveStoreName(p._sellerId || '');
-          return { ...p, seller: storeName, sellerId: p._sellerId || '' };
-        })
-      );
-      setProducts(enriched.map(({ _sellerId, ...rest }: any) => rest));
-      setLoading(false);
-    }, (err) => {
-      console.error('Marketplace query error:', err);
-      setLoading(false);
-    }, 'marketplaceProducts');
-    return () => unsub();
+    let cancelled = false;
+
+    async function fetchProducts() {
+      try {
+        const q = query(collection(db, 'products'), ...constraints);
+        const snap = await getDocs(q);
+        if (cancelled) return;
+
+        const raw = snap.docs.map(mapFirestoreProduct);
+        const enriched = await Promise.all(
+          raw.map(async (p: any) => {
+            const storeName = p.seller !== 'Vendeur' ? p.seller : await resolveStoreName(p._sellerId || '');
+            return { ...p, seller: storeName, sellerId: p._sellerId || '' };
+          })
+        );
+        if (cancelled) return;
+        setProducts(enriched.map(({ _sellerId, ...rest }: any) => rest));
+      } catch (err: any) {
+        console.warn('Marketplace query failed, trying fallback:', err.message);
+        // Try fallback query if provided
+        if (fallbackConstraints) {
+          try {
+            const q = query(collection(db, 'products'), ...fallbackConstraints);
+            const snap = await getDocs(q);
+            if (cancelled) return;
+
+            const raw = snap.docs.map(mapFirestoreProduct);
+            const enriched = await Promise.all(
+              raw.map(async (p: any) => {
+                const storeName = p.seller !== 'Vendeur' ? p.seller : await resolveStoreName(p._sellerId || '');
+                return { ...p, seller: storeName, sellerId: p._sellerId || '' };
+              })
+            );
+            if (cancelled) return;
+            setProducts(enriched.map(({ _sellerId, ...rest }: any) => rest));
+          } catch (fallbackErr) {
+            console.error('Marketplace fallback query also failed:', fallbackErr);
+          }
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchProducts();
+    return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(constraints.map(c => c.toString()))]);
 
@@ -130,26 +170,44 @@ export function useNewArrivals(count = 4) {
 
 /**
  * Best sellers: products flagged as best-seller, sorted by total sales
+ * Fallback: just active products sorted by totalSales (single composite)
  */
 export function useBestSellers(count = 4) {
-  return useFirestoreSection([
-    where('status', '==', 'active'),
-    where('isBestSeller', '==', true),
-    orderBy('totalSales', 'desc'),
-    limit(count),
-  ]);
+  return useFirestoreSection(
+    [
+      where('status', '==', 'active'),
+      where('isBestSeller', '==', true),
+      orderBy('totalSales', 'desc'),
+      limit(count),
+    ],
+    // Fallback: simpler query without isBestSeller filter
+    [
+      where('status', '==', 'active'),
+      orderBy('totalSales', 'desc'),
+      limit(count),
+    ]
+  );
 }
 
 /**
  * Sponsored products: active sponsorships, sorted by sponsoredAt desc
+ * Fallback: just active products sorted by createdAt
  */
 export function useSponsoredProducts(count = 8) {
-  return useFirestoreSection([
-    where('status', '==', 'active'),
-    where('isSponsored', '==', true),
-    orderBy('sponsoredAt', 'desc'),
-    limit(count),
-  ]);
+  return useFirestoreSection(
+    [
+      where('status', '==', 'active'),
+      where('isSponsored', '==', true),
+      orderBy('sponsoredAt', 'desc'),
+      limit(count),
+    ],
+    // Fallback: active products sorted by createdAt
+    [
+      where('status', '==', 'active'),
+      orderBy('createdAt', 'desc'),
+      limit(count),
+    ]
+  );
 }
 
 /**

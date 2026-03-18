@@ -5,8 +5,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, onSnapshot, collectionGroup, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, limit, collectionGroup, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 
 export interface PaymentRecord {
   id: string;
@@ -63,7 +64,7 @@ export function useAdminPayments() {
       }
     };
 
-    const unsubSub = onSnapshot(subQuery, (snap) => {
+    const unsubSub = safeOnSnapshot(subQuery, (snap: any) => {
       subPayments = snap.docs.map(doc => {
         const d = doc.data();
         const parentPath = doc.ref.parent.parent?.id || '';
@@ -91,7 +92,7 @@ export function useAdminPayments() {
       merge();
     });
 
-    const unsubOrder = onSnapshot(orderPayQuery, (snap) => {
+    const unsubOrder = safeOnSnapshot(orderPayQuery, (snap: any) => {
       orderPayments = snap.docs.map(doc => {
         const d = doc.data();
         const ts = d.createdAt instanceof Timestamp ? d.createdAt.toDate() : new Date();

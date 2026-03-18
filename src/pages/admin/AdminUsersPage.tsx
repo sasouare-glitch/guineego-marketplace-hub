@@ -42,7 +42,8 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Search, MoreHorizontal, UserPlus, Filter, Loader2, RefreshCw, ShieldCheck, Truck, Store, TrendingUp, Users } from 'lucide-react';
-import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -96,8 +97,8 @@ export default function AdminUsersPage() {
       limit(200)
     );
 
-    const unsubscribe = onSnapshot(usersQuery, (snapshot) => {
-      const usersData = snapshot.docs.map(d => ({
+    const unsubscribe = safeOnSnapshot(usersQuery, (snapshot: any) => {
+      const usersData = snapshot.docs.map((d: any) => ({
         id: d.id,
         ...d.data()
       })) as FirestoreUser[];
@@ -107,7 +108,7 @@ export default function AdminUsersPage() {
       console.error('Error listening to users:', error);
       toast.error('Erreur lors du chargement des utilisateurs');
       setLoading(false);
-    });
+    }, 'adminUsers');
 
     return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
   }, []);
