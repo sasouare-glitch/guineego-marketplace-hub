@@ -11,7 +11,7 @@ interface OrderConfirmationProps {
   isGuest?: boolean;
 }
 
-export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfirmationProps) => {
+export const OrderConfirmation = ({ orderNumber, estimatedDelivery, isGuest = false }: OrderConfirmationProps) => {
   const { t } = useTranslation();
 
   useEffect(() => {
