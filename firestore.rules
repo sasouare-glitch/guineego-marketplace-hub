@@ -534,6 +534,14 @@ service cloud.firestore {
     }
     
     // ============================================
+    // DAILY REPORTS (analytics, Cloud Functions only)
+    // ============================================
+    match /daily_reports/{docId} {
+      allow read: if isAdmin();
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
     // SELLER VISITS (visitor tracking counters)
     // ============================================
     match /seller_visits/{docId} {
