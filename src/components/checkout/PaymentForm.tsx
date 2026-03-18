@@ -116,7 +116,7 @@ export const PaymentForm = ({
       {/* Payment Methods */}
       <RadioGroup value={selectedMethod || ""} onValueChange={onSelectMethod}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {paymentMethods.map((method, index) => (
+          {filteredMethods.map((method, index) => (
             <motion.div
               key={method.id}
               initial={{ opacity: 0, y: 10 }}

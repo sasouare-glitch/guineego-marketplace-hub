@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { CheckCircle, Package, Truck, Clock, ArrowRight } from "lucide-react";
+import { CheckCircle, Package, Truck, Clock, ArrowRight, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
@@ -8,6 +8,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 interface OrderConfirmationProps {
   orderNumber: string;
   estimatedDelivery: string;
+  isGuest?: boolean;
 }
 
 export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfirmationProps) => {
