@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -55,6 +55,9 @@ export default function RegisterPage() {
   const { t } = useTranslation();
   const { signUp, signInWithGoogle, loading, user, claims } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const prefillName = searchParams.get('name') || '';
+  const prefillPhone = searchParams.get('phone') || '';
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -78,7 +81,10 @@ export default function RegisterPage() {
   const { register, handleSubmit, watch, formState: { errors, isSubmitting }, setValue } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      acceptTerms: false
+      acceptTerms: false,
+      role: prefillName ? 'customer' as const : undefined,
+      displayName: prefillName,
+      phone: prefillPhone,
     }
   });
 
