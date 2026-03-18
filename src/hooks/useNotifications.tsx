@@ -57,31 +57,36 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       orderBy("createdAt", "desc")
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const notifs: NotificationData[] = snapshot.docs.map((docSnap) => {
-        const data = docSnap.data();
-        const createdAt = data.createdAt instanceof Timestamp
-          ? data.createdAt.toDate().toISOString()
-          : data.createdAt || new Date().toISOString();
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onSnapshot(q, (snapshot) => {
+        const notifs: NotificationData[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data();
+          const createdAt = data.createdAt instanceof Timestamp
+            ? data.createdAt.toDate().toISOString()
+            : data.createdAt || new Date().toISOString();
 
-        return {
-          id: docSnap.id,
-          type: data.type || "system",
-          title: data.title || data.body || "",
-          message: data.message || data.body || "",
-          orderId: data.data?.orderId || data.orderId,
-          data: data.data || undefined,
-          read: data.read ?? false,
-          createdAt,
-        };
+          return {
+            id: docSnap.id,
+            type: data.type || "system",
+            title: data.title || data.body || "",
+            message: data.message || data.body || "",
+            orderId: data.data?.orderId || data.orderId,
+            data: data.data || undefined,
+            read: data.read ?? false,
+            createdAt,
+          };
+        });
+        setNotifications(notifs);
+      }, (error) => {
+        console.error("Error listening to notifications:", error);
       });
-      setNotifications(notifs);
-    }, (error) => {
-      console.error("Error listening to notifications:", error);
-    });
+    } catch (e) {
+      console.error('useNotifications: Failed to attach listener:', e);
+    }
 
     return () => {
-      try { unsubscribe(); } catch (e) { console.warn('Error unsubscribing notifications:', e); }
+      try { unsubscribe?.(); } catch (e) { /* ignore */ }
     };
   }, [user?.uid]);
 
