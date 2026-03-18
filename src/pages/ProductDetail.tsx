@@ -435,6 +435,14 @@ const ProductDetail = () => {
       </main>
 
       <Footer />
+
+      {/* AI Chat Agent */}
+      <ProductChatAgent
+        productName={product.name}
+        productPrice={product.price}
+        productImage={product.images[0]}
+        sellerName={product.seller.name}
+      />
     </div>
   );
 };
