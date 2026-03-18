@@ -28,10 +28,11 @@ interface ShippingAddress {
 }
 
 interface CreateOrderParams {
-  uid: string;
+  uid?: string;
   items: OrderItem[];
   shippingAddress: ShippingAddress;
   paymentMethod: string;
+  isGuest?: boolean;
 }
 
 const SHIPPING_FEES: Record<string, number> = {
