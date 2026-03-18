@@ -100,10 +100,10 @@ export function useSellerDashboard() {
       limit(10)
     );
 
-    const unsub = onSnapshot(q,
-      (snap) => {
+    const unsub = safeOnSnapshot(q,
+      (snap: any) => {
         const low = snap.docs
-          .map(d => {
+          .map((d: any) => {
             const data = d.data();
             return {
               id: d.id,
@@ -112,13 +112,14 @@ export function useSellerDashboard() {
               minStock: data.minStock ?? 5,
             };
           })
-          .filter(p => p.stock < p.minStock);
+          .filter((p: any) => p.stock < p.minStock);
         setLowStockProducts(low);
       },
-      (err) => console.error('Low stock error:', err)
+      (err) => console.error('Low stock error:', err),
+      'sellerDashboardLowStock'
     );
 
-    return () => { try { unsub(); } catch {} };
+    return () => unsub();
   }, [sellerScopeId]);
 
   // Listen to seller visits (last 30 days)
