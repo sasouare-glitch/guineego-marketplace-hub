@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Copy, Check, RefreshCw, XCircle, Loader2, Package, ShoppingBag, ShieldAlert } from "lucide-react";
+import { Copy, Check, RefreshCw, XCircle, Loader2, Package, ShoppingBag, ShieldAlert, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
