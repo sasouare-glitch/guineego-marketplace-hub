@@ -142,6 +142,7 @@ const App = () => (
                     <Route path="/delivery" element={<DeliveryPage />} />
                     <Route path="/payment" element={<PaymentPage />} />
                     <Route path="/protection" element={<ProtectionPage />} />
+                    <Route path="/track" element={<TrackOrderPage />} />
                     <Route path="/track/:id" element={<PublicOrderTrackingPage />} />
                     
                     {/* Protected Client Routes */}
