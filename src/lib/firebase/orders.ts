@@ -84,7 +84,8 @@ export async function createOrderDirect(params: CreateOrderParams) {
 
   const order = {
     id: orderId,
-    customerId: uid,
+    customerId,
+    isGuest: !!isGuest,
     items,
     sellers: sellerGroups,
     sellerIds: Object.keys(sellerGroups),
