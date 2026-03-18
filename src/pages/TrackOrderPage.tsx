@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { validateGuineaPhone } from "@/components/checkout/GuestAddressForm";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, Package, Phone, Hash, ArrowRight, ShoppingBag } from "lucide-react";
@@ -25,8 +26,9 @@ export default function TrackOrderPage() {
       setError("Veuillez entrer le numéro de commande");
       return;
     }
-    if (!trimmedPhone || trimmedPhone.length < 8) {
-      setError("Veuillez entrer un numéro de téléphone valide");
+    const phoneCheck = validateGuineaPhone(trimmedPhone);
+    if (!phoneCheck.valid) {
+      setError(phoneCheck.error || "Numéro de téléphone invalide");
       return;
     }
 

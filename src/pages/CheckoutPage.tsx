@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { CheckoutStepper } from "@/components/checkout/CheckoutStepper";
 import { AddressForm } from "@/components/checkout/AddressForm";
-import { GuestAddressForm, GuestAddress } from "@/components/checkout/GuestAddressForm";
+import { GuestAddressForm, GuestAddress, validateGuineaPhone } from "@/components/checkout/GuestAddressForm";
 import { PaymentForm } from "@/components/checkout/PaymentForm";
 import { OrderSummary } from "@/components/checkout/OrderSummary";
 import { OrderConfirmation } from "@/components/checkout/OrderConfirmation";
@@ -65,7 +65,7 @@ export default function CheckoutPage() {
   const isGuestAddressValid = () => {
     return (
       guestAddress.fullName.trim().length >= 2 &&
-      guestAddress.phone.trim().length >= 9 &&
+      validateGuineaPhone(guestAddress.phone).valid &&
       guestAddress.address.trim().length >= 3 &&
       guestAddress.commune.length > 0
     );

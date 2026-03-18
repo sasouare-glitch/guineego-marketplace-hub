@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { MapPin, Navigation, Loader2, User, Phone } from "lucide-react";
+import { MapPin, Navigation, Loader2, User, Phone, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,13 +30,49 @@ interface GuestAddressFormProps {
 
 const communes = ["Kaloum", "Dixinn", "Ratoma", "Matam", "Matoto"];
 
+/** Strip all non-digit chars except leading + */
+function cleanPhone(raw: string): string {
+  return raw.replace(/[\s\-().]/g, "");
+}
+
+/** Validate Guinean phone: 6XX or 3XX, 9 digits total (with or without +224) */
+export function validateGuineaPhone(raw: string): { valid: boolean; error?: string } {
+  const cleaned = cleanPhone(raw);
+  if (!cleaned) return { valid: false, error: "Le numéro de téléphone est requis" };
+
+  // Strip country code if present
+  let local = cleaned;
+  if (local.startsWith("+224")) local = local.slice(4);
+  else if (local.startsWith("00224")) local = local.slice(5);
+  else if (local.startsWith("224") && local.length > 9) local = local.slice(3);
+
+  if (!/^\d+$/.test(local)) return { valid: false, error: "Le numéro ne doit contenir que des chiffres" };
+  if (local.length !== 9) return { valid: false, error: "Le numéro doit contenir 9 chiffres (ex: 620 00 00 00)" };
+  if (!/^[63]/.test(local)) return { valid: false, error: "Le numéro doit commencer par 6 ou 3 (ex: 620, 622, 311)" };
+
+  return { valid: true };
+}
+
 export const GuestAddressForm = ({ address, onChange }: GuestAddressFormProps) => {
   const { t } = useTranslation();
   const [locating, setLocating] = useState(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const update = (field: keyof GuestAddress, value: string) => {
     onChange({ ...address, [field]: value });
   };
+
+  const markTouched = (field: string) => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  // Validation
+  const phoneValidation = useMemo(() => validateGuineaPhone(address.phone), [address.phone]);
+  const nameError = useMemo(() => {
+    if (!address.fullName.trim()) return "Le nom complet est requis";
+    if (address.fullName.trim().length < 2) return "Le nom doit contenir au moins 2 caractères";
+    return undefined;
+  }, [address.fullName]);
 
   const handleUseCurrentLocation = useCallback(async () => {
     if (!navigator.geolocation) return;
@@ -72,6 +108,14 @@ export const GuestAddressForm = ({ address, onChange }: GuestAddressFormProps) =
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }, [address, onChange]);
+
+  const FieldError = ({ message }: { message?: string }) =>
+    message ? (
+      <p className="flex items-center gap-1 text-xs text-destructive mt-1">
+        <AlertCircle className="w-3 h-3 shrink-0" />
+        {message}
+      </p>
+    ) : null;
 
   return (
     <motion.div
@@ -116,8 +160,11 @@ export const GuestAddressForm = ({ address, onChange }: GuestAddressFormProps) =
               placeholder="Mamadou Diallo"
               value={address.fullName}
               onChange={(e) => update("fullName", e.target.value)}
-              className="mt-1.5"
+              onBlur={() => markTouched("fullName")}
+              className={`mt-1.5 ${touched.fullName && nameError ? "border-destructive focus-visible:ring-destructive" : ""}`}
+              maxLength={100}
             />
+            {touched.fullName && <FieldError message={nameError} />}
           </div>
 
           <div className="sm:col-span-2">
@@ -127,11 +174,21 @@ export const GuestAddressForm = ({ address, onChange }: GuestAddressFormProps) =
             </Label>
             <Input
               id="guest-phone"
-              placeholder="+224 6XX XXX XXX"
+              type="tel"
+              placeholder="620 00 00 00"
               value={address.phone}
               onChange={(e) => update("phone", e.target.value)}
-              className="mt-1.5"
+              onBlur={() => markTouched("phone")}
+              className={`mt-1.5 ${touched.phone && !phoneValidation.valid ? "border-destructive focus-visible:ring-destructive" : ""}`}
+              maxLength={20}
             />
+            {touched.phone && !phoneValidation.valid && <FieldError message={phoneValidation.error} />}
+            {touched.phone && phoneValidation.valid && (
+              <p className="text-xs text-green-600 mt-1">✓ Numéro valide</p>
+            )}
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Format : 6XX XX XX XX ou 3XX XX XX XX
+            </p>
           </div>
 
           <div className="sm:col-span-2">
@@ -144,8 +201,11 @@ export const GuestAddressForm = ({ address, onChange }: GuestAddressFormProps) =
               placeholder="Quartier, Rue, N°"
               value={address.address}
               onChange={(e) => update("address", e.target.value)}
-              className="mt-1.5"
+              onBlur={() => markTouched("address")}
+              className={`mt-1.5 ${touched.address && !address.address.trim() ? "border-destructive focus-visible:ring-destructive" : ""}`}
+              maxLength={200}
             />
+            {touched.address && !address.address.trim() && <FieldError message="L'adresse est requise" />}
           </div>
 
           <div>
@@ -172,6 +232,7 @@ export const GuestAddressForm = ({ address, onChange }: GuestAddressFormProps) =
               value={address.city}
               onChange={(e) => update("city", e.target.value)}
               className="mt-1.5"
+              maxLength={50}
             />
           </div>
 
@@ -184,6 +245,7 @@ export const GuestAddressForm = ({ address, onChange }: GuestAddressFormProps) =
               onChange={(e) => update("instructions", e.target.value)}
               rows={2}
               className="mt-1.5"
+              maxLength={500}
             />
           </div>
         </div>
