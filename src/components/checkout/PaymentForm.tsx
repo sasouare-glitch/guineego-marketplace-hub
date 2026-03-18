@@ -22,6 +22,7 @@ interface PaymentFormProps {
   onPhoneChange: (phone: string) => void;
   walletBalance?: number;
   walletLoading?: boolean;
+  excludeMethods?: string[];
 }
 
 const paymentMethods: PaymentMethod[] = [
