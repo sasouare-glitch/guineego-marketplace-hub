@@ -286,25 +286,69 @@ export default function PublicOrderTrackingPage() {
           </Card>
         </div>
 
-        {/* CTA */}
-        <Card>
-          <CardContent className="p-4 flex flex-col sm:flex-row items-center gap-3 justify-between">
-            <p className="text-sm text-muted-foreground">
-              Besoin d'aide ? Connectez-vous pour plus d'options.
-            </p>
-            <div className="flex gap-2">
-              <Link to={`/order/${orderId}`}>
-                <Button variant="outline" size="sm">Se connecter</Button>
-              </Link>
-              <Link to="/marketplace">
-                <Button size="sm">
-                  <ShoppingBag className="w-4 h-4 mr-1" />
-                  Marketplace
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Guest conversion CTA */}
+        {order.isGuest && (
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="p-6 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <UserPlus className="w-5 h-5 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-display font-bold text-foreground">
+                    Créez votre compte GuineeGo
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Retrouvez facilement toutes vos commandes, enregistrez vos adresses et profitez d'offres exclusives.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 pl-[52px]">
+                <Link to={`/register?name=${encodeURIComponent(address?.fullName || "")}&phone=${encodeURIComponent(address?.phone || "")}`}>
+                  <Button size="sm" className="w-full sm:w-auto">
+                    <UserPlus className="w-4 h-4 mr-1.5" />
+                    Créer mon compte
+                  </Button>
+                </Link>
+                <Link to="/marketplace">
+                  <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                    <ShoppingBag className="w-4 h-4 mr-1.5" />
+                    Continuer mes achats
+                  </Button>
+                </Link>
+              </div>
+              <div className="pl-[52px]">
+                <ul className="text-xs text-muted-foreground space-y-1">
+                  <li className="flex items-center gap-1.5"><Check className="w-3 h-3 text-primary" /> Historique de commandes</li>
+                  <li className="flex items-center gap-1.5"><Check className="w-3 h-3 text-primary" /> Adresses sauvegardées</li>
+                  <li className="flex items-center gap-1.5"><Check className="w-3 h-3 text-primary" /> Notifications & promotions</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Generic CTA for non-guest */}
+        {!order.isGuest && (
+          <Card>
+            <CardContent className="p-4 flex flex-col sm:flex-row items-center gap-3 justify-between">
+              <p className="text-sm text-muted-foreground">
+                Besoin d'aide ? Connectez-vous pour plus d'options.
+              </p>
+              <div className="flex gap-2">
+                <Link to={`/order/${orderId}`}>
+                  <Button variant="outline" size="sm">Se connecter</Button>
+                </Link>
+                <Link to="/marketplace">
+                  <Button size="sm">
+                    <ShoppingBag className="w-4 h-4 mr-1" />
+                    Marketplace
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
 
       {/* Minimal footer */}
