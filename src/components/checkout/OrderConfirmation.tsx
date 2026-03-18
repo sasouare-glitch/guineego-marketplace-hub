@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { CheckCircle, Package, Truck, Clock, ArrowRight } from "lucide-react";
+import { CheckCircle, Package, Truck, Clock, ArrowRight, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
@@ -8,9 +8,10 @@ import { useTranslation } from "@/hooks/useTranslation";
 interface OrderConfirmationProps {
   orderNumber: string;
   estimatedDelivery: string;
+  isGuest?: boolean;
 }
 
-export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfirmationProps) => {
+export const OrderConfirmation = ({ orderNumber, estimatedDelivery, isGuest = false }: OrderConfirmationProps) => {
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -119,6 +120,32 @@ export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfi
         </div>
       </motion.div>
 
+      {/* Guest: Account creation CTA */}
+      {isGuest && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55 }}
+          className="bg-primary/5 border border-primary/20 rounded-2xl p-6 max-w-md mx-auto mb-8"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <UserPlus className="w-5 h-5 text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-foreground">Créer un compte ?</p>
+              <p className="text-sm text-muted-foreground">Suivez vos commandes et gagnez du temps</p>
+            </div>
+          </div>
+          <Button asChild variant="outline" className="w-full">
+            <Link to={`/register?redirect=/track/${orderNumber}`}>
+              <UserPlus className="w-4 h-4 mr-2" />
+              Créer mon compte gratuitement
+            </Link>
+          </Button>
+        </motion.div>
+      )}
+
       {/* Actions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -127,7 +154,7 @@ export const OrderConfirmation = ({ orderNumber, estimatedDelivery }: OrderConfi
         className="flex flex-col sm:flex-row gap-3 justify-center"
       >
         <Button asChild>
-          <Link to={`/order/${orderNumber}`}>
+          <Link to={isGuest ? `/track/${orderNumber}` : `/order/${orderNumber}`}>
             {t.checkout.trackOrder}
             <ArrowRight className="w-4 h-4 ml-2" />
           </Link>

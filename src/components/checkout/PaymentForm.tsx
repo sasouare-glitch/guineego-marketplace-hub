@@ -22,6 +22,7 @@ interface PaymentFormProps {
   onPhoneChange: (phone: string) => void;
   walletBalance?: number;
   walletLoading?: boolean;
+  excludeMethods?: string[];
 }
 
 const paymentMethods: PaymentMethod[] = [
@@ -73,10 +74,12 @@ export const PaymentForm = ({
   phoneNumber, 
   onPhoneChange,
   walletBalance = 0,
-  walletLoading = false
+  walletLoading = false,
+  excludeMethods = []
 }: PaymentFormProps) => {
   const { t } = useTranslation();
-  const selectedPayment = paymentMethods.find(m => m.id === selectedMethod);
+  const filteredMethods = paymentMethods.filter(m => !excludeMethods.includes(m.id));
+  const selectedPayment = filteredMethods.find(m => m.id === selectedMethod);
 
   const getDescription = (method: PaymentMethod) => {
     if (method.id === "orange_money") return "Orange Money";
@@ -113,7 +116,7 @@ export const PaymentForm = ({
       {/* Payment Methods */}
       <RadioGroup value={selectedMethod || ""} onValueChange={onSelectMethod}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {paymentMethods.map((method, index) => (
+          {filteredMethods.map((method, index) => (
             <motion.div
               key={method.id}
               initial={{ opacity: 0, y: 10 }}

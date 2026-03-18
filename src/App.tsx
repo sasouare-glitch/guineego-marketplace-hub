@@ -145,11 +145,7 @@ const App = () => (
                     
                     {/* Protected Client Routes */}
                     <Route path="/cart" element={<CartPage />} />
-                    <Route path="/checkout" element={
-                      <ProtectedRoute>
-                        <CheckoutPage />
-                      </ProtectedRoute>
-                    } />
+                    <Route path="/checkout" element={<CheckoutPage />} />
                     <Route path="/order/:id" element={
                       <ProtectedRoute>
                         <OrderTrackingPage />

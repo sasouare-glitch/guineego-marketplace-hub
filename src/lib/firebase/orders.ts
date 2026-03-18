@@ -28,10 +28,11 @@ interface ShippingAddress {
 }
 
 interface CreateOrderParams {
-  uid: string;
+  uid?: string;
   items: OrderItem[];
   shippingAddress: ShippingAddress;
   paymentMethod: string;
+  isGuest?: boolean;
 }
 
 const SHIPPING_FEES: Record<string, number> = {
@@ -52,7 +53,8 @@ function generateOrderId(): string {
 }
 
 export async function createOrderDirect(params: CreateOrderParams) {
-  const { uid, items, shippingAddress, paymentMethod } = params;
+  const { uid, items, shippingAddress, paymentMethod, isGuest } = params;
+  const customerId = uid || `guest_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
   if (!items.length) throw new Error('Le panier est vide');
   if (!shippingAddress.phone || !shippingAddress.commune) {
@@ -82,7 +84,8 @@ export async function createOrderDirect(params: CreateOrderParams) {
 
   const order = {
     id: orderId,
-    customerId: uid,
+    customerId,
+    isGuest: !!isGuest,
     items,
     sellers: sellerGroups,
     sellerIds: Object.keys(sellerGroups),
@@ -111,7 +114,7 @@ export async function createOrderDirect(params: CreateOrderParams) {
   await setDoc(paymentRef, {
     id: paymentRef.id,
     orderId,
-    customerId: uid,
+    customerId,
     amount: total,
     currency: 'GNF',
     method: paymentMethod,
@@ -119,7 +122,8 @@ export async function createOrderDirect(params: CreateOrderParams) {
     createdAt: now,
   });
 
-  // Send confirmation email via Firebase Trigger Email extension (client-side fallback)
+  // Send confirmation email (only for authenticated users)
+  if (uid && !isGuest) {
   try {
     const userDoc = await (await import('firebase/firestore')).getDoc(doc(db, 'users', uid));
     const userEmail = userDoc.data()?.email;
@@ -187,11 +191,14 @@ export async function createOrderDirect(params: CreateOrderParams) {
   } catch (emailError) {
     console.warn('⚠️ Erreur envoi email de confirmation:', emailError);
   }
+  }
 
-  // Clear user cart
-  try {
-    await deleteDoc(doc(db, 'carts', uid));
-  } catch { /* ignore */ }
+  // Clear user cart (only for authenticated users)
+  if (uid && !isGuest) {
+    try {
+      await deleteDoc(doc(db, 'carts', uid));
+    } catch { /* ignore */ }
+  }
 
   return { orderId, paymentId: paymentRef.id, total };
 }
