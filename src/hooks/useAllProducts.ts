@@ -64,26 +64,23 @@ export function useAllProducts() {
 
   useEffect(() => {
     const q = query(collection(db, 'products'), where('status', '==', 'active'));
-    const unsub = onSnapshot(q, async (snap) => {
-      // Clear cache on each snapshot so seller name changes propagate
+    const unsub = safeOnSnapshot(q, async (snap: any) => {
       storeNameCache.clear();
       const raw = snap.docs.map(mapDocBasic);
-      // Resolve store names for products that don't already have sellerName
       const enriched = await Promise.all(
-        raw.map(async (p) => {
+        raw.map(async (p: any) => {
           const storeName = p.seller !== 'Vendeur' ? p.seller : await resolveStoreName(p._sellerId || '');
           return { ...p, seller: storeName, sellerId: p._sellerId || '' };
         })
       );
-      // Remove internal field, sort sponsored products first
-      const cleaned = enriched.map(({ _sellerId, ...rest }) => rest);
-      cleaned.sort((a, b) => (b.isSponsored ? 1 : 0) - (a.isSponsored ? 1 : 0));
+      const cleaned = enriched.map(({ _sellerId, ...rest }: any) => rest);
+      cleaned.sort((a: any, b: any) => (b.isSponsored ? 1 : 0) - (a.isSponsored ? 1 : 0));
       setProducts(cleaned);
       setLoading(false);
     }, (err) => {
       console.error('All products query error:', err);
       setLoading(false);
-    });
+    }, 'allProducts');
     return () => unsub();
   }, []);
 

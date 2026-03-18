@@ -83,20 +83,20 @@ function useFirestoreSection(constraints: QueryConstraint[]) {
 
   useEffect(() => {
     const q = query(collection(db, 'products'), ...constraints);
-    const unsub = onSnapshot(q, async (snap) => {
+    const unsub = safeOnSnapshot(q, async (snap: any) => {
       const raw = snap.docs.map(mapFirestoreProduct);
       const enriched = await Promise.all(
-        raw.map(async (p) => {
+        raw.map(async (p: any) => {
           const storeName = p.seller !== 'Vendeur' ? p.seller : await resolveStoreName(p._sellerId || '');
           return { ...p, seller: storeName, sellerId: p._sellerId || '' };
         })
       );
-      setProducts(enriched.map(({ _sellerId, ...rest }) => rest));
+      setProducts(enriched.map(({ _sellerId, ...rest }: any) => rest));
       setLoading(false);
     }, (err) => {
       console.error('Marketplace query error:', err);
       setLoading(false);
-    });
+    }, 'marketplaceProducts');
     return () => unsub();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(constraints.map(c => c.toString()))]);
