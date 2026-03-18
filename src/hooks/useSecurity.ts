@@ -172,26 +172,32 @@ export function useSecurity() {
       limit(100)
     );
 
-    const unsub = onSnapshot(q, (snap) => {
-      const logs: AuditLog[] = snap.docs.map(d => ({
-        id: d.id,
-        action: d.data().action ?? 'unknown',
-        uid: d.data().uid,
-        user: d.data().user ?? d.data().email ?? 'inconnu',
-        role: d.data().role ?? '—',
-        ip: d.data().ip,
-        details: d.data().details ?? '',
-        severity: d.data().severity ?? 'info',
-        createdAt: d.data().createdAt ?? null,
-      }));
-      setAuditLogs(logs);
+    let unsub: (() => void) | undefined;
+    try {
+      unsub = onSnapshot(q, (snap) => {
+        const logs: AuditLog[] = snap.docs.map(d => ({
+          id: d.id,
+          action: d.data().action ?? 'unknown',
+          uid: d.data().uid,
+          user: d.data().user ?? d.data().email ?? 'inconnu',
+          role: d.data().role ?? '—',
+          ip: d.data().ip,
+          details: d.data().details ?? '',
+          severity: d.data().severity ?? 'info',
+          createdAt: d.data().createdAt ?? null,
+        }));
+        setAuditLogs(logs);
+        setLoadingAudit(false);
+      }, (err) => {
+        console.error('useSecurity audit error:', err);
+        setLoadingAudit(false);
+      });
+    } catch (e) {
+      console.error('useSecurity: Failed to attach audit listener:', e);
       setLoadingAudit(false);
-    }, (err) => {
-      console.error('useSecurity audit error:', err);
-      setLoadingAudit(false);
-    });
+    }
 
-    return () => unsub();
+    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
   }, []);
 
   // ── Écriture d'un événement d'audit ──────────────────────────────────────
