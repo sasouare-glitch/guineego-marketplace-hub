@@ -26,8 +26,9 @@ export default function TrackOrderPage() {
       setError("Veuillez entrer le numéro de commande");
       return;
     }
-    if (!trimmedPhone || trimmedPhone.length < 8) {
-      setError("Veuillez entrer un numéro de téléphone valide");
+    const phoneCheck = validateGuineaPhone(trimmedPhone);
+    if (!phoneCheck.valid) {
+      setError(phoneCheck.error || "Numéro de téléphone invalide");
       return;
     }
 

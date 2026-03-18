@@ -65,7 +65,7 @@ export default function CheckoutPage() {
   const isGuestAddressValid = () => {
     return (
       guestAddress.fullName.trim().length >= 2 &&
-      guestAddress.phone.trim().length >= 9 &&
+      validateGuineaPhone(guestAddress.phone).valid &&
       guestAddress.address.trim().length >= 3 &&
       guestAddress.commune.length > 0
     );
