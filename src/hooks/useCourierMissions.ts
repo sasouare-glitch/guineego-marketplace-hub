@@ -14,6 +14,7 @@ import {
   serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
+import { safeOnSnapshot } from "@/lib/firebase/safeSnapshot";
 import { toast } from "sonner";
 
 export type DeliveryStatus =
