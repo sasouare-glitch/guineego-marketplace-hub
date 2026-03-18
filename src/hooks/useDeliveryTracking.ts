@@ -178,6 +178,7 @@ export function useCourierActiveDelivery(courierId: string | null | undefined) {
     }
 
     setLoading(true);
+    let unsub: (() => void) | undefined;
     
     import('firebase/firestore').then(({ collection, query, where, orderBy, limit, onSnapshot }) => {
       const q = query(
@@ -188,27 +189,32 @@ export function useCourierActiveDelivery(courierId: string | null | undefined) {
         limit(1)
       );
 
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          if (!snapshot.empty) {
-            const doc = snapshot.docs[0];
-            setActiveDelivery({ id: doc.id, ...doc.data() } as DeliveryMission);
-          } else {
-            setActiveDelivery(null);
+      try {
+        unsub = onSnapshot(
+          q,
+          (snapshot) => {
+            if (!snapshot.empty) {
+              const doc = snapshot.docs[0];
+              setActiveDelivery({ id: doc.id, ...doc.data() } as DeliveryMission);
+            } else {
+              setActiveDelivery(null);
+            }
+            setLoading(false);
+            setError(null);
+          },
+          (err) => {
+            console.error('Error fetching active delivery:', err);
+            setError(err);
+            setLoading(false);
           }
-          setLoading(false);
-          setError(null);
-        },
-        (err) => {
-          console.error('Error fetching active delivery:', err);
-          setError(err);
-          setLoading(false);
-        }
-      );
-
-      return () => unsubscribe();
+        );
+      } catch (e) {
+        console.error('useCourierActiveDelivery: Failed to attach listener:', e);
+        setLoading(false);
+      }
     });
+
+    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
   }, [courierId]);
 
   return { activeDelivery, loading, error };
