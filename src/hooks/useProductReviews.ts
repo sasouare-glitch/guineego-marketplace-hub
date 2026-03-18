@@ -30,10 +30,10 @@ export function useProductReviews(productId: string | undefined) {
       orderBy('createdAt', 'desc')
     );
 
-    const unsub = onSnapshot(q, (snap) => {
-      setReviews(snap.docs.map(d => ({ id: d.id, ...d.data() } as Review)));
+    const unsub = safeOnSnapshot(q, (snap: any) => {
+      setReviews(snap.docs.map((d: any) => ({ id: d.id, ...d.data() } as Review)));
       setLoading(false);
-    }, () => setLoading(false));
+    }, () => setLoading(false), 'productReviews');
 
     return () => unsub();
   }, [productId]);
