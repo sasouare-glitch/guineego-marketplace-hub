@@ -5,8 +5,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, onSnapshot, collectionGroup, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, limit, collectionGroup, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 
 export interface PaymentRecord {
   id: string;
