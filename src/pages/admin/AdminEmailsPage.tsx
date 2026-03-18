@@ -195,23 +195,33 @@ export default function AdminEmailsPage() {
     const mailRef = collection(db, "mail");
     const q = query(mailRef, orderBy("createdAt", "desc"), limit(maxResults));
 
-    const unsub = onSnapshot(
-      q,
-      (snapshot) => {
-        const docs: MailDoc[] = snapshot.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        })) as MailDoc[];
-        setEmails(docs);
-        setLoading(false);
-      },
-      (error) => {
-        console.error("Erreur lecture collection mail:", error);
-        setLoading(false);
-      }
-    );
+    let unsub: (() => void) | undefined;
+    try {
+      unsub = onSnapshot(
+        q,
+        (snapshot) => {
+          const docs: MailDoc[] = snapshot.docs.map((d) => ({
+            id: d.id,
+            ...d.data(),
+          })) as MailDoc[];
+          setEmails(docs);
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Erreur lecture collection mail:", error);
+          setEmails([]);
+          setLoading(false);
+        }
+      );
+    } catch (error) {
+      console.error("Erreur initialisation listener mail:", error);
+      setEmails([]);
+      setLoading(false);
+    }
 
-    return () => unsub();
+    return () => {
+      try { unsub?.(); } catch (e) { /* ignore */ }
+    };
   }, [maxResults]);
 
   // Filtered emails
