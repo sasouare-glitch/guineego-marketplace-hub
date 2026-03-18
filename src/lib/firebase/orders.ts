@@ -193,10 +193,12 @@ export async function createOrderDirect(params: CreateOrderParams) {
     console.warn('⚠️ Erreur envoi email de confirmation:', emailError);
   }
 
-  // Clear user cart
-  try {
-    await deleteDoc(doc(db, 'carts', uid));
-  } catch { /* ignore */ }
+  // Clear user cart (only for authenticated users)
+  if (uid && !isGuest) {
+    try {
+      await deleteDoc(doc(db, 'carts', uid));
+    } catch { /* ignore */ }
+  }
 
   return { orderId, paymentId: paymentRef.id, total };
 }
