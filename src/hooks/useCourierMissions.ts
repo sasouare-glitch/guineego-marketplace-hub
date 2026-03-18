@@ -148,9 +148,11 @@ export function useCourierMissions() {
       where("assignedCourier", "==", user.uid),
       orderBy("createdAt", "desc")
     );
-    const unsub = onSnapshot(q, (snap) => {
-      setMyMissions(snap.docs.map((d) => ({ ...d.data(), id: d.id } as DeliveryMission)));
-    });
+    const unsub = safeOnSnapshot(q, (snap: any) => {
+      setMyMissions(snap.docs.map((d: any) => ({ ...d.data(), id: d.id } as DeliveryMission)));
+    }, (err) => {
+      console.error('Error fetching my missions:', err);
+    }, 'courierMyMissions');
     return () => unsub();
   }, [user]);
 
