@@ -114,7 +114,7 @@ export async function createOrderDirect(params: CreateOrderParams) {
   await setDoc(paymentRef, {
     id: paymentRef.id,
     orderId,
-    customerId: uid,
+    customerId,
     amount: total,
     currency: 'GNF',
     method: paymentMethod,
