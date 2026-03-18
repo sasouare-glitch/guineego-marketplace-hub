@@ -105,6 +105,7 @@ export function useSellerMessages() {
     }
 
     return () => { try { unsubscribe?.(); } catch (e) { /* ignore */ } };
+  }, [sellerId]);
 
   // ---- Subscribe to messages of selected conversation ----
   useEffect(() => {
