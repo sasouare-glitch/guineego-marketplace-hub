@@ -321,6 +321,12 @@ export function Header() {
             ) : (
               <div className="hidden sm:flex items-center gap-2">
                 <Button variant="ghost" size="sm" asChild>
+                  <Link to="/track" className="flex items-center gap-1.5">
+                    <Package className="w-4 h-4" />
+                    Suivre ma commande
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
                   <Link to="/login">{t.nav.login}</Link>
                 </Button>
                 <Button size="sm" asChild>
