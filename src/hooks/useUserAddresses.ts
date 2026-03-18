@@ -35,16 +35,17 @@ export function useUserAddresses() {
       return;
     }
 
-    const unsub = onSnapshot(
+    const unsub = safeOnSnapshot(
       doc(db, 'users', user.uid),
-      (snap) => {
+      (snap: any) => {
         if (snap.exists()) {
           const data = snap.data();
           setAddresses(data.addresses || []);
         }
         setLoading(false);
       },
-      () => setLoading(false)
+      () => setLoading(false),
+      'userAddresses'
     );
 
     return () => unsub();

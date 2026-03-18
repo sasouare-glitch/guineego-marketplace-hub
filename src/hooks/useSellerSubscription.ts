@@ -83,9 +83,9 @@ export function useSellerSubscription() {
       limit(1)
     );
 
-    const unsub = onSnapshot(
+    const unsub = safeOnSnapshot(
       pendingQuery,
-      (snap) => {
+      (snap: any) => {
         if (snap.empty) {
           setPendingPayment(null);
         } else {
@@ -99,7 +99,8 @@ export function useSellerSubscription() {
           });
         }
       },
-      () => setPendingPayment(null)
+      () => setPendingPayment(null),
+      'sellerPendingPayment'
     );
 
     return () => unsub();
