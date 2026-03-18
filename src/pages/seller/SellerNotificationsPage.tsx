@@ -25,12 +25,12 @@ import {
   orderBy,
   doc,
   updateDoc,
-  updateDoc,
   deleteDoc,
   writeBatch,
   Timestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { safeOnSnapshot } from "@/lib/firebase/safeSnapshot";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 
