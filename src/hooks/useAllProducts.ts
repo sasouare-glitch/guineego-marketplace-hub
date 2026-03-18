@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import type { Product } from '@/components/marketplace/ProductCard';
 
 // Cache store names to avoid repeated reads
