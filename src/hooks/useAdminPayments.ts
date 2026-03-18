@@ -64,7 +64,7 @@ export function useAdminPayments() {
       }
     };
 
-    const unsubSub = onSnapshot(subQuery, (snap) => {
+    const unsubSub = safeOnSnapshot(subQuery, (snap: any) => {
       subPayments = snap.docs.map(doc => {
         const d = doc.data();
         const parentPath = doc.ref.parent.parent?.id || '';
