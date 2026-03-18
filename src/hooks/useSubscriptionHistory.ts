@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface SubscriptionPayment {
