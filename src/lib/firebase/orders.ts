@@ -53,7 +53,8 @@ function generateOrderId(): string {
 }
 
 export async function createOrderDirect(params: CreateOrderParams) {
-  const { uid, items, shippingAddress, paymentMethod } = params;
+  const { uid, items, shippingAddress, paymentMethod, isGuest } = params;
+  const customerId = uid || `guest_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
   if (!items.length) throw new Error('Le panier est vide');
   if (!shippingAddress.phone || !shippingAddress.commune) {
