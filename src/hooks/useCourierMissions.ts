@@ -100,14 +100,14 @@ export function useCourierMissions() {
       where("status", "==", "pending"),
       orderBy("createdAt", "desc")
     );
-    const unsub = onSnapshot(q, (snap) => {
-      const missions = snap.docs.map((d) => ({ ...d.data(), id: d.id } as DeliveryMission));
+    const unsub = safeOnSnapshot(q, (snap: any) => {
+      const missions = snap.docs.map((d: any) => ({ ...d.data(), id: d.id } as DeliveryMission));
       
       // Detect new express missions (skip initial load)
       if (!isInitialLoadRef.current) {
         const prevIds = prevMissionIdsRef.current;
         const hasNewUrgent = missions.some(
-          (m) => !prevIds.has(m.id) && m.priority === "express"
+          (m: DeliveryMission) => !prevIds.has(m.id) && m.priority === "express"
         );
         if (hasNewUrgent) {
           const prefs = courierSettingsRef.current;
@@ -122,21 +122,21 @@ export function useCourierMissions() {
             duration: 6000,
           });
         } else {
-          const hasNewNormal = missions.some((m) => !prevIds.has(m.id));
+          const hasNewNormal = missions.some((m: DeliveryMission) => !prevIds.has(m.id));
           if (hasNewNormal) {
             toast.info("📦 Nouvelle mission disponible");
           }
         }
       }
       isInitialLoadRef.current = false;
-      prevMissionIdsRef.current = new Set(missions.map((m) => m.id));
+      prevMissionIdsRef.current = new Set(missions.map((m: DeliveryMission) => m.id));
 
       setAvailable(missions);
       setLoading(false);
     }, (err) => {
       console.error("Error fetching available missions:", err);
       setLoading(false);
-    });
+    }, 'courierAvailableMissions');
     return () => unsub();
   }, [playUrgentAlert]);
 
