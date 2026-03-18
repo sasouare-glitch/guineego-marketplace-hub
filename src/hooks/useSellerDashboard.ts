@@ -3,9 +3,10 @@
  */
 import { useState, useEffect, useMemo } from 'react';
 import {
-  collection, query, where, orderBy, onSnapshot, limit,
+  collection, query, where, orderBy, limit,
   Timestamp, getDocs
 } from 'firebase/firestore';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 
