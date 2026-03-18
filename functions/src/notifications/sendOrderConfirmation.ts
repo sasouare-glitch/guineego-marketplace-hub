@@ -139,7 +139,7 @@ async function sendConfirmationEmail(email: string, order: OrderData): Promise<v
  */
 async function sendConfirmationSMS(phone: string, order: OrderData): Promise<void> {
   const formattedPhone = formatGuineaPhone(phone);
-  const trackingLink = `${APP_URL}/order/${order.id}`;
+  const trackingLink = `${APP_URL}/track/${order.id}?phone=${encodeURIComponent(formattedPhone)}`;
   const smsMessage = 
     `GuineeGo: Commande ${order.id} confirmée! ` +
     `Total: ${order.pricing.total.toLocaleString()} GNF. ` +
