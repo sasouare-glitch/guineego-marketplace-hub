@@ -55,6 +55,9 @@ export default function RegisterPage() {
   const { t } = useTranslation();
   const { signUp, signInWithGoogle, loading, user, claims } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const prefillName = searchParams.get('name') || '';
+  const prefillPhone = searchParams.get('phone') || '';
 
   // Redirect if already authenticated
   useEffect(() => {
