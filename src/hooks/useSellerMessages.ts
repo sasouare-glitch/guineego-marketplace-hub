@@ -121,23 +121,29 @@ export function useSellerMessages() {
       orderBy('createdAt', 'asc')
     );
 
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const msgs = snapshot.docs.map((d) => ({
-          id: d.id,
-          ...d.data(),
-        })) as MessageDoc[];
-        setMessages(msgs);
-        setMessagesLoading(false);
-      },
-      (err) => {
-        console.error('Messages listener error:', err);
-        setMessagesLoading(false);
-      }
-    );
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const msgs = snapshot.docs.map((d) => ({
+            id: d.id,
+            ...d.data(),
+          })) as MessageDoc[];
+          setMessages(msgs);
+          setMessagesLoading(false);
+        },
+        (err) => {
+          console.error('Messages listener error:', err);
+          setMessagesLoading(false);
+        }
+      );
+    } catch (e) {
+      console.error('SellerMessages: Failed to attach messages listener:', e);
+      setMessagesLoading(false);
+    }
 
-    return () => unsubscribe();
+    return () => { try { unsubscribe?.(); } catch (e) { /* ignore */ } };
   }, [selectedConversationId]);
 
   // ---- Select conversation & mark as read ----
