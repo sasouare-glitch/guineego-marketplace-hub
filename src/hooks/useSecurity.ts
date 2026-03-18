@@ -97,7 +97,9 @@ export function useSecurity() {
       limit(50)
     );
 
-    const unsub = onSnapshot(q, (snap) => {
+    let unsub: (() => void) | undefined;
+    try {
+      unsub = onSnapshot(q, (snap) => {
       // Comptage par rôle
       const roleCounts: Record<string, number> = {};
       const totalSnap = snap.docs.length;
@@ -154,8 +156,12 @@ export function useSecurity() {
       console.error('useSecurity sessions error:', err);
       setLoadingSessions(false);
     });
+    } catch (e) {
+      console.error('useSecurity: Failed to attach sessions listener:', e);
+      setLoadingSessions(false);
+    }
 
-    return () => unsub();
+    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
   }, [user?.uid]);
 
   // ── Journal d'audit ───────────────────────────────────────────────────────
