@@ -97,8 +97,8 @@ export default function AdminUsersPage() {
       limit(200)
     );
 
-    const unsubscribe = onSnapshot(usersQuery, (snapshot) => {
-      const usersData = snapshot.docs.map(d => ({
+    const unsubscribe = safeOnSnapshot(usersQuery, (snapshot: any) => {
+      const usersData = snapshot.docs.map((d: any) => ({
         id: d.id,
         ...d.data()
       })) as FirestoreUser[];
@@ -108,7 +108,7 @@ export default function AdminUsersPage() {
       console.error('Error listening to users:', error);
       toast.error('Erreur lors du chargement des utilisateurs');
       setLoading(false);
-    });
+    }, 'adminUsers');
 
     return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
   }, []);
