@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Copy, Check, RefreshCw, XCircle, Loader2, Package, ShoppingBag } from "lucide-react";
+import { Copy, Check, RefreshCw, XCircle, Loader2, Package, ShoppingBag, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,15 +18,33 @@ const paymentMethodLabels: Record<string, string> = {
   cash: "Espèces",
 };
 
+/** Normalize phone for comparison */
+function normalizePhone(phone: string): string {
+  const cleaned = phone.replace(/[\s\-()]/g, "").replace(/[^\d]/g, "");
+  if (cleaned.startsWith("224") && cleaned.length > 9) return cleaned.slice(3);
+  return cleaned;
+}
+
 export default function PublicOrderTrackingPage() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const [copied, setCopied] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
   const orderId = id || "";
+  const phoneParam = searchParams.get("phone") || "";
   const { order, loading, currentStatus, statusHistory, estimatedDelivery } = useRealtimeOrder(orderId);
   const orderStatus = currentStatus || "pending";
+
+  // Verify phone matches order's shipping phone
+  const phoneVerified = useMemo(() => {
+    if (!order || !phoneParam) return false;
+    const orderPhone = normalizePhone(order.shippingAddress?.phone || "");
+    const inputPhone = normalizePhone(decodeURIComponent(phoneParam));
+    if (!orderPhone || !inputPhone) return false;
+    return orderPhone === inputPhone || orderPhone.endsWith(inputPhone) || inputPhone.endsWith(orderPhone);
+  }, [order, phoneParam]);
 
   const copyOrderId = () => {
     navigator.clipboard.writeText(orderId);
@@ -84,10 +102,40 @@ export default function PublicOrderTrackingPage() {
             <p className="text-muted-foreground text-sm">
               La commande <span className="font-mono font-semibold">{orderId}</span> n'existe pas ou le lien est invalide.
             </p>
+            <Link to="/track">
+              <Button variant="outline" className="mt-2 mr-2">
+                Réessayer
+              </Button>
+            </Link>
             <Link to="/marketplace">
               <Button className="mt-2">
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 Visiter GuineeGo
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Phone verification gate — redirect to lookup if phone not provided or mismatch
+  if (!phoneParam || !phoneVerified) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full text-center">
+          <CardContent className="pt-8 pb-8 space-y-4">
+            <ShieldAlert className="w-16 h-16 text-destructive/60 mx-auto" />
+            <h1 className="text-xl font-bold text-foreground">Vérification requise</h1>
+            <p className="text-muted-foreground text-sm">
+              {!phoneParam 
+                ? "Veuillez utiliser le formulaire de suivi pour accéder aux détails de cette commande."
+                : "Le numéro de téléphone ne correspond pas à cette commande."
+              }
+            </p>
+            <Link to="/track">
+              <Button className="mt-2">
+                Suivre ma commande
               </Button>
             </Link>
           </CardContent>
