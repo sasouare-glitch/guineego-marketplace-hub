@@ -122,7 +122,8 @@ export async function createOrderDirect(params: CreateOrderParams) {
     createdAt: now,
   });
 
-  // Send confirmation email via Firebase Trigger Email extension (client-side fallback)
+  // Send confirmation email (only for authenticated users)
+  if (uid && !isGuest) {
   try {
     const userDoc = await (await import('firebase/firestore')).getDoc(doc(db, 'users', uid));
     const userEmail = userDoc.data()?.email;
