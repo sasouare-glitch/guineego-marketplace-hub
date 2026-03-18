@@ -187,7 +187,8 @@ export async function createOrderDirect(params: CreateOrderParams) {
         createdAt: now,
       });
       console.log('📧 Email de confirmation écrit dans la collection mail');
-    }
+  }
+  }
   } catch (emailError) {
     console.warn('⚠️ Erreur envoi email de confirmation:', emailError);
   }
