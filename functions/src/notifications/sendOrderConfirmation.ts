@@ -37,18 +37,23 @@ interface OrderData {
  * Send order confirmation via Email + SMS
  */
 export async function sendOrderConfirmation(order: OrderData): Promise<void> {
-  const customerDoc = await db.collection('users').doc(order.customerId).get();
-  const customer = customerDoc.data();
-
+  const isGuest = order.customerId.startsWith('guest_');
   const promises: Promise<void>[] = [];
 
-  // 1. Send Email (via Firebase Trigger Email Extension)
-  const email = customer?.email;
-  if (email) {
-    promises.push(sendConfirmationEmail(email, order));
+  // 1. Send Email (only for registered users)
+  if (!isGuest) {
+    try {
+      const customerDoc = await db.collection('users').doc(order.customerId).get();
+      const email = customerDoc.data()?.email;
+      if (email) {
+        promises.push(sendConfirmationEmail(email, order));
+      }
+    } catch (error) {
+      console.warn(`⚠️ Impossible de récupérer l'email du client ${order.customerId}:`, error);
+    }
   }
 
-  // 2. Send SMS (via Orange SMS API)
+  // 2. Send SMS (via Orange SMS API) — works for both guests and registered users
   const phone = order.shippingAddress.phone;
   if (phone) {
     promises.push(sendConfirmationSMS(phone, order));
