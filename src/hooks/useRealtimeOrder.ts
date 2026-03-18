@@ -83,6 +83,7 @@ export interface Order extends FirestoreDoc {
   paidAt?: Timestamp;
   cancelledAt?: Timestamp;
   cancellationReason?: string;
+  isGuest?: boolean;
 }
 
 // ============================================
