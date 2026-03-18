@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { validateGuineaPhone } from "@/components/checkout/GuestAddressForm";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Search, Package, Phone, Hash, ArrowRight, ShoppingBag } from "lucide-react";
