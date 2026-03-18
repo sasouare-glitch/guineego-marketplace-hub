@@ -8,8 +8,19 @@ const ADMIN_EMAILS = ['sasouare@gmail.com'];
 // super_user has access to all protected routes (like admin)
 const SUPER_ROLES: UserRole[] = ['admin', 'super_user'];
 
-export function ProtectedRoute({ 
-  children, 
+function PermissionLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">Vérification des permissions...</p>
+      </div>
+    </div>
+  );
+}
+
+export function ProtectedRoute({
+  children,
   requiredRoles,
   redirectTo = '/login',
   fallback
@@ -34,42 +45,28 @@ export function ProtectedRoute({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // Bypass immédiat et inconditionnel pour les emails admin prioritaires
-  // Placé AVANT toute vérification de claims/rôles pour éviter les race conditions
-  const userEmail = user?.email?.toLowerCase();
-  const isAdminEmail = userEmail && ADMIN_EMAILS.includes(userEmail);
+  const userEmail = user.email?.toLowerCase();
+  const isAdminEmail = Boolean(userEmail && ADMIN_EMAILS.includes(userEmail));
 
   // Vérifier les rôles si spécifiés (seulement si l'utilisateur est connecté)
   if (requiredRoles && requiredRoles.length > 0) {
-    // Admin email bypass - accès immédiat sans attendre les claims
-    if (isAdminEmail) {
-      return <>{children}</>;
-    }
-
-    // super_user bypass - accès à toutes les routes protégées
     const effectiveRoles = [...new Set([...requiredRoles, ...SUPER_ROLES])];
 
-    // hasAnyRole now also checks profile fallback
-    if (hasAnyRole(effectiveRoles)) {
+    // Important: wait for auth-derived permission state before mounting
+    // privileged routes, otherwise Firestore listeners can attach too early
+    // and trigger the SDK b815/ca9 assertion on admin pages.
+    if (!claims && !profile) {
+      return <PermissionLoader />;
+    }
+
+    if (isAdminEmail || hasAnyRole(effectiveRoles)) {
       return <>{children}</>;
     }
 
-    // Attendre que les claims OU le profil soient chargés avant de refuser l'accès
-    if (!claims && !profile) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="text-muted-foreground">Vérification des permissions...</p>
-          </div>
-        </div>
-      );
-    }
-
-    // À ce stade, claims chargés mais rôle insuffisant
     if (fallback) {
       return <>{fallback}</>;
     }
+
     return <Navigate to="/access-denied" replace />;
   }
 

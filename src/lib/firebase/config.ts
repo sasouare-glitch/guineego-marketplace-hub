@@ -4,26 +4,25 @@
  */
 
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
-import { 
-  getAuth, 
+import {
+  getAuth,
   connectAuthEmulator,
   GoogleAuthProvider,
   FacebookAuthProvider,
   type Auth
 } from 'firebase/auth';
-import { 
-  getFirestore, 
+import {
+  getFirestore,
   connectFirestoreEmulator,
-  enableIndexedDbPersistence,
   type Firestore
 } from 'firebase/firestore';
-import { 
-  getStorage, 
+import {
+  getStorage,
   connectStorageEmulator,
   type FirebaseStorage
 } from 'firebase/storage';
-import { 
-  getFunctions, 
+import {
+  getFunctions,
   connectFunctionsEmulator,
   httpsCallable,
   type Functions
@@ -65,16 +64,11 @@ db = getFirestore(app);
 storage = getStorage(app);
 functions = getFunctions(app, 'europe-west1');
 
-// Enable offline persistence for Firestore
-if (typeof window !== 'undefined') {
-  enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code === 'failed-precondition') {
-      console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-    } else if (err.code === 'unimplemented') {
-      console.warn('The current browser does not support offline persistence.');
-    }
-  });
-}
+// NOTE:
+// IndexedDB persistence is intentionally disabled because this project has
+// multiple high-churn realtime listeners and Firebase 12.8.0 can hit the
+// b815/ca9 internal assertion when local persistence + watch state drift.
+// Default in-memory cache is more stable here and prevents blank-screen crashes.
 
 // OAuth Providers
 export const googleProvider = new GoogleAuthProvider();

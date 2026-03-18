@@ -7,7 +7,6 @@ import {
   query,
   where,
   orderBy,
-  onSnapshot,
   doc,
   updateDoc,
   deleteDoc,
@@ -17,6 +16,7 @@ import {
   Timestamp
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { safeOnSnapshot } from "@/lib/firebase/safeSnapshot";
 
 interface NotificationContextType {
   notifications: NotificationData[];
@@ -57,10 +57,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       orderBy("createdAt", "desc")
     );
 
-    let unsubscribe: (() => void) | undefined;
-    try {
-      unsubscribe = onSnapshot(q, (snapshot) => {
-        const notifs: NotificationData[] = snapshot.docs.map((docSnap) => {
+    const unsubscribe = safeOnSnapshot(
+      q,
+      (snapshot: any) => {
+        const notifs: NotificationData[] = snapshot.docs.map((docSnap: any) => {
           const data = docSnap.data();
           const createdAt = data.createdAt instanceof Timestamp
             ? data.createdAt.toDate().toISOString()
@@ -78,16 +78,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           };
         });
         setNotifications(notifs);
-      }, (error) => {
+      },
+      (error) => {
         console.error("Error listening to notifications:", error);
-      });
-    } catch (e) {
-      console.error('useNotifications: Failed to attach listener:', e);
-    }
+      },
+      'NotificationProvider'
+    );
 
-    return () => {
-      try { unsubscribe?.(); } catch (e) { /* ignore */ }
-    };
+    return unsubscribe;
   }, [user?.uid]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
