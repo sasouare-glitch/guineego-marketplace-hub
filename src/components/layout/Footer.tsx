@@ -46,6 +46,7 @@ export function Footer() {
     ],
     aide: [
       { name: t.footer.helpCenter, href: "/help" },
+      { name: "📦 Suivre ma commande", href: "/track" },
       { name: t.footer.myOrders, href: "/orders" },
       { name: t.footer.returns, href: "/returns" },
       { name: t.footer.contactUs, href: "/contact" },

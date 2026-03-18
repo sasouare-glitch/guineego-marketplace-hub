@@ -321,6 +321,12 @@ export function Header() {
             ) : (
               <div className="hidden sm:flex items-center gap-2">
                 <Button variant="ghost" size="sm" asChild>
+                  <Link to="/track" className="flex items-center gap-1.5">
+                    <Package className="w-4 h-4" />
+                    Suivre ma commande
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild>
                   <Link to="/login">{t.nav.login}</Link>
                 </Button>
                 <Button size="sm" asChild>
@@ -427,13 +433,23 @@ export function Header() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="pt-4 px-4 flex gap-2">
-                    <Button variant="outline" className="flex-1" asChild>
-                      <Link to="/login">{t.nav.login}</Link>
-                    </Button>
-                    <Button className="flex-1" asChild>
-                      <Link to="/register">{t.nav.register}</Link>
-                    </Button>
+                  <div className="pt-4 px-4 space-y-3">
+                    <Link
+                      to="/track"
+                      className="flex items-center gap-3 px-4 py-3 text-foreground/80 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Package className="w-5 h-5" />
+                      📦 Suivre ma commande
+                    </Link>
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="flex-1" asChild>
+                        <Link to="/login">{t.nav.login}</Link>
+                      </Button>
+                      <Button className="flex-1" asChild>
+                        <Link to="/register">{t.nav.register}</Link>
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
