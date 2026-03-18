@@ -463,19 +463,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Écouter les changements du document utilisateur pour auto-refresh des claims
   useEffect(() => {
     if (!state.user) return;
-    const unsubscribe = onSnapshot(doc(db, 'users', state.user.uid), (snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      // Si le rôle a changé dans Firestore, rafraîchir les claims (une seule fois)
-      if (data.role && data.role !== currentRoleRef.current && !isRefreshingRef.current) {
-        console.log('[AuthContext] Role changed in Firestore, refreshing claims…');
-        isRefreshingRef.current = true;
-        refreshClaims().finally(() => {
-          isRefreshingRef.current = false;
-        });
-      }
-    });
-    return () => unsubscribe();
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = onSnapshot(doc(db, 'users', state.user.uid), (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        // Si le rôle a changé dans Firestore, rafraîchir les claims (une seule fois)
+        if (data.role && data.role !== currentRoleRef.current && !isRefreshingRef.current) {
+          console.log('[AuthContext] Role changed in Firestore, refreshing claims…');
+          isRefreshingRef.current = true;
+          refreshClaims().finally(() => {
+            isRefreshingRef.current = false;
+          });
+        }
+      }, (err) => {
+        console.error('[AuthContext] Role watcher error:', err);
+      });
+    } catch (e) {
+      console.error('[AuthContext] Failed to attach role watcher:', e);
+    }
+    return () => { try { unsubscribe?.(); } catch (e) { /* ignore */ } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.user?.uid]);
 
