@@ -235,41 +235,45 @@ export function useAvailableMissions(courierZones: string[] = []) {
     }
 
     setLoading(true);
+    let unsub: (() => void) | undefined;
     
     import('firebase/firestore').then(({ collection, query, where, orderBy, onSnapshot }) => {
-      // Note: This query would need a composite index
       const q = query(
         collection(db, 'deliveries'),
         where('status', '==', 'pending'),
         orderBy('createdAt', 'desc')
       );
 
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          let missionsList = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          } as DeliveryMission));
-          
-          // Filter by zones client-side
-          missionsList = missionsList.filter(m => 
-            courierZones.includes(m.delivery.commune)
-          );
-          
-          setMissions(missionsList);
-          setLoading(false);
-          setError(null);
-        },
-        (err) => {
-          console.error('Error fetching available missions:', err);
-          setError(err);
-          setLoading(false);
-        }
-      );
-
-      return () => unsubscribe();
+      try {
+        unsub = onSnapshot(
+          q,
+          (snapshot) => {
+            let missionsList = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            } as DeliveryMission));
+            
+            missionsList = missionsList.filter(m => 
+              courierZones.includes(m.delivery.commune)
+            );
+            
+            setMissions(missionsList);
+            setLoading(false);
+            setError(null);
+          },
+          (err) => {
+            console.error('Error fetching available missions:', err);
+            setError(err);
+            setLoading(false);
+          }
+        );
+      } catch (e) {
+        console.error('useAvailableMissions: Failed to attach listener:', e);
+        setLoading(false);
+      }
     });
+
+    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
   }, [courierZones.join(',')]);
 
   return { missions, loading, error };

@@ -219,6 +219,7 @@ export function useSellerOrders(sellerId: string | null | undefined, statusFilte
     }
 
     setLoading(true);
+    let unsub: (() => void) | undefined;
     
     import('firebase/firestore').then(({ collection, query, where, orderBy, onSnapshot }) => {
       let q = query(
@@ -226,35 +227,37 @@ export function useSellerOrders(sellerId: string | null | undefined, statusFilte
         where('sellerIds', 'array-contains', sellerId),
         orderBy('createdAt', 'desc')
       );
-
-      // Note: Status filter would require a composite index
-      // For now, filter client-side
       
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          let ordersList = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          } as Order));
-          
-          if (statusFilter) {
-            ordersList = ordersList.filter(o => o.status === statusFilter);
+      try {
+        unsub = onSnapshot(
+          q,
+          (snapshot) => {
+            let ordersList = snapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            } as Order));
+            
+            if (statusFilter) {
+              ordersList = ordersList.filter(o => o.status === statusFilter);
+            }
+            
+            setOrders(ordersList);
+            setLoading(false);
+            setError(null);
+          },
+          (err) => {
+            console.error('Error fetching seller orders:', err);
+            setError(err);
+            setLoading(false);
           }
-          
-          setOrders(ordersList);
-          setLoading(false);
-          setError(null);
-        },
-        (err) => {
-          console.error('Error fetching seller orders:', err);
-          setError(err);
-          setLoading(false);
-        }
-      );
-
-      return () => unsubscribe();
+        );
+      } catch (e) {
+        console.error('useSellerOrders: Failed to attach listener:', e);
+        setLoading(false);
+      }
     });
+
+    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
   }, [sellerId, statusFilter]);
 
   // Calculate stats
