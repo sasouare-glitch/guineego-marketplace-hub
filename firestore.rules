@@ -121,9 +121,8 @@ service cloud.firestore {
                   || (isCloser() && resource.data.assignedCloser == request.auth.uid)
                   || (isCourier() && resource.data.assignedCourier == request.auth.uid);
       
-      // Authenticated users can create their own orders; admin can create any
-      allow create: if isAdmin()
-                    || (isAuthenticated() && request.resource.data.customerId == request.auth.uid);
+      // Orders are created exclusively via Cloud Functions (Admin SDK)
+      allow create: if false;
       
       // Sellers can update orders they are involved in (by UID, sellerId, or ecommerceId)
       allow update: if isAdmin()
