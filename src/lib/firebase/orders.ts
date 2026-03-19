@@ -67,6 +67,22 @@ function toUserFacingOrderError(error: any, isGuest?: boolean): Error {
   const code = error?.code || '';
   const message = error?.message || '';
 
+  console.error('[Order] Raw error:', { code, message, error });
+
+  // Network / CORS / unreachable Cloud Function
+  if (
+    message === 'internal' ||
+    message === 'Failed to fetch' ||
+    message.includes('Failed to fetch') ||
+    message.includes('NetworkError') ||
+    message.includes('ERR_NETWORK') ||
+    code === 'functions/internal'
+  ) {
+    return new Error(
+      'Le serveur de commande est temporairement indisponible. Vérifiez votre connexion internet et réessayez dans quelques instants.'
+    );
+  }
+
   if (code === 'functions/unauthenticated') {
     return new Error('Votre session a expiré. Reconnectez-vous puis réessayez.');
   }
@@ -80,8 +96,7 @@ function toUserFacingOrderError(error: any, isGuest?: boolean): Error {
 
   if (
     code === 'functions/invalid-argument' ||
-    code === 'functions/failed-precondition' ||
-    code === 'functions/internal'
+    code === 'functions/failed-precondition'
   ) {
     return new Error(message || 'Erreur lors de la création de la commande');
   }
