@@ -175,9 +175,8 @@ service cloud.firestore {
     // ============================================
     match /payments/{paymentId} {
       allow read: if isOwner(resource.data.customerId) || isAdmin();
-      allow create: if isAdmin()
-                    || (isAuthenticated() && request.resource.data.customerId == request.auth.uid);
-      allow update, delete: if false;
+      // Payments are created exclusively via Cloud Functions (Admin SDK)
+      allow create: if false;
     }
     
     // ============================================
