@@ -30,6 +30,7 @@ export { onProductCreated, onProductUpdated } from './products/productTriggers';
 // ORDERS FUNCTIONS
 // ============================================
 export { createOrder } from './orders/createOrder';
+export { createGuestOrder } from './orders/createGuestOrder';
 export { updateOrderStatus } from './orders/updateOrderStatus';
 export { cancelOrder } from './orders/cancelOrder';
 export { onOrderCreated, onOrderStatusChanged } from './orders/orderTriggers';
