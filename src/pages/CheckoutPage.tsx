@@ -238,8 +238,8 @@ export default function CheckoutPage() {
     );
   }
 
-  // Filter payment methods for guests (no wallet)
-  const guestExcludedPayments = isGuest ? ['wallet'] : [];
+  // Filter payment methods for guests (wallet + card require authenticated flows)
+  const guestExcludedPayments = isGuest ? ['wallet', 'card'] : [];
 
   return (
     <div className="min-h-screen bg-background">
