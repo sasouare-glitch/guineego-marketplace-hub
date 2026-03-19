@@ -1,0 +1,421 @@
+"use strict";
+/**
+ * ORDERS TRIGGERS: Firestore Triggers for Orders
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.onOrderStatusChanged = exports.onOrderCreated = void 0;
+const functions = __importStar(require("firebase-functions"));
+const admin = __importStar(require("firebase-admin"));
+const notifications_1 = require("../utils/notifications");
+const sendOrderConfirmation_1 = require("../notifications/sendOrderConfirmation");
+const sendStatusNotification_1 = require("../notifications/sendStatusNotification");
+const emailTemplate_1 = require("../utils/emailTemplate");
+const sendgrid_1 = require("../utils/sendgrid");
+const db = admin.firestore();
+/**
+ * Trigger: Order Created
+ * - Assign to closer if available
+ * - Update seller stats
+ * - Log analytics
+ */
+exports.onOrderCreated = functions
+    .region('europe-west1')
+    .firestore.document('orders/{orderId}')
+    .onCreate(async (snapshot, context) => {
+    const order = snapshot.data();
+    const orderId = context.params.orderId;
+    try {
+        // 1. Find available closer for assignment
+        const closersSnapshot = await db.collection('closers')
+            .where('isAvailable', '==', true)
+            .where('status', '==', 'active')
+            .orderBy('assignedOrders', 'asc')
+            .limit(1)
+            .get();
+        if (!closersSnapshot.empty) {
+            const closer = closersSnapshot.docs[0];
+            // Assign closer
+            await snapshot.ref.update({
+                assignedCloser: closer.data().userId,
+                closerId: closer.id
+            });
+            // Update closer stats
+            await closer.ref.update({
+                assignedOrders: admin.firestore.FieldValue.increment(1)
+            });
+            // Notify closer
+            await (0, notifications_1.sendNotification)({
+                userId: closer.data().userId,
+                type: 'closing_assigned',
+                title: 'Nouvelle commande assignée',
+                body: `Commande ${orderId} - ${order.pricing.total.toLocaleString()} GNF`,
+                data: { orderId }
+            });
+        }
+        // 2. Update seller stats
+        for (const sellerId of order.sellerIds || []) {
+            const sellerAmount = order.sellers[sellerId]?.subtotal || 0;
+            await db.collection('ecommerces').doc(sellerId).update({
+                pendingOrders: admin.firestore.FieldValue.increment(1),
+                totalOrderValue: admin.firestore.FieldValue.increment(sellerAmount)
+            });
+            // Create seller order reference
+            await db.collection('seller_orders').add({
+                sellerId,
+                orderId,
+                customerId: order.customerId,
+                amount: sellerAmount,
+                status: 'pending',
+                createdAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+        }
+        // 3. Log to analytics
+        await db.collection('analytics_events').add({
+            event: 'order_created',
+            orderId,
+            customerId: order.customerId,
+            total: order.pricing.total,
+            itemCount: order.items.length,
+            sellerCount: order.sellerIds?.length || 1,
+            paymentMethod: order.paymentMethod,
+            commune: order.shippingAddress.commune,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        // 4. Send confirmation SMS + Email to customer
+        await (0, sendOrderConfirmation_1.sendOrderConfirmation)({
+            id: orderId,
+            customerId: order.customerId,
+            pricing: order.pricing,
+            items: order.items,
+            shippingAddress: order.shippingAddress,
+            paymentMethod: order.paymentMethod,
+        });
+        console.log(`Order ${orderId} processed successfully`);
+    }
+    catch (error) {
+        console.error('Error in onOrderCreated:', error);
+    }
+});
+/**
+ * Trigger: Order Status Changed
+ * - Process payments on confirmation
+ * - Create delivery mission on ready
+ * - Calculate commissions on delivery
+ */
+exports.onOrderStatusChanged = functions
+    .region('europe-west1')
+    .firestore.document('orders/{orderId}')
+    .onUpdate(async (change, context) => {
+    const before = change.before.data();
+    const after = change.after.data();
+    const orderId = context.params.orderId;
+    // Only process status changes
+    if (before.status === after.status) {
+        return;
+    }
+    const newStatus = after.status;
+    try {
+        switch (newStatus) {
+            case 'confirmed':
+                // Order confirmed by seller/closer
+                await db.collection('analytics_events').add({
+                    event: 'order_confirmed',
+                    orderId,
+                    confirmedBy: after.statusHistory?.slice(-1)[0]?.performedBy,
+                    createdAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+                break;
+            case 'ready':
+                // Create delivery mission
+                await createDeliveryMission(orderId, after);
+                break;
+            case 'delivered':
+                // Process seller payouts
+                await processSellerPayouts(orderId, after);
+                // Update closer metrics
+                if (after.closerId) {
+                    await db.collection('closers').doc(after.closerId).update({
+                        completedOrders: admin.firestore.FieldValue.increment(1)
+                    });
+                }
+                // Update courier stats
+                if (after.assignedCourier) {
+                    await db.collection('couriers').doc(after.assignedCourier).update({
+                        totalDeliveries: admin.firestore.FieldValue.increment(1)
+                    });
+                }
+                // Notify sellers: order delivered
+                await notifySellers(orderId, after, 'delivered');
+                break;
+            case 'cancelled':
+                // Update seller pending orders
+                for (const sellerId of after.sellerIds || []) {
+                    await db.collection('ecommerces').doc(sellerId).update({
+                        pendingOrders: admin.firestore.FieldValue.increment(-1)
+                    });
+                }
+                // Notify sellers: order cancelled
+                await notifySellers(orderId, after, 'cancelled');
+                break;
+        }
+        // Send SMS + Email notification for status changes
+        const notifiableStatuses = ['confirmed', 'preparing', 'ready', 'shipped', 'in_delivery', 'delivered', 'cancelled'];
+        if (notifiableStatuses.includes(newStatus)) {
+            await (0, sendStatusNotification_1.sendStatusNotification)({
+                orderId,
+                customerId: after.customerId,
+                status: newStatus,
+                customerName: after.shippingAddress?.fullName,
+                commune: after.shippingAddress?.commune,
+                total: after.pricing?.total,
+                phone: after.shippingAddress?.phone,
+            });
+        }
+        // Log status change
+        await db.collection('analytics_events').add({
+            event: 'order_status_changed',
+            orderId,
+            previousStatus: before.status,
+            newStatus,
+            performedBy: after.statusHistory?.slice(-1)[0]?.performedBy,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+    }
+    catch (error) {
+        console.error('Error in onOrderStatusChanged:', error);
+    }
+});
+/**
+ * Create delivery mission when order is ready
+ */
+async function createDeliveryMission(orderId, order) {
+    const missionRef = db.collection('deliveries').doc();
+    await missionRef.set({
+        id: missionRef.id,
+        orderId,
+        customerId: order.customerId,
+        sellerIds: order.sellerIds,
+        pickup: {
+            // Get from first seller
+            address: 'À récupérer chez le vendeur',
+            commune: 'Kaloum' // Default
+        },
+        delivery: order.shippingAddress,
+        status: 'pending',
+        assignedCourier: null,
+        fee: order.pricing.shippingFee,
+        distance: null,
+        estimatedTime: null,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    // Link mission to order
+    await db.collection('orders').doc(orderId).update({
+        deliveryMissionId: missionRef.id
+    });
+    // Notify available couriers in the zone
+    const couriersSnapshot = await db.collection('couriers')
+        .where('isOnline', '==', true)
+        .where('zones', 'array-contains', order.shippingAddress.commune)
+        .limit(10)
+        .get();
+    for (const courier of couriersSnapshot.docs) {
+        await (0, notifications_1.sendNotification)({
+            userId: courier.data().userId,
+            type: 'new_mission',
+            title: 'Nouvelle mission disponible',
+            body: `Livraison vers ${order.shippingAddress.commune} - ${order.pricing.shippingFee.toLocaleString()} GNF`,
+            data: { missionId: missionRef.id, orderId }
+        });
+    }
+}
+/**
+ * Process seller payouts on delivery
+ */
+async function processSellerPayouts(orderId, order) {
+    for (const sellerId of order.sellerIds || []) {
+        const sellerData = order.sellers[sellerId];
+        if (!sellerData)
+            continue;
+        // Get seller commission rate
+        const sellerDoc = await db.collection('ecommerces').doc(sellerId).get();
+        const commissionRate = sellerDoc.data()?.commission || 0.1;
+        // Calculate payout
+        const grossAmount = sellerData.subtotal;
+        const commission = Math.floor(grossAmount * commissionRate);
+        const netAmount = grossAmount - commission;
+        // Create payout record
+        await db.collection('payouts').add({
+            sellerId,
+            orderId,
+            grossAmount,
+            commission,
+            commissionRate,
+            netAmount,
+            status: 'pending',
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        // Update seller stats
+        await db.collection('ecommerces').doc(sellerId).update({
+            totalSales: admin.firestore.FieldValue.increment(1),
+            totalRevenue: admin.firestore.FieldValue.increment(netAmount),
+            pendingPayout: admin.firestore.FieldValue.increment(netAmount),
+            pendingOrders: admin.firestore.FieldValue.increment(-1)
+        });
+        // Notify seller
+        await (0, notifications_1.sendNotification)({
+            userId: sellerId,
+            type: 'payment_received',
+            title: 'Vente complétée !',
+            body: `Commande livrée. ${netAmount.toLocaleString()} GNF ajoutés à votre solde.`,
+            data: { orderId, amount: netAmount.toString() }
+        });
+    }
+}
+/**
+ * Notify all sellers of an order via in-app + SMS + Email
+ */
+async function notifySellers(orderId, order, status) {
+    const sellerMessages = {
+        delivered: {
+            emoji: '🎉',
+            title: 'Commande livrée',
+            body: (amount) => `La commande ${orderId} a été livrée avec succès. Montant : ${amount} GNF.`,
+            sms: (amount) => `GuineeGo: Commande ${orderId} livrée! Montant: ${amount} GNF ajouté à votre solde.`,
+            emailBody: (sellerName, amount) => (0, emailTemplate_1.wrapInTemplate)(`
+        <h2 style="margin: 0 0 8px; font-size: 22px; color: ${emailTemplate_1.COLORS.green};">🎉 Commande livrée avec succès</h2>
+        <p style="margin: 0 0 16px; font-size: 15px; color: ${emailTemplate_1.COLORS.bodyText};">Bonjour <strong>${sellerName}</strong>,</p>
+        <p style="margin: 0 0 16px; font-size: 15px; color: ${emailTemplate_1.COLORS.bodyText};">La commande <strong>${orderId}</strong> a été livrée au client.</p>
+        <div style="background-color: #ecfdf5; border-left: 4px solid ${emailTemplate_1.COLORS.green}; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px;">
+          <p style="margin: 0; font-size: 13px; color: ${emailTemplate_1.COLORS.mutedText};">Montant crédité</p>
+          <p style="margin: 4px 0 0; font-size: 22px; font-weight: 700; color: ${emailTemplate_1.COLORS.green};">${amount} GNF</p>
+        </div>
+        ${(0, emailTemplate_1.ctaButton)('📋 Voir les détails', `${emailTemplate_1.APP_URL}/order/${orderId}`)}
+      `),
+        },
+        cancelled: {
+            emoji: '❌',
+            title: 'Commande annulée',
+            body: (_) => `La commande ${orderId} a été annulée.`,
+            sms: (_) => `GuineeGo: Commande ${orderId} annulée. Consultez votre tableau de bord.`,
+            emailBody: (sellerName, _) => (0, emailTemplate_1.wrapInTemplate)(`
+        <h2 style="margin: 0 0 8px; font-size: 22px; color: ${emailTemplate_1.COLORS.red};">❌ Commande annulée</h2>
+        <p style="margin: 0 0 16px; font-size: 15px; color: ${emailTemplate_1.COLORS.bodyText};">Bonjour <strong>${sellerName}</strong>,</p>
+        <p style="margin: 0 0 16px; font-size: 15px; color: ${emailTemplate_1.COLORS.bodyText};">La commande <strong>${orderId}</strong> a été annulée.</p>
+        <p style="margin: 0 0 20px; font-size: 14px; color: ${emailTemplate_1.COLORS.mutedText};">Consultez votre tableau de bord pour plus de détails.</p>
+        ${(0, emailTemplate_1.ctaButton)('📋 Voir les détails', `${emailTemplate_1.APP_URL}/order/${orderId}`, emailTemplate_1.COLORS.red)}
+      `),
+        },
+    };
+    const msg = sellerMessages[status];
+    for (const sellerId of order.sellerIds || []) {
+        try {
+            const sellerAmount = order.sellers?.[sellerId]?.subtotal?.toLocaleString() || '0';
+            // 1. In-app notification
+            await (0, notifications_1.sendNotification)({
+                userId: sellerId,
+                type: status === 'delivered' ? 'order_delivered' : 'order_cancelled',
+                title: `${msg.emoji} ${msg.title}`,
+                body: msg.body(sellerAmount),
+                data: { orderId },
+            });
+            // 2. Get seller info for email/SMS
+            const sellerDoc = await db.collection('users').doc(sellerId).get();
+            const seller = sellerDoc.data();
+            if (!seller)
+                continue;
+            const sellerName = seller.displayName || seller.shopName || 'Vendeur';
+            const promises = [];
+            // 3. Email via dual strategy (mail collection + SendGrid fallback)
+            if (seller.email) {
+                promises.push((0, sendgrid_1.sendEmailWithFallback)({
+                    to: seller.email,
+                    subject: `${msg.emoji} ${msg.title} — Commande ${orderId}`,
+                    html: msg.emailBody(sellerName, sellerAmount),
+                }));
+            }
+            // 4. SMS via Orange API
+            const phone = seller.phone || seller.phoneNumber;
+            if (phone) {
+                promises.push(sendSellerSMS(phone, msg.sms(sellerAmount)));
+            }
+            await Promise.allSettled(promises);
+            console.log(`✅ Seller ${sellerId} notifié (${status}) pour commande ${orderId}`);
+        }
+        catch (error) {
+            console.error(`❌ Erreur notification vendeur ${sellerId}:`, error);
+        }
+    }
+}
+/**
+ * Send SMS to seller via Orange API
+ */
+async function sendSellerSMS(phone, message) {
+    const configDoc = await db.collection('config').doc('orange_sms').get();
+    const config = configDoc.data();
+    if (!config?.clientId || !config?.clientSecret)
+        return;
+    const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'grant_type=client_credentials',
+    });
+    if (!tokenResponse.ok)
+        throw new Error(`Token failed: ${tokenResponse.status}`);
+    const { access_token } = await tokenResponse.json();
+    const cleaned = phone.replace(/\s+/g, '').replace(/[^\d+]/g, '');
+    const formattedPhone = cleaned.startsWith('+224') ? cleaned
+        : cleaned.startsWith('224') ? `+${cleaned}`
+            : `+224${cleaned}`;
+    const senderAddress = config.senderAddress || 'tel:+224000000000';
+    await fetch(`https://api.orange.com/smsmessaging/v1/outbound/${encodeURIComponent(senderAddress)}/requests`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${access_token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            outboundSMSMessageRequest: {
+                address: `tel:${formattedPhone}`,
+                senderAddress,
+                outboundSMSTextMessage: { message },
+            },
+        }),
+    });
+}
+//# sourceMappingURL=orderTriggers.js.map
