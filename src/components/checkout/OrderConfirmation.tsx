@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { CheckCircle, Package, Truck, Clock, ArrowRight, UserPlus } from "lucide-react";
+import { CheckCircle, Package, Truck, Clock, ArrowRight, UserPlus, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -9,9 +10,10 @@ interface OrderConfirmationProps {
   orderNumber: string;
   estimatedDelivery: string;
   isGuest?: boolean;
+  isSandbox?: boolean;
 }
 
-export const OrderConfirmation = ({ orderNumber, estimatedDelivery, isGuest = false }: OrderConfirmationProps) => {
+export const OrderConfirmation = ({ orderNumber, estimatedDelivery, isGuest = false, isSandbox = false }: OrderConfirmationProps) => {
   const { t } = useTranslation();
 
   useEffect(() => {
