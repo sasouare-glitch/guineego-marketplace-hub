@@ -94,6 +94,7 @@ import AdminRoleRequestsPage from "./pages/admin/AdminRoleRequestsPage";
 import AdminSuperUsersPage from "./pages/admin/AdminSuperUsersPage";
 import AdminSmsConfigPage from "./pages/admin/AdminSmsConfigPage";
 import AdminSmsLogsPage from "./pages/admin/AdminSmsLogsPage";
+import AdminWhatsAppLogsPage from "./pages/admin/AdminWhatsAppLogsPage";
 import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
 import AdminCommissionsPage from "./pages/admin/AdminCommissionsPage";
 import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
@@ -399,6 +400,11 @@ const App = () => (
                     <Route path="/admin/sms-logs" element={
                       <ProtectedRoute requiredRoles={['admin']}>
                         <AdminSmsLogsPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/admin/whatsapp-logs" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminWhatsAppLogsPage />
                       </ProtectedRoute>
                     } />
                     <Route path="/admin/products" element={

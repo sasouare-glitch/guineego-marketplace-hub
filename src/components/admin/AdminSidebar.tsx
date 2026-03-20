@@ -192,6 +192,12 @@ const settingsItems = [
     icon: MessageSquare,
     description: "Journal des SMS envoyés"
   },
+  {
+    title: "Historique WhatsApp",
+    url: "/admin/whatsapp-logs",
+    icon: MessageSquare,
+    description: "Journal des WhatsApp envoyés"
+  },
 ];
 
 export function AdminSidebar() {
