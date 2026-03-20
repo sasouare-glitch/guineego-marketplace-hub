@@ -12,10 +12,59 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Save, Loader2, Eye, EyeOff, Send, CheckCircle2, XCircle, MessageSquare, Phone } from 'lucide-react';
+import { Save, Loader2, Eye, EyeOff, Send, CheckCircle2, XCircle, MessageSquare, Phone, WifiOff, AlertTriangle } from 'lucide-react';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
 import { toast } from 'sonner';
+
+/**
+ * Classify Cloud Function errors into user-friendly messages
+ */
+function getCloudFunctionErrorMessage(err: any, functionName: string, channel: string): string {
+  const code = err?.code || '';
+  const message = err?.message || '';
+  const details = err?.details || '';
+
+  // Network error — function not reachable (not deployed, CORS, offline)
+  if (
+    code === 'functions/internal' && (!message || message === 'INTERNAL') ||
+    message?.includes('Failed to fetch') ||
+    message?.includes('NetworkError') ||
+    message?.includes('Network request failed') ||
+    message?.includes('ERR_CONNECTION') ||
+    err instanceof TypeError
+  ) {
+    return `🔌 Impossible de joindre la fonction "${functionName}". Vérifiez qu'elle est bien déployée sur Firebase (firebase deploy --only functions:${functionName}).`;
+  }
+
+  // Unauthenticated
+  if (code === 'functions/unauthenticated' || code === 'unauthenticated') {
+    return `🔒 Authentification requise. Reconnectez-vous et réessayez.`;
+  }
+
+  // Permission denied
+  if (code === 'functions/permission-denied' || code === 'permission-denied') {
+    return `⛔ Accès refusé. Seuls les administrateurs peuvent envoyer un ${channel} de test.`;
+  }
+
+  // Precondition failed (missing config)
+  if (code === 'functions/failed-precondition' || code === 'failed-precondition') {
+    return `⚙️ Configuration ${channel} incomplète côté serveur : ${message || details || 'credentials manquants'}`;
+  }
+
+  // Invalid argument
+  if (code === 'functions/invalid-argument' || code === 'invalid-argument') {
+    return `📋 Paramètre invalide : ${message || 'vérifiez le numéro de téléphone'}`;
+  }
+
+  // Internal server error (API call failed on the function side)
+  if (code === 'functions/internal' || code === 'internal') {
+    return `❌ Erreur serveur ${channel} : ${message || details || 'erreur interne de la Cloud Function. Consultez les logs Firebase pour plus de détails.'}`;
+  }
+
+  // Fallback
+  return `❌ Échec de l'envoi ${channel} : ${message || 'erreur inconnue'}`;
+}
 
 // ─── Orange SMS Config Section ───────────────────────────────────────────────
 
