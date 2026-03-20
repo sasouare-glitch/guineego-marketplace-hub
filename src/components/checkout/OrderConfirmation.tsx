@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { CheckCircle, Package, Truck, Clock, ArrowRight, UserPlus } from "lucide-react";
+import { CheckCircle, Package, Truck, Clock, ArrowRight, UserPlus, FlaskConical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -9,9 +10,10 @@ interface OrderConfirmationProps {
   orderNumber: string;
   estimatedDelivery: string;
   isGuest?: boolean;
+  isSandbox?: boolean;
 }
 
-export const OrderConfirmation = ({ orderNumber, estimatedDelivery, isGuest = false }: OrderConfirmationProps) => {
+export const OrderConfirmation = ({ orderNumber, estimatedDelivery, isGuest = false, isSandbox = false }: OrderConfirmationProps) => {
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -35,16 +37,36 @@ export const OrderConfirmation = ({ orderNumber, estimatedDelivery, isGuest = fa
         <CheckCircle className="w-12 h-12 text-guinea-green" />
       </motion.div>
 
+      {/* Sandbox Banner */}
+      {isSandbox && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="border-2 border-dashed border-guinea-yellow/50 bg-guinea-yellow/5 rounded-2xl p-4 max-w-md mx-auto mb-6"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Badge variant="outline" className="bg-guinea-yellow/10 text-guinea-yellow border-guinea-yellow/30 text-xs font-mono">
+              <FlaskConical className="w-3 h-3 mr-1" />
+              SANDBOX
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground text-left">
+            🧪 <strong className="text-foreground">Ceci est une simulation.</strong> Aucune commande réelle n'a été créée, aucun paiement n'a été débité. Le numéro de commande et le suivi sont fictifs.
+          </p>
+        </motion.div>
+      )}
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
       >
         <h2 className="text-2xl font-display font-bold text-foreground mb-2">
-          {t.checkout.orderConfirmedTitle} 🎉
+          {isSandbox ? "Simulation terminée 🧪" : `${t.checkout.orderConfirmedTitle} 🎉`}
         </h2>
         <p className="text-muted-foreground mb-6">
-          {t.checkout.thankYouOrder}
+          {isSandbox ? "Le parcours de commande fonctionne correctement." : t.checkout.thankYouOrder}
         </p>
       </motion.div>
 

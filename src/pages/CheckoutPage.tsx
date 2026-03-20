@@ -362,6 +362,7 @@ export default function CheckoutPage() {
                     orderNumber={orderNumber}
                     estimatedDelivery={t.time.today + ", 14h - 18h"}
                     isGuest={isGuest}
+                    isSandbox={isSandboxMode}
                   />
                 </motion.div>
               )}
