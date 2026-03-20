@@ -126,22 +126,34 @@ export default function CheckoutPage() {
         }
 
         // SANDBOX MODE
-        const isMobileMoney = selectedPayment === "orange_money" || selectedPayment === "mtn_money";
-        if (isSandboxMode && isMobileMoney) {
-          const sandboxResult = await simulatePayment({
-            method: selectedPayment as "orange_money" | "mtn_money",
-            phone: phoneNumber,
-            amount: subtotal,
-            orderId: `SANDBOX_ORD_${Date.now()}`,
-          });
+        if (isSandboxMode) {
+          const isMobileMoney = selectedPayment === "orange_money" || selectedPayment === "mtn_money";
+          
+          if (isMobileMoney) {
+            const sandboxResult = await simulatePayment({
+              method: selectedPayment as "orange_money" | "mtn_money",
+              phone: phoneNumber,
+              amount: subtotal,
+              orderId: `SANDBOX_ORD_${Date.now()}`,
+            });
 
-          if (sandboxResult.success) {
-            setOrderNumber(sandboxResult.orderId);
+            if (sandboxResult.success) {
+              setOrderNumber(sandboxResult.orderId);
+              clearCart();
+              toast.success("🧪 [SANDBOX] Paiement simulé avec succès !");
+              await new Promise(r => setTimeout(r, 1500));
+              setCurrentStep(3);
+              resetSandbox();
+            }
+          } else {
+            // Sandbox pour cash, wallet, card, etc.
+            const fakeOrderId = `SANDBOX_ORD_${Date.now()}`;
+            setOrderNumber(fakeOrderId);
             clearCart();
-            toast.success("🧪 [SANDBOX] Paiement simulé avec succès !");
-            await new Promise(r => setTimeout(r, 1500));
+            const label = selectedPayment === "cash" ? "Cash à la livraison" : selectedPayment === "wallet" ? "Wallet" : "Carte";
+            toast.success(`🧪 [SANDBOX] Commande ${label} simulée avec succès !`);
+            await new Promise(r => setTimeout(r, 800));
             setCurrentStep(3);
-            resetSandbox();
           }
           setIsProcessing(false);
           return;
