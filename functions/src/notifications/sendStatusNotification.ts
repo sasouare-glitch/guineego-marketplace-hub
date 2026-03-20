@@ -7,6 +7,7 @@
 import * as admin from 'firebase-admin';
 import { wrapInTemplate, ctaButton, APP_URL, COLORS } from '../utils/emailTemplate';
 import { sendEmailWithFallback } from '../utils/sendgrid';
+import { sendWhatsApp } from '../utils/whatsapp';
 
 const db = admin.firestore();
 
