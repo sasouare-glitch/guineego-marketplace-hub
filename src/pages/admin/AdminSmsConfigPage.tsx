@@ -305,7 +305,8 @@ function TwilioWhatsAppConfigSection() {
       const result = await sendTest({ phoneNumber: testPhone.trim() });
       toast.success(result.data.message || `WhatsApp de test envoyé au ${testPhone}`);
     } catch (err: any) {
-      toast.error(err?.message || 'Échec de l\'envoi du WhatsApp de test');
+      const errorMsg = getCloudFunctionErrorMessage(err, 'sendTestWhatsApp', 'WhatsApp');
+      toast.error(errorMsg, { duration: 8000 });
     } finally {
       setTesting(false);
     }
