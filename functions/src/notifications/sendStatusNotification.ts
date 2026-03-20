@@ -7,6 +7,7 @@
 import * as admin from 'firebase-admin';
 import { wrapInTemplate, ctaButton, APP_URL, COLORS } from '../utils/emailTemplate';
 import { sendEmailWithFallback } from '../utils/sendgrid';
+import { sendWhatsApp } from '../utils/whatsapp';
 
 const db = admin.firestore();
 
@@ -152,72 +153,85 @@ async function sendStatusSMS(
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
 
+  let smsSent = false;
+
   try {
     const configDoc = await db.collection('config').doc('orange_sms').get();
     const config = configDoc.data();
 
     if (!config?.clientId || !config?.clientSecret) {
       await logRef.set({ ...logBase, status: 'failed', error: 'Orange SMS API non configurée' });
-      return;
-    }
-
-    if (!config?.enabled) {
+    } else if (!config?.enabled) {
       await logRef.set({ ...logBase, status: 'failed', error: 'SMS désactivé' });
-      return;
-    }
-
-    const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: 'grant_type=client_credentials',
-    });
-
-    if (!tokenResponse.ok) {
-      const tokenError = await tokenResponse.text();
-      await logRef.set({ ...logBase, status: 'failed', error: `Token OAuth échoué [${tokenResponse.status}]: ${tokenError}` });
-      throw new Error(`Token failed: ${tokenResponse.status}`);
-    }
-
-    const { access_token } = await tokenResponse.json();
-    const senderAddress = config.senderAddress || 'tel:+224000000000';
-    const encodedSender = encodeURIComponent(senderAddress);
-
-    const smsResponse = await fetch(
-      `https://api.orange.com/smsmessaging/v1/outbound/${encodedSender}/requests`,
-      {
+    } else {
+      const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${access_token}`,
-          'Content-Type': 'application/json',
+          'Authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({
-          outboundSMSMessageRequest: {
-            address: `tel:${formattedPhone}`,
-            senderAddress,
-            outboundSMSTextMessage: { message: smsMessage },
-          },
-        }),
+        body: 'grant_type=client_credentials',
+      });
+
+      if (!tokenResponse.ok) {
+        const tokenError = await tokenResponse.text();
+        await logRef.set({ ...logBase, status: 'failed', error: `Token OAuth échoué [${tokenResponse.status}]: ${tokenError}` });
+      } else {
+        const { access_token } = await tokenResponse.json();
+        const senderAddress = config.senderAddress || 'tel:+224000000000';
+        const encodedSender = encodeURIComponent(senderAddress);
+
+        const smsResponse = await fetch(
+          `https://api.orange.com/smsmessaging/v1/outbound/${encodedSender}/requests`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${access_token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              outboundSMSMessageRequest: {
+                address: `tel:${formattedPhone}`,
+                senderAddress,
+                outboundSMSTextMessage: { message: smsMessage },
+              },
+            }),
+          }
+        );
+
+        if (!smsResponse.ok) {
+          const errorBody = await smsResponse.text();
+          await logRef.set({ ...logBase, status: 'failed', error: `SMS échoué [${smsResponse.status}]: ${errorBody}` });
+        } else {
+          const responseBody = await smsResponse.text();
+          await logRef.set({ ...logBase, status: 'sent', response: responseBody });
+          console.log(`✅ SMS statut "${status}" envoyé à ${formattedPhone} pour commande ${orderId}`);
+          smsSent = true;
+        }
       }
-    );
-
-    if (!smsResponse.ok) {
-      const errorBody = await smsResponse.text();
-      await logRef.set({ ...logBase, status: 'failed', error: `SMS échoué [${smsResponse.status}]: ${errorBody}` });
-      throw new Error(`SMS failed [${smsResponse.status}]: ${errorBody}`);
     }
-
-    const responseBody = await smsResponse.text();
-    await logRef.set({ ...logBase, status: 'sent', response: responseBody });
-    console.log(`✅ SMS statut "${status}" envoyé à ${formattedPhone} pour commande ${orderId}`);
   } catch (error: any) {
     const existingLog = await logRef.get();
     if (!existingLog.exists) {
       await logRef.set({ ...logBase, status: 'failed', error: error?.message || String(error) });
     }
     console.error(`❌ Erreur envoi SMS statut pour commande ${orderId}:`, error);
+  }
+
+  // 🔄 Fallback WhatsApp si SMS échoué
+  if (!smsSent) {
+    console.log(`🔄 SMS échoué → tentative WhatsApp pour commande ${orderId}`);
+    const whatsappSent = await sendWhatsApp({
+      to: formattedPhone,
+      body: smsMessage,
+      orderId,
+      type: `status_${status}`,
+    });
+    if (whatsappSent) {
+      console.log(`✅ WhatsApp fallback réussi pour commande ${orderId}`);
+    } else {
+      console.error(`❌ WhatsApp fallback échoué pour commande ${orderId} — aucun canal de notification disponible`);
+    }
   }
 }
 
