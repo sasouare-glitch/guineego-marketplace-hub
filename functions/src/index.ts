@@ -139,9 +139,10 @@ export {
 } from './analytics/bigQuerySync';
 
 // ============================================
-// SMS FUNCTIONS
+// SMS & WHATSAPP FUNCTIONS
 // ============================================
 export { sendTestSms } from './notifications/sendTestSms';
+export { sendTestWhatsApp } from './notifications/sendTestWhatsApp';
 export { retrySmsScheduled } from './notifications/retrySms';
 export { manualRetrySms } from './notifications/manualRetrySms';
 export { resendOrderSms } from './notifications/resendOrderSms';
