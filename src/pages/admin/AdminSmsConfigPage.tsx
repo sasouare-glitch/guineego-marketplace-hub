@@ -293,6 +293,23 @@ function TwilioWhatsAppConfigSection() {
     }
   };
 
+  const handleTestWhatsApp = async () => {
+    if (!testPhone.trim()) {
+      toast.error('Entrez un numéro de test');
+      return;
+    }
+    setTesting(true);
+    try {
+      const sendTest = callFunction<{ phoneNumber: string }, { success: boolean; message: string }>('sendTestWhatsApp');
+      const result = await sendTest({ phoneNumber: testPhone.trim() });
+      toast.success(result.data.message || `WhatsApp de test envoyé au ${testPhone}`);
+    } catch (err: any) {
+      toast.error(err?.message || 'Échec de l\'envoi du WhatsApp de test');
+    } finally {
+      setTesting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
