@@ -94,7 +94,8 @@ function OrangeSmsConfigSection() {
       const result = await sendTestSms({ phoneNumber: testPhone.trim() });
       toast.success(result.data.message || `SMS de test envoyé au ${testPhone}`);
     } catch (err: any) {
-      toast.error(err?.message || 'Échec de l\'envoi du SMS de test');
+      const errorMsg = getCloudFunctionErrorMessage(err, 'sendTestSms', 'SMS');
+      toast.error(errorMsg, { duration: 8000 });
     } finally {
       setTesting(false);
     }
