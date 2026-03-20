@@ -235,6 +235,7 @@ function OrangeSmsConfigSection() {
 function TwilioWhatsAppConfigSection() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [showToken, setShowToken] = useState(false);
 
   const [accountSid, setAccountSid] = useState('');
@@ -243,6 +244,7 @@ function TwilioWhatsAppConfigSection() {
   const [enabled, setEnabled] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [configured, setConfigured] = useState(false);
+  const [testPhone, setTestPhone] = useState('');
 
   useEffect(() => { loadConfig(); }, []);
 
