@@ -402,6 +402,11 @@ const App = () => (
                         <AdminSmsLogsPage />
                       </ProtectedRoute>
                     } />
+                    <Route path="/admin/whatsapp-logs" element={
+                      <ProtectedRoute requiredRoles={['admin']}>
+                        <AdminWhatsAppLogsPage />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/admin/products" element={
                       <ProtectedRoute requiredRoles={['admin']}>
                         <AdminProductsPage />
