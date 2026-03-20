@@ -387,6 +387,48 @@ function TwilioWhatsAppConfigSection() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Test WhatsApp */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Phone className="w-5 h-5" />
+            Tester l'envoi WhatsApp
+          </CardTitle>
+          <CardDescription>
+            Envoyez un message WhatsApp de test pour vérifier la configuration Twilio
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-3">
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="tw-testPhone">Numéro guinéen de test</Label>
+              <Input
+                id="tw-testPhone"
+                value={testPhone}
+                onChange={e => setTestPhone(e.target.value)}
+                placeholder="621XXXXXX"
+              />
+              <p className="text-xs text-muted-foreground">
+                Le destinataire doit avoir rejoint le sandbox Twilio WhatsApp au préalable
+              </p>
+            </div>
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                onClick={handleTestWhatsApp}
+                disabled={testing || !configured}
+              >
+                {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Envoyer test
+              </Button>
+            </div>
+          </div>
+          {!configured && (
+            <p className="text-sm text-muted-foreground">Enregistrez d'abord les credentials pour pouvoir tester</p>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }
