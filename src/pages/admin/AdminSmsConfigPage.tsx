@@ -1,6 +1,6 @@
 /**
- * Admin Orange SMS Configuration Page
- * Allows admins to configure Orange SMS API credentials stored in Firestore config/orange_sms
+ * Admin SMS & WhatsApp Configuration Page
+ * Orange SMS + Twilio WhatsApp fallback config stored in Firestore
  */
 
 import { useState, useEffect } from 'react';
@@ -17,7 +17,9 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
 import { toast } from 'sonner';
 
-export default function AdminSmsConfigPage() {
+// ─── Orange SMS Config Section ───────────────────────────────────────────────
+
+function OrangeSmsConfigSection() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -32,9 +34,7 @@ export default function AdminSmsConfigPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [configured, setConfigured] = useState(false);
 
-  useEffect(() => {
-    loadConfig();
-  }, []);
+  useEffect(() => { loadConfig(); }, []);
 
   const loadConfig = async () => {
     try {
@@ -47,9 +47,7 @@ export default function AdminSmsConfigPage() {
         setSenderName(data.senderName || 'GuineeGo');
         setEnabled(data.enabled !== false);
         setConfigured(!!(data.clientId && data.clientSecret));
-        if (data.updatedAt?.toDate) {
-          setLastUpdated(data.updatedAt.toDate());
-        }
+        if (data.updatedAt?.toDate) setLastUpdated(data.updatedAt.toDate());
       }
     } catch (err) {
       console.error('Error loading SMS config:', err);
@@ -96,9 +94,7 @@ export default function AdminSmsConfigPage() {
       const result = await sendTestSms({ phoneNumber: testPhone.trim() });
       toast.success(result.data.message || `SMS de test envoyé au ${testPhone}`);
     } catch (err: any) {
-      const msg = err?.message || 'Échec de l\'envoi du SMS de test';
-      toast.error(msg);
-      console.error('Test SMS error:', err);
+      toast.error(err?.message || 'Échec de l\'envoi du SMS de test');
     } finally {
       setTesting(false);
     }
@@ -106,187 +102,323 @@ export default function AdminSmsConfigPage() {
 
   if (loading) {
     return (
-      <AdminLayout title="Configuration SMS" description="Orange SMS API">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
-      </AdminLayout>
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
   return (
-    <AdminLayout title="Configuration SMS" description="Gérez les credentials de l'API Orange SMS">
-      <div className="max-w-3xl space-y-6">
-        {/* Status Banner */}
-        <Card className={configured && enabled ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}>
-          <CardContent className="flex items-center gap-4 py-4">
-            {configured && enabled ? (
-              <>
-                <CheckCircle2 className="w-8 h-8 text-primary shrink-0" />
-                <div>
-                  <p className="font-semibold text-foreground">Orange SMS configuré et actif</p>
-                  <p className="text-sm text-muted-foreground">
-                    {lastUpdated ? `Dernière mise à jour : ${lastUpdated.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` : 'Les SMS seront envoyés automatiquement'}
-                  </p>
-                </div>
-              </>
-            ) : (
-              <>
-                <XCircle className="w-8 h-8 text-destructive shrink-0" />
-                <div>
-                  <p className="font-semibold text-foreground">
-                    {configured ? 'Orange SMS désactivé' : 'Orange SMS non configuré'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {configured ? 'Activez le service pour envoyer des SMS' : 'Renseignez vos credentials Orange Developer pour activer les SMS'}
-                  </p>
-                </div>
-              </>
-            )}
-            <div className="ml-auto">
-              <Badge variant={configured && enabled ? 'default' : 'secondary'}>
-                {configured && enabled ? 'Actif' : 'Inactif'}
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Credentials */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5" />
-              Credentials API Orange
-            </CardTitle>
-            <CardDescription>
-              Obtenez vos credentials sur{' '}
-              <a 
-                href="https://developer.orange.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-primary underline hover:no-underline"
-              >
-                developer.orange.com
-              </a>
-              {' '}→ My Apps → Votre application SMS
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="clientId">Client ID</Label>
-              <Input
-                id="clientId"
-                value={clientId}
-                onChange={e => setClientId(e.target.value)}
-                placeholder="Votre Client ID Orange Developer"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="clientSecret">Client Secret</Label>
-              <div className="relative">
-                <Input
-                  id="clientSecret"
-                  type={showSecret ? 'text' : 'password'}
-                  value={clientSecret}
-                  onChange={e => setClientSecret(e.target.value)}
-                  placeholder="Votre Client Secret"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowSecret(!showSecret)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="senderAddress">Numéro expéditeur</Label>
-              <Input
-                id="senderAddress"
-                value={senderAddress}
-                onChange={e => setSenderAddress(e.target.value)}
-                placeholder="tel:+224XXXXXXXXX"
-              />
-              <p className="text-xs text-muted-foreground">
-                Format : tel:+224XXXXXXXXX (numéro autorisé par Orange)
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="senderName">Nom de l'expéditeur</Label>
-              <Input
-                id="senderName"
-                value={senderName}
-                onChange={e => setSenderName(e.target.value)}
-                placeholder="GuineeGo"
-              />
-            </div>
-
-            <Separator />
-
-            <div className="flex items-center justify-between">
+    <>
+      {/* Status Banner */}
+      <Card className={configured && enabled ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}>
+        <CardContent className="flex items-center gap-4 py-4">
+          {configured && enabled ? (
+            <>
+              <CheckCircle2 className="w-8 h-8 text-primary shrink-0" />
               <div>
-                <p className="font-medium">Service SMS actif</p>
+                <p className="font-semibold text-foreground">Orange SMS configuré et actif</p>
                 <p className="text-sm text-muted-foreground">
-                  Activer/désactiver l'envoi automatique de SMS
+                  {lastUpdated ? `Dernière mise à jour : ${lastUpdated.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` : 'Les SMS seront envoyés automatiquement'}
                 </p>
               </div>
-              <Switch checked={enabled} onCheckedChange={setEnabled} />
-            </div>
+            </>
+          ) : (
+            <>
+              <XCircle className="w-8 h-8 text-destructive shrink-0" />
+              <div>
+                <p className="font-semibold text-foreground">
+                  {configured ? 'Orange SMS désactivé' : 'Orange SMS non configuré'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {configured ? 'Activez le service pour envoyer des SMS' : 'Renseignez vos credentials Orange Developer pour activer les SMS'}
+                </p>
+              </div>
+            </>
+          )}
+          <div className="ml-auto">
+            <Badge variant={configured && enabled ? 'default' : 'secondary'}>
+              {configured && enabled ? 'Actif' : 'Inactif'}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
 
-            <div className="flex justify-end">
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                Enregistrer
+      {/* Credentials */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5" />
+            Credentials API Orange
+          </CardTitle>
+          <CardDescription>
+            Obtenez vos credentials sur{' '}
+            <a href="https://developer.orange.com" target="_blank" rel="noopener noreferrer" className="text-primary underline hover:no-underline">
+              developer.orange.com
+            </a>
+            {' '}→ My Apps → Votre application SMS
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="clientId">Client ID</Label>
+            <Input id="clientId" value={clientId} onChange={e => setClientId(e.target.value)} placeholder="Votre Client ID Orange Developer" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="clientSecret">Client Secret</Label>
+            <div className="relative">
+              <Input id="clientSecret" type={showSecret ? 'text' : 'password'} value={clientSecret} onChange={e => setClientSecret(e.target.value)} placeholder="Votre Client Secret" className="pr-10" />
+              <button type="button" onClick={() => setShowSecret(!showSecret)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                {showSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="senderAddress">Numéro expéditeur</Label>
+            <Input id="senderAddress" value={senderAddress} onChange={e => setSenderAddress(e.target.value)} placeholder="tel:+224XXXXXXXXX" />
+            <p className="text-xs text-muted-foreground">Format : tel:+224XXXXXXXXX (numéro autorisé par Orange)</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="senderName">Nom de l'expéditeur</Label>
+            <Input id="senderName" value={senderName} onChange={e => setSenderName(e.target.value)} placeholder="GuineeGo" />
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Service SMS actif</p>
+              <p className="text-sm text-muted-foreground">Activer/désactiver l'envoi automatique de SMS</p>
+            </div>
+            <Switch checked={enabled} onCheckedChange={setEnabled} />
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              Enregistrer
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Test SMS */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Phone className="w-5 h-5" />
+            Tester l'envoi SMS
+          </CardTitle>
+          <CardDescription>Envoyez un SMS de test pour vérifier la configuration</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-3">
+            <div className="flex-1 space-y-2">
+              <Label htmlFor="testPhone">Numéro de test</Label>
+              <Input id="testPhone" value={testPhone} onChange={e => setTestPhone(e.target.value)} placeholder="621XXXXXX" />
+            </div>
+            <div className="flex items-end">
+              <Button variant="outline" onClick={handleTest} disabled={testing || !configured}>
+                {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                Envoyer test
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          {!configured && (
+            <p className="text-sm text-muted-foreground">Enregistrez d'abord les credentials pour pouvoir tester</p>
+          )}
+        </CardContent>
+      </Card>
+    </>
+  );
+}
 
-        {/* Test SMS */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Phone className="w-5 h-5" />
-              Tester l'envoi SMS
-            </CardTitle>
-            <CardDescription>
-              Envoyez un SMS de test pour vérifier la configuration
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-3">
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="testPhone">Numéro de test</Label>
-                <Input
-                  id="testPhone"
-                  value={testPhone}
-                  onChange={e => setTestPhone(e.target.value)}
-                  placeholder="621XXXXXX"
-                />
+// ─── Twilio WhatsApp Config Section ──────────────────────────────────────────
+
+function TwilioWhatsAppConfigSection() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [showToken, setShowToken] = useState(false);
+
+  const [accountSid, setAccountSid] = useState('');
+  const [authToken, setAuthToken] = useState('');
+  const [fromNumber, setFromNumber] = useState('');
+  const [enabled, setEnabled] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [configured, setConfigured] = useState(false);
+
+  useEffect(() => { loadConfig(); }, []);
+
+  const loadConfig = async () => {
+    try {
+      const snap = await getDoc(doc(db, 'config', 'twilio_whatsapp'));
+      if (snap.exists()) {
+        const data = snap.data();
+        setAccountSid(data.accountSid || '');
+        setAuthToken(data.authToken || '');
+        setFromNumber(data.fromNumber || '');
+        setEnabled(data.enabled !== false);
+        setConfigured(!!(data.accountSid && data.authToken && data.fromNumber));
+        if (data.updatedAt?.toDate) setLastUpdated(data.updatedAt.toDate());
+      }
+    } catch (err) {
+      console.error('Error loading Twilio config:', err);
+      toast.error('Erreur lors du chargement de la configuration Twilio');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!accountSid.trim() || !authToken.trim() || !fromNumber.trim()) {
+      toast.error('Account SID, Auth Token et numéro WhatsApp sont requis');
+      return;
+    }
+    setSaving(true);
+    try {
+      await setDoc(doc(db, 'config', 'twilio_whatsapp'), {
+        accountSid: accountSid.trim(),
+        authToken: authToken.trim(),
+        fromNumber: fromNumber.trim(),
+        enabled,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+      setConfigured(true);
+      setLastUpdated(new Date());
+      toast.success('Configuration Twilio WhatsApp enregistrée');
+    } catch (err) {
+      console.error('Error saving Twilio config:', err);
+      toast.error('Erreur lors de la sauvegarde');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Status Banner */}
+      <Card className={configured && enabled ? 'border-primary/30 bg-primary/5' : 'border-muted'}>
+        <CardContent className="flex items-center gap-4 py-4">
+          {configured && enabled ? (
+            <>
+              <CheckCircle2 className="w-8 h-8 text-primary shrink-0" />
+              <div>
+                <p className="font-semibold text-foreground">Twilio WhatsApp configuré et actif</p>
+                <p className="text-sm text-muted-foreground">
+                  {lastUpdated ? `Dernière mise à jour : ${lastUpdated.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}` : 'Fallback WhatsApp actif en cas d\'échec SMS'}
+                </p>
               </div>
-              <div className="flex items-end">
-                <Button
-                  variant="outline"
-                  onClick={handleTest}
-                  disabled={testing || !configured}
-                >
-                  {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
-                  Envoyer test
-                </Button>
+            </>
+          ) : (
+            <>
+              <XCircle className="w-8 h-8 text-muted-foreground shrink-0" />
+              <div>
+                <p className="font-semibold text-foreground">
+                  {configured ? 'WhatsApp désactivé' : 'Twilio WhatsApp non configuré'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {configured ? 'Activez pour utiliser WhatsApp comme fallback' : 'Renseignez vos credentials Twilio pour activer le fallback WhatsApp'}
+                </p>
               </div>
+            </>
+          )}
+          <div className="ml-auto">
+            <Badge variant={configured && enabled ? 'default' : 'secondary'}>
+              {configured && enabled ? 'Actif' : 'Inactif'}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Credentials */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5" />
+            Credentials Twilio WhatsApp
+          </CardTitle>
+          <CardDescription>
+            Obtenez vos credentials sur{' '}
+            <a href="https://console.twilio.com" target="_blank" rel="noopener noreferrer" className="text-primary underline hover:no-underline">
+              console.twilio.com
+            </a>
+            {' '}→ Account Info. Activez WhatsApp dans Messaging → Try WhatsApp.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="tw-accountSid">Account SID</Label>
+            <Input id="tw-accountSid" value={accountSid} onChange={e => setAccountSid(e.target.value)} placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" className="font-mono" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tw-authToken">Auth Token</Label>
+            <div className="relative">
+              <Input id="tw-authToken" type={showToken ? 'text' : 'password'} value={authToken} onChange={e => setAuthToken(e.target.value)} placeholder="Votre Auth Token Twilio" className="pr-10 font-mono" />
+              <button type="button" onClick={() => setShowToken(!showToken)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
-            {!configured && (
-              <p className="text-sm text-muted-foreground">
-                Enregistrez d'abord les credentials pour pouvoir tester
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tw-fromNumber">Numéro WhatsApp expéditeur</Label>
+            <Input id="tw-fromNumber" value={fromNumber} onChange={e => setFromNumber(e.target.value)} placeholder="whatsapp:+14155238886" className="font-mono" />
+            <p className="text-xs text-muted-foreground">Format : whatsapp:+XXXXXXXXXXX (numéro sandbox ou approuvé Twilio)</p>
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Fallback WhatsApp actif</p>
+              <p className="text-sm text-muted-foreground">Envoyer un WhatsApp si le SMS Orange échoue</p>
+            </div>
+            <Switch checked={enabled} onCheckedChange={setEnabled} />
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+              Enregistrer
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
+// ─── Main Page ───────────────────────────────────────────────────────────────
+
+export default function AdminSmsConfigPage() {
+  return (
+    <AdminLayout title="Configuration SMS & WhatsApp" description="Gérez les canaux de notification : Orange SMS (principal) et Twilio WhatsApp (fallback)">
+      <div className="max-w-3xl space-y-8">
+        {/* Orange SMS Section */}
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            📱 Canal principal — Orange SMS
+          </h2>
+          <div className="space-y-6">
+            <OrangeSmsConfigSection />
+          </div>
+        </div>
+
+        <Separator className="my-2" />
+
+        {/* Twilio WhatsApp Section */}
+        <div>
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            💬 Canal fallback — Twilio WhatsApp
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Si l'envoi SMS Orange échoue, un message WhatsApp sera automatiquement envoyé via Twilio.
+          </p>
+          <div className="space-y-6">
+            <TwilioWhatsAppConfigSection />
+          </div>
+        </div>
       </div>
     </AdminLayout>
   );
