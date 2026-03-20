@@ -94,6 +94,7 @@ import AdminRoleRequestsPage from "./pages/admin/AdminRoleRequestsPage";
 import AdminSuperUsersPage from "./pages/admin/AdminSuperUsersPage";
 import AdminSmsConfigPage from "./pages/admin/AdminSmsConfigPage";
 import AdminSmsLogsPage from "./pages/admin/AdminSmsLogsPage";
+import AdminWhatsAppLogsPage from "./pages/admin/AdminWhatsAppLogsPage";
 import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
 import AdminCommissionsPage from "./pages/admin/AdminCommissionsPage";
 import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
