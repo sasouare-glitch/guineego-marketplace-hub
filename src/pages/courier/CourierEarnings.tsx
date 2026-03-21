@@ -3,9 +3,7 @@ import { EarningsChart, EarningsPeriod } from "@/components/courier/EarningsChar
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { WithdrawalDialog } from "@/components/shared/WithdrawalDialog";
 import {
   Wallet,
   ArrowUpRight,
@@ -15,7 +13,6 @@ import {
   Download,
   Smartphone,
   Loader2,
-  AlertCircle,
   Clock,
 } from "lucide-react";
 import {
@@ -25,21 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useState, useMemo } from "react";
 import { useWallet, useTransactions, useWithdrawal, formatGNF } from "@/hooks/useWallet";
 import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
 import { useCourierMissions } from "@/hooks/useCourierMissions";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 function getPeriodStart(period: EarningsPeriod): Date {
   const now = new Date();
