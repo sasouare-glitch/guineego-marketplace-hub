@@ -271,6 +271,11 @@ const App = () => (
                         <SellerFinances />
                       </ProtectedRoute>
                     } />
+                    <Route path="/seller/withdrawals" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerWithdrawalHistory />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/seller/analytics" element={
                       <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
                         <SellerAnalytics />
