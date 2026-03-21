@@ -90,36 +90,8 @@ export default function SellerFinances() {
     return t.category === typeFilter || t.type === typeFilter;
   });
 
-  const handleWithdraw = () => {
-    const amount = parseInt(withdrawalAmount);
-    if (!amount || amount <= 0) {
-      toast.error("Montant invalide");
-      return;
-    }
-    if (amount < sellerLimits.minAmount) {
-      toast.error(`Montant minimum: ${sellerLimits.minAmount.toLocaleString()} GNF`);
-      return;
-    }
-    if (amount > sellerLimits.maxAmount) {
-      toast.error(`Montant maximum: ${sellerLimits.maxAmount.toLocaleString()} GNF`);
-      return;
-    }
-    if (amount > availableBalance) {
-      toast.error("Solde insuffisant");
-      return;
-    }
-    if (withdrawalMethod !== "cash" && !withdrawalPhone) {
-      toast.error("Numéro de téléphone requis");
-      return;
-    }
-    requestWithdrawal({
-      amount,
-      method: withdrawalMethod,
-      phone: withdrawalMethod !== "cash" ? withdrawalPhone : undefined,
-    });
-    setWithdrawalOpen(false);
-    setWithdrawalAmount("");
-    setWithdrawalPhone("");
+  const handleWithdraw = (data: { amount: number; method: "orange_money" | "mtn_money" | "cash"; phone?: string }) => {
+    requestWithdrawal(data);
   };
 
   return (
