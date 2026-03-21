@@ -31,6 +31,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { useWallet, useTransactions, useWithdrawal } from "@/hooks/useWallet";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
 import { toast } from "sonner";
 
 const typeConfig: Record<string, { label: string; icon: any; color: string; bgColor: string }> = {
@@ -66,6 +67,8 @@ export default function SellerFinances() {
   const { transactions, loading: txLoading, hasMore, loadMore } = useTransactions(30);
   const { requestWithdrawal, isLoading: withdrawing } = useWithdrawal();
   const { format: formatPrice } = useCurrency();
+  const { getEffectiveLimits, loading: limitsLoading } = useWithdrawalLimits();
+  const sellerLimits = getEffectiveLimits('seller');
 
   const loading = walletLoading;
 
@@ -92,6 +95,14 @@ export default function SellerFinances() {
     const amount = parseInt(withdrawalAmount);
     if (!amount || amount <= 0) {
       toast.error("Montant invalide");
+      return;
+    }
+    if (amount < sellerLimits.minAmount) {
+      toast.error(`Montant minimum: ${sellerLimits.minAmount.toLocaleString()} GNF`);
+      return;
+    }
+    if (amount > sellerLimits.maxAmount) {
+      toast.error(`Montant maximum: ${sellerLimits.maxAmount.toLocaleString()} GNF`);
       return;
     }
     if (amount > availableBalance) {
@@ -138,13 +149,21 @@ export default function SellerFinances() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 border border-border">
+                    <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <p className="text-xs text-muted-foreground">
+                      Min: {formatPrice(sellerLimits.minAmount)} · Max: {formatPrice(sellerLimits.maxAmount)} · Frais: {sellerLimits.feePercent}%
+                    </p>
+                  </div>
                   <div className="space-y-2">
                     <Label>Montant à retirer</Label>
                     <Input
                       type="number"
-                      placeholder="Ex: 5000000"
+                      placeholder={`Min: ${sellerLimits.minAmount.toLocaleString()} GNF`}
                       value={withdrawalAmount}
                       onChange={(e) => setWithdrawalAmount(e.target.value)}
+                      min={sellerLimits.minAmount}
+                      max={Math.min(sellerLimits.maxAmount, availableBalance)}
                     />
                   </div>
                   <div className="space-y-2">

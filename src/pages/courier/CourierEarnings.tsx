@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useState, useMemo } from "react";
 import { useWallet, useTransactions, formatGNF } from "@/hooks/useWallet";
+import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
 import { useCourierMissions } from "@/hooks/useCourierMissions";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
 
@@ -40,6 +41,8 @@ const CourierEarnings = () => {
   const { wallet, loading: walletLoading } = useWallet();
   const { transactions, loading: txLoading } = useTransactions();
   const { myMissions } = useCourierMissions();
+  const { getEffectiveLimits } = useWithdrawalLimits();
+  const courierLimits = getEffectiveLimits('courier');
 
   const loading = walletLoading;
 
@@ -113,6 +116,9 @@ const CourierEarnings = () => {
                     <ArrowUpRight className="w-4 h-4 mr-2" />
                     Retirer
                   </Button>
+                  <p className="text-xs text-white/60 mt-2 text-center">
+                    Min: {courierLimits.minAmount.toLocaleString()} · Max: {courierLimits.maxAmount.toLocaleString()} GNF
+                  </p>
                 </CardContent>
               </Card>
 

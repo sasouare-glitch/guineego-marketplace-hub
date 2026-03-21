@@ -38,10 +38,23 @@ export const createPayout = functions
 
     const { amount, method, phone } = data;
 
-    if (!amount || amount < 50000) {
+    // Fetch dynamic limits
+    const configDoc = await db.collection('platform_config').doc('withdrawal_limits').get();
+    const config = configDoc.exists ? configDoc.data()! : {};
+    const minAmount = config.sellerMinAmount || config.minAmount || 50000;
+    const maxAmount = config.sellerMaxAmount || config.maxAmount || 5000000;
+
+    if (!amount || amount < minAmount) {
       throw new functions.https.HttpsError(
         'invalid-argument',
-        'Montant minimum: 50,000 GNF'
+        `Montant minimum: ${minAmount.toLocaleString()} GNF`
+      );
+    }
+
+    if (amount > maxAmount) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        `Montant maximum: ${maxAmount.toLocaleString()} GNF`
       );
     }
 
@@ -71,6 +84,10 @@ export const createPayout = functions
       }
 
       // Create payout record
+      const feePercent = (config.feePercent ?? 1) / 100;
+      const fee = Math.floor(amount * feePercent);
+      const netAmount = amount - fee;
+
       const payoutRef = db.collection('seller_payouts').doc();
       await payoutRef.set({
         id: payoutRef.id,
@@ -79,8 +96,8 @@ export const createPayout = functions
         amount,
         method,
         phone,
-        fee: Math.floor(amount * 0.01), // 1% fee
-        netAmount: amount - Math.floor(amount * 0.01),
+        fee,
+        netAmount,
         status: 'pending',
         requestedBy: context.auth!.uid,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
@@ -110,7 +127,7 @@ export const createPayout = functions
         success: true,
         payoutId: payoutRef.id,
         amount,
-        netAmount: amount - Math.floor(amount * 0.01),
+        netAmount,
         message: 'Demande de retrait enregistrée'
       };
 
