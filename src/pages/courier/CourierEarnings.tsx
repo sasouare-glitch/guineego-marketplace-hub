@@ -143,6 +143,7 @@ const CourierEarnings = () => {
               <SelectItem value="year">Cette année</SelectItem>
             </SelectContent>
           </Select>
+          </div>
         </div>
 
         {loading ? (
