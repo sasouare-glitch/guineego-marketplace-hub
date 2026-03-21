@@ -158,12 +158,31 @@ const CourierMissionDetail = () => {
   };
 
   const handleCashCollected = async (proof: { type: "photo" | "signature"; dataUrl: string }) => {
-    // Mark proof as collected, then proceed with delivery status update
     setCashProofCollected(true);
     setShowCashDialog(false);
     setUpdating(true);
-    // In production, you'd upload proof.dataUrl to Firebase Storage here
     console.log('[CashCollection] Proof collected:', proof.type);
+
+    // Notify each seller about cash collection
+    const courierName = user?.displayName || 'Le coursier';
+    const sellerIds = orderSellerIds.length > 0 ? orderSellerIds : (mission.sellerIds || []);
+    await Promise.all(
+      sellerIds.map((sellerId) =>
+        setDoc(doc(db, "notifications", `${sellerId}_cash_${mission.orderId}_${Date.now()}`), {
+          userId: sellerId,
+          type: "cash_collected",
+          title: "💰 Paiement cash collecté",
+          message: `${courierName} a collecté ${formatPrice(orderTotal)} en cash pour la commande ${mission.orderId.slice(0, 16)}. Preuve : ${proof.type === 'photo' ? 'Photo' : 'Signature client'}.`,
+          orderId: mission.orderId,
+          missionId: mission.id,
+          amount: orderTotal,
+          proofType: proof.type,
+          read: false,
+          createdAt: serverTimestamp(),
+        })
+      )
+    );
+
     await updateMissionStatus(mission.id, "delivered");
     setUpdating(false);
   };
