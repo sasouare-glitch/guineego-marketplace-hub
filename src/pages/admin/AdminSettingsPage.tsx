@@ -2,6 +2,7 @@
  * Admin Settings Page - System Configuration
  */
 
+import { useState, useEffect } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,199 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Save, Globe, Bell, Shield, Palette, CreditCard } from 'lucide-react';
+import { Save, Globe, Bell, Shield, Palette, CreditCard, Loader2, ArrowUpFromLine, Info } from 'lucide-react';
+import { useWithdrawalLimits, WithdrawalLimits } from '@/hooks/useWithdrawalLimits';
+import { Badge } from '@/components/ui/badge';
+
+function WithdrawalLimitsSection() {
+  const { limits, loading, saveLimits } = useWithdrawalLimits();
+  const [form, setForm] = useState<Partial<WithdrawalLimits>>({});
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      setForm({ ...limits });
+    }
+  }, [limits, loading]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    await saveLimits(form);
+    setSaving(false);
+  };
+
+  const updateField = (field: keyof WithdrawalLimits, value: string) => {
+    const num = parseInt(value) || 0;
+    setForm(prev => ({ ...prev, [field]: num }));
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/10">
+        <Info className="w-4 h-4 text-primary shrink-0" />
+        <p className="text-sm text-muted-foreground">
+          Ces plafonds s'appliquent à toutes les demandes de retrait. Vous pouvez définir des limites spécifiques par rôle (vendeur/coursier).
+        </p>
+      </div>
+
+      {/* Global Limits */}
+      <div className="space-y-4">
+        <h4 className="font-medium flex items-center gap-2">
+          <ArrowUpFromLine className="w-4 h-4 text-primary" />
+          Limites globales
+        </h4>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-2">
+            <Label htmlFor="minAmount">Montant minimum (GNF)</Label>
+            <Input
+              id="minAmount"
+              type="number"
+              value={form.minAmount || ''}
+              onChange={(e) => updateField('minAmount', e.target.value)}
+              placeholder="10000"
+            />
+            <p className="text-xs text-muted-foreground">Min: 10,000 GNF recommandé</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="maxAmount">Montant maximum par transaction (GNF)</Label>
+            <Input
+              id="maxAmount"
+              type="number"
+              value={form.maxAmount || ''}
+              onChange={(e) => updateField('maxAmount', e.target.value)}
+              placeholder="5000000"
+            />
+            <p className="text-xs text-muted-foreground">Par retrait individuel</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="dailyLimit">Limite quotidienne (GNF)</Label>
+            <Input
+              id="dailyLimit"
+              type="number"
+              value={form.dailyLimit || ''}
+              onChange={(e) => updateField('dailyLimit', e.target.value)}
+              placeholder="10000000"
+            />
+            <p className="text-xs text-muted-foreground">Total journalier maximum</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Fees */}
+      <div className="space-y-4">
+        <h4 className="font-medium">Frais de retrait</h4>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="feePercent">Commission de retrait (%)</Label>
+            <Input
+              id="feePercent"
+              type="number"
+              step="0.1"
+              value={form.feePercent || ''}
+              onChange={(e) => setForm(prev => ({ ...prev, feePercent: parseFloat(e.target.value) || 0 }))}
+              placeholder="1"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="minFee">Frais minimum (GNF)</Label>
+            <Input
+              id="minFee"
+              type="number"
+              value={form.minFee || ''}
+              onChange={(e) => updateField('minFee', e.target.value)}
+              placeholder="500"
+            />
+          </div>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Seller-specific */}
+      <div className="space-y-4">
+        <h4 className="font-medium flex items-center gap-2">
+          Limites vendeurs
+          <Badge variant="outline" className="text-xs">Optionnel</Badge>
+        </h4>
+        <p className="text-sm text-muted-foreground">Laissez vide pour utiliser les limites globales.</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="sellerMinAmount">Minimum vendeur (GNF)</Label>
+            <Input
+              id="sellerMinAmount"
+              type="number"
+              value={form.sellerMinAmount || ''}
+              onChange={(e) => updateField('sellerMinAmount', e.target.value)}
+              placeholder={`Global: ${(form.minAmount || 10000).toLocaleString()}`}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="sellerMaxAmount">Maximum vendeur (GNF)</Label>
+            <Input
+              id="sellerMaxAmount"
+              type="number"
+              value={form.sellerMaxAmount || ''}
+              onChange={(e) => updateField('sellerMaxAmount', e.target.value)}
+              placeholder={`Global: ${(form.maxAmount || 5000000).toLocaleString()}`}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Courier-specific */}
+      <div className="space-y-4">
+        <h4 className="font-medium flex items-center gap-2">
+          Limites coursiers
+          <Badge variant="outline" className="text-xs">Optionnel</Badge>
+        </h4>
+        <p className="text-sm text-muted-foreground">Laissez vide pour utiliser les limites globales.</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="courierMinAmount">Minimum coursier (GNF)</Label>
+            <Input
+              id="courierMinAmount"
+              type="number"
+              value={form.courierMinAmount || ''}
+              onChange={(e) => updateField('courierMinAmount', e.target.value)}
+              placeholder={`Global: ${(form.minAmount || 10000).toLocaleString()}`}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="courierMaxAmount">Maximum coursier (GNF)</Label>
+            <Input
+              id="courierMaxAmount"
+              type="number"
+              value={form.courierMaxAmount || ''}
+              onChange={(e) => updateField('courierMaxAmount', e.target.value)}
+              placeholder={`Global: ${(form.maxAmount || 5000000).toLocaleString()}`}
+            />
+          </div>
+        </div>
+      </div>
+
+      {limits.updatedAt && (
+        <p className="text-xs text-muted-foreground">
+          Dernière modification: {new Date(limits.updatedAt).toLocaleString('fr-FR')}
+        </p>
+      )}
+
+      <div className="flex justify-end">
+        <Button onClick={handleSave} disabled={saving}>
+          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+          Enregistrer les plafonds
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminSettingsPage() {
   return (
@@ -282,57 +475,75 @@ export default function AdminSettingsPage() {
 
           {/* Payments Settings */}
           <TabsContent value="payments">
-            <Card>
-              <CardHeader>
-                <CardTitle>Paiements</CardTitle>
-                <CardDescription>Configuration des moyens de paiement</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Orange Money</p>
-                    <p className="text-sm text-muted-foreground">
-                      Activer les paiements Orange Money
-                    </p>
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Paiements</CardTitle>
+                  <CardDescription>Configuration des moyens de paiement</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Orange Money</p>
+                      <p className="text-sm text-muted-foreground">
+                        Activer les paiements Orange Money
+                      </p>
+                    </div>
+                    <Switch defaultChecked />
                   </div>
-                  <Switch defaultChecked />
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">MTN Mobile Money</p>
-                    <p className="text-sm text-muted-foreground">
-                      Activer les paiements MTN
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">MTN Mobile Money</p>
+                      <p className="text-sm text-muted-foreground">
+                        Activer les paiements MTN
+                      </p>
+                    </div>
+                    <Switch defaultChecked />
                   </div>
-                  <Switch defaultChecked />
-                </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Paiement à la livraison</p>
-                    <p className="text-sm text-muted-foreground">
-                      Autoriser le paiement cash
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Paiement à la livraison</p>
+                      <p className="text-sm text-muted-foreground">
+                        Autoriser le paiement cash
+                      </p>
+                    </div>
+                    <Switch defaultChecked />
                   </div>
-                  <Switch defaultChecked />
-                </div>
 
-                <Separator />
+                  <Separator />
 
-                <div className="space-y-2">
-                  <Label>Commission plateforme (%)</Label>
-                  <Input type="number" defaultValue="5" className="w-24" />
-                </div>
+                  <div className="space-y-2">
+                    <Label>Commission plateforme (%)</Label>
+                    <Input type="number" defaultValue="5" className="w-24" />
+                  </div>
 
-                <div className="flex justify-end">
-                  <Button>
-                    <Save className="w-4 h-4 mr-2" />
-                    Enregistrer
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="flex justify-end">
+                    <Button>
+                      <Save className="w-4 h-4 mr-2" />
+                      Enregistrer
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Withdrawal Limits Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ArrowUpFromLine className="w-5 h-5 text-primary" />
+                    Plafonds de retrait
+                  </CardTitle>
+                  <CardDescription>
+                    Configurez les montants minimum et maximum de retrait pour les vendeurs et coursiers
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <WithdrawalLimitsSection />
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
