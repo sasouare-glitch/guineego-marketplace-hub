@@ -28,7 +28,6 @@ import { doc, onSnapshot, getDoc, setDoc, serverTimestamp } from "firebase/fires
 import { useCourierMissions, DeliveryMission, DeliveryStatus } from "@/hooks/useCourierMissions";
 import { useCourierGPS } from "@/hooks/useCourierGPS";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCourierGPS } from "@/hooks/useCourierGPS";
 
 type StepStatus = "accepted" | "pickup_started" | "picked_up" | "in_transit" | "arrived" | "delivered";
 
