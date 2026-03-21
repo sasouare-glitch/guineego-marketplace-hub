@@ -83,6 +83,13 @@ export const requestWithdrawal = functions
       );
     }
 
+    // Get user role for role-specific limits
+    const userDoc = await db.collection('users').doc(uid).get();
+    const userRole = userDoc.exists ? userDoc.data()?.role : undefined;
+    
+    // Fetch dynamic limits from Firestore
+    const WITHDRAWAL_LIMITS = await getWithdrawalLimits(userRole);
+
     if (amount < WITHDRAWAL_LIMITS.minAmount) {
       throw new functions.https.HttpsError(
         'invalid-argument',
