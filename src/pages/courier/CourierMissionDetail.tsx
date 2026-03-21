@@ -103,6 +103,7 @@ const CourierMissionDetail = () => {
         setItemCount(total);
         setOrderPaymentMethod(data.paymentMethod || null);
         setOrderTotal(data.pricing?.total || data.total || 0);
+        setOrderSellerIds(data.sellerIds || []);
       }
     }).catch(() => {});
   }, [mission?.orderId]);
