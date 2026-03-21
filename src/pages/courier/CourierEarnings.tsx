@@ -61,6 +61,7 @@ const CourierEarnings = () => {
   const { transactions, loading: txLoading } = useTransactions();
   const { myMissions } = useCourierMissions();
   const { requestWithdrawal, isLoading: withdrawing } = useWithdrawal();
+  const navigate = useNavigate();
   const { getEffectiveLimits } = useWithdrawalLimits();
   const courierLimits = getEffectiveLimits('courier');
 
