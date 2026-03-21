@@ -136,13 +136,32 @@ const CourierMissionDetail = () => {
     setUpdating(false);
   };
 
+  const isCashOrder = orderPaymentMethod === 'cash';
+
   const handleNextStatus = async () => {
     const nextIndex = currentStepIndex + 1;
     if (nextIndex < statusSteps.length) {
+      const nextStatus = statusSteps[nextIndex].status;
+      // Intercept: if cash order and about to mark "delivered", show cash collection dialog first
+      if (isCashOrder && nextStatus === "delivered" && !cashProofCollected) {
+        setShowCashDialog(true);
+        return;
+      }
       setUpdating(true);
-      await updateMissionStatus(mission.id, statusSteps[nextIndex].status as DeliveryStatus);
+      await updateMissionStatus(mission.id, nextStatus as DeliveryStatus);
       setUpdating(false);
     }
+  };
+
+  const handleCashCollected = async (proof: { type: "photo" | "signature"; dataUrl: string }) => {
+    // Mark proof as collected, then proceed with delivery status update
+    setCashProofCollected(true);
+    setShowCashDialog(false);
+    setUpdating(true);
+    // In production, you'd upload proof.dataUrl to Firebase Storage here
+    console.log('[CashCollection] Proof collected:', proof.type);
+    await updateMissionStatus(mission.id, "delivered");
+    setUpdating(false);
   };
 
   const getNextStatusLabel = () => {
