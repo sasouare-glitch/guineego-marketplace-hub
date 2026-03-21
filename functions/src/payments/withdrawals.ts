@@ -10,14 +10,48 @@ import { verifyAuth, verifyAdmin } from '../utils/auth';
 
 const db = admin.firestore();
 
-// Withdrawal limits
-const WITHDRAWAL_LIMITS = {
+// Default limits (fallback if Firestore config not found)
+const DEFAULT_LIMITS = {
   minAmount: 10000,      // 10,000 GNF minimum
   maxAmount: 5000000,    // 5,000,000 GNF maximum per transaction
   dailyLimit: 10000000,  // 10,000,000 GNF per day
-  fee: 0.01,             // 1% withdrawal fee
+  feePercent: 1,         // 1% withdrawal fee
   minFee: 500,           // Minimum 500 GNF fee
 };
+
+/**
+ * Fetch withdrawal limits from Firestore platform_config
+ */
+async function getWithdrawalLimits(userRole?: string) {
+  try {
+    const configDoc = await db.collection('platform_config').doc('withdrawal_limits').get();
+    if (!configDoc.exists) return DEFAULT_LIMITS;
+    
+    const config = configDoc.data()!;
+    let minAmount = config.minAmount || DEFAULT_LIMITS.minAmount;
+    let maxAmount = config.maxAmount || DEFAULT_LIMITS.maxAmount;
+    
+    // Apply role-specific overrides
+    if (userRole === 'ecommerce' || userRole === 'seller') {
+      minAmount = config.sellerMinAmount || minAmount;
+      maxAmount = config.sellerMaxAmount || maxAmount;
+    } else if (userRole === 'courier') {
+      minAmount = config.courierMinAmount || minAmount;
+      maxAmount = config.courierMaxAmount || maxAmount;
+    }
+    
+    return {
+      minAmount,
+      maxAmount,
+      dailyLimit: config.dailyLimit || DEFAULT_LIMITS.dailyLimit,
+      feePercent: config.feePercent ?? DEFAULT_LIMITS.feePercent,
+      minFee: config.minFee || DEFAULT_LIMITS.minFee,
+    };
+  } catch (error) {
+    console.error('Error fetching withdrawal limits:', error);
+    return DEFAULT_LIMITS;
+  }
+}
 
 interface RequestWithdrawalData {
   amount: number;
