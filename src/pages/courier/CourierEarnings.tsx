@@ -116,6 +116,9 @@ const CourierEarnings = () => {
                     <ArrowUpRight className="w-4 h-4 mr-2" />
                     Retirer
                   </Button>
+                  <p className="text-xs text-white/60 mt-2 text-center">
+                    Min: {courierLimits.minAmount.toLocaleString()} · Max: {courierLimits.maxAmount.toLocaleString()} GNF
+                  </p>
                 </CardContent>
               </Card>
 

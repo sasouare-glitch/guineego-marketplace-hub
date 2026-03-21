@@ -127,7 +127,7 @@ export const createPayout = functions
         success: true,
         payoutId: payoutRef.id,
         amount,
-        netAmount: amount - Math.floor(amount * 0.01),
+        netAmount,
         message: 'Demande de retrait enregistrée'
       };
 
