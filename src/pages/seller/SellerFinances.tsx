@@ -1,18 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { WithdrawalDialog } from "@/components/shared/WithdrawalDialog";
 import {
   Wallet as WalletIcon,
   TrendingUp,
   ArrowDownToLine,
   ArrowUpFromLine,
-  Download,
-  Calendar,
   CheckCircle2,
   Clock,
   XCircle,
   CreditCard,
-  Smartphone,
   Loader2,
   AlertCircle,
 } from "lucide-react";
@@ -23,17 +21,10 @@ import { StatCard } from "@/components/seller/StatCard";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { useWallet, useTransactions, useWithdrawal } from "@/hooks/useWallet";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
-import { toast } from "sonner";
 
 const typeConfig: Record<string, { label: string; icon: any; color: string; bgColor: string }> = {
   credit: { label: "Crédit", icon: ArrowDownToLine, color: "text-primary", bgColor: "bg-primary/10" },
@@ -60,9 +51,6 @@ function formatDate(date: Date | undefined): string {
 export default function SellerFinances() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
-  const [withdrawalMethod, setWithdrawalMethod] = useState<"orange_money" | "mtn_money" | "cash">("orange_money");
-  const [withdrawalAmount, setWithdrawalAmount] = useState("");
-  const [withdrawalPhone, setWithdrawalPhone] = useState("");
 
   const { wallet, loading: walletLoading } = useWallet();
   const { transactions, loading: txLoading, hasMore, loadMore } = useTransactions(30);
@@ -93,36 +81,8 @@ export default function SellerFinances() {
     return t.category === typeFilter || t.type === typeFilter;
   });
 
-  const handleWithdraw = () => {
-    const amount = parseInt(withdrawalAmount);
-    if (!amount || amount <= 0) {
-      toast.error("Montant invalide");
-      return;
-    }
-    if (amount < sellerLimits.minAmount) {
-      toast.error(`Montant minimum: ${sellerLimits.minAmount.toLocaleString()} GNF`);
-      return;
-    }
-    if (amount > sellerLimits.maxAmount) {
-      toast.error(`Montant maximum: ${sellerLimits.maxAmount.toLocaleString()} GNF`);
-      return;
-    }
-    if (amount > availableBalance) {
-      toast.error("Solde insuffisant");
-      return;
-    }
-    if (withdrawalMethod !== "cash" && !withdrawalPhone) {
-      toast.error("Numéro de téléphone requis");
-      return;
-    }
-    requestWithdrawal({
-      amount,
-      method: withdrawalMethod,
-      phone: withdrawalMethod !== "cash" ? withdrawalPhone : undefined,
-    });
-    setWithdrawalOpen(false);
-    setWithdrawalAmount("");
-    setWithdrawalPhone("");
+  const handleWithdraw = (data: { amount: number; method: "orange_money" | "mtn_money" | "cash"; phone?: string }) => {
+    requestWithdrawal(data);
   };
 
   return (
@@ -140,88 +100,20 @@ export default function SellerFinances() {
               <Clock className="w-4 h-4" />
               Historique retraits
             </Button>
-            <Dialog open={withdrawalOpen} onOpenChange={setWithdrawalOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
-                  <ArrowUpFromLine className="w-4 h-4" />
-                  Retirer
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Demande de retrait</DialogTitle>
-                  <DialogDescription>
-                    Solde disponible: {formatPrice(availableBalance)}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 border border-border">
-                    <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <p className="text-xs text-muted-foreground">
-                      Min: {formatPrice(sellerLimits.minAmount)} · Max: {formatPrice(sellerLimits.maxAmount)} · Frais: {sellerLimits.feePercent}%
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Montant à retirer</Label>
-                    <Input
-                      type="number"
-                      placeholder={`Min: ${sellerLimits.minAmount.toLocaleString()} GNF`}
-                      value={withdrawalAmount}
-                      onChange={(e) => setWithdrawalAmount(e.target.value)}
-                      min={sellerLimits.minAmount}
-                      max={Math.min(sellerLimits.maxAmount, availableBalance)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Mode de retrait</Label>
-                    <RadioGroup
-                      value={withdrawalMethod}
-                      onValueChange={(v) => setWithdrawalMethod(v as any)}
-                      className="grid grid-cols-3 gap-4"
-                    >
-                      <div>
-                        <RadioGroupItem value="orange_money" id="orange" className="peer sr-only" />
-                        <Label htmlFor="orange" className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                          <Smartphone className="mb-2 h-6 w-6 text-[#FF6600]" />
-                          <span className="text-sm font-medium">Orange Money</span>
-                        </Label>
-                      </div>
-                      <div>
-                        <RadioGroupItem value="mtn_money" id="mtn" className="peer sr-only" />
-                        <Label htmlFor="mtn" className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                          <Smartphone className="mb-2 h-6 w-6 text-[#FFCC00]" />
-                          <span className="text-sm font-medium">MTN Money</span>
-                        </Label>
-                      </div>
-                      <div>
-                        <RadioGroupItem value="cash" id="cash" className="peer sr-only" />
-                        <Label htmlFor="cash" className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                          <WalletIcon className="mb-2 h-6 w-6 text-primary" />
-                          <span className="text-sm font-medium">Cash</span>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                  {withdrawalMethod !== "cash" && (
-                    <div className="space-y-2">
-                      <Label>Numéro de téléphone</Label>
-                      <Input
-                        placeholder="+224 6XX XX XX XX"
-                        value={withdrawalPhone}
-                        onChange={(e) => setWithdrawalPhone(e.target.value)}
-                      />
-                    </div>
-                  )}
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setWithdrawalOpen(false)}>Annuler</Button>
-                  <Button onClick={handleWithdraw} disabled={withdrawing}>
-                    {withdrawing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                    Confirmer le retrait
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button className="flex items-center gap-2" onClick={() => setWithdrawalOpen(true)}>
+              <ArrowUpFromLine className="w-4 h-4" />
+              Retirer
+            </Button>
+            <WithdrawalDialog
+              open={withdrawalOpen}
+              onOpenChange={setWithdrawalOpen}
+              availableBalance={availableBalance}
+              limits={sellerLimits}
+              onSubmit={handleWithdraw}
+              isSubmitting={withdrawing}
+              idPrefix="seller"
+              formatAmount={formatPrice}
+            />
           </motion.div>
         </div>
 
