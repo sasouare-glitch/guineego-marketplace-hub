@@ -171,10 +171,11 @@ async function handlePaymentFailed(paymentIntent: any) {
   });
 
   // Notify admins of failure
-  await notifyAdmins(
-    'Paiement Stripe échoué',
-    `Paiement ${paymentId} pour commande ${orderId || 'N/A'} a échoué: ${paymentIntent.last_payment_error?.message || 'Raison inconnue'}`
-  );
+  await notifyAdmins({
+    type: 'payment_received',
+    title: 'Paiement Stripe échoué',
+    body: `Paiement ${paymentId} pour commande ${orderId || 'N/A'} a échoué: ${paymentIntent.last_payment_error?.message || 'Raison inconnue'}`
+  });
 
   console.log(`❌ Stripe payment failed: ${paymentId}`);
 }

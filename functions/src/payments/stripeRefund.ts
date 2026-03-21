@@ -121,10 +121,11 @@ export const stripeRefund = functions
       await batch.commit();
 
       // Notify admins
-      await notifyAdmins(
-        'Remboursement Stripe effectué',
-        `Paiement ${paymentId.slice(0, 8).toUpperCase()} remboursé — ${refund.amount?.toLocaleString()} GNF. Raison: ${reason || 'N/A'}`
-      );
+      await notifyAdmins({
+        type: 'payment_received',
+        title: 'Remboursement Stripe effectué',
+        body: `Paiement ${paymentId.slice(0, 8).toUpperCase()} remboursé — ${refund.amount?.toLocaleString()} GNF. Raison: ${reason || 'N/A'}`
+      });
 
       console.log(`✅ Stripe refund completed: ${refund.id} for payment ${paymentId}`);
 
