@@ -130,6 +130,13 @@ const financeItems = [
     description: "Revenus et paiements"
   },
   { 
+    title: "Retraits", 
+    url: "/admin/withdrawals", 
+    icon: Wallet,
+    badge: null,
+    description: "Demandes de retrait"
+  },
+  { 
     title: "Paiements", 
     url: "/admin/payments", 
     icon: CreditCard,

@@ -460,6 +460,11 @@ const App = () => (
                          <AdminFinancesPage />
                        </ProtectedRoute>
                      } />
+                     <Route path="/admin/withdrawals" element={
+                       <ProtectedRoute requiredRoles={['admin']}>
+                         <AdminWithdrawalsPage />
+                       </ProtectedRoute>
+                     } />
                      <Route path="/admin/commissions" element={
                       <ProtectedRoute requiredRoles={['admin']}>
                         <AdminCommissionsPage />
