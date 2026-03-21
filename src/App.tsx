@@ -17,6 +17,7 @@ import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerProducts from "./pages/seller/SellerProducts";
 import SellerOrders from "./pages/seller/SellerOrders";
 import SellerFinances from "./pages/seller/SellerFinances";
+import SellerWithdrawalHistory from "./pages/seller/SellerWithdrawalHistory";
 import SellerAnalytics from "./pages/seller/SellerAnalytics";
 import SellerCustomers from "./pages/seller/SellerCustomers";
 import SellerProfilePage from "./pages/seller/SellerProfilePage";
@@ -28,6 +29,7 @@ import CourierDashboard from "./pages/courier/CourierDashboard";
 import CourierMissions from "./pages/courier/CourierMissions";
 import CourierMissionDetail from "./pages/courier/CourierMissionDetail";
 import CourierEarnings from "./pages/courier/CourierEarnings";
+import CourierWithdrawalHistory from "./pages/courier/CourierWithdrawalHistory";
 import CourierMobileHome from "./pages/courier/CourierMobileHome";
 import CourierActiveMissions from "./pages/courier/CourierActiveMissions";
 import CourierStatsPage from "./pages/courier/CourierStatsPage";
@@ -269,6 +271,11 @@ const App = () => (
                         <SellerFinances />
                       </ProtectedRoute>
                     } />
+                    <Route path="/seller/withdrawals" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerWithdrawalHistory />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/seller/analytics" element={
                       <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
                         <SellerAnalytics />
@@ -335,6 +342,11 @@ const App = () => (
                     <Route path="/courier/earnings" element={
                       <ProtectedRoute requiredRoles={['courier', 'admin']}>
                         <CourierEarnings />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/courier/withdrawals" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierWithdrawalHistory />
                       </ProtectedRoute>
                     } />
                     <Route path="/courier/stats" element={

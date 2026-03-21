@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Wallet as WalletIcon,
@@ -66,6 +67,7 @@ export default function SellerFinances() {
   const { wallet, loading: walletLoading } = useWallet();
   const { transactions, loading: txLoading, hasMore, loadMore } = useTransactions(30);
   const { requestWithdrawal, isLoading: withdrawing } = useWithdrawal();
+  const navigate = useNavigate();
   const { format: formatPrice } = useCurrency();
   const { getEffectiveLimits, loading: limitsLoading } = useWithdrawalLimits();
   const sellerLimits = getEffectiveLimits('seller');
@@ -134,6 +136,10 @@ export default function SellerFinances() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate('/seller/withdrawals')} className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              Historique retraits
+            </Button>
             <Dialog open={withdrawalOpen} onOpenChange={setWithdrawalOpen}>
               <DialogTrigger asChild>
                 <Button className="flex items-center gap-2">
