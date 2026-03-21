@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CourierLayout } from "@/components/courier/CourierLayout";
 import { SwipeStatusButton } from "@/components/courier/SwipeStatusButton";
+import { CashCollectionDialog } from "@/components/courier/CashCollectionDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ import {
   Loader2,
   Navigation2,
   Crosshair,
+  Banknote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/firebase/config";
@@ -45,6 +47,10 @@ const CourierMissionDetail = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [itemCount, setItemCount] = useState<number | null>(null);
+  const [orderPaymentMethod, setOrderPaymentMethod] = useState<string | null>(null);
+  const [orderTotal, setOrderTotal] = useState<number>(0);
+  const [showCashDialog, setShowCashDialog] = useState(false);
+  const [cashProofCollected, setCashProofCollected] = useState(false);
 
   // Extract GPS coordinates from mission if available
   const pickupCoords = mission?.pickup && 'lat' in mission.pickup
@@ -92,6 +98,8 @@ const CourierMissionDetail = () => {
         const items = data.items || data.orderItems || [];
         const total = items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
         setItemCount(total);
+        setOrderPaymentMethod(data.paymentMethod || null);
+        setOrderTotal(data.pricing?.total || data.total || 0);
       }
     }).catch(() => {});
   }, [mission?.orderId]);
@@ -128,13 +136,32 @@ const CourierMissionDetail = () => {
     setUpdating(false);
   };
 
+  const isCashOrder = orderPaymentMethod === 'cash';
+
   const handleNextStatus = async () => {
     const nextIndex = currentStepIndex + 1;
     if (nextIndex < statusSteps.length) {
+      const nextStatus = statusSteps[nextIndex].status;
+      // Intercept: if cash order and about to mark "delivered", show cash collection dialog first
+      if (isCashOrder && nextStatus === "delivered" && !cashProofCollected) {
+        setShowCashDialog(true);
+        return;
+      }
       setUpdating(true);
-      await updateMissionStatus(mission.id, statusSteps[nextIndex].status as DeliveryStatus);
+      await updateMissionStatus(mission.id, nextStatus as DeliveryStatus);
       setUpdating(false);
     }
+  };
+
+  const handleCashCollected = async (proof: { type: "photo" | "signature"; dataUrl: string }) => {
+    // Mark proof as collected, then proceed with delivery status update
+    setCashProofCollected(true);
+    setShowCashDialog(false);
+    setUpdating(true);
+    // In production, you'd upload proof.dataUrl to Firebase Storage here
+    console.log('[CashCollection] Proof collected:', proof.type);
+    await updateMissionStatus(mission.id, "delivered");
+    setUpdating(false);
   };
 
   const getNextStatusLabel = () => {
@@ -385,6 +412,28 @@ const CourierMissionDetail = () => {
           </CardContent>
         </Card>
 
+        {/* Cash Payment Indicator */}
+        {isCashOrder && !isPending && mission.status !== "delivered" && (
+          <Card className="bg-guinea-yellow/10 border-guinea-yellow/30">
+            <CardContent className="py-3 px-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-guinea-yellow/20 flex items-center justify-center">
+                  <Banknote className="w-5 h-5 text-guinea-yellow" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-foreground">Paiement Cash</p>
+                  <p className="text-xs text-muted-foreground">
+                    Collectez {formatPrice(orderTotal)} à la livraison
+                  </p>
+                </div>
+                <Badge variant="outline" className="border-guinea-yellow text-guinea-yellow">
+                  CASH
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Earnings */}
         <Card className="bg-guinea-green/5 border-guinea-green/20">
           <CardContent className="pt-4">
@@ -501,6 +550,15 @@ const CourierMissionDetail = () => {
             </Button>
           </div>
         )}
+
+        {/* Cash Collection Dialog */}
+        <CashCollectionDialog
+          open={showCashDialog}
+          onOpenChange={setShowCashDialog}
+          onConfirm={handleCashCollected}
+          amount={orderTotal}
+          customerName={mission.delivery.fullName}
+        />
       </div>
     </CourierLayout>
   );
