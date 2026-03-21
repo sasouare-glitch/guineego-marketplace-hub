@@ -41,6 +41,8 @@ const CourierEarnings = () => {
   const { wallet, loading: walletLoading } = useWallet();
   const { transactions, loading: txLoading } = useTransactions();
   const { myMissions } = useCourierMissions();
+  const { getEffectiveLimits } = useWithdrawalLimits();
+  const courierLimits = getEffectiveLimits('courier');
 
   const loading = walletLoading;
 
