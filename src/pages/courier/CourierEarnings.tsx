@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useState, useMemo } from "react";
 import { useWallet, useTransactions, formatGNF } from "@/hooks/useWallet";
+import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
 import { useCourierMissions } from "@/hooks/useCourierMissions";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
 
