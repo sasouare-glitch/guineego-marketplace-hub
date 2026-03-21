@@ -88,26 +88,27 @@ export const AddressForm = ({ selectedAddress, onSelectAddress, addresses, loadi
   };
 
   const handleAddAddress = async () => {
-    if (newAddress.fullName && newAddress.phone && newAddress.address && newAddress.commune) {
-      setSaving(true);
-      try {
-        const addr = await onAddAddress({
-          label: getAddressLabel(newAddress.type || "home"),
-          type: newAddress.type || "home",
-          fullName: newAddress.fullName,
-          phone: newAddress.phone,
-          address: newAddress.address,
-          commune: newAddress.commune,
-          city: newAddress.city || "Conakry",
-          instructions: newAddress.instructions,
-          isDefault: addresses.length === 0
-        });
-        onSelectAddress(addr.id);
-        setIsAddingNew(false);
-        setNewAddress({ type: "home", city: "Conakry" });
-      } finally {
-        setSaving(false);
-      }
+    if (!newAddress.fullName || !newAddress.phone || !newAddress.address || !newAddress.commune) return;
+    setSaving(true);
+    try {
+      const addr = await onAddAddress({
+        label: getAddressLabel(newAddress.type || "home"),
+        type: newAddress.type || "home",
+        fullName: newAddress.fullName,
+        phone: newAddress.phone,
+        address: newAddress.address,
+        commune: newAddress.commune,
+        city: newAddress.city || "Conakry",
+        instructions: newAddress.instructions,
+        isDefault: addresses.length === 0
+      });
+      onSelectAddress(addr.id);
+      setNewAddress({ type: "home", city: "Conakry" });
+    } catch (e) {
+      console.error("Failed to save address:", e);
+    } finally {
+      setSaving(false);
+      setIsAddingNew(false);
     }
   };
 
