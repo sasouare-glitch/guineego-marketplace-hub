@@ -31,6 +31,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { useWallet, useTransactions, useWithdrawal } from "@/hooks/useWallet";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
 import { toast } from "sonner";
 
 const typeConfig: Record<string, { label: string; icon: any; color: string; bgColor: string }> = {
