@@ -309,15 +309,32 @@ export const onDeliveryConfirmed = functions
           const transferFn = require('./transferToEcommercant').transferToEcommercant;
           await transferFn.run({ orderId }, { auth: null });
 
-          // Notify sellers
-          for (const sellerId of after.sellerIds || []) {
-            await sendNotification({
-              userId: sellerId,
-              type: 'payout_received',
-              title: 'Vente confirmée',
-              body: `La commande ${orderId} a été livrée. Le reversement est en cours.`,
-              data: { orderId }
-            });
+          // Notify each seller with their actual credited amount
+          const sellerPayouts = after.payoutDetails || [];
+          for (const payout of sellerPayouts) {
+            const sellerId = payout.sellerId;
+            if (sellerId) {
+              await sendNotification({
+                userId: sellerId,
+                type: 'wallet_credited',
+                title: '💰 Paiement reçu !',
+                body: `+${(payout.netAmount || 0).toLocaleString()} GNF crédités sur votre wallet (commande ${orderId}). Commission: ${(payout.commission || 0).toLocaleString()} GNF.`,
+                data: { orderId, amount: (payout.netAmount || 0).toString() }
+              });
+            }
+          }
+
+          // Fallback: if no payoutDetails, notify by sellerIds
+          if (sellerPayouts.length === 0) {
+            for (const sellerId of after.sellerIds || []) {
+              await sendNotification({
+                userId: sellerId,
+                type: 'payout_received',
+                title: 'Vente confirmée',
+                body: `La commande ${orderId} a été livrée. Le reversement est en cours.`,
+                data: { orderId }
+              });
+            }
           }
 
         } catch (error) {

@@ -17,6 +17,7 @@ export type NotificationType =
   | 'payment_received'
   | 'payout_sent'
   | 'payout_received'
+  | 'wallet_credited'
   | 'investment_return'
   | 'course_purchased'
   | 'certificate_issued'
