@@ -84,6 +84,10 @@ export const createPayout = functions
       }
 
       // Create payout record
+      const feePercent = (config.feePercent ?? 1) / 100;
+      const fee = Math.floor(amount * feePercent);
+      const netAmount = amount - fee;
+
       const payoutRef = db.collection('seller_payouts').doc();
       await payoutRef.set({
         id: payoutRef.id,
@@ -92,9 +96,8 @@ export const createPayout = functions
         amount,
         method,
         phone,
-        const feePercent = (config.feePercent ?? 1) / 100;
-        fee: Math.floor(amount * feePercent),
-        netAmount: amount - Math.floor(amount * feePercent),
+        fee,
+        netAmount,
         status: 'pending',
         requestedBy: context.auth!.uid,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
