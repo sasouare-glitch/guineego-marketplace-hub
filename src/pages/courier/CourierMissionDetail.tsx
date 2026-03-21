@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CourierLayout } from "@/components/courier/CourierLayout";
 import { SwipeStatusButton } from "@/components/courier/SwipeStatusButton";
+import { CashCollectionDialog } from "@/components/courier/CashCollectionDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ import {
   Loader2,
   Navigation2,
   Crosshair,
+  Banknote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/firebase/config";
