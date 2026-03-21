@@ -4,10 +4,10 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { sendNotification, notifyAdmins } from '../utils/notifications';
+import { sendNotification } from '../utils/notifications';
 import { sendOrderConfirmation } from '../notifications/sendOrderConfirmation';
 import { sendStatusNotification } from '../notifications/sendStatusNotification';
-import { wrapInTemplate, ctaButton, infoRow, divider, APP_URL, COLORS } from '../utils/emailTemplate';
+import { wrapInTemplate, ctaButton, APP_URL, COLORS } from '../utils/emailTemplate';
 import { sendEmailWithFallback } from '../utils/sendgrid';
 
 const db = admin.firestore();
@@ -351,7 +351,7 @@ async function notifySellers(orderId: string, order: any, status: 'delivered' | 
       // 1. In-app notification
       await sendNotification({
         userId: sellerId,
-        type: status === 'delivered' ? 'order_delivered' : 'order_cancelled',
+        type: 'order_status_changed',
         title: `${msg.emoji} ${msg.title}`,
         body: msg.body(sellerAmount),
         data: { orderId },

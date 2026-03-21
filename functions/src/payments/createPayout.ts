@@ -6,7 +6,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { verifySeller, verifyAdmin } from '../utils/auth';
-import { updateWalletTransaction } from '../utils/firestore';
+// updateWalletTransaction available in firestore utils if needed
 import { sendNotification } from '../utils/notifications';
 
 const db = admin.firestore();

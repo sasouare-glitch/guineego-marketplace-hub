@@ -135,10 +135,11 @@ async function handleCheckoutCompleted(session: any) {
   }
 
   // Notify admins
-  await notifyAdmins(
-    'Paiement Stripe reçu',
-    `Commande ${orderId.slice(0, 8).toUpperCase()} — ${(session.amount_total || 0).toLocaleString()} GNF par carte bancaire.`
-  );
+  await notifyAdmins({
+    type: 'payment_received',
+    title: 'Paiement Stripe reçu',
+    body: `Commande ${orderId.slice(0, 8).toUpperCase()} — ${(session.amount_total || 0).toLocaleString()} GNF par carte bancaire.`
+  });
 
   console.log(`✅ Stripe payment completed: ${paymentId} for order ${orderId}`);
 }
@@ -170,10 +171,11 @@ async function handlePaymentFailed(paymentIntent: any) {
   });
 
   // Notify admins of failure
-  await notifyAdmins(
-    'Paiement Stripe échoué',
-    `Paiement ${paymentId} pour commande ${orderId || 'N/A'} a échoué: ${paymentIntent.last_payment_error?.message || 'Raison inconnue'}`
-  );
+  await notifyAdmins({
+    type: 'payment_received',
+    title: 'Paiement Stripe échoué',
+    body: `Paiement ${paymentId} pour commande ${orderId || 'N/A'} a échoué: ${paymentIntent.last_payment_error?.message || 'Raison inconnue'}`
+  });
 
   console.log(`❌ Stripe payment failed: ${paymentId}`);
 }

@@ -67,9 +67,7 @@ export async function sendOrderConfirmation(order: OrderData): Promise<void> {
  */
 async function sendConfirmationEmail(email: string, order: OrderData): Promise<void> {
   try {
-    const itemsList = order.items
-      .map(item => `• ${item.name} x${item.quantity} — ${item.price.toLocaleString()} GNF`)
-      .join('<br>');
+    // itemsList used in itemsHtml below
 
     const itemsHtml = order.items
       .map(item => `

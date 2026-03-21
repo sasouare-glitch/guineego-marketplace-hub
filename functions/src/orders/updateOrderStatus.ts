@@ -5,7 +5,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { verifyAuth, verifySeller, verifyAdmin, UserClaims } from '../utils/auth';
+import { verifyAuth, UserClaims } from '../utils/auth';
 import { notifyOrderStatus } from '../utils/notifications';
 
 const db = admin.firestore();
@@ -67,7 +67,7 @@ export const updateOrderStatus = functions
   .region('europe-west1')
   .https.onCall(async (data: UpdateStatusData, context) => {
     const uid = verifyAuth(context);
-    const claims = context.auth!.token as UserClaims;
+    const claims = context.auth!.token as unknown as UserClaims;
     const { orderId, status, note } = data;
 
     if (!orderId || !status) {

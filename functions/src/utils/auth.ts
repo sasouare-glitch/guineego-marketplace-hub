@@ -37,7 +37,7 @@ export function verifyRole(
   context: functions.https.CallableContext,
   allowedRoles: UserRole[]
 ): UserClaims {
-  const uid = verifyAuth(context);
+  verifyAuth(context);
   const claims = context.auth?.token as UserClaims | undefined;
   
   if (!claims?.role || !allowedRoles.includes(claims.role)) {
