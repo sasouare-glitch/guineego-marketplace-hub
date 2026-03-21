@@ -37,6 +37,7 @@ import { useWallet, useTransactions, useWithdrawal, formatGNF } from "@/hooks/us
 import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
 import { useCourierMissions } from "@/hooks/useCourierMissions";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 function getPeriodStart(period: EarningsPeriod): Date {
