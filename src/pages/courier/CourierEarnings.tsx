@@ -42,9 +42,6 @@ function getPeriodStart(period: EarningsPeriod): Date {
 const CourierEarnings = () => {
   const [period, setPeriod] = useState<EarningsPeriod>("week");
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
-  const [withdrawalMethod, setWithdrawalMethod] = useState<"orange_money" | "mtn_money" | "cash">("orange_money");
-  const [withdrawalAmount, setWithdrawalAmount] = useState("");
-  const [withdrawalPhone, setWithdrawalPhone] = useState("");
 
   const { wallet, loading: walletLoading } = useWallet();
   const { transactions, loading: txLoading } = useTransactions();
