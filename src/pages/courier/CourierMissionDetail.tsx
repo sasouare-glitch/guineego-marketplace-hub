@@ -412,6 +412,28 @@ const CourierMissionDetail = () => {
           </CardContent>
         </Card>
 
+        {/* Cash Payment Indicator */}
+        {isCashOrder && !isPending && mission.status !== "delivered" && (
+          <Card className="bg-guinea-yellow/10 border-guinea-yellow/30">
+            <CardContent className="py-3 px-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-guinea-yellow/20 flex items-center justify-center">
+                  <Banknote className="w-5 h-5 text-guinea-yellow" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-foreground">Paiement Cash</p>
+                  <p className="text-xs text-muted-foreground">
+                    Collectez {formatPrice(orderTotal)} à la livraison
+                  </p>
+                </div>
+                <Badge variant="outline" className="border-guinea-yellow text-guinea-yellow">
+                  CASH
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Earnings */}
         <Card className="bg-guinea-green/5 border-guinea-green/20">
           <CardContent className="pt-4">
