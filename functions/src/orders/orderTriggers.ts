@@ -7,7 +7,7 @@ import * as admin from 'firebase-admin';
 import { sendNotification } from '../utils/notifications';
 import { sendOrderConfirmation } from '../notifications/sendOrderConfirmation';
 import { sendStatusNotification } from '../notifications/sendStatusNotification';
-import { wrapInTemplate, ctaButton, infoRow, divider, APP_URL, COLORS } from '../utils/emailTemplate';
+import { wrapInTemplate, ctaButton, APP_URL, COLORS } from '../utils/emailTemplate';
 import { sendEmailWithFallback } from '../utils/sendgrid';
 
 const db = admin.firestore();
