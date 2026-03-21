@@ -126,7 +126,12 @@ const CourierEarnings = () => {
             <h1 className="text-2xl font-display font-bold">Mes Revenus</h1>
             <p className="text-muted-foreground">Suivez vos gains et retraits</p>
           </div>
-          <Select value={period} onValueChange={(v) => setPeriod(v as EarningsPeriod)}>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate('/courier/withdrawals')} className="gap-2">
+              <Clock className="w-4 h-4" />
+              <span className="hidden sm:inline">Historique retraits</span>
+            </Button>
+            <Select value={period} onValueChange={(v) => setPeriod(v as EarningsPeriod)}>
             <SelectTrigger className="w-[180px]">
               <Calendar className="w-4 h-4 mr-2" />
               <SelectValue />
