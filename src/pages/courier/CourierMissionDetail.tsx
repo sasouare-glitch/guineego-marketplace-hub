@@ -43,6 +43,7 @@ const statusSteps: { status: StepStatus; label: string }[] = [
 const CourierMissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { acceptMission, updateMissionStatus } = useCourierMissions();
   const [mission, setMission] = useState<DeliveryMission | null>(null);
   const [loading, setLoading] = useState(true);
