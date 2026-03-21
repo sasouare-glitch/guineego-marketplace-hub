@@ -17,6 +17,7 @@ import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerProducts from "./pages/seller/SellerProducts";
 import SellerOrders from "./pages/seller/SellerOrders";
 import SellerFinances from "./pages/seller/SellerFinances";
+import SellerWithdrawalHistory from "./pages/seller/SellerWithdrawalHistory";
 import SellerAnalytics from "./pages/seller/SellerAnalytics";
 import SellerCustomers from "./pages/seller/SellerCustomers";
 import SellerProfilePage from "./pages/seller/SellerProfilePage";
