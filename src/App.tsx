@@ -101,6 +101,7 @@ import AdminOrderDetailPage from "./pages/admin/AdminOrderDetailPage";
 import AdminCommissionsPage from "./pages/admin/AdminCommissionsPage";
 import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
 import AdminStripeDashboardPage from "./pages/admin/AdminStripeDashboardPage";
+import AdminWithdrawalsPage from "./pages/admin/AdminWithdrawalsPage";
 // Mobile Components
 import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
 import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";
@@ -457,6 +458,11 @@ const App = () => (
                      <Route path="/admin/finances" element={
                        <ProtectedRoute requiredRoles={['admin']}>
                          <AdminFinancesPage />
+                       </ProtectedRoute>
+                     } />
+                     <Route path="/admin/withdrawals" element={
+                       <ProtectedRoute requiredRoles={['admin']}>
+                         <AdminWithdrawalsPage />
                        </ProtectedRoute>
                      } />
                      <Route path="/admin/commissions" element={
