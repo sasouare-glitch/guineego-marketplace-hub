@@ -60,9 +60,6 @@ function formatDate(date: Date | undefined): string {
 export default function SellerFinances() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [withdrawalOpen, setWithdrawalOpen] = useState(false);
-  const [withdrawalMethod, setWithdrawalMethod] = useState<"orange_money" | "mtn_money" | "cash">("orange_money");
-  const [withdrawalAmount, setWithdrawalAmount] = useState("");
-  const [withdrawalPhone, setWithdrawalPhone] = useState("");
 
   const { wallet, loading: walletLoading } = useWallet();
   const { transactions, loading: txLoading, hasMore, loadMore } = useTransactions(30);
