@@ -550,6 +550,15 @@ const CourierMissionDetail = () => {
             </Button>
           </div>
         )}
+
+        {/* Cash Collection Dialog */}
+        <CashCollectionDialog
+          open={showCashDialog}
+          onOpenChange={setShowCashDialog}
+          onConfirm={handleCashCollected}
+          amount={orderTotal}
+          customerName={mission.delivery.fullName}
+        />
       </div>
     </CourierLayout>
   );
