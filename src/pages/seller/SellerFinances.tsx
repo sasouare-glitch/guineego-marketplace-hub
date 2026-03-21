@@ -67,6 +67,8 @@ export default function SellerFinances() {
   const { transactions, loading: txLoading, hasMore, loadMore } = useTransactions(30);
   const { requestWithdrawal, isLoading: withdrawing } = useWithdrawal();
   const { format: formatPrice } = useCurrency();
+  const { getEffectiveLimits, loading: limitsLoading } = useWithdrawalLimits();
+  const sellerLimits = getEffectiveLimits('seller');
 
   const loading = walletLoading;
 
