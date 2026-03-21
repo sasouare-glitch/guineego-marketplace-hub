@@ -97,6 +97,14 @@ export default function SellerFinances() {
       toast.error("Montant invalide");
       return;
     }
+    if (amount < sellerLimits.minAmount) {
+      toast.error(`Montant minimum: ${sellerLimits.minAmount.toLocaleString()} GNF`);
+      return;
+    }
+    if (amount > sellerLimits.maxAmount) {
+      toast.error(`Montant maximum: ${sellerLimits.maxAmount.toLocaleString()} GNF`);
+      return;
+    }
     if (amount > availableBalance) {
       toast.error("Solde insuffisant");
       return;
