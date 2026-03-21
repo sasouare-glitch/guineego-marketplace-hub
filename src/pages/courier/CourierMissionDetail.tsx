@@ -98,6 +98,8 @@ const CourierMissionDetail = () => {
         const items = data.items || data.orderItems || [];
         const total = items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
         setItemCount(total);
+        setOrderPaymentMethod(data.paymentMethod || null);
+        setOrderTotal(data.pricing?.total || data.total || 0);
       }
     }).catch(() => {});
   }, [mission?.orderId]);
