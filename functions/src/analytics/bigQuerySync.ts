@@ -415,7 +415,7 @@ export const dailyReconciliation = functions
         .reduce((s, d) => s + (d.data().amount || 0), 0);
 
       // Check for discrepancies
-      const expectedPlatformRevenue = platformFees;
+      const _expectedPlatformRevenue = platformFees;
       const expectedSellerPayouts = ordersTotal - platformFees;
       
       const discrepancies: string[] = [];

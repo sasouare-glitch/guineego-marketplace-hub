@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import fetch from 'node-fetch';
+const fetch = require('node-fetch') as typeof import('node-fetch').default;
 
 const db = admin.firestore();
 

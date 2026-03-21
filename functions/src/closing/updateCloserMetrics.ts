@@ -5,7 +5,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { verifyCloser, verifyAdmin } from '../utils/auth';
+import { verifyCloser } from '../utils/auth';
 
 const db = admin.firestore();
 

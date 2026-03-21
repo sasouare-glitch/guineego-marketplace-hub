@@ -5,7 +5,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { verifyCourier, verifyAdmin } from '../utils/auth';
+import { verifyAdmin } from '../utils/auth';
 import { sendNotification } from '../utils/notifications';
 
 const db = admin.firestore();

@@ -5,7 +5,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { paginatedQuery, PaginatedResult } from '../utils/firestore';
+import { PaginatedResult } from '../utils/firestore';
 
 const db = admin.firestore();
 

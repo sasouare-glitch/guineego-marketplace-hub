@@ -26,7 +26,7 @@ export const cancelOrder = functions
   .region('europe-west1')
   .https.onCall(async (data: CancelOrderData, context) => {
     const uid = verifyAuth(context);
-    const claims = context.auth!.token as UserClaims;
+    const claims = context.auth!.token as unknown as UserClaims;
     const { orderId, reason, refundToWallet = true } = data;
 
     if (!orderId || !reason) {

@@ -5,7 +5,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { verifySeller, verifyAdmin } from '../utils/auth';
+import { verifyAuth } from '../utils/auth';
 import { generateMissionId } from '../utils/firestore';
 import { sendNotification } from '../utils/notifications';
 

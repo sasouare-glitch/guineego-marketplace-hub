@@ -5,7 +5,8 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { verifyAdmin, verifySeller } from '../utils/auth';
+// Auth utilities used at runtime for role verification
+import type { UserRole } from '../utils/auth';
 import { sendNotification } from '../utils/notifications';
 
 const db = admin.firestore();

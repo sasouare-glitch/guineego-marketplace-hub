@@ -351,7 +351,7 @@ async function notifySellers(orderId: string, order: any, status: 'delivered' | 
       // 1. In-app notification
       await sendNotification({
         userId: sellerId,
-        type: status === 'delivered' ? 'order_delivered' : 'order_cancelled',
+        type: 'order_status_changed',
         title: `${msg.emoji} ${msg.title}`,
         body: msg.body(sellerAmount),
         data: { orderId },
