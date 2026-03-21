@@ -344,6 +344,11 @@ const App = () => (
                         <CourierEarnings />
                       </ProtectedRoute>
                     } />
+                    <Route path="/courier/withdrawals" element={
+                      <ProtectedRoute requiredRoles={['courier', 'admin']}>
+                        <CourierWithdrawalHistory />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/courier/stats" element={
                       <ProtectedRoute requiredRoles={['courier', 'admin']}>
                         <CourierStatsPage />
