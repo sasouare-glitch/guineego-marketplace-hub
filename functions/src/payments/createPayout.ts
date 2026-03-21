@@ -92,8 +92,9 @@ export const createPayout = functions
         amount,
         method,
         phone,
-        fee: Math.floor(amount * 0.01), // 1% fee
-        netAmount: amount - Math.floor(amount * 0.01),
+        const feePercent = (config.feePercent ?? 1) / 100;
+        fee: Math.floor(amount * feePercent),
+        netAmount: amount - Math.floor(amount * feePercent),
         status: 'pending',
         requestedBy: context.auth!.uid,
         createdAt: admin.firestore.FieldValue.serverTimestamp()
