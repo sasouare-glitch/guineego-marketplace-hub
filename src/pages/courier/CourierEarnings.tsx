@@ -3,6 +3,9 @@ import { EarningsChart, EarningsPeriod } from "@/components/courier/EarningsChar
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Wallet,
   ArrowUpRight,
@@ -12,6 +15,7 @@ import {
   Download,
   Smartphone,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
 import {
   Select,
@@ -20,11 +24,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useState, useMemo } from "react";
-import { useWallet, useTransactions, formatGNF } from "@/hooks/useWallet";
+import { useWallet, useTransactions, useWithdrawal, formatGNF } from "@/hooks/useWallet";
 import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
 import { useCourierMissions } from "@/hooks/useCourierMissions";
 import { startOfDay, startOfWeek, startOfMonth, startOfYear } from "date-fns";
+import { toast } from "sonner";
 
 function getPeriodStart(period: EarningsPeriod): Date {
   const now = new Date();
@@ -38,9 +51,15 @@ function getPeriodStart(period: EarningsPeriod): Date {
 
 const CourierEarnings = () => {
   const [period, setPeriod] = useState<EarningsPeriod>("week");
+  const [withdrawalOpen, setWithdrawalOpen] = useState(false);
+  const [withdrawalMethod, setWithdrawalMethod] = useState<"orange_money" | "mtn_money" | "cash">("orange_money");
+  const [withdrawalAmount, setWithdrawalAmount] = useState("");
+  const [withdrawalPhone, setWithdrawalPhone] = useState("");
+
   const { wallet, loading: walletLoading } = useWallet();
   const { transactions, loading: txLoading } = useTransactions();
   const { myMissions } = useCourierMissions();
+  const { requestWithdrawal, isLoading: withdrawing } = useWithdrawal();
   const { getEffectiveLimits } = useWithdrawalLimits();
   const courierLimits = getEffectiveLimits('courier');
 
@@ -64,6 +83,38 @@ const CourierEarnings = () => {
       return d >= start;
     });
   }, [transactions, period]);
+
+  const handleWithdraw = () => {
+    const amount = parseInt(withdrawalAmount);
+    if (!amount || amount <= 0) {
+      toast.error("Montant invalide");
+      return;
+    }
+    if (amount < courierLimits.minAmount) {
+      toast.error(`Montant minimum: ${courierLimits.minAmount.toLocaleString()} GNF`);
+      return;
+    }
+    if (amount > courierLimits.maxAmount) {
+      toast.error(`Montant maximum: ${courierLimits.maxAmount.toLocaleString()} GNF`);
+      return;
+    }
+    if (amount > computedBalance) {
+      toast.error("Solde insuffisant");
+      return;
+    }
+    if (withdrawalMethod !== "cash" && !withdrawalPhone.trim()) {
+      toast.error("Numéro de téléphone requis");
+      return;
+    }
+    requestWithdrawal({
+      amount,
+      method: withdrawalMethod,
+      phone: withdrawalMethod !== "cash" ? withdrawalPhone : undefined,
+    });
+    setWithdrawalOpen(false);
+    setWithdrawalAmount("");
+    setWithdrawalPhone("");
+  };
 
   return (
     <CourierLayout>
@@ -112,6 +163,7 @@ const CourierEarnings = () => {
                   <Button
                     variant="secondary"
                     className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border-0"
+                    onClick={() => setWithdrawalOpen(true)}
                   >
                     <ArrowUpRight className="w-4 h-4 mr-2" />
                     Retirer
@@ -244,6 +296,91 @@ const CourierEarnings = () => {
             </Card>
           </>
         )}
+
+        {/* Withdrawal Dialog */}
+        <Dialog open={withdrawalOpen} onOpenChange={setWithdrawalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Demande de retrait</DialogTitle>
+              <DialogDescription>
+                Solde disponible: {computedBalance.toLocaleString("fr-GN")} GNF
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {/* Limits info */}
+              <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 border border-border">
+                <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  Min: {courierLimits.minAmount.toLocaleString()} GNF · Max: {courierLimits.maxAmount.toLocaleString()} GNF · Frais: {courierLimits.feePercent}%
+                </p>
+              </div>
+
+              {/* Amount */}
+              <div className="space-y-2">
+                <Label>Montant à retirer</Label>
+                <Input
+                  type="number"
+                  placeholder={`Min: ${courierLimits.minAmount.toLocaleString()} GNF`}
+                  value={withdrawalAmount}
+                  onChange={(e) => setWithdrawalAmount(e.target.value)}
+                  min={courierLimits.minAmount}
+                  max={Math.min(courierLimits.maxAmount, computedBalance)}
+                />
+              </div>
+
+              {/* Method */}
+              <div className="space-y-2">
+                <Label>Mode de retrait</Label>
+                <RadioGroup
+                  value={withdrawalMethod}
+                  onValueChange={(v) => setWithdrawalMethod(v as any)}
+                  className="grid grid-cols-3 gap-4"
+                >
+                  <div>
+                    <RadioGroupItem value="orange_money" id="courier-orange" className="peer sr-only" />
+                    <Label htmlFor="courier-orange" className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                      <Smartphone className="mb-2 h-6 w-6 text-[#FF6600]" />
+                      <span className="text-sm font-medium">Orange Money</span>
+                    </Label>
+                  </div>
+                  <div>
+                    <RadioGroupItem value="mtn_money" id="courier-mtn" className="peer sr-only" />
+                    <Label htmlFor="courier-mtn" className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                      <Smartphone className="mb-2 h-6 w-6 text-[#FFCC00]" />
+                      <span className="text-sm font-medium">MTN Money</span>
+                    </Label>
+                  </div>
+                  <div>
+                    <RadioGroupItem value="cash" id="courier-cash" className="peer sr-only" />
+                    <Label htmlFor="courier-cash" className="flex flex-col items-center justify-between rounded-lg border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                      <Wallet className="mb-2 h-6 w-6 text-guinea-green" />
+                      <span className="text-sm font-medium">Cash</span>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Phone */}
+              {withdrawalMethod !== "cash" && (
+                <div className="space-y-2">
+                  <Label>Numéro de téléphone</Label>
+                  <Input
+                    placeholder="6XX XX XX XX"
+                    value={withdrawalPhone}
+                    onChange={(e) => setWithdrawalPhone(e.target.value)}
+                  />
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setWithdrawalOpen(false)}>Annuler</Button>
+              <Button onClick={handleWithdraw} disabled={withdrawing}>
+                {withdrawing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                Confirmer le retrait
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </CourierLayout>
   );
