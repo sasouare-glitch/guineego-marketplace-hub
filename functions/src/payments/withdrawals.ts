@@ -131,7 +131,7 @@ export const requestWithdrawal = functions
         const currentBalance = wallet.balance || 0;
 
         // Calculate fee
-        let fee = Math.round(amount * WITHDRAWAL_LIMITS.fee);
+        let fee = Math.round(amount * (WITHDRAWAL_LIMITS.feePercent / 100));
         if (fee < WITHDRAWAL_LIMITS.minFee) {
           fee = WITHDRAWAL_LIMITS.minFee;
         }
