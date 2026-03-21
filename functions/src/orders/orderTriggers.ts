@@ -4,7 +4,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { sendNotification, notifyAdmins } from '../utils/notifications';
+import { sendNotification } from '../utils/notifications';
 import { sendOrderConfirmation } from '../notifications/sendOrderConfirmation';
 import { sendStatusNotification } from '../notifications/sendStatusNotification';
 import { wrapInTemplate, ctaButton, infoRow, divider, APP_URL, COLORS } from '../utils/emailTemplate';
