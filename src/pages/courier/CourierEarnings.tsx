@@ -272,15 +272,6 @@ const CourierEarnings = () => {
           isSubmitting={withdrawing}
           idPrefix="courier"
         />
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setWithdrawalOpen(false)}>Annuler</Button>
-              <Button onClick={handleWithdraw} disabled={withdrawing}>
-                {withdrawing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                Confirmer le retrait
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </CourierLayout>
   );
