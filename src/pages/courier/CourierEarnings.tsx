@@ -72,36 +72,8 @@ const CourierEarnings = () => {
     });
   }, [transactions, period]);
 
-  const handleWithdraw = () => {
-    const amount = parseInt(withdrawalAmount);
-    if (!amount || amount <= 0) {
-      toast.error("Montant invalide");
-      return;
-    }
-    if (amount < courierLimits.minAmount) {
-      toast.error(`Montant minimum: ${courierLimits.minAmount.toLocaleString()} GNF`);
-      return;
-    }
-    if (amount > courierLimits.maxAmount) {
-      toast.error(`Montant maximum: ${courierLimits.maxAmount.toLocaleString()} GNF`);
-      return;
-    }
-    if (amount > computedBalance) {
-      toast.error("Solde insuffisant");
-      return;
-    }
-    if (withdrawalMethod !== "cash" && !withdrawalPhone.trim()) {
-      toast.error("Numéro de téléphone requis");
-      return;
-    }
-    requestWithdrawal({
-      amount,
-      method: withdrawalMethod,
-      phone: withdrawalMethod !== "cash" ? withdrawalPhone : undefined,
-    });
-    setWithdrawalOpen(false);
-    setWithdrawalAmount("");
-    setWithdrawalPhone("");
+  const handleWithdraw = (data: { amount: number; method: "orange_money" | "mtn_money" | "cash"; phone?: string }) => {
+    requestWithdrawal(data);
   };
 
   return (
