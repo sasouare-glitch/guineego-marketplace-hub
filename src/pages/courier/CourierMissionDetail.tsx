@@ -47,6 +47,10 @@ const CourierMissionDetail = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [itemCount, setItemCount] = useState<number | null>(null);
+  const [orderPaymentMethod, setOrderPaymentMethod] = useState<string | null>(null);
+  const [orderTotal, setOrderTotal] = useState<number>(0);
+  const [showCashDialog, setShowCashDialog] = useState(false);
+  const [cashProofCollected, setCashProofCollected] = useState(false);
 
   // Extract GPS coordinates from mission if available
   const pickupCoords = mission?.pickup && 'lat' in mission.pickup
