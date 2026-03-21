@@ -7,13 +7,10 @@ import {
   TrendingUp,
   ArrowDownToLine,
   ArrowUpFromLine,
-  Download,
-  Calendar,
   CheckCircle2,
   Clock,
   XCircle,
   CreditCard,
-  Smartphone,
   Loader2,
   AlertCircle,
 } from "lucide-react";
@@ -24,17 +21,10 @@ import { StatCard } from "@/components/seller/StatCard";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { useWallet, useTransactions, useWithdrawal } from "@/hooks/useWallet";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useWithdrawalLimits } from "@/hooks/useWithdrawalLimits";
-import { toast } from "sonner";
 
 const typeConfig: Record<string, { label: string; icon: any; color: string; bgColor: string }> = {
   credit: { label: "Crédit", icon: ArrowDownToLine, color: "text-primary", bgColor: "bg-primary/10" },
