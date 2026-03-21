@@ -149,13 +149,21 @@ export default function SellerFinances() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-muted/50 border border-border">
+                    <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <p className="text-xs text-muted-foreground">
+                      Min: {formatPrice(sellerLimits.minAmount)} · Max: {formatPrice(sellerLimits.maxAmount)} · Frais: {sellerLimits.feePercent}%
+                    </p>
+                  </div>
                   <div className="space-y-2">
                     <Label>Montant à retirer</Label>
                     <Input
                       type="number"
-                      placeholder="Ex: 5000000"
+                      placeholder={`Min: ${sellerLimits.minAmount.toLocaleString()} GNF`}
                       value={withdrawalAmount}
                       onChange={(e) => setWithdrawalAmount(e.target.value)}
+                      min={sellerLimits.minAmount}
+                      max={Math.min(sellerLimits.maxAmount, availableBalance)}
                     />
                   </div>
                   <div className="space-y-2">
