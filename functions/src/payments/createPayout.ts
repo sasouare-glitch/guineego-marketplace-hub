@@ -38,10 +38,23 @@ export const createPayout = functions
 
     const { amount, method, phone } = data;
 
-    if (!amount || amount < 50000) {
+    // Fetch dynamic limits
+    const configDoc = await db.collection('platform_config').doc('withdrawal_limits').get();
+    const config = configDoc.exists ? configDoc.data()! : {};
+    const minAmount = config.sellerMinAmount || config.minAmount || 50000;
+    const maxAmount = config.sellerMaxAmount || config.maxAmount || 5000000;
+
+    if (!amount || amount < minAmount) {
       throw new functions.https.HttpsError(
         'invalid-argument',
-        'Montant minimum: 50,000 GNF'
+        `Montant minimum: ${minAmount.toLocaleString()} GNF`
+      );
+    }
+
+    if (amount > maxAmount) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        `Montant maximum: ${maxAmount.toLocaleString()} GNF`
       );
     }
 
