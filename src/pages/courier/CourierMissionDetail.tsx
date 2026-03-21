@@ -24,9 +24,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { db } from "@/lib/firebase/config";
-import { doc, onSnapshot, getDoc } from "firebase/firestore";
+import { doc, onSnapshot, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useCourierMissions, DeliveryMission, DeliveryStatus } from "@/hooks/useCourierMissions";
 import { useCourierGPS } from "@/hooks/useCourierGPS";
+import { useAuth } from "@/contexts/AuthContext";
 
 type StepStatus = "accepted" | "pickup_started" | "picked_up" | "in_transit" | "arrived" | "delivered";
 
@@ -42,6 +43,7 @@ const statusSteps: { status: StepStatus; label: string }[] = [
 const CourierMissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { acceptMission, updateMissionStatus } = useCourierMissions();
   const [mission, setMission] = useState<DeliveryMission | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,6 +51,7 @@ const CourierMissionDetail = () => {
   const [itemCount, setItemCount] = useState<number | null>(null);
   const [orderPaymentMethod, setOrderPaymentMethod] = useState<string | null>(null);
   const [orderTotal, setOrderTotal] = useState<number>(0);
+  const [orderSellerIds, setOrderSellerIds] = useState<string[]>([]);
   const [showCashDialog, setShowCashDialog] = useState(false);
   const [cashProofCollected, setCashProofCollected] = useState(false);
 
@@ -100,6 +103,7 @@ const CourierMissionDetail = () => {
         setItemCount(total);
         setOrderPaymentMethod(data.paymentMethod || null);
         setOrderTotal(data.pricing?.total || data.total || 0);
+        setOrderSellerIds(data.sellerIds || []);
       }
     }).catch(() => {});
   }, [mission?.orderId]);
@@ -154,12 +158,31 @@ const CourierMissionDetail = () => {
   };
 
   const handleCashCollected = async (proof: { type: "photo" | "signature"; dataUrl: string }) => {
-    // Mark proof as collected, then proceed with delivery status update
     setCashProofCollected(true);
     setShowCashDialog(false);
     setUpdating(true);
-    // In production, you'd upload proof.dataUrl to Firebase Storage here
     console.log('[CashCollection] Proof collected:', proof.type);
+
+    // Notify each seller about cash collection
+    const courierName = user?.displayName || 'Le coursier';
+    const sellerIds = orderSellerIds.length > 0 ? orderSellerIds : (mission.sellerIds || []);
+    await Promise.all(
+      sellerIds.map((sellerId) =>
+        setDoc(doc(db, "notifications", `${sellerId}_cash_${mission.orderId}_${Date.now()}`), {
+          userId: sellerId,
+          type: "cash_collected",
+          title: "💰 Paiement cash collecté",
+          message: `${courierName} a collecté ${formatPrice(orderTotal)} en cash pour la commande ${mission.orderId.slice(0, 16)}. Preuve : ${proof.type === 'photo' ? 'Photo' : 'Signature client'}.`,
+          orderId: mission.orderId,
+          missionId: mission.id,
+          amount: orderTotal,
+          proofType: proof.type,
+          read: false,
+          createdAt: serverTimestamp(),
+        })
+      )
+    );
+
     await updateMissionStatus(mission.id, "delivered");
     setUpdating(false);
   };
