@@ -51,6 +51,7 @@ const CourierMissionDetail = () => {
   const [itemCount, setItemCount] = useState<number | null>(null);
   const [orderPaymentMethod, setOrderPaymentMethod] = useState<string | null>(null);
   const [orderTotal, setOrderTotal] = useState<number>(0);
+  const [orderSellerIds, setOrderSellerIds] = useState<string[]>([]);
   const [showCashDialog, setShowCashDialog] = useState(false);
   const [cashProofCollected, setCashProofCollected] = useState(false);
 
