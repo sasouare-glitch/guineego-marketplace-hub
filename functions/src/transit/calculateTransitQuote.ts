@@ -4,9 +4,6 @@
  */
 
 import * as functions from "firebase-functions";
-import * as admin from "firebase-admin";
-
-const _db = admin.firestore();
 
 interface QuoteData {
   weightKg: number;
