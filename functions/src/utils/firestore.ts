@@ -184,6 +184,29 @@ export async function updateWalletTransaction(
     transaction.set(txRef, txData);
     
     return { success: true, newBalance, transactionId: txRef.id };
+  }).then(async (result) => {
+    // Send push notification for wallet credits (outside transaction)
+    if (type === 'credit') {
+      try {
+        const { sendNotification } = await import('./notifications');
+        await sendNotification({
+          userId,
+          type: 'wallet_credited',
+          title: '💰 Wallet crédité',
+          body: `+${amount.toLocaleString()} GNF — ${description}. Nouveau solde: ${result.newBalance.toLocaleString()} GNF`,
+          data: {
+            amount: amount.toString(),
+            newBalance: result.newBalance.toString(),
+            transactionId: result.transactionId,
+            ...(metadata?.orderId ? { orderId: metadata.orderId } : {}),
+            ...(metadata?.missionId ? { missionId: metadata.missionId } : {}),
+          }
+        });
+      } catch (notifError) {
+        console.error('Wallet credit notification error:', notifError);
+      }
+    }
+    return result;
   });
 }
 
