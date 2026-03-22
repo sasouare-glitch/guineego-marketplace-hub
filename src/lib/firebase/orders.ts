@@ -104,18 +104,56 @@ function toUserFacingOrderError(error: any, isGuest?: boolean): Error {
   return error instanceof Error ? error : new Error(message || 'Erreur lors de la création de la commande');
 }
 
+async function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRetryableError(error: any): boolean {
+  const message = error?.message || '';
+  const code = error?.code || '';
+  return (
+    message === 'Failed to fetch' ||
+    message.includes('Failed to fetch') ||
+    message.includes('NetworkError') ||
+    message.includes('ERR_NETWORK') ||
+    message === 'internal' ||
+    code === 'functions/internal' ||
+    code === 'functions/unavailable'
+  );
+}
+
 async function createOrderViaFunction(
   functionName: OrderFunctionName,
-  params: CreateOrderParams
+  params: CreateOrderParams,
+  maxRetries = 2
 ): Promise<CreateOrderResult> {
   const createOrder = callFunction<CreateOrderFunctionPayload, CreateOrderResult>(functionName);
-  const result = await createOrder({
+  const payload = {
     items: params.items,
     shippingAddress: params.shippingAddress,
     paymentMethod: normalizePaymentMethod(params.paymentMethod),
-  });
+  };
 
-  return result.data;
+  let lastError: any;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      if (attempt > 0) {
+        console.log(`[Order] Retry attempt ${attempt}/${maxRetries}...`);
+        await delay(1500 * attempt); // 1.5s, 3s
+      }
+      const result = await createOrder(payload);
+      return result.data;
+    } catch (error: any) {
+      lastError = error;
+      if (!isRetryableError(error) || attempt === maxRetries) {
+        throw error;
+      }
+      console.warn(`[Order] Attempt ${attempt + 1} failed, retrying...`, error?.message);
+    }
+  }
+
+  throw lastError;
 }
 
 export async function createOrderDirect(params: CreateOrderParams): Promise<CreateOrderResult> {
