@@ -145,7 +145,7 @@ export async function bulkDecrementStock(data: BulkStockUpdate): Promise<void> {
       }
 
       const variants = productDoc.data()?.variants || [];
-      const variant = variants.find((v: any) => v.sku === item.variantSku);
+      const variant = variants.find((v: any) => v.sku.toUpperCase() === item.variantSku.toUpperCase());
       
       if (!variant) {
         throw new functions.https.HttpsError(
