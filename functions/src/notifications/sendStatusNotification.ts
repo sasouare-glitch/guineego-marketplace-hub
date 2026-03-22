@@ -164,20 +164,17 @@ async function sendStatusSMS(
     } else if (!config?.enabled) {
       await logRef.set({ ...logBase, status: 'failed', error: 'SMS désactivé' });
     } else {
-      const tokenResponse = await fetch('https://api.orange.com/oauth/v3/token', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'grant_type=client_credentials',
-      });
+      let access_token: string;
+      try {
+        access_token = await getOrangeToken(config.clientId, config.clientSecret);
+      } catch (tokenErr: any) {
+        await logRef.set({ ...logBase, status: 'failed', error: `Token OAuth échoué: ${tokenErr.message}` });
+        access_token = '';
+      }
 
-      if (!tokenResponse.ok) {
-        const tokenError = await tokenResponse.text();
-        await logRef.set({ ...logBase, status: 'failed', error: `Token OAuth échoué [${tokenResponse.status}]: ${tokenError}` });
+      if (!access_token) {
+        // Already logged above
       } else {
-        const { access_token } = await tokenResponse.json();
         const senderAddress = config.senderAddress || 'tel:+224000000000';
         const encodedSender = encodeURIComponent(senderAddress);
 

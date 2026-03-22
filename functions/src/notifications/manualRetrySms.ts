@@ -1,23 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import fetch from 'node-fetch';
-
-const db = admin.firestore();
-
-async function getOrangeToken(clientId: string, clientSecret: string): Promise<string> {
-  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-  const res = await fetch('https://api.orange.com/oauth/v1/token', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${credentials}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: 'grant_type=client_credentials',
-  });
-  const data = await res.json() as any;
-  if (!data.access_token) throw new Error('OAuth token error');
-  return data.access_token;
-}
+import { getOrangeToken } from './orangeAuth';
 
 // Admin emails with bypass (same as client-side)
 const ADMIN_EMAILS = ['sasouare@gmail.com'];

@@ -5,37 +5,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-
-const db = admin.firestore();
-
-interface OrangeSmsConfig {
-  clientId: string;
-  clientSecret: string;
-  senderAddress: string;
-  senderName: string;
-  enabled: boolean;
-}
-
-async function getOrangeToken(clientId: string, clientSecret: string): Promise<string> {
-  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-  
-  const response = await fetch('https://api.orange.com/oauth/v1/token', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Basic ${credentials}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: 'grant_type=client_credentials',
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Orange OAuth failed (${response.status}): ${text}`);
-  }
-
-  const data = await response.json() as { access_token: string };
-  return data.access_token;
-}
+import { getOrangeToken } from './orangeAuth';
 
 // Admin emails with bypass (same as client-side)
 const ADMIN_EMAILS = ['sasouare@gmail.com'];
