@@ -7,6 +7,15 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { getOrangeToken } from './orangeAuth';
 
+const db = admin.firestore();
+
+interface OrangeSmsConfig {
+  clientId: string;
+  clientSecret: string;
+  senderAddress?: string;
+  senderName?: string;
+}
+
 // Admin emails with bypass (same as client-side)
 const ADMIN_EMAILS = ['sasouare@gmail.com'];
 
