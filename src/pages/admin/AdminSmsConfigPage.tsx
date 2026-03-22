@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Save, Loader2, Eye, EyeOff, Send, CheckCircle2, XCircle, MessageSquare, Phone, WifiOff, AlertTriangle } from 'lucide-react';
+import { OrangeSmsDiagnosticPanel } from '@/components/admin/OrangeSmsDiagnosticPanel';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
 import { toast } from 'sonner';
@@ -514,6 +515,7 @@ export default function AdminSmsConfigPage() {
           </h2>
           <div className="space-y-6">
             <OrangeSmsConfigSection />
+            <OrangeSmsDiagnosticPanel />
           </div>
         </div>
 
