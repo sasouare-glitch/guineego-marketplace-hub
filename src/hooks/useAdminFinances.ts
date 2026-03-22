@@ -102,7 +102,7 @@ export function useAdminFinances() {
       where('createdAt', '>=', Timestamp.fromDate(sixMonthsAgo)),
     );
 
-    const unsub = onSnapshot(q, (snap) => {
+    getDocs(q).then((snap) => {
       const buckets: Record<string, number> = {};
       const txns: FinanceTransaction[] = [];
 
@@ -132,9 +132,7 @@ export function useAdminFinances() {
         const others = prev.filter((t) => t.type !== 'commission');
         return [...others, ...txns];
       });
-    }, (err) => console.error('orders finance listener:', err));
-
-    return () => { try { unsub(); } catch {} };
+    }).catch((err) => console.error('orders finance fetch:', err));
   }, [commissionRateCache]);
 
   // ── 2. Deliveries → delivery margins ──
@@ -147,7 +145,7 @@ export function useAdminFinances() {
       where('createdAt', '>=', Timestamp.fromDate(sixMonthsAgo)),
     );
 
-    const unsub = onSnapshot(q, (snap) => {
+    getDocs(q).then((snap) => {
       const buckets: Record<string, number> = {};
       const txns: FinanceTransaction[] = [];
 
@@ -157,7 +155,7 @@ export function useAdminFinances() {
         if (!date) return;
 
         const fee = data.deliveryFee || data.fee || data.price || 0;
-        const margin = fee * 0.3; // 30% platform margin on delivery
+        const margin = fee * 0.3;
         const mk = monthKey(date);
         buckets[mk] = (buckets[mk] || 0) + margin;
 
@@ -178,55 +176,47 @@ export function useAdminFinances() {
         const others = prev.filter((t) => t.type !== 'livraison');
         return [...others, ...txns];
       });
-    }, (err) => console.error('deliveries finance listener:', err));
-
-    return () => { try { unsub(); } catch {} };
+    }).catch((err) => console.error('deliveries finance fetch:', err));
   }, []);
 
   // ── 3. Seller settings → subscriptions ──
   useEffect(() => {
-    const unsub = onSnapshot(
-      collection(db, 'seller_settings'),
-      (snap) => {
-        let total = 0;
-        const txns: FinanceTransaction[] = [];
+    getDocs(collection(db, 'seller_settings')).then((snap) => {
+      let total = 0;
+      const txns: FinanceTransaction[] = [];
 
-        snap.docs.forEach((d) => {
-          const data = d.data();
-          const planId = data.subscription?.planId as SellerPlanId | undefined;
-          if (!planId || planId === 'free') return;
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        const planId = data.subscription?.planId as SellerPlanId | undefined;
+        if (!planId || planId === 'free') return;
 
-          const plan = SELLER_PLANS.find((p) => p.id === planId);
-          if (!plan) return;
-          total += plan.price;
+        const plan = SELLER_PLANS.find((p) => p.id === planId);
+        if (!plan) return;
+        total += plan.price;
 
-          txns.push({
-            id: `sub-${d.id}`,
-            type: 'abonnement',
-            label: `Abo ${plan.name} – ${d.id.slice(0, 8)}`,
-            amount: plan.price,
-            status: 'completed',
-            date: tsToDate(data.subscription?.subscribedAt)?.toISOString() || new Date().toISOString(),
-          });
+        txns.push({
+          id: `sub-${d.id}`,
+          type: 'abonnement',
+          label: `Abo ${plan.name} – ${d.id.slice(0, 8)}`,
+          amount: plan.price,
+          status: 'completed',
+          date: tsToDate(data.subscription?.subscribedAt)?.toISOString() || new Date().toISOString(),
         });
+      });
 
-        setSubscriptionRevenue(total);
-        setTransactions((prev) => {
-          const others = prev.filter((t) => t.type !== 'abonnement');
-          return [...others, ...txns];
-        });
-      },
-      (err) => console.error('seller_settings finance listener:', err),
-    );
-
-    return () => { try { unsub(); } catch {} };
+      setSubscriptionRevenue(total);
+      setTransactions((prev) => {
+        const others = prev.filter((t) => t.type !== 'abonnement');
+        return [...others, ...txns];
+      });
+    }).catch((err) => console.error('seller_settings finance fetch:', err));
   }, []);
 
   // ── 4. Products → sponsoring ──
   useEffect(() => {
     const q = query(collection(db, 'products'), where('isSponsored', '==', true));
 
-    const unsub = onSnapshot(q, (snap) => {
+    getDocs(q).then((snap) => {
       let total = 0;
       const txns: FinanceTransaction[] = [];
 
@@ -252,9 +242,7 @@ export function useAdminFinances() {
         const others = prev.filter((t) => t.type !== 'sponsoring');
         return [...others, ...txns];
       });
-    }, (err) => console.error('products sponsor listener:', err));
-
-    return () => { try { unsub(); } catch {} };
+    }).catch((err) => console.error('products sponsor fetch:', err));
   }, []);
 
   // ── 5. Transit → freight fees ──
@@ -267,7 +255,7 @@ export function useAdminFinances() {
       where('createdAt', '>=', Timestamp.fromDate(sixMonthsAgo)),
     );
 
-    const unsub = onSnapshot(q, (snap) => {
+    getDocs(q).then((snap) => {
       const buckets: Record<string, number> = {};
       const txns: FinanceTransaction[] = [];
 
@@ -297,9 +285,7 @@ export function useAdminFinances() {
         const others = prev.filter((t) => t.type !== 'transit');
         return [...others, ...txns];
       });
-    }, (err) => console.error('transit finance listener:', err));
-
-    return () => { try { unsub(); } catch {} };
+    }).catch((err) => console.error('transit finance fetch:', err));
   }, []);
 
   // ── 6. Academy → course purchases ──
@@ -312,7 +298,7 @@ export function useAdminFinances() {
       where('createdAt', '>=', Timestamp.fromDate(sixMonthsAgo)),
     );
 
-    const unsub = onSnapshot(q, (snap) => {
+    getDocs(q).then((snap) => {
       const buckets: Record<string, number> = {};
       const txns: FinanceTransaction[] = [];
 
@@ -342,9 +328,7 @@ export function useAdminFinances() {
         const others = prev.filter((t) => t.type !== 'academy');
         return [...others, ...txns];
       });
-    }, (err) => console.error('academy finance listener:', err));
-
-    return () => { try { unsub(); } catch {} };
+    }).catch((err) => console.error('academy finance fetch:', err));
   }, []);
 
   // ── Mark loading done after a short settle ──
