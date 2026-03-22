@@ -13,8 +13,8 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import {
-  collection, query, where, onSnapshot, orderBy, limit, Timestamp,
-  doc, getDoc,
+  collection, query, where, Timestamp,
+  doc, getDoc, getDocs,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { SELLER_PLANS, type SellerPlanId } from '@/constants/sellerPlans';
