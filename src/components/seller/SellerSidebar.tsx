@@ -36,9 +36,10 @@ const secondaryNav = [
 interface SellerSidebarProps {
   collapsed?: boolean;
   onToggle?: () => void;
+  onNavigate?: () => void;
 }
 
-export function SellerSidebar({ collapsed = false, onToggle }: SellerSidebarProps) {
+export function SellerSidebar({ collapsed = false, onToggle, onNavigate }: SellerSidebarProps) {
   const location = useLocation();
 
   return (
