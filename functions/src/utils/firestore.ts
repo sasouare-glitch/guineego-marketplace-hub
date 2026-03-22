@@ -84,7 +84,7 @@ export async function updateStockTransaction(
     
     const product = productDoc.data()!;
     const variants = product.variants || [];
-    const variantIndex = variants.findIndex((v: any) => v.sku === variantSku);
+    const variantIndex = variants.findIndex((v: any) => v.sku.toUpperCase() === variantSku.toUpperCase());
     
     if (variantIndex === -1) {
       throw new functions.https.HttpsError('not-found', 'Variante non trouvée');
