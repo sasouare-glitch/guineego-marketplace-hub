@@ -37,7 +37,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { path: '/', icon: Home, label: 'Accueil' },
     { path: '/marketplace', icon: Search, label: 'Explorer' },
     { path: '/cart', icon: ShoppingCart, label: 'Panier' },
-    { path: '/my-orders', icon: ClipboardList, label: 'Commandes' },
+    { path: '/orders', icon: ClipboardList, label: 'Commandes' },
     { path: '/profile', icon: User, label: 'Profil' }
   ],
   ecommerce: [
