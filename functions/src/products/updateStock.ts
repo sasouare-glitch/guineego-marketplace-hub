@@ -167,7 +167,7 @@ export async function bulkDecrementStock(data: BulkStockUpdate): Promise<void> {
       const item = items[i];
       const productDoc = productReads[i];
       const variants = [...productDoc.data()!.variants];
-      const variantIndex = variants.findIndex((v: any) => v.sku === item.variantSku);
+      const variantIndex = variants.findIndex((v: any) => v.sku.toUpperCase() === item.variantSku.toUpperCase());
       
       variants[variantIndex].stock -= item.quantity;
       variants[variantIndex].updatedAt = admin.firestore.Timestamp.now();
