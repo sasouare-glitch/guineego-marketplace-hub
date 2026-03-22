@@ -39,6 +39,7 @@ export function SellerLayout({ children }: SellerLayoutProps) {
         <SellerSidebar
           collapsed={false}
           onToggle={() => setMobileMenuOpen(false)}
+          onNavigate={() => setMobileMenuOpen(false)}
         />
       </div>
 

@@ -36,9 +36,10 @@ const secondaryNav = [
 interface SellerSidebarProps {
   collapsed?: boolean;
   onToggle?: () => void;
+  onNavigate?: () => void;
 }
 
-export function SellerSidebar({ collapsed = false, onToggle }: SellerSidebarProps) {
+export function SellerSidebar({ collapsed = false, onToggle, onNavigate }: SellerSidebarProps) {
   const location = useLocation();
 
   return (
@@ -91,6 +92,7 @@ export function SellerSidebar({ collapsed = false, onToggle }: SellerSidebarProp
               <Link
                 key={item.name}
                 to={item.href}
+                onClick={onNavigate}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                   isActive
@@ -120,6 +122,7 @@ export function SellerSidebar({ collapsed = false, onToggle }: SellerSidebarProp
               <Link
                 key={item.name}
                 to={item.href}
+                onClick={onNavigate}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                   isActive
