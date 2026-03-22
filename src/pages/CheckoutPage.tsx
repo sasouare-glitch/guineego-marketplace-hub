@@ -164,7 +164,7 @@ export default function CheckoutPage() {
           isGuest,
           items: items.map(item => ({
             productId: item.productId,
-            variantSku: item.variant || 'default',
+            variantSku: item.variant || 'DEFAULT',
             name: item.name,
             price: item.price,
             quantity: item.quantity,
