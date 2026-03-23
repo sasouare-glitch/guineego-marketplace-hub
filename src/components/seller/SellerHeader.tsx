@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import {
   Bell,
   Search,
@@ -176,9 +177,10 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
 
   return (
     <header
-      className={`fixed top-0 right-0 z-30 h-16 bg-background/80 backdrop-blur-lg border-b border-border transition-all duration-300 ${
-        sidebarCollapsed ? "left-20" : "left-64"
-      }`}
+      className={cn(
+        "fixed top-0 right-0 left-0 z-30 h-16 bg-background/80 backdrop-blur-lg border-b border-border transition-all duration-300",
+        sidebarCollapsed ? "lg:left-20" : "lg:left-64"
+      )}
     >
       <div className="flex h-full items-center justify-between px-6">
         {/* Left Section */}
