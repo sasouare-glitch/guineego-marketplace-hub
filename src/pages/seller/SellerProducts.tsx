@@ -309,7 +309,7 @@ export default function SellerProducts() {
                             {formatPrice(product.price || product.basePrice)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 hidden sm:table-cell">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
                           <button
                             onClick={() => setStockDialog({ open: true, product })}
                             className={cn(
