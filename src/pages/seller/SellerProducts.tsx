@@ -299,13 +299,13 @@ export default function SellerProducts() {
                             })()}
                           </div>
                         </td>
-                        <td className="px-6 py-4 hidden md:table-cell">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                           <span className="text-sm text-muted-foreground">
                             {product.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className="font-medium text-foreground">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                          <span className="font-medium text-foreground text-xs sm:text-sm">
                             {formatPrice(product.price || product.basePrice)}
                           </span>
                         </td>
