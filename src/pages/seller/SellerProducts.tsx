@@ -446,17 +446,17 @@ export default function SellerProducts() {
                       );
                     })()}
                   </div>
-                  <div className="p-4 space-y-3">
+                  <div className="p-2.5 sm:p-4 space-y-2 sm:space-y-3">
                     <div>
-                      <h3 className="font-medium text-foreground line-clamp-2">
+                      <h3 className="font-medium text-foreground line-clamp-1 text-xs sm:text-sm">
                         {product.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-[10px] sm:text-sm text-muted-foreground line-clamp-1">
                         {product.category}
                       </p>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-primary">
+                      <span className="font-bold text-primary text-xs sm:text-base">
                         {formatPrice(product.price || product.basePrice)}
                       </span>
                       <button
