@@ -322,20 +322,20 @@ export default function SellerProducts() {
                             {product.totalStock}
                           </button>
                         </td>
-                        <td className="px-6 py-4 hidden lg:table-cell">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">
                           <span className="text-sm text-muted-foreground">
                             {product.totalSales || 0} vendus
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
                           <Badge
                             variant="outline"
-                            className={cn(status.variant)}
+                            className={cn("text-[10px] sm:text-xs", status.variant)}
                           >
                             {status.label}
                           </Badge>
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon">
