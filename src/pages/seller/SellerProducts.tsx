@@ -268,12 +268,12 @@ export default function SellerProducts() {
                         key={product.id}
                         className="hover:bg-muted/30 transition-colors"
                       >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
+                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                          <div className="flex items-center gap-2 sm:gap-3">
                             {product.thumbnail && product.thumbnail !== '/placeholder.svg' ? (
-                              <img src={product.thumbnail} alt={product.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                              <img src={product.thumbnail} alt={product.name} className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0" />
                             ) : (
-                              <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                              <div className="w-9 h-9 sm:w-12 sm:h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
                                 <Package className="w-6 h-6 text-muted-foreground" />
                               </div>
                             )}
