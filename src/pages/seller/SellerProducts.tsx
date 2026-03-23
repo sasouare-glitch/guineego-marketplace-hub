@@ -118,16 +118,17 @@ export default function SellerProducts() {
 
   return (
     <SellerLayout>
-      <div className="space-y-6">
+      <div className="space-y-3 sm:space-y-6">
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-2">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
+            className="min-w-0"
           >
-            <h1 className="text-2xl font-bold text-foreground">Produits</h1>
-            <p className="text-muted-foreground">
-              Gérez votre catalogue de {products.length} produit{products.length !== 1 ? 's' : ''}
+            <h1 className="text-lg sm:text-2xl font-bold text-foreground">Produits</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              {products.length} produit{products.length !== 1 ? 's' : ''}
             </p>
           </motion.div>
 
@@ -136,9 +137,9 @@ export default function SellerProducts() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            <Button onClick={() => setAddDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Ajouter un produit
+            <Button size="sm" onClick={() => setAddDialogOpen(true)} className="sm:size-default">
+              <Plus className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Ajouter un produit</span>
             </Button>
           </motion.div>
         </div>
@@ -148,26 +149,26 @@ export default function SellerProducts() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-card rounded-xl border border-border p-4"
+          className="bg-card rounded-xl border border-border p-3 sm:p-4"
         >
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col gap-2 sm:gap-4 lg:flex-row">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher un produit..."
+                placeholder="Rechercher..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+                className="pl-9 h-9 sm:h-10 text-sm"
               />
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2 overflow-x-auto">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[110px] sm:w-[140px] h-9 sm:h-10 text-xs sm:text-sm flex-shrink-0">
                   <SelectValue placeholder="Statut" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="all">Tous</SelectItem>
                   <SelectItem value="active">Actifs</SelectItem>
                   <SelectItem value="draft">Brouillons</SelectItem>
                   <SelectItem value="out_of_stock">Rupture</SelectItem>
@@ -175,11 +176,11 @@ export default function SellerProducts() {
               </Select>
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-[110px] sm:w-[150px] h-9 sm:h-10 text-xs sm:text-sm flex-shrink-0">
                   <SelectValue placeholder="Catégorie" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toutes catégories</SelectItem>
+                  <SelectItem value="all">Toutes</SelectItem>
                   {categories.map((cat) => (
                     <SelectItem key={cat} value={cat}>
                       {cat}
@@ -188,12 +189,12 @@ export default function SellerProducts() {
                 </SelectContent>
               </Select>
 
-              <div className="flex border border-border rounded-lg overflow-hidden">
+              <div className="flex border border-border rounded-lg overflow-hidden flex-shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "rounded-none h-10",
+                    "rounded-none h-9 w-9 sm:h-10 sm:w-10",
                     viewMode === "list" && "bg-muted"
                   )}
                   onClick={() => setViewMode("list")}
@@ -204,7 +205,7 @@ export default function SellerProducts() {
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "rounded-none h-10",
+                    "rounded-none h-9 w-9 sm:h-10 sm:w-10",
                     viewMode === "grid" && "bg-muted"
                   )}
                   onClick={() => setViewMode("grid")}
