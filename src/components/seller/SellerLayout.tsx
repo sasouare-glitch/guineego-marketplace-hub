@@ -56,7 +56,7 @@ export function SellerLayout({ children }: SellerLayoutProps) {
           sidebarCollapsed ? "lg:pl-20" : "lg:pl-64"
         )}
       >
-        <div className="p-6">{children}</div>
+        <div className="p-3 sm:p-6">{children}</div>
       </main>
     </div>
   );

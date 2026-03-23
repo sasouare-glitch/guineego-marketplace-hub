@@ -34,7 +34,7 @@ export default function SellerDashboard() {
 
   return (
     <SellerLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <WelcomeBanner
           role="ecommerce"
           title="Bienvenue sur votre espace vendeur"
@@ -50,19 +50,20 @@ export default function SellerDashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <h1 className="text-2xl font-bold text-foreground">Tableau de bord</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Tableau de bord</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Bienvenue, voici un aperçu de votre boutique
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
           <StatCard
             title="Chiffre d'affaires"
             value={formatPrice(stats.totalRevenue)}
             icon={Wallet}
             iconColor="primary"
             delay={0}
+            compact
           />
           <StatCard
             title="Commandes"
@@ -70,6 +71,7 @@ export default function SellerDashboard() {
             icon={ShoppingBag}
             iconColor="accent"
             delay={0.1}
+            compact
           />
           <StatCard
             title="Produits en alerte"
@@ -77,6 +79,7 @@ export default function SellerDashboard() {
             icon={Package}
             iconColor="destructive"
             delay={0.15}
+            compact
           />
           <StatCard
             title="Taux de conversion"
@@ -84,16 +87,15 @@ export default function SellerDashboard() {
             icon={TrendingUp}
             iconColor="primary"
             delay={0.2}
+            compact
           />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <StatCard
-            title="Visiteurs estimés"
+            title="Visiteurs"
             value={stats.uniqueVisitors.toString()}
             icon={Eye}
             iconColor="accent"
             delay={0.25}
+            compact
           />
           <StatCard
             title="Nouveaux clients"
@@ -101,14 +103,15 @@ export default function SellerDashboard() {
             icon={Users}
             iconColor="primary"
             delay={0.3}
+            compact
           />
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
           <div className="xl:col-span-2">
             <SalesChart data={salesChartData} />
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <LowStockAlert products={lowStockProducts} />
             <ShareStoreCard />
           </div>
