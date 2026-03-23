@@ -235,27 +235,27 @@ export default function SellerProducts() {
           >
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-muted/50">
+                 <thead className="bg-muted/50">
                   <tr>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4">
+                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 sm:px-6 py-3 sm:py-4">
                       Produit
                     </th>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4 hidden md:table-cell">
+                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 sm:px-6 py-3 sm:py-4 hidden md:table-cell">
                       Catégorie
                     </th>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4">
+                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 sm:px-6 py-3 sm:py-4">
                       Prix
                     </th>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4 hidden sm:table-cell">
+                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
                       Stock
                     </th>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4 hidden lg:table-cell">
+                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 sm:px-6 py-3 sm:py-4 hidden lg:table-cell">
                       Ventes
                     </th>
-                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4">
+                    <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 sm:px-6 py-3 sm:py-4">
                       Statut
                     </th>
-                    <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider px-6 py-4">
+                    <th className="text-right text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 sm:px-6 py-3 sm:py-4">
                       Actions
                     </th>
                   </tr>
