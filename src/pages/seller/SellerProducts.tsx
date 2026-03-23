@@ -533,7 +533,7 @@ export default function SellerProducts() {
 
         {/* Empty State */}
         {!loading && filteredProducts.length === 0 && (
-          <div className="bg-card rounded-xl border border-border p-12 text-center">
+          <div className="bg-card rounded-xl border border-border p-6 sm:p-12 text-center">
             <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">
               {products.length === 0 ? "Aucun produit" : "Aucun produit trouvé"}
