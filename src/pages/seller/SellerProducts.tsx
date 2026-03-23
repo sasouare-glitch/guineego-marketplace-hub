@@ -277,7 +277,7 @@ export default function SellerProducts() {
                                 <Package className="w-6 h-6 text-muted-foreground" />
                               </div>
                             )}
-                            <span className="font-medium text-foreground line-clamp-1">
+                            <span className="font-medium text-foreground line-clamp-1 text-xs sm:text-sm">
                               {product.name}
                             </span>
                             {(product as any).isSponsored && (() => {
