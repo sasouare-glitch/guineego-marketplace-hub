@@ -13,33 +13,11 @@ export function SellerLayout({ children }: SellerLayoutProps) {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Sidebar - Hidden on mobile */}
+      {/* Sidebar - Desktop only */}
       <div className="hidden lg:block">
         <SellerSidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-        />
-      </div>
-
-      {/* Mobile Sidebar Overlay */}
-      {mobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
-
-      {/* Mobile Sidebar */}
-      <div
-        className={cn(
-          "fixed inset-y-0 left-0 z-40 lg:hidden transform transition-transform duration-300",
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <SellerSidebar
-          collapsed={false}
-          onToggle={() => setMobileMenuOpen(false)}
-          onNavigate={() => setMobileMenuOpen(false)}
         />
       </div>
 

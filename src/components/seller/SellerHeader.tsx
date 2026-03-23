@@ -185,14 +185,12 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
       <div className="flex h-full items-center justify-between px-6">
         {/* Left Section */}
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={onMenuClick}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          <Link to="/seller/dashboard" className="lg:hidden flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <Store className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="font-display font-bold text-sm">Vendeur</span>
+          </Link>
 
           <div className="hidden md:flex relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
