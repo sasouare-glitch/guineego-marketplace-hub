@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import {
   Bell,
   Search,
