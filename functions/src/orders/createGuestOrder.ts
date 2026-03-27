@@ -7,8 +7,11 @@ import {
 } from './orderCreation';
 
 function isValidGuineaPhone(phone: string): boolean {
-  const digits = phone.replace(/\D/g, '');
-  return digits.length === 8 || digits.length === 11 || digits.length === 12;
+  let digits = phone.replace(/\D/g, '');
+  // Strip country code +224 / 00224 / 224
+  if (digits.startsWith('224') && digits.length > 9) digits = digits.slice(3);
+  // Valid Guinean number: 9 digits starting with 6 or 3
+  return digits.length === 9 && /^[63]/.test(digits);
 }
 
 function generateGuestCustomerId(): string {
