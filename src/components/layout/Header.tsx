@@ -32,6 +32,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import logoMakiity from "@/assets/logo-makiity.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Header() {
@@ -91,13 +92,8 @@ export function Header() {
       <nav className="container-tight">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary-gradient rounded-xl flex items-center justify-center">
-              <Package className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="font-display text-xl font-bold text-foreground">
-              Makiity<span className="text-primary"></span>
-            </span>
+          <Link to="/" className="flex items-center" aria-label="Makiity - Le marché digital de Guinée">
+            <img src={logoMakiity} alt="Makiity" className="h-10 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
