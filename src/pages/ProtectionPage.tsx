@@ -80,7 +80,7 @@ const faqItems = [
   },
   {
     question: "Sous quel délai suis-je remboursé ?",
-    answer: "Les remboursements sont traités sous 48 heures ouvrables après validation du litige. Le montant est crédité sur votre mode de paiement d'origine ou votre Wallet GuineeGo.",
+    answer: "Les remboursements sont traités sous 48 heures ouvrables après validation du litige. Le montant est crédité sur votre mode de paiement d'origine ou votre Wallet Makiity.",
   },
   {
     question: "Comment savoir si un vendeur est fiable ?",
@@ -124,7 +124,7 @@ export default function ProtectionPage() {
                 Achetez en toute <span className="text-primary">confiance</span>
               </h1>
               <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Chez GuineeGo, votre sécurité est notre priorité. Chaque transaction est protégée, 
+                Chez Makiity, votre sécurité est notre priorité. Chaque transaction est protégée, 
                 chaque vendeur est vérifié, et notre équipe veille sur vos achats 7 jours sur 7.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -152,7 +152,7 @@ export default function ProtectionPage() {
                 Vos garanties
               </h2>
               <p className="text-muted-foreground max-w-xl mx-auto">
-                6 niveaux de protection pour des achats sereins sur GuineeGo.
+                6 niveaux de protection pour des achats sereins sur Makiity.
               </p>
             </motion.div>
 
@@ -278,7 +278,7 @@ export default function ProtectionPage() {
                 Protégé à chaque étape
               </h2>
               <p className="text-primary-foreground/80 mb-8 max-w-lg mx-auto">
-                De la commande à la livraison, votre satisfaction est garantie. Rejoignez des milliers d'acheteurs qui font confiance à GuineeGo.
+                De la commande à la livraison, votre satisfaction est garantie. Rejoignez des milliers d'acheteurs qui font confiance à Makiity.
               </p>
               <Button size="lg" variant="secondary" asChild>
                 <Link to="/marketplace">

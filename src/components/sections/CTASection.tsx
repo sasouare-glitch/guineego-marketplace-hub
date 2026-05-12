@@ -4,11 +4,11 @@ import { Smartphone, Store, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/hooks/useTranslation";
 import { QRCodeSVG } from "qrcode.react";
-import logoGuineego from "@/assets/logo-guineego.png";
+import logoGuineego from "@/assets/logo-makiity.png";
 
 export function CTASection() {
   const { t } = useTranslation();
-  const siteUrl = typeof window !== "undefined" ? window.location.origin : "https://guineego.com";
+  const siteUrl = typeof window !== "undefined" ? window.location.origin : "https://makiity.com";
 
   return (
     <section className="section-padding bg-hero-gradient relative overflow-hidden">

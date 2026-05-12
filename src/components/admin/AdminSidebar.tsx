@@ -254,7 +254,7 @@ export function AdminSidebar() {
           {!collapsed && (
             <div>
               <h2 className="font-bold text-foreground">Admin</h2>
-              <p className="text-xs text-muted-foreground">GuineeGo LAT</p>
+              <p className="text-xs text-muted-foreground">Makiity LAT</p>
             </div>
           )}
         </div>

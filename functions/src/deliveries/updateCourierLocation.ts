@@ -227,7 +227,7 @@ async function geocodeAddress(
 
     const res = await fetch(
       `https://nominatim.openstreetmap.org/search?${params}`,
-      { headers: { 'User-Agent': 'GuineeGo-Server/1.0' } }
+      { headers: { 'User-Agent': 'Makiity-Server/1.0' } }
     );
 
     const data = await res.json();

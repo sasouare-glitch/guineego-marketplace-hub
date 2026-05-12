@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Receipt, Smartphone, CreditCard, Download } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { toast } from 'sonner';
-import logoGuineego from '@/assets/logo-guineego.png';
+import logoGuineego from '@/assets/logo-makiity.png';
 
 function loadImageAsBase64(src: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -66,7 +66,7 @@ async function generateInvoicePDF(payment: SubscriptionPayment) {
   }
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('GuineeGo', 46, 25);
+  doc.text('Makiity', 46, 25);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(120, 120, 120);
@@ -135,11 +135,11 @@ async function generateInvoicePDF(payment: SubscriptionPayment) {
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(150, 150, 150);
-  doc.text('GuineeGo SAS — Conakry, Guinée', 20, 270);
-  doc.text('support@guineego.com | www.guineego.com', 20, 275);
+  doc.text('Makiity SAS — Conakry, Guinée', 20, 270);
+  doc.text('support@makiity.com | www.makiity.com', 20, 275);
   doc.text('Ce document est généré automatiquement et fait office de justificatif de paiement.', 20, 280);
 
-  doc.save(`facture-guineego-${invoiceNum}.pdf`);
+  doc.save(`facture-makiity-${invoiceNum}.pdf`);
   toast.success('Facture téléchargée');
 }
 

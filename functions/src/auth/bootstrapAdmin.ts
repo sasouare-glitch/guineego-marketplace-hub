@@ -30,7 +30,7 @@ export const bootstrapAdmin = functions
 
     // Simple secret to prevent unauthorized access
     // Change this before deploying!
-    const BOOTSTRAP_SECRET = 'guineego-admin-setup-2024';
+    const BOOTSTRAP_SECRET = 'makiity-admin-setup-2024';
 
     if (secretKey !== BOOTSTRAP_SECRET) {
       res.status(403).json({ error: 'Invalid secret key' });

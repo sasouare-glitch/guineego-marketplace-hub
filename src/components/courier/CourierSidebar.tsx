@@ -49,7 +49,7 @@ export const CourierSidebar = ({ collapsed, onToggle }: CourierSidebarProps) => 
           </div>
           {!collapsed && (
             <div>
-              <span className="font-display font-bold text-lg">GuineeGo</span>
+              <span className="font-display font-bold text-lg">Makiity</span>
               <span className="text-xs text-muted-foreground block">Coursier</span>
             </div>
           )}

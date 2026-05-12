@@ -315,7 +315,7 @@ async function notifySellers(orderId: string, order: any, status: 'delivered' | 
       emoji: '🎉',
       title: 'Commande livrée',
       body: (amount: string) => `La commande ${orderId} a été livrée avec succès. Montant : ${amount} GNF.`,
-      sms: (amount: string) => `GuineeGo: Commande ${orderId} livrée! Montant: ${amount} GNF ajouté à votre solde.`,
+      sms: (amount: string) => `Makiity: Commande ${orderId} livrée! Montant: ${amount} GNF ajouté à votre solde.`,
       emailBody: (sellerName: string, amount: string) => wrapInTemplate(`
         <h2 style="margin: 0 0 8px; font-size: 22px; color: ${COLORS.green};">🎉 Commande livrée avec succès</h2>
         <p style="margin: 0 0 16px; font-size: 15px; color: ${COLORS.bodyText};">Bonjour <strong>${sellerName}</strong>,</p>
@@ -331,7 +331,7 @@ async function notifySellers(orderId: string, order: any, status: 'delivered' | 
       emoji: '❌',
       title: 'Commande annulée',
       body: (_: string) => `La commande ${orderId} a été annulée.`,
-      sms: (_: string) => `GuineeGo: Commande ${orderId} annulée. Consultez votre tableau de bord.`,
+      sms: (_: string) => `Makiity: Commande ${orderId} annulée. Consultez votre tableau de bord.`,
       emailBody: (sellerName: string, _: string) => wrapInTemplate(`
         <h2 style="margin: 0 0 8px; font-size: 22px; color: ${COLORS.red};">❌ Commande annulée</h2>
         <p style="margin: 0 0 16px; font-size: 15px; color: ${COLORS.bodyText};">Bonjour <strong>${sellerName}</strong>,</p>

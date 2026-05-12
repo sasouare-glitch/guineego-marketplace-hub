@@ -1,5 +1,5 @@
 /**
- * GuineeGo LAT - Cloud Functions Entry Point
+ * Makiity LAT - Cloud Functions Entry Point
  * Architecture 100% Firebase-native
  */
 

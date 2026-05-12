@@ -45,7 +45,7 @@ const paymentMethods: PaymentMethod[] = [
   },
   {
     id: "wallet",
-    name: "GuineeGo Wallet",
+    name: "Makiity Wallet",
     icon: "💚",
     type: "wallet",
     descriptionKey: "wallet",

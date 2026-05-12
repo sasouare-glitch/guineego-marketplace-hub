@@ -52,9 +52,9 @@ export const en: TranslationKeys = {
   // Authentication
   auth: {
     login: "Login",
-    loginDescription: "Sign in to your GuineeGo account",
+    loginDescription: "Sign in to your Makiity account",
     register: "Sign up",
-    registerDescription: "Join the GuineeGo marketplace",
+    registerDescription: "Join the Makiity marketplace",
     logout: "Logout",
     password: "Password",
     confirmPassword: "Confirm password",
@@ -108,7 +108,7 @@ export const en: TranslationKeys = {
     badge: "Guinea's first marketplace",
     title1: "Buy, Sell,",
     title2: "Connect Guinea",
-    description: "GuineeGo LAT brings together sellers, buyers, couriers and investors on a single platform. China-Guinea transit, e-commerce training, secure mobile payment.",
+    description: "Makiity LAT brings together sellers, buyers, couriers and investors on a single platform. China-Guinea transit, e-commerce training, secure mobile payment.",
     exploreStore: "Explore the store",
     becomeSeller: "Become a seller",
     products: "Products",
@@ -155,7 +155,7 @@ export const en: TranslationKeys = {
     expressDelivery: "Express delivery",
     expressDeliveryDesc: "Reliable courier network covering Conakry and the interior. Real-time GPS tracking.",
     trackPackage: "Track a package",
-    academy: "GuineeGo Academy",
+    academy: "Makiity Academy",
     academyDesc: "Train in e-commerce, digital marketing, closing. Videos, PDFs, recognized certifications.",
     viewCourses: "View courses",
     mobilePayment: "Mobile payment",
@@ -168,7 +168,7 @@ export const en: TranslationKeys = {
 
   // Academy Section
   academy: {
-    title: "GuineeGo Academy",
+    title: "Makiity Academy",
     subtitle: "Learn e-commerce",
     description: "Learn to sell online with our free and certified courses",
     viewCourses: "View courses",
@@ -186,7 +186,7 @@ export const en: TranslationKeys = {
   // CTA Section
   cta: {
     title: "Ready to join the Guinean e-commerce revolution?",
-    subtitle: "Thousands of Guineans already trust GuineeGo LAT to buy, sell and grow their business. And you?",
+    subtitle: "Thousands of Guineans already trust Makiity LAT to buy, sell and grow their business. And you?",
     startBuying: "Start buying",
     openShop: "Open my shop",
     comingSoon: "Coming soon on",
@@ -354,7 +354,7 @@ export const en: TranslationKeys = {
     step2Payment: "You will receive an SMS with a USSD code",
     step3Payment: "Dial the code to validate the payment",
     step4Payment: "Your order will be confirmed automatically",
-    yourBalance: "Your GuineeGo balance",
+    yourBalance: "Your Makiity balance",
     free: "Free",
     cardNumber: "Card number",
     expiryDate: "Expiry date",
@@ -494,7 +494,7 @@ export const en: TranslationKeys = {
     pricing: "Pricing",
     servicesTitle: "Services",
     transitChina: "China-Guinea Transit",
-    academy: "GuineeGo Academy",
+    academy: "Makiity Academy",
     expressDelivery: "Express delivery",
     invest: "Invest",
     helpTitle: "Help",

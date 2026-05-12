@@ -13,7 +13,7 @@ const allCourses: Course[] = [
   {
     id: "1",
     title: "Lancer sa boutique e-commerce de A à Z",
-    description: "Apprenez à créer et gérer votre boutique en ligne sur GuineeGo LAT",
+    description: "Apprenez à créer et gérer votre boutique en ligne sur Makiity LAT",
     thumbnail: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600",
     instructor: "Mamadou Diallo",
     duration: "4h 30min",
@@ -176,7 +176,7 @@ const Academy = () => {
             <div className="max-w-2xl">
               <Badge className="bg-guinea-yellow text-foreground mb-4">
                 <GraduationCap className="w-3 h-3 mr-1" />
-                GuineeGo Academy
+                Makiity Academy
               </Badge>
               <h1 className="font-display text-3xl md:text-4xl font-bold mb-4">
                 Formez-vous au e-commerce et développez votre business

@@ -29,7 +29,7 @@ const paymentMethods = [
   },
   {
     icon: Wallet,
-    name: "Wallet GuineeGo",
+    name: "Wallet Makiity",
     description: "Rechargez votre portefeuille interne et payez en un clic. Idéal pour les achats fréquents.",
     color: "bg-primary/10 text-primary",
     badge: "Rapide",

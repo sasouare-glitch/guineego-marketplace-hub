@@ -54,14 +54,14 @@ const testimonials = [
     name: "Mamadou Diallo",
     role: "Coursier, Conakry",
     avatar: avatarMamadou,
-    quote: "GuineeGo m'a permis de travailler à mon rythme et de bien gagner ma vie. Le système est transparent et les paiements sont toujours à temps.",
+    quote: "Makiity m'a permis de travailler à mon rythme et de bien gagner ma vie. Le système est transparent et les paiements sont toujours à temps.",
     rating: 5,
   },
   {
     name: "Fatoumata Camara",
     role: "Investisseuse",
     avatar: avatarFatoumata,
-    quote: "J'ai diversifié mes investissements avec GuineeGo. Les rendements sont bons et le suivi est excellent. Je recommande !",
+    quote: "J'ai diversifié mes investissements avec Makiity. Les rendements sont bons et le suivi est excellent. Je recommande !",
     rating: 5,
   },
 ];
@@ -82,11 +82,11 @@ export function PartnersSection() {
             Partenariats
           </span>
           <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
-            Rejoignez l'aventure GuineeGo
+            Rejoignez l'aventure Makiity
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Que vous souhaitiez devenir coursier ou investisseur, 
-            GuineeGo vous offre des opportunités uniques pour prospérer.
+            Makiity vous offre des opportunités uniques pour prospérer.
           </p>
         </motion.div>
 

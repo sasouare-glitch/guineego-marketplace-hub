@@ -69,15 +69,15 @@ export const createStripeSubscriptionCheckout = functions
               currency: 'gnf',
               unit_amount: Math.round(payment.amount),
               product_data: {
-                name: `Abonnement GuineeGo - ${planId}`,
+                name: `Abonnement Makiity - ${planId}`,
                 description: `Plan ${planId} pour 30 jours`,
               },
             },
             quantity: 1,
           },
         ],
-        success_url: successUrl || `https://guineego.web.app/seller/subscription?payment=success`,
-        cancel_url: cancelUrl || `https://guineego.web.app/seller/subscription?payment=cancelled`,
+        success_url: successUrl || `https://makiity.web.app/seller/subscription?payment=success`,
+        cancel_url: cancelUrl || `https://makiity.web.app/seller/subscription?payment=cancelled`,
       });
 
       await paymentRef.update({

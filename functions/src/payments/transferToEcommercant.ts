@@ -13,7 +13,7 @@ const db = admin.firestore();
 
 // Commission rates
 const COMMISSION_RATES = {
-  guineego: 0.05,      // 5% commission GuineeGo
+  makiity: 0.05,      // 5% commission Makiity
   deliveryBase: 10000, // Frais de livraison de base (GNF)
   deliveryPerKm: 1000, // Par km additionnel
 };
@@ -119,7 +119,7 @@ export const transferToEcommercant = functions
             amount: payout.netAmount,
             grossAmount: payout.amount,
             commission: payout.commission,
-            commissionRate: COMMISSION_RATES.guineego,
+            commissionRate: COMMISSION_RATES.makiity,
             balanceBefore: currentBalance,
             balanceAfter: newBalance,
             description: `Vente commande ${orderId}`,
@@ -269,7 +269,7 @@ async function calculateSellerPayouts(
 
   // Calculate commissions
   for (const payout of sellerItems.values()) {
-    payout.commission = Math.round(payout.amount * COMMISSION_RATES.guineego);
+    payout.commission = Math.round(payout.amount * COMMISSION_RATES.makiity);
     payout.netAmount = payout.amount - payout.commission;
   }
 

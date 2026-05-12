@@ -64,7 +64,7 @@ export function SellerSidebar({ collapsed = false, onToggle, onNavigate }: Selle
               <span className="font-display text-sm font-bold text-foreground">
                 Espace Vendeur
               </span>
-              <span className="text-xs text-muted-foreground">GuineeGo LAT</span>
+              <span className="text-xs text-muted-foreground">Makiity LAT</span>
             </motion.div>
           )}
         </Link>

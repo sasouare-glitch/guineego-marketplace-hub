@@ -16,10 +16,10 @@ import {
 import { useTranslation } from "@/hooks/useTranslation";
 
 const socialLinks = [
-  { icon: Facebook, href: "https://facebook.com/guineego", label: "Facebook" },
-  { icon: Instagram, href: "https://instagram.com/guineego", label: "Instagram" },
-  { icon: Twitter, href: "https://twitter.com/guineego", label: "Twitter" },
-  { icon: Youtube, href: "https://youtube.com/guineego", label: "Youtube" },
+  { icon: Facebook, href: "https://facebook.com/makiity", label: "Facebook" },
+  { icon: Instagram, href: "https://instagram.com/makiity", label: "Instagram" },
+  { icon: Twitter, href: "https://twitter.com/makiity", label: "Twitter" },
+  { icon: Youtube, href: "https://youtube.com/makiity", label: "Youtube" },
 ];
 
 export function Footer() {
@@ -65,7 +65,7 @@ export function Footer() {
                 <Package className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="font-display text-xl font-bold">
-                GuineeGo<span className="text-guinea-yellow"> LAT</span>
+                Makiity<span className="text-guinea-yellow"> LAT</span>
               </span>
             </Link>
             <p className="text-white/70 mb-6 max-w-xs">
@@ -78,9 +78,9 @@ export function Footer() {
                 <Phone className="w-4 h-4" />
                 <span>+224 623 456 789</span>
               </a>
-              <a href="mailto:contact@guineego.com" className="flex items-center gap-3 text-white/70 hover:text-guinea-yellow transition-colors">
+              <a href="mailto:contact@makiity.com" className="flex items-center gap-3 text-white/70 hover:text-guinea-yellow transition-colors">
                 <Mail className="w-4 h-4" />
-                <span>contact@guineego.com</span>
+                <span>contact@makiity.com</span>
               </a>
               <div className="flex items-start gap-3 text-white/70">
                 <MapPin className="w-4 h-4 mt-1" />
@@ -164,7 +164,7 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="container-tight py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/50 text-sm">
-            © 2024 GuineeGo LAT. {t.footer.copyright}. 
+            © 2024 Makiity LAT. {t.footer.copyright}. 
             <span className="ml-2 text-white/30 font-mono text-xs">v1.0.0-{BUILD_DATE}</span>
           </p>
           <div className="flex gap-6 text-sm">
