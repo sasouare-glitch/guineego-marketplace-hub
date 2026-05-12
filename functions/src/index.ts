@@ -1,5 +1,5 @@
 /**
- * Makiity LAT - Cloud Functions Entry Point
+ * Makiity - Cloud Functions Entry Point
  * Architecture 100% Firebase-native
  */
 

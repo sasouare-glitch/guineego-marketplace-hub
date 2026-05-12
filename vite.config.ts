@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Makiity LAT - Marketplace',
+        name: 'Makiity - Marketplace',
         short_name: 'Makiity',
         description: 'Marketplace e-commerce Guinée - Achetez, vendez, livrez',
         theme_color: '#E63946',

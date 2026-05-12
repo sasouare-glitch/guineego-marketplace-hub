@@ -106,7 +106,7 @@ export const zh = {
     badge: "几内亚第一电商平台",
     title1: "买卖交易，",
     title2: "连接几内亚",
-    description: "Makiity LAT 将卖家、买家、快递员和投资者汇聚在一个平台。中国-几内亚物流、电商培训、安全的移动支付。",
+    description: "Makiity 将卖家、买家、快递员和投资者汇聚在一个平台。中国-几内亚物流、电商培训、安全的移动支付。",
     exploreStore: "探索商店",
     becomeSeller: "成为卖家",
     products: "商品",
@@ -184,7 +184,7 @@ export const zh = {
   // CTA Section
   cta: {
     title: "准备加入几内亚电商革命？",
-    subtitle: "成千上万的几内亚人已经信任 Makiity LAT 进行购买、销售和发展业务。您呢？",
+    subtitle: "成千上万的几内亚人已经信任 Makiity 进行购买、销售和发展业务。您呢？",
     startBuying: "开始购物",
     openShop: "开设我的商店",
     comingSoon: "即将登陆",

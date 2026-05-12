@@ -127,7 +127,7 @@ export default function SellStartPage() {
             >
               <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm gap-2">
                 <TrendingUp className="w-4 h-4" />
-                Rejoignez Makiity LAT
+                Rejoignez Makiity
               </Badge>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground mb-6 leading-tight tracking-tight">
                 Vendez en ligne,{" "}
@@ -352,7 +352,7 @@ export default function SellStartPage() {
                 Prêt à commencer ?
               </h2>
               <p className="text-primary-foreground/80 text-lg mb-8 max-w-lg mx-auto">
-                Rejoignez des centaines de vendeurs qui développent leur business avec Makiity LAT.
+                Rejoignez des centaines de vendeurs qui développent leur business avec Makiity.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" variant="secondary" asChild className="text-base h-12 px-8 shadow-lg">

@@ -108,7 +108,7 @@ export const en: TranslationKeys = {
     badge: "Guinea's first marketplace",
     title1: "Buy, Sell,",
     title2: "Connect Guinea",
-    description: "Makiity LAT brings together sellers, buyers, couriers and investors on a single platform. China-Guinea transit, e-commerce training, secure mobile payment.",
+    description: "Makiity brings together sellers, buyers, couriers and investors on a single platform. China-Guinea transit, e-commerce training, secure mobile payment.",
     exploreStore: "Explore the store",
     becomeSeller: "Become a seller",
     products: "Products",
@@ -186,7 +186,7 @@ export const en: TranslationKeys = {
   // CTA Section
   cta: {
     title: "Ready to join the Guinean e-commerce revolution?",
-    subtitle: "Thousands of Guineans already trust Makiity LAT to buy, sell and grow their business. And you?",
+    subtitle: "Thousands of Guineans already trust Makiity to buy, sell and grow their business. And you?",
     startBuying: "Start buying",
     openShop: "Open my shop",
     comingSoon: "Coming soon on",

@@ -1,7 +1,7 @@
 import type { TranslationKeys } from "./fr";
 
 /**
- * ߒߞߏ (N'Ko) Translations for Makiity LAT
+ * ߒߞߏ (N'Ko) Translations for Makiity
  * Script: N'Ko (U+07C0 – U+07FF) — RTL
  * Language: Manding (Maninka/Bambara variant spoken in Guinea)
  * Font: Noto Sans NKo (Google Fonts)
@@ -117,7 +117,7 @@ export const nqo: TranslationKeys = {
     badge: "ߜߋ߬ߣߍ ߝߟߐ ߝߋ߬ߙߋ ߦߙߐ",
     title1: "ߛߊ߲߬, ߝߋ߬ߙߋ߬,",
     title2: "ߜߋ߬ߣߍ ߟߊߞߍ ߞߋ߲",
-    description: "Makiity LAT ߦߋ߫ ߝߋ߬ߙߋ߬ߓߊ ߠߎ߬ ߣߌ߬ ߛߊ߲ߓߊ ߠߎ߬ ߣߌ߬ ߟߊ߬ߛߋ߬ߙߌ ߠߎ߬ ߣߌ߬ ߡߊ߬ߞߍ߬ߟߊ ߠߎ߬ ߟߊ߲ߓߍ ߞߍ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬. ߛ߭ߌ߲ ߕߊ߬ߡߌ߲, ߥߍ߫ߓ ߞߏ ߞߊ߬ߙߊ߲, ߡߏ߬ߓߊ߬ߦߌ ߛߊ߬ߙߊ ߕߌ߲ߢߍ.",
+    description: "Makiity ߦߋ߫ ߝߋ߬ߙߋ߬ߓߊ ߠߎ߬ ߣߌ߬ ߛߊ߲ߓߊ ߠߎ߬ ߣߌ߬ ߟߊ߬ߛߋ߬ߙߌ ߠߎ߬ ߣߌ߬ ߡߊ߬ߞߍ߬ߟߊ ߠߎ߬ ߟߊ߲ߓߍ ߞߍ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬. ߛ߭ߌ߲ ߕߊ߬ߡߌ߲, ߥߍ߫ߓ ߞߏ ߞߊ߬ߙߊ߲, ߡߏ߬ߓߊ߬ߦߌ ߛߊ߬ߙߊ ߕߌ߲ߢߍ.",
     exploreStore: "ߝߋ߲ ߠߎ߬ ߞߐ߬ߟߐ߲ ߞߍ߫",
     becomeSeller: "ߝߋ߬ߙߋ߬ߓߊ߬ߟߊ ߞߍ߫",
     products: "ߝߋ߲ ߠߎ߬",
