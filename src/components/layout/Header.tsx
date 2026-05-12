@@ -321,6 +321,14 @@ export function Header() {
               className="lg:hidden overflow-hidden border-t border-border"
             >
               <div className="py-4 space-y-1">
+                {/* Logo in mobile menu */}
+                <div className="px-4 pb-3 mb-2 border-b border-border">
+                  <Link to="/" onClick={() => setMobileMenuOpen(false)} className="inline-flex">
+                    <div className="h-10 bg-primary rounded-xl px-3 flex items-center justify-center">
+                      <img src={logoMakiity} alt="Makiity" className="h-6 w-auto max-w-[160px] object-contain" />
+                    </div>
+                  </Link>
+                </div>
                 {navigation.map((item) => (
                   <Link
                     key={item.name}
