@@ -4,7 +4,7 @@ import { Smartphone, Store, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/hooks/useTranslation";
 import { QRCodeSVG } from "qrcode.react";
-import logoGuineego from "@/assets/logo-makiity.png";
+import logoGuineego from "@/assets/logo-guineego.png";
 
 export function CTASection() {
   const { t } = useTranslation();
