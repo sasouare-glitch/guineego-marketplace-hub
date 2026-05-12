@@ -39,10 +39,7 @@ export function Footer() {
       { name: t.footer.pricing, href: "/seller/pricing" },
     ],
     services: [
-      { name: t.footer.transitChina, href: "/transit" },
-      { name: t.footer.academy, href: "/academy" },
       { name: t.footer.expressDelivery, href: "/delivery" },
-      { name: t.footer.invest, href: "/invest" },
     ],
     aide: [
       { name: t.footer.helpCenter, href: "/help" },
