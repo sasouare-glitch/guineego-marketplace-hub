@@ -92,8 +92,8 @@ export function Header() {
       <nav className="container-tight">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center" aria-label="Makiity - Le marché digital de Guinée">
-            <img src={logoMakiity} alt="Makiity" className="h-10 w-auto" />
+          <Link to="/" className="flex items-center flex-shrink-0 mr-4" aria-label="Makiity - Le marché digital de Guinée">
+            <img src={logoMakiity} alt="Makiity" className="h-9 w-auto max-w-[160px] object-contain" />
           </Link>
 
           {/* Desktop Navigation */}
