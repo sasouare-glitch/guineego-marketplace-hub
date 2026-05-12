@@ -9,17 +9,13 @@ import {
   ChevronDown,
   Package,
   Truck,
-  GraduationCap,
   Store,
-  Globe,
-  BarChart3,
   ClipboardList,
   Heart,
   Languages,
   Shield,
   LogOut,
-  Settings,
-  Wallet
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
