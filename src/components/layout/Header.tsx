@@ -130,7 +130,7 @@ export function Header() {
               <Package className="w-6 h-6 text-primary-foreground" />
             </div>
             <span className="font-display text-xl font-bold text-foreground">
-              Makiity<span className="text-primary"> LAT</span>
+              Makiity<span className="text-primary"></span>
             </span>
           </Link>
 

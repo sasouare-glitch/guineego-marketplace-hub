@@ -13,7 +13,7 @@ const allCourses: Course[] = [
   {
     id: "1",
     title: "Lancer sa boutique e-commerce de A à Z",
-    description: "Apprenez à créer et gérer votre boutique en ligne sur Makiity LAT",
+    description: "Apprenez à créer et gérer votre boutique en ligne sur Makiity",
     thumbnail: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600",
     instructor: "Mamadou Diallo",
     duration: "4h 30min",

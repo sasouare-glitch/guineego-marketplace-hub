@@ -1,7 +1,7 @@
 {
   "name": "makiity-functions",
   "version": "1.0.0",
-  "description": "Cloud Functions for Makiity LAT Marketplace",
+  "description": "Cloud Functions for Makiity Marketplace",
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc",

@@ -106,7 +106,7 @@ export const fr = {
     badge: "Première marketplace de Guinée",
     title1: "Achetez, Vendez,",
     title2: "Connectez la Guinée",
-    description: "Makiity LAT réunit vendeurs, acheteurs, livreurs et investisseurs sur une seule plateforme. Transit Chine-Guinée, formation e-commerce, paiement mobile sécurisé.",
+    description: "Makiity réunit vendeurs, acheteurs, livreurs et investisseurs sur une seule plateforme. Transit Chine-Guinée, formation e-commerce, paiement mobile sécurisé.",
     exploreStore: "Explorer la boutique",
     becomeSeller: "Devenir vendeur",
     products: "Produits",
@@ -184,7 +184,7 @@ export const fr = {
   // CTA Section
   cta: {
     title: "Prêt à rejoindre la révolution du e-commerce guinéen ?",
-    subtitle: "Des milliers de Guinéens font déjà confiance à Makiity LAT pour acheter, vendre et développer leur activité. Et vous ?",
+    subtitle: "Des milliers de Guinéens font déjà confiance à Makiity pour acheter, vendre et développer leur activité. Et vous ?",
     startBuying: "Commencer à acheter",
     openShop: "Ouvrir ma boutique",
     comingSoon: "Bientôt disponible sur",

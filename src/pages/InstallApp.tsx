@@ -87,7 +87,7 @@ export default function InstallApp() {
           </motion.div>
           <h1 className="text-3xl font-bold mb-4">Application installée !</h1>
           <p className="text-muted-foreground mb-8">
-            Makiity LAT est maintenant sur votre écran d'accueil
+            Makiity est maintenant sur votre écran d'accueil
           </p>
           <Button onClick={() => navigate('/')}>
             Continuer vers l'accueil
@@ -119,7 +119,7 @@ export default function InstallApp() {
             transition={{ delay: 0.1 }}
             className="text-3xl md:text-4xl font-bold mb-4"
           >
-            Installez Makiity LAT
+            Installez Makiity
           </motion.h1>
           
           <motion.p
