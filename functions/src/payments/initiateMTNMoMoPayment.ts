@@ -141,7 +141,7 @@ export const initiateMTNMoMoPayment = functions
           partyIdType: 'MSISDN',
           partyId: formatMSISDN(phone),
         },
-        payerMessage: `Abonnement ${planName} - GuineeGo`,
+        payerMessage: `Abonnement ${planName} - Makiity`,
         payeeNote: `sub_${sellerId}_${paymentDocId}`,
       };
 

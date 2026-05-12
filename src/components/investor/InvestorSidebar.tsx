@@ -39,7 +39,7 @@ export const InvestorSidebar = () => {
             <TrendingUp className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="font-display font-bold text-foreground">GuineeGo</h1>
+            <h1 className="font-display font-bold text-foreground">Makiity</h1>
             <p className="text-xs text-muted-foreground">Investisseur</p>
           </div>
         </Link>

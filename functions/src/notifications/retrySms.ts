@@ -118,7 +118,7 @@ export const retrySmsScheduled = functions
     }
 
     const senderAddress = config.senderAddress || 'tel:+224000000000';
-    const senderName = config.senderName || 'GuineeGo';
+    const senderName = config.senderName || 'Makiity';
 
     let successCount = 0;
     let failCount = 0;
@@ -126,7 +126,7 @@ export const retrySmsScheduled = functions
     for (const doc of eligible) {
       const data = doc.data();
       const retryCount = (data.retryCount || 0) + 1;
-      const message = data.message || `[GuineeGo] Ceci est un SMS de test. Votre configuration Orange SMS fonctionne correctement ! ✅`;
+      const message = data.message || `[Makiity] Ceci est un SMS de test. Votre configuration Orange SMS fonctionne correctement ! ✅`;
 
       try {
         const result = await sendSms(token, senderAddress, senderName, data.to, message);

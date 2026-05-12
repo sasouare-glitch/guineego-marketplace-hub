@@ -50,9 +50,9 @@ export const fr = {
   // Authentication
   auth: {
     login: "Se connecter",
-    loginDescription: "Connectez-vous à votre compte GuineeGo",
+    loginDescription: "Connectez-vous à votre compte Makiity",
     register: "S'inscrire",
-    registerDescription: "Rejoignez la marketplace GuineeGo",
+    registerDescription: "Rejoignez la marketplace Makiity",
     logout: "Déconnexion",
     password: "Mot de passe",
     confirmPassword: "Confirmer le mot de passe",
@@ -106,7 +106,7 @@ export const fr = {
     badge: "Première marketplace de Guinée",
     title1: "Achetez, Vendez,",
     title2: "Connectez la Guinée",
-    description: "GuineeGo LAT réunit vendeurs, acheteurs, livreurs et investisseurs sur une seule plateforme. Transit Chine-Guinée, formation e-commerce, paiement mobile sécurisé.",
+    description: "Makiity LAT réunit vendeurs, acheteurs, livreurs et investisseurs sur une seule plateforme. Transit Chine-Guinée, formation e-commerce, paiement mobile sécurisé.",
     exploreStore: "Explorer la boutique",
     becomeSeller: "Devenir vendeur",
     products: "Produits",
@@ -153,7 +153,7 @@ export const fr = {
     expressDelivery: "Livraison express",
     expressDeliveryDesc: "Réseau de coursiers fiables couvrant Conakry et l'intérieur du pays. Suivi GPS en temps réel.",
     trackPackage: "Suivre un colis",
-    academy: "GuineeGo Academy",
+    academy: "Makiity Academy",
     academyDesc: "Formez-vous au e-commerce, marketing digital, closing. Vidéos, PDF, certifications reconnues.",
     viewCourses: "Voir les formations",
     mobilePayment: "Paiement mobile",
@@ -166,7 +166,7 @@ export const fr = {
 
   // Academy Section
   academy: {
-    title: "GuineeGo Academy",
+    title: "Makiity Academy",
     subtitle: "Formez-vous au e-commerce",
     description: "Apprenez à vendre en ligne avec nos formations gratuites et certifiantes",
     viewCourses: "Voir les formations",
@@ -184,7 +184,7 @@ export const fr = {
   // CTA Section
   cta: {
     title: "Prêt à rejoindre la révolution du e-commerce guinéen ?",
-    subtitle: "Des milliers de Guinéens font déjà confiance à GuineeGo LAT pour acheter, vendre et développer leur activité. Et vous ?",
+    subtitle: "Des milliers de Guinéens font déjà confiance à Makiity LAT pour acheter, vendre et développer leur activité. Et vous ?",
     startBuying: "Commencer à acheter",
     openShop: "Ouvrir ma boutique",
     comingSoon: "Bientôt disponible sur",
@@ -352,7 +352,7 @@ export const fr = {
     step2Payment: "Vous recevrez un SMS avec un code USSD",
     step3Payment: "Composez le code pour valider le paiement",
     step4Payment: "Votre commande sera confirmée automatiquement",
-    yourBalance: "Votre solde GuineeGo",
+    yourBalance: "Votre solde Makiity",
     free: "Gratuit",
     cardNumber: "Numéro de carte",
     expiryDate: "Date d'expiration",
@@ -492,7 +492,7 @@ export const fr = {
     pricing: "Tarifs",
     servicesTitle: "Services",
     transitChina: "Transit Chine-Guinée",
-    academy: "GuineeGo Academy",
+    academy: "Makiity Academy",
     expressDelivery: "Livraison express",
     invest: "Investir",
     helpTitle: "Aide",

@@ -52,9 +52,9 @@ export const ar: TranslationKeys = {
   // Authentication
   auth: {
     login: "تسجيل الدخول",
-    loginDescription: "سجّل الدخول إلى حسابك في GuineeGo",
+    loginDescription: "سجّل الدخول إلى حسابك في Makiity",
     register: "إنشاء حساب",
-    registerDescription: "انضم إلى سوق GuineeGo",
+    registerDescription: "انضم إلى سوق Makiity",
     logout: "تسجيل الخروج",
     password: "كلمة المرور",
     confirmPassword: "تأكيد كلمة المرور",
@@ -108,7 +108,7 @@ export const ar: TranslationKeys = {
     badge: "أول سوق إلكتروني في غينيا",
     title1: "اشترِ، بِع،",
     title2: "اربط غينيا",
-    description: "GuineeGo LAT يجمع البائعين والمشترين والسعاة والمستثمرين على منصة واحدة. شحن الصين-غينيا، تدريب التجارة الإلكترونية، دفع موبايل آمن.",
+    description: "Makiity LAT يجمع البائعين والمشترين والسعاة والمستثمرين على منصة واحدة. شحن الصين-غينيا، تدريب التجارة الإلكترونية، دفع موبايل آمن.",
     exploreStore: "استكشف المتجر",
     becomeSeller: "كن بائعاً",
     products: "منتجات",
@@ -155,7 +155,7 @@ export const ar: TranslationKeys = {
     expressDelivery: "توصيل سريع",
     expressDeliveryDesc: "شبكة سعاة موثوقة تغطي كوناكري والداخل. تتبع GPS فوري.",
     trackPackage: "تتبع طرد",
-    academy: "أكاديمية GuineeGo",
+    academy: "أكاديمية Makiity",
     academyDesc: "تدرب على التجارة الإلكترونية والتسويق الرقمي. فيديوهات، PDF، شهادات معتمدة.",
     viewCourses: "عرض الدورات",
     mobilePayment: "دفع موبايل",
@@ -168,7 +168,7 @@ export const ar: TranslationKeys = {
 
   // Academy Section
   academy: {
-    title: "أكاديمية GuineeGo",
+    title: "أكاديمية Makiity",
     subtitle: "تعلم التجارة الإلكترونية",
     description: "تعلم البيع عبر الإنترنت مع دوراتنا المجانية والمعتمدة",
     viewCourses: "عرض الدورات",
@@ -186,7 +186,7 @@ export const ar: TranslationKeys = {
   // CTA Section
   cta: {
     title: "مستعد للانضمام إلى ثورة التجارة الإلكترونية الغينية؟",
-    subtitle: "آلاف الغينيين يثقون بالفعل في GuineeGo LAT للشراء والبيع وتنمية أعمالهم. وأنت؟",
+    subtitle: "آلاف الغينيين يثقون بالفعل في Makiity LAT للشراء والبيع وتنمية أعمالهم. وأنت؟",
     startBuying: "ابدأ الشراء",
     openShop: "افتح متجري",
     comingSoon: "قريباً على",
@@ -354,7 +354,7 @@ export const ar: TranslationKeys = {
     step2Payment: "ستتلقى رسالة SMS برمز USSD",
     step3Payment: "اطلب الرمز للتحقق من الدفع",
     step4Payment: "سيتم تأكيد طلبك تلقائياً",
-    yourBalance: "رصيدك في GuineeGo",
+    yourBalance: "رصيدك في Makiity",
     free: "مجاني",
     cardNumber: "رقم البطاقة",
     expiryDate: "تاريخ الانتهاء",
@@ -494,7 +494,7 @@ export const ar: TranslationKeys = {
     pricing: "الأسعار",
     servicesTitle: "الخدمات",
     transitChina: "شحن الصين-غينيا",
-    academy: "أكاديمية GuineeGo",
+    academy: "أكاديمية Makiity",
     expressDelivery: "توصيل سريع",
     invest: "استثمر",
     helpTitle: "المساعدة",

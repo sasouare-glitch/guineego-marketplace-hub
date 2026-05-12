@@ -66,7 +66,7 @@ export default function InvestorDashboard() {
         <WelcomeBanner
           role="investor"
           title="Bienvenue dans votre espace investisseur"
-          description="Explorez les opportunités d'investissement et commencez à faire fructifier votre capital avec GuineeGo."
+          description="Explorez les opportunités d'investissement et commencez à faire fructifier votre capital avec Makiity."
           steps={[
             { label: "Voir les opportunités", href: "/investor/opportunities" },
             { label: "Mes investissements", href: "/investor/investments" },

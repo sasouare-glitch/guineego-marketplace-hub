@@ -50,9 +50,9 @@ export const zh = {
   // Authentication
   auth: {
     login: "登录",
-    loginDescription: "登录您的 GuineeGo 账户",
+    loginDescription: "登录您的 Makiity 账户",
     register: "注册",
-    registerDescription: "加入 GuineeGo 市场",
+    registerDescription: "加入 Makiity 市场",
     logout: "退出登录",
     password: "密码",
     confirmPassword: "确认密码",
@@ -106,7 +106,7 @@ export const zh = {
     badge: "几内亚第一电商平台",
     title1: "买卖交易，",
     title2: "连接几内亚",
-    description: "GuineeGo LAT 将卖家、买家、快递员和投资者汇聚在一个平台。中国-几内亚物流、电商培训、安全的移动支付。",
+    description: "Makiity LAT 将卖家、买家、快递员和投资者汇聚在一个平台。中国-几内亚物流、电商培训、安全的移动支付。",
     exploreStore: "探索商店",
     becomeSeller: "成为卖家",
     products: "商品",
@@ -153,7 +153,7 @@ export const zh = {
     expressDelivery: "快速配送",
     expressDeliveryDesc: "覆盖科纳克里和内陆地区的可靠快递网络。实时GPS跟踪。",
     trackPackage: "追踪包裹",
-    academy: "GuineeGo 学院",
+    academy: "Makiity 学院",
     academyDesc: "学习电商、数字营销、销售技巧。视频、PDF、认证证书。",
     viewCourses: "查看课程",
     mobilePayment: "移动支付",
@@ -166,7 +166,7 @@ export const zh = {
 
   // Academy Section
   academy: {
-    title: "GuineeGo 学院",
+    title: "Makiity 学院",
     subtitle: "学习电商",
     description: "通过我们的免费认证课程学习在线销售",
     viewCourses: "查看课程",
@@ -184,7 +184,7 @@ export const zh = {
   // CTA Section
   cta: {
     title: "准备加入几内亚电商革命？",
-    subtitle: "成千上万的几内亚人已经信任 GuineeGo LAT 进行购买、销售和发展业务。您呢？",
+    subtitle: "成千上万的几内亚人已经信任 Makiity LAT 进行购买、销售和发展业务。您呢？",
     startBuying: "开始购物",
     openShop: "开设我的商店",
     comingSoon: "即将登陆",
@@ -350,7 +350,7 @@ export const zh = {
     step2Payment: "您将收到包含USSD代码的短信",
     step3Payment: "拨打代码验证付款",
     step4Payment: "您的订单将自动确认",
-    yourBalance: "您的 GuineeGo 余额",
+    yourBalance: "您的 Makiity 余额",
     free: "免费",
     cardNumber: "卡号",
     expiryDate: "有效期",
@@ -487,7 +487,7 @@ export const zh = {
     pricing: "定价",
     servicesTitle: "服务",
     transitChina: "中国-几内亚物流",
-    academy: "GuineeGo 学院",
+    academy: "Makiity 学院",
     expressDelivery: "快速配送",
     invest: "投资",
     helpTitle: "帮助",

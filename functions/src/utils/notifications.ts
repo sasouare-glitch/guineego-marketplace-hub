@@ -75,7 +75,7 @@ export async function sendNotification(payload: NotificationPayload): Promise<vo
           android: {
             priority: 'high',
             notification: {
-              channelId: 'guineego_notifications',
+              channelId: 'makiity_notifications',
               sound: 'default'
             }
           },

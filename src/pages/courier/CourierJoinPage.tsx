@@ -123,7 +123,7 @@ const CourierJoinPage = () => {
               custom={1}
             >
               Devenez coursier{" "}
-              <span className="text-accent">GuineeGo</span>
+              <span className="text-accent">Makiity</span>
             </motion.h1>
             <motion.p
               className="text-lg md:text-xl opacity-90 mb-8 max-w-2xl mx-auto"
@@ -192,7 +192,7 @@ const CourierJoinPage = () => {
             custom={0}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Pourquoi devenir coursier GuineeGo ?
+              Pourquoi devenir coursier Makiity ?
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Des avantages concrets pour vous accompagner au quotidien
@@ -319,14 +319,14 @@ const CourierJoinPage = () => {
             variants={fadeUp}
             custom={0}
           >
-            <h2 className="text-3xl font-bold text-foreground mb-4">Ils livrent avec GuineeGo</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Ils livrent avec Makiity</h2>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
               {
                 name: "Mamadou B.",
                 role: "Coursier moto — Conakry",
-                quote: "Depuis que j'ai rejoint GuineeGo, je gagne bien ma vie tout en gérant mon emploi du temps. L'appli est vraiment facile.",
+                quote: "Depuis que j'ai rejoint Makiity, je gagne bien ma vie tout en gérant mon emploi du temps. L'appli est vraiment facile.",
                 rating: 5,
               },
               {

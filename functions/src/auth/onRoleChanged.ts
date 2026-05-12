@@ -118,7 +118,7 @@ export const onUserRoleChanged = functions
               Bonjour <strong>${userName}</strong>,
             </p>
             <p style="font-size: 15px; color: ${COLORS.bodyText}; line-height: 1.6;">
-              Votre compte a été promu au rôle <strong>Super User</strong> sur GuineeGo.
+              Votre compte a été promu au rôle <strong>Super User</strong> sur Makiity.
               Vous avez désormais accès à tous les dashboards et pouvez gérer l'ensemble des données de la plateforme.
             </p>
             ${divider()}
@@ -132,9 +132,9 @@ export const onUserRoleChanged = functions
             <p style="font-size: 14px; color: ${COLORS.bodyText};">
               Vous ne pouvez <strong>pas</strong> modifier le rôle d'un administrateur ni attribuer le rôle admin.
             </p>
-            ${ctaButton('Accéder au Dashboard', 'https://guineego.app/admin/dashboard')}
+            ${ctaButton('Accéder au Dashboard', 'https://makiity.app/admin/dashboard')}
           `);
-          await sendEmailWithFallback({ to: userEmail, subject: '🛡️ Rôle Super User activé — GuineeGo', html });
+          await sendEmailWithFallback({ to: userEmail, subject: '🛡️ Rôle Super User activé — Makiity', html });
         }
 
         // Notify all admins
@@ -165,9 +165,9 @@ export const onUserRoleChanged = functions
                   <p style="margin: 0; font-size: 15px; color: ${COLORS.darkText};">${oldRole || 'customer'}</p>
                 </td></tr>
               </table>
-              ${ctaButton('Gérer les Super Users', 'https://guineego.app/admin/super-users')}
+              ${ctaButton('Gérer les Super Users', 'https://makiity.app/admin/super-users')}
             `);
-            await sendEmailWithFallback({ to: adminEmail, subject: '🛡️ Nouveau Super User — GuineeGo', html });
+            await sendEmailWithFallback({ to: adminEmail, subject: '🛡️ Nouveau Super User — Makiity', html });
           }
         }
       }
@@ -189,9 +189,9 @@ export const onUserRoleChanged = functions
             <p style="font-size: 14px; color: ${COLORS.mutedText};">
               Si vous pensez que c'est une erreur, contactez un administrateur.
             </p>
-            ${ctaButton('Accéder à GuineeGo', 'https://guineego.app')}
+            ${ctaButton('Accéder à Makiity', 'https://makiity.app')}
           `);
-          await sendEmailWithFallback({ to: userEmail, subject: '🔒 Accès Super User révoqué — GuineeGo', html });
+          await sendEmailWithFallback({ to: userEmail, subject: '🔒 Accès Super User révoqué — Makiity', html });
         }
 
         // Notify admins

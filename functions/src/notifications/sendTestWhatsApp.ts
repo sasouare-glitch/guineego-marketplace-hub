@@ -57,7 +57,7 @@ export const sendTestWhatsApp = functions
     }
     const formattedTo = `whatsapp:${normalized}`;
 
-    const testMessage = `[GuineeGo] ✅ Ceci est un message WhatsApp de test. Votre configuration Twilio fonctionne correctement !`;
+    const testMessage = `[Makiity] ✅ Ceci est un message WhatsApp de test. Votre configuration Twilio fonctionne correctement !`;
 
     const logRef = db.collection('whatsapp_logs').doc();
 

@@ -21,7 +21,7 @@ export function HeroSection() {
       <div className="absolute inset-0">
         <img 
           src={heroImage} 
-          alt="GuineeGo Marketplace" 
+          alt="Makiity Marketplace" 
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/95 via-foreground/80 to-foreground/40" />

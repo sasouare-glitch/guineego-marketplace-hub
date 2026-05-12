@@ -29,8 +29,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
-        name: 'GuineeGo LAT - Marketplace',
-        short_name: 'GuineeGo',
+        name: 'Makiity LAT - Marketplace',
+        short_name: 'Makiity',
         description: 'Marketplace e-commerce Guinée - Achetez, vendez, livrez',
         theme_color: '#E63946',
         background_color: '#ffffff',

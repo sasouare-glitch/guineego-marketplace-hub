@@ -78,7 +78,7 @@ function OrangeSmsConfigSection() {
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [senderAddress, setSenderAddress] = useState('');
-  const [senderName, setSenderName] = useState('GuineeGo');
+  const [senderName, setSenderName] = useState('Makiity');
   const [enabled, setEnabled] = useState(true);
   const [testPhone, setTestPhone] = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -94,7 +94,7 @@ function OrangeSmsConfigSection() {
         setClientId(data.clientId || '');
         setClientSecret(data.clientSecret || '');
         setSenderAddress(data.senderAddress || '');
-        setSenderName(data.senderName || 'GuineeGo');
+        setSenderName(data.senderName || 'Makiity');
         setEnabled(data.enabled !== false);
         setConfigured(!!(data.clientId && data.clientSecret));
         if (data.updatedAt?.toDate) setLastUpdated(data.updatedAt.toDate());
@@ -231,7 +231,7 @@ function OrangeSmsConfigSection() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="senderName">Nom de l'expéditeur</Label>
-            <Input id="senderName" value={senderName} onChange={e => setSenderName(e.target.value)} placeholder="GuineeGo" />
+            <Input id="senderName" value={senderName} onChange={e => setSenderName(e.target.value)} placeholder="Makiity" />
           </div>
           <Separator />
           <div className="flex items-center justify-between">

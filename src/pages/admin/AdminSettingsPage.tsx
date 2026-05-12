@@ -251,11 +251,11 @@ export default function AdminSettingsPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="siteName">Nom du site</Label>
-                    <Input id="siteName" defaultValue="GuineeGo LAT" />
+                    <Input id="siteName" defaultValue="Makiity LAT" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="siteEmail">Email de contact</Label>
-                    <Input id="siteEmail" type="email" defaultValue="contact@guineego.com" />
+                    <Input id="siteEmail" type="email" defaultValue="contact@makiity.com" />
                   </div>
                 </div>
 

@@ -88,17 +88,17 @@ export const createStripeCheckout = functions
               currency: 'gnf',
               unit_amount: amountInSmallestUnit,
               product_data: {
-                name: `Commande GuineeGo #${orderId.slice(0, 8).toUpperCase()}`,
+                name: `Commande Makiity #${orderId.slice(0, 8).toUpperCase()}`,
                 description: order?.items
                   ? `${order.items.length} article(s)`
-                  : 'Commande GuineeGo',
+                  : 'Commande Makiity',
               },
             },
             quantity: 1,
           },
         ],
-        success_url: successUrl || `https://guineego.web.app/orders/${orderId}?payment=success`,
-        cancel_url: cancelUrl || `https://guineego.web.app/orders/${orderId}?payment=cancelled`,
+        success_url: successUrl || `https://makiity.web.app/orders/${orderId}?payment=success`,
+        cancel_url: cancelUrl || `https://makiity.web.app/orders/${orderId}?payment=cancelled`,
       });
 
       // Update payment record with Stripe session ID

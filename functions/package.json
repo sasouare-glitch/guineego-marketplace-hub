@@ -1,7 +1,7 @@
 {
-  "name": "guineego-functions",
+  "name": "makiity-functions",
   "version": "1.0.0",
-  "description": "Cloud Functions for GuineeGo LAT Marketplace",
+  "description": "Cloud Functions for Makiity LAT Marketplace",
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc",

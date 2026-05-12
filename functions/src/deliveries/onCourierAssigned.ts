@@ -111,7 +111,7 @@ async function sendCourierSMS(
   const formattedPhone = formatGuineaPhone(courierPhone);
 
   const smsMessage =
-    `GuineeGo ${details.priorityLabel}\n` +
+    `Makiity ${details.priorityLabel}\n` +
     `Mission: ${missionId}\n` +
     `Pickup: ${details.pickupAddress || 'Voir app'}\n` +
     `Livraison: ${details.deliveryAddress || 'Voir app'}\n` +

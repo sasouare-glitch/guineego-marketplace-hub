@@ -94,7 +94,7 @@ export default function ForgotPasswordPage() {
                   <span className="text-white font-black text-lg">G</span>
                 </div>
                 <span className="text-2xl font-black bg-gradient-to-r from-guinea-red to-guinea-green bg-clip-text text-transparent">
-                  GuineeGo
+                  Makiity
                 </span>
               </motion.div>
             </Link>

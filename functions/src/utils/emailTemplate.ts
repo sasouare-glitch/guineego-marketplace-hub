@@ -1,9 +1,9 @@
 /**
- * Shared Email Template — GuineeGo Branding
+ * Shared Email Template — Makiity Branding
  * Guinea flag colors: Green (#009639), Yellow (#FEDD00), Red (#CE1126)
  */
 
-const APP_URL = 'https://guineego.app';
+const APP_URL = 'https://makiity.app';
 
 // Brand colors
 const COLORS = {
@@ -20,7 +20,7 @@ const COLORS = {
 };
 
 /**
- * Wrap email body content in the branded GuineeGo layout
+ * Wrap email body content in the branded Makiity layout
  */
 export function wrapInTemplate(bodyContent: string): string {
   return `
@@ -29,7 +29,7 @@ export function wrapInTemplate(bodyContent: string): string {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GuineeGo</title>
+  <title>Makiity</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: ${COLORS.lightBg}; font-family: 'Segoe UI', Arial, sans-serif;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color: ${COLORS.lightBg};">
@@ -85,7 +85,7 @@ export function wrapInTemplate(bodyContent: string): string {
                       Merci pour votre confiance !
                     </p>
                     <p style="margin: 0 0 16px; font-size: 13px; color: ${COLORS.mutedText};">
-                      L'équipe <strong style="color: ${COLORS.green};">GuineeGo</strong> 🇬🇳
+                      L'équipe <strong style="color: ${COLORS.green};">Makiity</strong> 🇬🇳
                     </p>
                     <table role="presentation" cellpadding="0" cellspacing="0">
                       <tr>
@@ -98,12 +98,12 @@ export function wrapInTemplate(bodyContent: string): string {
                         </td>
                         <td style="color: ${COLORS.border};">|</td>
                         <td style="padding: 0 8px;">
-                          <a href="mailto:support@guineego.app" style="font-size: 12px; color: ${COLORS.green}; text-decoration: none;">Support</a>
+                          <a href="mailto:support@makiity.app" style="font-size: 12px; color: ${COLORS.green}; text-decoration: none;">Support</a>
                         </td>
                       </tr>
                     </table>
                     <p style="margin: 16px 0 0; font-size: 11px; color: #9ca3af;">
-                      © ${new Date().getFullYear()} GuineeGo — Conakry, Guinée
+                      © ${new Date().getFullYear()} Makiity — Conakry, Guinée
                     </p>
                   </td>
                 </tr>

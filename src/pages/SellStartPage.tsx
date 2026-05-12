@@ -76,7 +76,7 @@ const testimonials = [
   {
     name: "Mariama Diallo",
     role: "Vendeuse de vêtements",
-    content: "Depuis que j'ai rejoint GuineeGo, mes ventes ont triplé. La livraison intégrée me fait gagner un temps précieux !",
+    content: "Depuis que j'ai rejoint Makiity, mes ventes ont triplé. La livraison intégrée me fait gagner un temps précieux !",
     rating: 5,
     initials: "MD",
     avatar: avatarMariama,
@@ -127,7 +127,7 @@ export default function SellStartPage() {
             >
               <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm gap-2">
                 <TrendingUp className="w-4 h-4" />
-                Rejoignez GuineeGo LAT
+                Rejoignez Makiity LAT
               </Badge>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground mb-6 leading-tight tracking-tight">
                 Vendez en ligne,{" "}
@@ -210,7 +210,7 @@ export default function SellStartPage() {
           >
             <Badge variant="outline" className="mb-4">Avantages</Badge>
             <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-              Pourquoi vendre sur GuineeGo ?
+              Pourquoi vendre sur Makiity ?
             </h2>
             <p className="text-muted-foreground text-lg max-w-xl mx-auto">
               Tout ce dont vous avez besoin pour réussir votre commerce en ligne.
@@ -352,7 +352,7 @@ export default function SellStartPage() {
                 Prêt à commencer ?
               </h2>
               <p className="text-primary-foreground/80 text-lg mb-8 max-w-lg mx-auto">
-                Rejoignez des centaines de vendeurs qui développent leur business avec GuineeGo LAT.
+                Rejoignez des centaines de vendeurs qui développent leur business avec Makiity LAT.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" variant="secondary" asChild className="text-base h-12 px-8 shadow-lg">
