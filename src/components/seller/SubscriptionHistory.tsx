@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Receipt, Smartphone, CreditCard, Download } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import { toast } from 'sonner';
-import logoGuineego from '@/assets/logo-makiity.png';
+import logoGuineego from '@/assets/logo-guineego.png';
 
 function loadImageAsBase64(src: string): Promise<string> {
   return new Promise((resolve, reject) => {
