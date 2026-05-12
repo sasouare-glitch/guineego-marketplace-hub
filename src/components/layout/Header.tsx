@@ -9,17 +9,13 @@ import {
   ChevronDown,
   Package,
   Truck,
-  GraduationCap,
   Store,
-  Globe,
-  BarChart3,
   ClipboardList,
   Heart,
   Languages,
   Shield,
   LogOut,
-  Settings,
-  Wallet
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
@@ -79,17 +75,6 @@ export function Header() {
       ]
     },
     { 
-      name: t.nav.transit, 
-      href: "/transit/dashboard",
-      icon: Globe,
-      submenu: [
-        { name: t.header.dashboard, href: "/transit/dashboard" },
-        { name: t.header.calculateQuote, href: "/transit/quote" },
-        { name: t.header.trackPackage, href: "/transit/tracking" },
-        { name: t.header.myShipments, href: "/transit/shipments" },
-      ]
-    },
-    { 
       name: t.nav.delivery, 
       href: "/courier/dashboard",
       icon: Truck,
@@ -97,25 +82,6 @@ export function Header() {
         { name: t.header.courierSpace, href: "/courier/dashboard" },
         { name: t.header.missions, href: "/courier/missions" },
         { name: t.header.myEarnings, href: "/courier/earnings" },
-      ]
-    },
-    { 
-      name: t.nav.academy, 
-      href: "/academy",
-      icon: GraduationCap,
-      submenu: [
-        { name: t.header.allCourses, href: "/academy" },
-        { name: t.header.freeCourses, href: "/academy?free=true" },
-      ]
-    },
-    { 
-      name: t.nav.invest, 
-      href: "/investor/dashboard",
-      icon: BarChart3,
-      submenu: [
-        { name: t.header.myPortfolio, href: "/investor/dashboard" },
-        { name: t.header.opportunities, href: "/investor/opportunities" },
-        { name: t.header.myInvestments, href: "/investor/investments" },
       ]
     },
   ];
