@@ -72,13 +72,11 @@ export function AcademySection() {
             </span>
             
             <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-6">
-              Formez-vous au commerce digital
+              {t.academy.mainTitle}
             </h2>
             
             <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-              Des formations conçues pour l'Afrique, par des experts africains. 
-              Apprenez à créer, gérer et développer votre activité e-commerce 
-              avec des méthodes adaptées à notre marché.
+              {t.academy.mainDescription}
             </p>
 
             {/* Stats */}
