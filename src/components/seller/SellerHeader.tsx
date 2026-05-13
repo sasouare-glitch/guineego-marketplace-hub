@@ -84,8 +84,8 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
     );
 
     const unsub = safeOnSnapshot(q,
-      (snap) => {
-        setNotifications(snap.docs.map(d => {
+      (snap: any) => {
+        setNotifications(snap.docs.map((d: any) => {
           const data = d.data();
           return {
             id: d.id,
