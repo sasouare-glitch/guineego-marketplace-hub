@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { collection, query, where, limit, getDocs } from "firebase/firestore";
+import { collection, query, where, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { safeOnSnapshot } from "@/lib/firebase/safeSnapshot";
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * Returns true when the connected user has at least one order in Firestore.
- * Used to conditionally show "Mes commandes" / "Suivre ma commande" entries.
+ * Uses a realtime listener so menu entries appear immediately on first order.
  */
 export function useHasOrders() {
   const { user } = useAuth();
@@ -13,8 +14,6 @@ export function useHasOrders() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-
     if (!user) {
       setHasOrders(false);
       setLoading(false);
@@ -28,23 +27,25 @@ export function useHasOrders() {
       limit(1)
     );
 
-    getDocs(q)
-      .then((snap) => {
-        if (!cancelled) {
-          setHasOrders(!snap.empty);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
+    const unsub = safeOnSnapshot(
+      q,
+      (snap: any) => {
+        setHasOrders(!snap.empty);
+        setLoading(false);
+      },
+      (err) => {
         console.error("[useHasOrders] error:", err);
-        if (!cancelled) {
-          setHasOrders(false);
-          setLoading(false);
-        }
-      });
+        setHasOrders(false);
+        setLoading(false);
+      }
+    );
 
     return () => {
-      cancelled = true;
+      try {
+        unsub?.();
+      } catch {
+        /* noop */
+      }
     };
   }, [user]);
 
