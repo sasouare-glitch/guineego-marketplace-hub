@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Menu, 
@@ -15,9 +15,11 @@ import {
   Languages,
   Shield,
   LogOut,
-  Settings
+  Settings,
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -39,6 +41,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
   const { itemCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
   const { t, language } = useTranslation();
@@ -47,6 +51,13 @@ export function Header() {
   const { hasOrders } = useHasOrders();
   const isAdmin = hasRole('admin');
   const isLoggedIn = !!user;
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    navigate(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+    setMobileMenuOpen(false);
+  };
 
   const languages = [
     { code: "fr" as const, label: "Français", flag: "🇫🇷" },
@@ -99,6 +110,32 @@ export function Header() {
               <img src={logoMakiity} alt="Makiity" className="h-8 sm:h-9 md:h-10 w-auto max-w-[160px] sm:max-w-[200px] object-contain" />
             </div>
           </Link>
+
+          {/* Search bar (AliExpress-style) */}
+          <form
+            onSubmit={handleSearchSubmit}
+            className="hidden md:flex flex-1 max-w-xl mx-4"
+            role="search"
+          >
+            <div className="relative w-full flex">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              <Input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t.search?.placeholder || "Rechercher des produits..."}
+                className="pl-9 pr-24 h-10 rounded-full bg-secondary/60 border-border focus-visible:ring-primary"
+                aria-label={t.search?.placeholder || "Rechercher des produits"}
+              />
+              <Button
+                type="submit"
+                size="sm"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 rounded-full px-4"
+              >
+                OK
+              </Button>
+            </div>
+          </form>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">
@@ -310,6 +347,24 @@ export function Header() {
             </button>
           </div>
         </div>
+
+        {/* Mobile search bar (always visible on small screens) */}
+        <form onSubmit={handleSearchSubmit} className="md:hidden pb-3" role="search">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Input
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t.search?.placeholder || "Rechercher des produits..."}
+              className="pl-9 pr-16 h-10 rounded-full bg-secondary/60 border-border"
+              aria-label={t.search?.placeholder || "Rechercher des produits"}
+            />
+            <Button type="submit" size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 rounded-full px-3">
+              OK
+            </Button>
+          </div>
+        </form>
 
         {/* Mobile Navigation */}
         <AnimatePresence>
