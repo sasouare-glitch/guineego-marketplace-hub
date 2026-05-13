@@ -537,6 +537,7 @@ export const nqo: TranslationKeys = {
     invest: "ߡ .",
     helpTitle: "ߘ .",
     helpCenter: "ߘ .",
+    trackOrder: "ߟ .",
     myOrders: "ߒ .",
     returns: "ߛ .",
     contactUs: "ߊ .",

@@ -533,6 +533,7 @@ export const en: TranslationKeys = {
     invest: "Invest",
     helpTitle: "Help",
     helpCenter: "Help center",
+    trackOrder: "Track my order",
     myOrders: "My orders",
     returns: "Returns & refunds",
     contactUs: "Contact us",

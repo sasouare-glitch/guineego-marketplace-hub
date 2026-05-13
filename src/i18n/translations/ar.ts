@@ -533,6 +533,7 @@ export const ar: TranslationKeys = {
     invest: "استثمر",
     helpTitle: "المساعدة",
     helpCenter: "مركز المساعدة",
+    trackOrder: "تتبع طلبي",
     myOrders: "طلباتي",
     returns: "المرتجعات والاسترداد",
     contactUs: "اتصل بنا",
