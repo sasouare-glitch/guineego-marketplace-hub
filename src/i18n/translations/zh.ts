@@ -104,8 +104,8 @@ export const zh = {
   // Hero Section
   hero: {
     badge: "几内亚第一电商平台",
-    title1: "买卖交易，",
-    title2: "连接几内亚",
+    title1: "买，卖，租，",
+    title2: "连接几内亚与世界",
     description: "Makiity 将卖家、买家、快递员和投资者汇聚在一个平台。中国-几内亚物流、电商培训、安全的移动支付。",
     exploreStore: "探索商店",
     becomeSeller: "成为卖家",
