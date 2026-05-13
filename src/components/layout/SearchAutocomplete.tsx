@@ -70,6 +70,7 @@ export function SearchAutocomplete({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <Input
             type="search"
+            enterKeyHint="search"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -80,7 +81,7 @@ export function SearchAutocomplete({
             aria-label={placeholder}
             aria-autocomplete="list"
             aria-expanded={open && suggestions.length > 0}
-            className={`pl-9 pr-24 h-10 rounded-full bg-secondary/60 border-border focus-visible:ring-primary ${inputClassName}`}
+            className={`pl-9 pr-10 md:pr-24 h-10 rounded-full bg-secondary/60 border-border focus-visible:ring-primary ${inputClassName}`}
           />
           {query && (
             <button
@@ -89,7 +90,7 @@ export function SearchAutocomplete({
                 setQuery("");
                 setOpen(false);
               }}
-              className="absolute right-20 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+              className="absolute right-2 md:right-20 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
               aria-label="Effacer"
             >
               <X className="w-4 h-4" />
@@ -98,7 +99,7 @@ export function SearchAutocomplete({
           <Button
             type="submit"
             size="sm"
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 rounded-full px-4"
+            className="hidden md:flex absolute right-1 top-1/2 -translate-y-1/2 h-8 rounded-full px-4"
           >
             {buttonLabel}
           </Button>
@@ -107,7 +108,13 @@ export function SearchAutocomplete({
 
       {open && debounced.length >= 2 && (
         <div className="absolute left-0 right-0 top-full mt-2 bg-popover border border-border rounded-xl shadow-lg overflow-hidden z-50">
-          {suggestions.length === 0 ? (
+          {loading ? (
+            <div className="px-4 py-3 space-y-2">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : suggestions.length === 0 ? (
             <div className="px-4 py-3 text-sm text-muted-foreground">
               Aucun produit trouvé
             </div>
