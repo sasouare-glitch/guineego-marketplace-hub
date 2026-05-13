@@ -93,8 +93,8 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center flex-shrink-0 mr-2 sm:mr-4" aria-label="Makiity - Le marché digital de Guinée">
-            <div className="h-8 sm:h-9 md:h-10 bg-primary rounded-lg px-2 sm:px-3 flex items-center justify-center">
-              <img src={logoMakiity} alt="Makiity" className="h-5 sm:h-6 w-auto max-w-[120px] sm:max-w-[160px] object-contain" />
+            <div className="h-10 sm:h-11 md:h-12 bg-primary rounded-lg px-2.5 sm:px-4 flex items-center justify-center">
+              <img src={logoMakiity} alt="Makiity" className="h-7 sm:h-8 w-auto max-w-[140px] sm:max-w-[180px] object-contain" />
             </div>
           </Link>
 
@@ -324,8 +324,8 @@ export function Header() {
                 {/* Logo in mobile menu */}
                 <div className="px-4 pb-3 mb-2 border-b border-border">
                   <Link to="/" onClick={() => setMobileMenuOpen(false)} className="inline-flex">
-                    <div className="h-10 bg-primary rounded-xl px-3 flex items-center justify-center">
-                      <img src={logoMakiity} alt="Makiity" className="h-6 w-auto max-w-[160px] object-contain" />
+                    <div className="h-11 bg-primary rounded-xl px-4 flex items-center justify-center">
+                      <img src={logoMakiity} alt="Makiity" className="h-7 w-auto max-w-[180px] object-contain" />
                     </div>
                   </Link>
                 </div>
