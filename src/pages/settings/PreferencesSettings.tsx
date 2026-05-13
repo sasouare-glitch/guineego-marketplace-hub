@@ -29,7 +29,6 @@ import { useCurrency } from "@/hooks/useCurrency";
 const languages = [
   { code: "fr" as Language, label: "Français", flag: "🇫🇷" },
   { code: "en" as Language, label: "English", flag: "🇬🇧" },
-  { code: "ar" as Language, label: "العربية", flag: "🇸🇦" },
   { code: "nqo" as Language, label: "ߒߞߏ", flag: "🇬🇳" },
 ];
 
@@ -112,7 +111,6 @@ export default function PreferencesSettings() {
                     <CardDescription>
                       {preferences.language === "fr" && "Choisissez la langue de l'interface"}
                       {preferences.language === "en" && "Choose the interface language"}
-                      {preferences.language === "ar" && "اختر لغة الواجهة"}
                       {preferences.language === "nqo" && "ߞߊ߲ ߛߎ߲ߞߎ߲ ߛߏ ߞ"}
                     </CardDescription>
                   </div>
@@ -168,7 +166,6 @@ export default function PreferencesSettings() {
                     <CardDescription>
                       {preferences.language === "fr" && "Personnalisez l'apparence de l'application"}
                       {preferences.language === "en" && "Customize the application appearance"}
-                      {preferences.language === "ar" && "تخصيص مظهر التطبيق"}
                       {preferences.language === "nqo" && "ߝ "}
                     </CardDescription>
                   </div>
@@ -236,7 +233,6 @@ export default function PreferencesSettings() {
                     <CardDescription>
                       {preferences.language === "fr" && "Devise utilisée pour l'affichage des prix"}
                       {preferences.language === "en" && "Currency used for price display"}
-                      {preferences.language === "ar" && "العملة المستخدمة لعرض الأسعار"}
                       {preferences.language === "nqo" && "ߥ "}
                     </CardDescription>
                   </div>
@@ -283,7 +279,7 @@ export default function PreferencesSettings() {
               onClick={handleReset}
               className="flex-1"
             >
-              {preferences.language === "fr" ? "Réinitialiser" : preferences.language === "en" ? "Reset" : preferences.language === "nqo" ? "ߟ ." : "إعادة تعيين"}
+              {preferences.language === "fr" ? "Réinitialiser" : preferences.language === "en" ? "Reset" : "ߟ ."}
             </Button>
             <Button
               onClick={handleSave}
@@ -304,7 +300,6 @@ export default function PreferencesSettings() {
                 <p className="text-sm text-muted-foreground mb-3">
                   {preferences.language === "fr" && "Aperçu de vos préférences"}
                   {preferences.language === "en" && "Preview of your preferences"}
-                  {preferences.language === "ar" && "معاينة تفضيلاتك"}
                   {preferences.language === "nqo" && "ߌ "}
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -323,7 +318,6 @@ export default function PreferencesSettings() {
                   <p className="text-xs text-muted-foreground mb-1">
                     {preferences.language === "fr" && "Exemple de prix:"}
                     {preferences.language === "en" && "Price example:"}
-                    {preferences.language === "ar" && "مثال على السعر:"}
                     {preferences.language === "nqo" && "ߛ :"}
                   </p>
                   <p className="text-lg font-bold text-primary">{format(examplePrice)}</p>

@@ -281,7 +281,6 @@ const SellerSettingsPage = () => {
                   >
                     <option value="fr">Français</option>
                     <option value="en">English</option>
-                    <option value="ar">العربية</option>
                   </select>
                 </div>
                 <div className="space-y-2">

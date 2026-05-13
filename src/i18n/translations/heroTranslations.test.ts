@@ -1,12 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { fr } from "./fr";
 import { en } from "./en";
-import { ar } from "./ar";
 import { zh } from "./zh";
 import { nqo } from "./nqo";
 
 describe("Hero translations", () => {
-  const translations = { fr, en, ar, zh, nqo };
+  const translations = { fr, en, zh, nqo };
 
   describe("Key existence", () => {
     it.each(Object.entries(translations))(

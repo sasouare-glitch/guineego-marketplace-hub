@@ -1,6 +1,5 @@
 import { fr, TranslationKeys } from "./translations/fr";
 import { en } from "./translations/en";
-import { ar } from "./translations/ar";
 import { zh } from "./translations/zh";
 import { nqo } from "./translations/nqo";
 import type { Language } from "@/hooks/usePreferences";
@@ -8,7 +7,6 @@ import type { Language } from "@/hooks/usePreferences";
 const translations: Record<Language, TranslationKeys> = {
   fr,
   en,
-  ar,
   zh,
   nqo,
 };

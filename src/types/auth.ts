@@ -37,7 +37,7 @@ export interface UserProfile {
     lastName: string;
     dateOfBirth?: string;
     gender?: 'male' | 'female' | 'other';
-    language: 'fr' | 'en' | 'ar';
+    language: 'fr' | 'en' | 'zh' | 'nqo';
     currency: 'GNF' | 'USD' | 'EUR' | 'XOF';
   };
   
