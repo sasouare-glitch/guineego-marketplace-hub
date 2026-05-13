@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SearchAutocomplete } from "@/components/layout/SearchAutocomplete";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
@@ -111,31 +112,11 @@ export function Header() {
             </div>
           </Link>
 
-          {/* Search bar (AliExpress-style) */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hidden md:flex flex-1 max-w-xl mx-4"
-            role="search"
-          >
-            <div className="relative w-full flex">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-              <Input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t.search?.placeholder || "Rechercher des produits..."}
-                className="pl-9 pr-24 h-10 rounded-full bg-secondary/60 border-border focus-visible:ring-primary"
-                aria-label={t.search?.placeholder || "Rechercher des produits"}
-              />
-              <Button
-                type="submit"
-                size="sm"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 rounded-full px-4"
-              >
-                OK
-              </Button>
-            </div>
-          </form>
+          {/* Search bar with autocomplete (AliExpress-style) */}
+          <SearchAutocomplete
+            className="hidden md:block flex-1 max-w-xl mx-4"
+            placeholder={t.search?.placeholder || "Rechercher des produits..."}
+          />
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">
@@ -348,23 +329,12 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile search bar (always visible on small screens) */}
-        <form onSubmit={handleSearchSubmit} className="md:hidden pb-3" role="search">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <Input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.search?.placeholder || "Rechercher des produits..."}
-              className="pl-9 pr-16 h-10 rounded-full bg-secondary/60 border-border"
-              aria-label={t.search?.placeholder || "Rechercher des produits"}
-            />
-            <Button type="submit" size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 rounded-full px-3">
-              OK
-            </Button>
-          </div>
-        </form>
+        {/* Mobile search bar with autocomplete */}
+        <div className="md:hidden pb-3">
+          <SearchAutocomplete
+            placeholder={t.search?.placeholder || "Rechercher des produits..."}
+          />
+        </div>
 
         {/* Mobile Navigation */}
         <AnimatePresence>
