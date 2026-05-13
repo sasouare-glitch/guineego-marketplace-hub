@@ -47,7 +47,7 @@ const recentReports = [
 
 const categoryBreakdown = [
   { category: 'Commissions marketplace', icon: Store, amount: 30500000, pct: 38, trend: +12 },
-  { category: 'Transit Chine-Guinée', icon: Globe, amount: 76100000, pct: 95, trend: +18 },
+  { category: 'Transit Vers Guinee', icon: Globe, amount: 76100000, pct: 95, trend: +18 },
   { category: 'Paiements livreurs', icon: Truck, amount: 9700000, pct: 12, trend: +5 },
   { category: 'Formations Academy', icon: GraduationCap, amount: 4290000, pct: 6, trend: +31 },
   { category: 'Frais plateforme', icon: Package, amount: 2100000, pct: 3, trend: -2 },
