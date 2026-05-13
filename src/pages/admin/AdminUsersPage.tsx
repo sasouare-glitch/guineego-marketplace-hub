@@ -176,7 +176,7 @@ export default function AdminUsersPage() {
       
       toast.success(`Rôle de ${selectedUser.displayName || selectedUser.email} changé en ${roleLabels[newRole]?.label}`);
       setRoleDialogOpen(false);
-      // onSnapshot handles refresh automatically
+      fetchUsers();
     } catch (error: any) {
       console.error('Error updating role:', error);
       toast.error(error.message || 'Erreur lors de la mise à jour du rôle');
