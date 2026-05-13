@@ -41,7 +41,7 @@ export const TransitSidebar = () => {
           </div>
           <div>
             <h1 className="font-display font-bold text-foreground">Makiity</h1>
-            <p className="text-xs text-muted-foreground">Transit Chine</p>
+            <p className="text-xs text-muted-foreground">Transit Vers Guinee</p>
           </div>
         </Link>
       </div>

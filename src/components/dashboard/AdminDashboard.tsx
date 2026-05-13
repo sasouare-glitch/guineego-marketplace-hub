@@ -591,7 +591,7 @@ export function AdminDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="w-5 h-5" />
-                  Transit Chine-Guinée
+                  Transit Vers Guinee
                 </CardTitle>
                 <CardDescription>Expéditions en cours</CardDescription>
               </CardHeader>
