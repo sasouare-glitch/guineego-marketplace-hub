@@ -132,7 +132,7 @@ export function SearchAutocomplete({
                       </p>
                     </div>
                     <span className="text-sm font-medium text-primary whitespace-nowrap">
-                      {formatGNF(p.price)}
+                      {formatPrice(p.price, "GNF")}
                     </span>
                   </Link>
                 </li>
