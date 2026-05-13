@@ -29,9 +29,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/hooks/useCurrency";
 import {
-  collection, query, where, orderBy, onSnapshot, limit, Timestamp
+  collection, query, where, orderBy, limit, Timestamp
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { safeOnSnapshot } from "@/lib/firebase/safeSnapshot";
 
 interface SellerHeaderProps {
   sidebarCollapsed?: boolean;
@@ -82,9 +83,9 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
       limit(5)
     );
 
-    const unsub = onSnapshot(q,
-      (snap) => {
-        setNotifications(snap.docs.map(d => {
+    const unsub = safeOnSnapshot(q,
+      (snap: any) => {
+        setNotifications(snap.docs.map((d: any) => {
           const data = d.data();
           return {
             id: d.id,
@@ -115,13 +116,13 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
       limit(100)
     );
 
-    const unsub = onSnapshot(q,
-      (snap) => {
+    const unsub = safeOnSnapshot(q,
+      (snap: any) => {
         const today = new Date().toISOString().slice(0, 10);
         let sales = 0;
         let pending = 0;
 
-        snap.docs.forEach(d => {
+        snap.docs.forEach((d: any) => {
           const data = d.data();
           const status = data.status || '';
 
