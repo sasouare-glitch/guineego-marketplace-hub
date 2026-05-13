@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAllProducts } from "@/hooks/useAllProducts";
 import { formatPrice } from "@/lib/currency";
 
@@ -24,7 +25,7 @@ export function SearchAutocomplete({
   const [debounced, setDebounced] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { products } = useAllProducts();
+  const { products, loading } = useAllProducts();
 
   // Debounce 150ms for smoother typing
   useEffect(() => {
