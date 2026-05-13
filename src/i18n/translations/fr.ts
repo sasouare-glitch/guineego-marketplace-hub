@@ -531,6 +531,7 @@ export const fr = {
     invest: "Investir",
     helpTitle: "Aide",
     helpCenter: "Centre d'aide",
+    trackOrder: "Suivre ma commande",
     myOrders: "Mes commandes",
     returns: "Retours & remboursements",
     contactUs: "Nous contacter",

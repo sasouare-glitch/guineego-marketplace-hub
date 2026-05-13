@@ -526,6 +526,7 @@ export const zh = {
     invest: "投资",
     helpTitle: "帮助",
     helpCenter: "帮助中心",
+    trackOrder: "追踪我的订单",
     myOrders: "我的订单",
     returns: "退货与退款",
     contactUs: "联系我们",
