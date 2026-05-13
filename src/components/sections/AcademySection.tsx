@@ -68,7 +68,7 @@ export function AcademySection() {
           >
             <span className="badge-guinea mb-4 inline-block">
               <GraduationCap className="w-4 h-4 inline mr-2" />
-              Makiity Academy
+              {t.academy.title}
             </span>
             
             <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-6">
