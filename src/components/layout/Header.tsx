@@ -24,6 +24,7 @@ import { NotificationCenter } from "@/components/notifications/NotificationCente
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePreferences } from "@/hooks/usePreferences";
 import { useAuth } from "@/contexts/AuthContext";
+import { useHasOrders } from "@/hooks/useHasOrders";
 import { RoleSwitcher } from "@/components/auth/RoleSwitcher";
 import {
   DropdownMenu,
@@ -43,6 +44,7 @@ export function Header() {
   const { t, language } = useTranslation();
   const { setLanguage } = usePreferences();
   const { hasRole, user, profile, signOut } = useAuth();
+  const { hasOrders } = useHasOrders();
   const isAdmin = hasRole('admin');
   const isLoggedIn = !!user;
 
@@ -184,13 +186,15 @@ export function Header() {
               </Link>
             )}
 
-            <Link 
-              to="/orders" 
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-lg hover:bg-primary/5"
-            >
-              <ClipboardList className="w-4 h-4" />
-              <span className="hidden md:inline">{t.nav.orders}</span>
-            </Link>
+            {isLoggedIn && hasOrders && (
+              <Link 
+                to="/orders" 
+                className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-lg hover:bg-primary/5"
+              >
+                <ClipboardList className="w-4 h-4" />
+                <span className="hidden md:inline">{t.nav.orders}</span>
+              </Link>
+            )}
 
             {/* Notifications */}
             <NotificationCenter />
@@ -243,12 +247,14 @@ export function Header() {
                       Mon profil
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="cursor-pointer">
-                    <Link to="/orders" className="flex items-center gap-2">
-                      <ClipboardList className="w-4 h-4" />
-                      Mes commandes
-                    </Link>
-                  </DropdownMenuItem>
+                  {hasOrders && (
+                    <DropdownMenuItem asChild className="cursor-pointer">
+                      <Link to="/orders" className="flex items-center gap-2">
+                        <ClipboardList className="w-4 h-4" />
+                        Mes commandes
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link to="/wishlist" className="flex items-center gap-2">
                       <Heart className="w-4 h-4" />
@@ -284,12 +290,7 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <div className="hidden sm:flex items-center gap-2">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/track" className="flex items-center gap-1.5">
-                    <Package className="w-4 h-4" />
-                    Suivre ma commande
-                  </Link>
-                </Button>
+                {/* Suivre ma commande masqué pour les invités sans commande */}
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/login">{t.nav.login}</Link>
                 </Button>
@@ -340,14 +341,16 @@ export function Header() {
                     {item.name}
                   </Link>
                 ))}
-                <Link
-                  to="/orders"
-                  className="flex items-center gap-3 px-4 py-3 text-foreground/80 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <ClipboardList className="w-5 h-5" />
-                  {t.nav.orders}
-                </Link>
+                {isLoggedIn && hasOrders && (
+                  <Link
+                    to="/orders"
+                    className="flex items-center gap-3 px-4 py-3 text-foreground/80 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <ClipboardList className="w-5 h-5" />
+                    {t.nav.orders}
+                  </Link>
+                )}
                 {isAdmin && (
                   <Link
                     to="/admin/dashboard"
