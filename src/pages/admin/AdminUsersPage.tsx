@@ -42,8 +42,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Search, MoreHorizontal, UserPlus, Filter, Loader2, RefreshCw, ShieldCheck, Truck, Store, TrendingUp, Users } from 'lucide-react';
-import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
+import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -88,29 +87,42 @@ export default function AdminUsersPage() {
   const [updating, setUpdating] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
 
-  // Real-time listener for users
-  useEffect(() => {
+  // Fetch users (one-shot, resilient against SDK listener crashes)
+  const fetchUsers = async () => {
     setLoading(true);
-    const usersQuery = query(
-      collection(db, 'users'),
-      orderBy('metadata.createdAt', 'desc'),
-      limit(200)
-    );
-
-    const unsubscribe = safeOnSnapshot(usersQuery, (snapshot: any) => {
-      const usersData = snapshot.docs.map((d: any) => ({
+    try {
+      const usersQuery = query(
+        collection(db, 'users'),
+        orderBy('metadata.createdAt', 'desc'),
+        limit(200)
+      );
+      const snap = await getDocs(usersQuery);
+      const usersData = snap.docs.map((d) => ({
         id: d.id,
         ...d.data()
       })) as FirestoreUser[];
       setUsers(usersData);
+    } catch (error: any) {
+      console.error('Error fetching users:', error);
+      // Fallback without orderBy in case some docs miss metadata.createdAt
+      try {
+        const fallback = await getDocs(query(collection(db, 'users'), limit(200)));
+        const usersData = fallback.docs.map((d) => ({
+          id: d.id,
+          ...d.data()
+        })) as FirestoreUser[];
+        setUsers(usersData);
+      } catch (e: any) {
+        console.error('Fallback users fetch failed:', e);
+        toast.error(e?.message || 'Erreur lors du chargement des utilisateurs');
+      }
+    } finally {
       setLoading(false);
-    }, (error) => {
-      console.error('Error listening to users:', error);
-      toast.error('Erreur lors du chargement des utilisateurs');
-      setLoading(false);
-    }, 'adminUsers');
+    }
+  };
 
-    return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
   // Filter users
@@ -164,7 +176,7 @@ export default function AdminUsersPage() {
       
       toast.success(`Rôle de ${selectedUser.displayName || selectedUser.email} changé en ${roleLabels[newRole]?.label}`);
       setRoleDialogOpen(false);
-      // onSnapshot handles refresh automatically
+      fetchUsers();
     } catch (error: any) {
       console.error('Error updating role:', error);
       toast.error(error.message || 'Erreur lors de la mise à jour du rôle');
@@ -183,7 +195,7 @@ export default function AdminUsersPage() {
         'metadata.updatedAt': serverTimestamp()
       });
       toast.success(`Rôle mis à jour en ${roleLabels[role]?.label}. Reconnectez-vous pour appliquer.`);
-      // onSnapshot handles refresh automatically
+      fetchUsers();
     } catch (error) {
       console.error('Error:', error);
       toast.error('Erreur lors de la mise à jour');
@@ -262,7 +274,9 @@ export default function AdminUsersPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+                <Button variant="outline" size="icon" onClick={fetchUsers} disabled={loading} title="Actualiser">
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
               </div>
             </div>
           </CardHeader>
