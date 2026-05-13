@@ -380,7 +380,6 @@ export default function TransitSettings() {
                       <SelectContent>
                         <SelectItem value="fr">🇫🇷 Français</SelectItem>
                         <SelectItem value="en">🇬🇧 English</SelectItem>
-                        <SelectItem value="ar">🇸🇦 العربية</SelectItem>
                         <SelectItem value="zh">🇨🇳 中文</SelectItem>
                       </SelectContent>
                     </Select>
