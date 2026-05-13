@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 
-export type Language = "fr" | "en" | "ar" | "zh" | "nqo";
+export type Language = "fr" | "en" | "zh" | "nqo";
 export type Theme = "light" | "dark" | "system";
 export type Currency = "GNF" | "USD" | "EUR" | "XOF";
 
@@ -60,7 +60,7 @@ function applyTheme(theme: Theme) {
 
 function applyLanguage(language: Language) {
   document.documentElement.lang = language;
-  const isRtl = language === "ar" || language === "nqo";
+  const isRtl = language === "nqo";
   document.documentElement.dir = isRtl ? "rtl" : "ltr";
   
   // Apply N'Ko font family when nqo is selected
