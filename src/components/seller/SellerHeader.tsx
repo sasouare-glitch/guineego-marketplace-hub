@@ -29,9 +29,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useCurrency } from "@/hooks/useCurrency";
 import {
-  collection, query, where, orderBy, onSnapshot, limit, Timestamp
+  collection, query, where, orderBy, limit, Timestamp
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
+import { safeOnSnapshot } from "@/lib/firebase/safeSnapshot";
 
 interface SellerHeaderProps {
   sidebarCollapsed?: boolean;
