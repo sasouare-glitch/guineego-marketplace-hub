@@ -29,7 +29,6 @@ import { useCurrency } from "@/hooks/useCurrency";
 const languages = [
   { code: "fr" as Language, label: "Français", flag: "🇫🇷" },
   { code: "en" as Language, label: "English", flag: "🇬🇧" },
-  { code: "ar" as Language, label: "العربية", flag: "🇸🇦" },
   { code: "nqo" as Language, label: "ߒߞߏ", flag: "🇬🇳" },
 ];
 

@@ -68,7 +68,7 @@ export function OrderHistoryCard({ order, index }: OrderHistoryCardProps) {
   const formatDate = (ts: Timestamp | string | null) => {
     if (!ts) return "";
     const date = typeof ts === "string" ? new Date(ts) : (ts as any).toDate ? (ts as any).toDate() : new Date(ts as any);
-    const locale = language === "ar" ? "ar-SA" : language === "en" ? "en-US" : "fr-FR";
+    const locale = language === "en" ? "en-US" : "fr-FR";
     return date.toLocaleDateString(locale, {
       day: "numeric",
       month: "long",
