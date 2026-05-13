@@ -52,34 +52,43 @@ export const SearchFilters = ({ filters, onFiltersChange, onClearFilters, seller
 
   // Fetch sellers from Firestore
   useEffect(() => {
+    let cancelled = false;
     setLoadingSellers(true);
-    getDocs(collection(db, "seller_settings")).then((snap) => {
+
+    const loadSellers = async () => {
       const list: SellerOption[] = [];
-      snap.docs.forEach((d) => {
-        const data = d.data();
-        const name = data.shopName || data.storeName || data.name;
-        if (name) {
-          list.push({ id: data.userId || d.id, label: name });
-        }
-      });
-      // Fallback: also check 'sellers' collection
+      try {
+        const snap = await getDocs(collection(db, "seller_settings"));
+        snap.docs.forEach((d) => {
+          const data = d.data();
+          const name = data.shopName || data.storeName || data.name;
+          if (name) list.push({ id: data.userId || d.id, label: name });
+        });
+      } catch (e) {
+        console.warn("[SearchFilters] seller_settings fetch failed:", e);
+      }
+
       if (list.length === 0) {
-        getDocs(collection(db, "sellers")).then((sellersSnap) => {
+        try {
+          const sellersSnap = await getDocs(collection(db, "sellers"));
           sellersSnap.docs.forEach((d) => {
             const data = d.data();
             const name = data.shopName || data.storeName || data.businessName || data.name;
-            if (name) {
-              list.push({ id: data.userId || d.id, label: name });
-            }
+            if (name) list.push({ id: data.userId || d.id, label: name });
           });
-          setSellers(list);
-          setLoadingSellers(false);
-        });
-      } else {
+        } catch (e) {
+          console.warn("[SearchFilters] sellers fetch failed:", e);
+        }
+      }
+
+      if (!cancelled) {
         setSellers(list);
         setLoadingSellers(false);
       }
-    }).catch(() => setLoadingSellers(false));
+    };
+
+    loadSellers();
+    return () => { cancelled = true; };
   }, []);
 
   const toggleSection = (section: keyof typeof openSections) => {
