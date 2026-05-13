@@ -232,6 +232,7 @@ export const nqo: TranslationKeys = {
     startBuying: "ߛ .",
     openShop: "ߒ .",
     comingSoon: "ߣ .",
+    scanToAccess: "Scannez pour accéder au site",
   },
 
   // ߝߋ߬ ߙߋ ߦߙߐ — Marketplace
