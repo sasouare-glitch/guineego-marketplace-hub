@@ -4,7 +4,7 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAllProducts } from "@/hooks/useAllProducts";
-import { formatGNF } from "@/lib/currency";
+import { formatPrice } from "@/lib/currency";
 
 interface Props {
   placeholder?: string;
