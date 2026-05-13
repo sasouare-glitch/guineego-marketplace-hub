@@ -118,50 +118,6 @@ export function Header() {
             placeholder={t.search?.placeholder || "Rechercher des produits..."}
           />
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navigation.map((item) => (
-              <div 
-                key={item.name}
-                className="relative"
-                onMouseEnter={() => item.submenu && setActiveSubmenu(item.name)}
-                onMouseLeave={() => setActiveSubmenu(null)}
-              >
-                <Link
-                  to={item.href}
-                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-lg hover:bg-primary/5"
-                >
-                  <item.icon className="w-4 h-4" />
-                  {item.name}
-                  {item.submenu && <ChevronDown className="w-3 h-3" />}
-                </Link>
-
-                {/* Submenu */}
-                <AnimatePresence>
-                  {item.submenu && activeSubmenu === item.name && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute top-full left-0 mt-1 w-48 bg-card rounded-xl shadow-lg border border-border overflow-hidden"
-                    >
-                      {item.submenu.map((subItem) => (
-                        <Link
-                          key={subItem.name}
-                          to={subItem.href}
-                          className="block px-4 py-3 text-sm text-foreground/80 hover:bg-primary/5 hover:text-primary transition-colors"
-                        >
-                          {subItem.name}
-                        </Link>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-
           {/* Right Actions */}
           <div className="flex items-center gap-2">
             {/* Role Switcher for multi-role users */}
