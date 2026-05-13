@@ -42,8 +42,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Search, MoreHorizontal, UserPlus, Filter, Loader2, RefreshCw, ShieldCheck, Truck, Store, TrendingUp, Users } from 'lucide-react';
-import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
+import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
