@@ -195,7 +195,7 @@ export default function AdminUsersPage() {
         'metadata.updatedAt': serverTimestamp()
       });
       toast.success(`Rôle mis à jour en ${roleLabels[role]?.label}. Reconnectez-vous pour appliquer.`);
-      // onSnapshot handles refresh automatically
+      fetchUsers();
     } catch (error) {
       console.error('Error:', error);
       toast.error('Erreur lors de la mise à jour');
