@@ -329,23 +329,12 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile search bar (always visible on small screens) */}
-        <form onSubmit={handleSearchSubmit} className="md:hidden pb-3" role="search">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-            <Input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t.search?.placeholder || "Rechercher des produits..."}
-              className="pl-9 pr-16 h-10 rounded-full bg-secondary/60 border-border"
-              aria-label={t.search?.placeholder || "Rechercher des produits"}
-            />
-            <Button type="submit" size="sm" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 rounded-full px-3">
-              OK
-            </Button>
-          </div>
-        </form>
+        {/* Mobile search bar with autocomplete */}
+        <div className="md:hidden pb-3">
+          <SearchAutocomplete
+            placeholder={t.search?.placeholder || "Rechercher des produits..."}
+          />
+        </div>
 
         {/* Mobile Navigation */}
         <AnimatePresence>
