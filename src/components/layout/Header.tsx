@@ -123,30 +123,7 @@ export function Header() {
             {/* Role Switcher for multi-role users */}
             {isLoggedIn && <RoleSwitcher />}
             
-            {/* Language Selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1.5 px-2 py-2 text-sm font-medium text-foreground/80 hover:text-primary transition-colors rounded-lg hover:bg-primary/5">
-                  <Languages className="w-4 h-4" />
-                  <span className="hidden sm:inline text-xs">
-                    {languages.find(l => l.code === language)?.flag}
-                  </span>
-                  <ChevronDown className="w-3 h-3 hidden sm:block" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-[140px]">
-                {languages.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() => setLanguage(lang.code)}
-                    className={`cursor-pointer ${language === lang.code ? 'bg-primary/10 text-primary' : ''}`}
-                  >
-                    <span className="mr-2">{lang.flag}</span>
-                    {lang.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Language selector moved to second row */}
 
             {/* Admin Dashboard Link */}
             {isAdmin && (
