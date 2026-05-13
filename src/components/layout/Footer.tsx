@@ -14,6 +14,7 @@ import {
   MapPin
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useHasOrders } from "@/hooks/useHasOrders";
 
 const socialLinks = [
   { icon: Facebook, href: "https://facebook.com/makiity", label: "Facebook" },
@@ -24,6 +25,7 @@ const socialLinks = [
 
 export function Footer() {
   const { t } = useTranslation();
+  const { hasOrders } = useHasOrders();
 
   const footerLinks = {
     marketplace: [
@@ -43,8 +45,12 @@ export function Footer() {
     ],
     aide: [
       { name: t.footer.helpCenter, href: "/help" },
-      { name: `📦 ${t.footer.trackOrder}`, href: "/track" },
-      { name: t.footer.myOrders, href: "/orders" },
+      ...(hasOrders
+        ? [
+            { name: `📦 ${t.footer.trackOrder}`, href: "/track" },
+            { name: t.footer.myOrders, href: "/orders" },
+          ]
+        : []),
       { name: t.footer.returns, href: "/returns" },
       { name: t.footer.contactUs, href: "/contact" },
     ],
