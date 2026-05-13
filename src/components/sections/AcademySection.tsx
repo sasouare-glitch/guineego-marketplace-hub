@@ -12,44 +12,47 @@ import {
   PackageCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const courses = [
-  {
-    id: 1,
-    title: "Lancer sa boutique e-commerce",
-    category: "Débutant",
-    duration: "4h 30min",
-    students: 1234,
-    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=250&fit=crop",
-    href: "/academy/course/1",
-  },
-  {
-    id: 2,
-    title: "Marketing digital en Afrique",
-    category: "Intermédiaire",
-    duration: "6h 15min",
-    students: 856,
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=250&fit=crop",
-    href: "/academy/course/2",
-  },
-  {
-    id: 3,
-    title: "Devenir closer pro",
-    category: "Avancé",
-    duration: "8h 00min",
-    students: 432,
-    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=250&fit=crop",
-    href: "/academy/course/3",
-  },
-];
-
-const academyStats = [
-  { icon: BookOpen, value: "50+", label: "Formations" },
-  { icon: Users, value: "5K+", label: "Étudiants" },
-  { icon: Award, value: "98%", label: "Satisfaction" },
-];
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function AcademySection() {
+  const { t } = useTranslation();
+
+  const courses = [
+    {
+      id: 1,
+      title: t.academy.course1Title,
+      category: t.academy.beginner,
+      duration: "4h 30min",
+      students: 1234,
+      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=250&fit=crop",
+      href: "/academy/course/1",
+    },
+    {
+      id: 2,
+      title: t.academy.course2Title,
+      category: t.academy.intermediate,
+      duration: "6h 15min",
+      students: 856,
+      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=250&fit=crop",
+      href: "/academy/course/2",
+    },
+    {
+      id: 3,
+      title: t.academy.course3Title,
+      category: t.academy.advanced,
+      duration: "8h 00min",
+      students: 432,
+      image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=250&fit=crop",
+      href: "/academy/course/3",
+    },
+  ];
+
+  const academyStats = [
+    { icon: BookOpen, value: "50+", label: t.academy.courses },
+    { icon: Users, value: "5K+", label: t.academy.students },
+    { icon: Award, value: "98%", label: t.academy.satisfaction },
+  ];
+
   return (
     <section className="section-padding bg-background relative overflow-hidden">
       {/* Background decoration */}
@@ -65,17 +68,15 @@ export function AcademySection() {
           >
             <span className="badge-guinea mb-4 inline-block">
               <GraduationCap className="w-4 h-4 inline mr-2" />
-              Makiity Academy
+              {t.academy.title}
             </span>
             
             <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-6">
-              Formez-vous au commerce digital
+              {t.academy.mainTitle}
             </h2>
             
             <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-              Des formations conçues pour l'Afrique, par des experts africains. 
-              Apprenez à créer, gérer et développer votre activité e-commerce 
-              avec des méthodes adaptées à notre marché.
+              {t.academy.mainDescription}
             </p>
 
             {/* Stats */}
@@ -103,12 +104,12 @@ export function AcademySection() {
             <div className="flex flex-wrap gap-4">
               <Button size="lg" asChild>
                 <Link to="/academy">
-                  Explorer les formations
+                  {t.academy.exploreCourses}
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
                 <Link to="/academy/pricing">
-                  Voir les tarifs
+                  {t.academy.viewPricing}
                 </Link>
               </Button>
             </div>

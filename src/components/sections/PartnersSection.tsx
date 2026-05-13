@@ -6,67 +6,68 @@ import {
   Truck, 
   Users2, 
   TrendingUp, 
-  DollarSign,
   ChevronRight,
-  MapPin,
   Star,
   ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const partnerTypes = [
-  {
-    type: "courier",
-    icon: Truck,
-    title: "Devenir Coursier",
-    description: "Rejoignez notre réseau de livreurs et gagnez de l'argent en livrant des colis à Conakry et dans tout le pays.",
-    benefits: [
-      "Revenus flexibles selon vos horaires",
-      "Formation gratuite incluse",
-      "Application mobile dédiée",
-      "Paiements hebdomadaires",
-    ],
-    cta: "Postuler maintenant",
-    href: "/courier/join",
-    color: "guinea-green",
-    gradient: "from-guinea-green/10 to-guinea-green/5",
-  },
-  {
-    type: "investor",
-    icon: TrendingUp,
-    title: "Devenir Investisseur",
-    description: "Participez à la croissance de l'e-commerce guinéen. Investissez dans notre écosystème et générez des rendements.",
-    benefits: [
-      "Rendements attractifs",
-      "Tableau de bord en temps réel",
-      "Accompagnement personnalisé",
-      "Diversification de portefeuille",
-    ],
-    cta: "Découvrir les opportunités",
-    href: "/invest",
-    color: "guinea-yellow",
-    gradient: "from-guinea-yellow/10 to-guinea-yellow/5",
-  },
-];
-
-const testimonials = [
-  {
-    name: "Mamadou Diallo",
-    role: "Coursier, Conakry",
-    avatar: avatarMamadou,
-    quote: "Makiity m'a permis de travailler à mon rythme et de bien gagner ma vie. Le système est transparent et les paiements sont toujours à temps.",
-    rating: 5,
-  },
-  {
-    name: "Fatoumata Camara",
-    role: "Investisseuse",
-    avatar: avatarFatoumata,
-    quote: "J'ai diversifié mes investissements avec Makiity. Les rendements sont bons et le suivi est excellent. Je recommande !",
-    rating: 5,
-  },
-];
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function PartnersSection() {
+  const { t } = useTranslation();
+
+  const partnerTypes = [
+    {
+      type: "courier",
+      icon: Truck,
+      title: t.partners.becomeCourier,
+      description: t.partners.courierDesc,
+      benefits: [
+        t.partners.courierBenefit1,
+        t.partners.courierBenefit2,
+        t.partners.courierBenefit3,
+        t.partners.courierBenefit4,
+      ],
+      cta: t.partners.courierCta,
+      href: "/courier/join",
+      color: "guinea-green",
+      gradient: "from-guinea-green/10 to-guinea-green/5",
+    },
+    {
+      type: "investor",
+      icon: TrendingUp,
+      title: t.partners.becomeInvestor,
+      description: t.partners.investorDesc,
+      benefits: [
+        t.partners.investorBenefit1,
+        t.partners.investorBenefit2,
+        t.partners.investorBenefit3,
+        t.partners.investorBenefit4,
+      ],
+      cta: t.partners.investorCta,
+      href: "/invest",
+      color: "guinea-yellow",
+      gradient: "from-guinea-yellow/10 to-guinea-yellow/5",
+    },
+  ];
+
+  const testimonials = [
+    {
+      name: "Mamadou Diallo",
+      role: t.partners.testimonial1Role,
+      avatar: avatarMamadou,
+      quote: t.partners.testimonial1Quote,
+      rating: 5,
+    },
+    {
+      name: "Fatoumata Camara",
+      role: t.partners.testimonial2Role,
+      avatar: avatarFatoumata,
+      quote: t.partners.testimonial2Quote,
+      rating: 5,
+    },
+  ];
+
   return (
     <section className="section-padding bg-secondary/30">
       <div className="container-tight">
@@ -79,14 +80,13 @@ export function PartnersSection() {
         >
           <span className="badge-guinea mb-4 inline-block">
             <Users2 className="w-4 h-4 inline mr-2" />
-            Partenariats
+            {t.partners.badge}
           </span>
           <h2 className="text-3xl sm:text-4xl font-display font-bold text-foreground mb-4">
-            Rejoignez l'aventure Makiity
+            {t.partners.mainTitle}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Que vous souhaitiez devenir coursier ou investisseur, 
-            Makiity vous offre des opportunités uniques pour prospérer.
+            {t.partners.mainDescription}
           </p>
         </motion.div>
 
