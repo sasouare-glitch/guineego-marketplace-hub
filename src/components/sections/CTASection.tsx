@@ -84,7 +84,7 @@ export function CTASection() {
               </div>
               <span className="text-white/70 text-sm flex items-center gap-1.5">
                 <Download className="w-3.5 h-3.5" />
-                Scannez pour accéder au site
+                {t.cta.scanToAccess}
               </span>
             </motion.div>
 
