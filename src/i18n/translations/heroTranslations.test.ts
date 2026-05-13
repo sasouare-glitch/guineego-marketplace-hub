@@ -31,7 +31,7 @@ describe("Hero translations", () => {
 
   describe("French exact text match", () => {
     it("fr hero.title1 should match exactly", () => {
-      expect(fr.hero.title1).toBe("Achetez, Vendez, Loyez,");
+      expect(fr.hero.title1).toBe("Achetez, Vendez, Louez,");
     });
 
     it("fr hero.title2 should match exactly", () => {
@@ -41,7 +41,7 @@ describe("Hero translations", () => {
     it("fr full slogan should match expected text", () => {
       const fullSlogan = `${fr.hero.title1} ${fr.hero.title2}`;
       expect(fullSlogan).toBe(
-        "Achetez, Vendez, Loyez, connectez la Guinee et le monde entier"
+        "Achetez, Vendez, Louez, connectez la Guinee et le monde entier"
       );
     });
   });

@@ -104,7 +104,7 @@ export const fr = {
   // Hero Section
   hero: {
     badge: "Première marketplace de Guinée",
-    title1: "Achetez, Vendez, Loyez,",
+    title1: "Achetez, Vendez, Louez,",
     title2: "connectez la Guinee et le monde entier",
     description: "Makiity réunit vendeurs, acheteurs, livreurs et investisseurs sur une seule plateforme. Transit Chine-Guinée, formation e-commerce, paiement mobile sécurisé.",
     exploreStore: "Explorer la boutique",
