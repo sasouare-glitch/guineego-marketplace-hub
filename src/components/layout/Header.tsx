@@ -106,7 +106,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center flex-shrink-0 mr-2 sm:mr-4" aria-label="Makiity - Le marché digital de Guinée">
-            <div className="h-10 sm:h-11 md:h-12 flex items-center justify-center">
+            <div className="h-10 sm:h-11 md:h-12 flex items-center justify-center glass rounded-lg px-2">
               <img src={logoMakiity} alt="Makiity" className="h-8 sm:h-9 md:h-10 w-auto max-w-[160px] sm:max-w-[200px] object-contain" />
             </div>
           </Link>
