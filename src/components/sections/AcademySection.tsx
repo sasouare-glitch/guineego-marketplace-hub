@@ -104,12 +104,12 @@ export function AcademySection() {
             <div className="flex flex-wrap gap-4">
               <Button size="lg" asChild>
                 <Link to="/academy">
-                  Explorer les formations
+                  {t.academy.exploreCourses}
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild>
                 <Link to="/academy/pricing">
-                  Voir les tarifs
+                  {t.academy.viewPricing}
                 </Link>
               </Button>
             </div>
