@@ -52,6 +52,8 @@ export function AcademySection() {
     { icon: Users, value: "5K+", label: t.academy.students },
     { icon: Award, value: "98%", label: t.academy.satisfaction },
   ];
+
+  return (
     <section className="section-padding bg-background relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-guinea-yellow/5 to-transparent" />
