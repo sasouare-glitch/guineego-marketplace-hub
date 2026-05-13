@@ -87,29 +87,42 @@ export default function AdminUsersPage() {
   const [updating, setUpdating] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
 
-  // Real-time listener for users
-  useEffect(() => {
+  // Fetch users (one-shot, resilient against SDK listener crashes)
+  const fetchUsers = async () => {
     setLoading(true);
-    const usersQuery = query(
-      collection(db, 'users'),
-      orderBy('metadata.createdAt', 'desc'),
-      limit(200)
-    );
-
-    const unsubscribe = safeOnSnapshot(usersQuery, (snapshot: any) => {
-      const usersData = snapshot.docs.map((d: any) => ({
+    try {
+      const usersQuery = query(
+        collection(db, 'users'),
+        orderBy('metadata.createdAt', 'desc'),
+        limit(200)
+      );
+      const snap = await getDocs(usersQuery);
+      const usersData = snap.docs.map((d) => ({
         id: d.id,
         ...d.data()
       })) as FirestoreUser[];
       setUsers(usersData);
+    } catch (error: any) {
+      console.error('Error fetching users:', error);
+      // Fallback without orderBy in case some docs miss metadata.createdAt
+      try {
+        const fallback = await getDocs(query(collection(db, 'users'), limit(200)));
+        const usersData = fallback.docs.map((d) => ({
+          id: d.id,
+          ...d.data()
+        })) as FirestoreUser[];
+        setUsers(usersData);
+      } catch (e: any) {
+        console.error('Fallback users fetch failed:', e);
+        toast.error(e?.message || 'Erreur lors du chargement des utilisateurs');
+      }
+    } finally {
       setLoading(false);
-    }, (error) => {
-      console.error('Error listening to users:', error);
-      toast.error('Erreur lors du chargement des utilisateurs');
-      setLoading(false);
-    }, 'adminUsers');
+    }
+  };
 
-    return () => { try { unsubscribe(); } catch (e) { /* ignore */ } };
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
   // Filter users
