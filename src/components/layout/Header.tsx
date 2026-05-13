@@ -41,6 +41,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
   const { itemCount } = useCart();
   const { itemCount: wishlistCount } = useWishlist();
   const { t, language } = useTranslation();
@@ -49,6 +51,13 @@ export function Header() {
   const { hasOrders } = useHasOrders();
   const isAdmin = hasRole('admin');
   const isLoggedIn = !!user;
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    navigate(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+    setMobileMenuOpen(false);
+  };
 
   const languages = [
     { code: "fr" as const, label: "Français", flag: "🇫🇷" },
