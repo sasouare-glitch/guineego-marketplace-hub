@@ -83,7 +83,7 @@ export function SellerHeader({ sidebarCollapsed = false, onMenuClick }: SellerHe
       limit(5)
     );
 
-    const unsub = onSnapshot(q,
+    const unsub = safeOnSnapshot(q,
       (snap) => {
         setNotifications(snap.docs.map(d => {
           const data = d.data();
