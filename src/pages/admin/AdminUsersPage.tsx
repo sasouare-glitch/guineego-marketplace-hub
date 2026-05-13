@@ -274,7 +274,9 @@ export default function AdminUsersPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+                <Button variant="outline" size="icon" onClick={fetchUsers} disabled={loading} title="Actualiser">
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                </Button>
               </div>
             </div>
           </CardHeader>
