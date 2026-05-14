@@ -287,6 +287,11 @@ export default function AdminLessorRequestsPage() {
                       <X className="w-3 h-3" /> Refusé
                     </Badge>
                   )}
+                  {req.status === "revoked" && (
+                    <Badge variant="destructive" className="gap-1 bg-orange-500/10 text-orange-600 border-orange-300">
+                      <X className="w-3 h-3" /> Révoqué
+                    </Badge>
+                  )}
                 </div>
               </div>
 
