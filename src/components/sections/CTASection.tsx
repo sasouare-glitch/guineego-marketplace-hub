@@ -55,7 +55,7 @@ export function CTASection() {
                 </Link>
               </Button>
               <Button variant="heroOutline" size="xl" asChild>
-                <Link to="/lessor/items/new">
+                <Link to="/become-lessor">
                   <CalendarDays className="w-5 h-5" />
                   {t.cta.becomeLessor}
                 </Link>
