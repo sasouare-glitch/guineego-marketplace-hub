@@ -75,7 +75,7 @@ export default function RentalItemDetail() {
   const unavailable = !!reason;
 
   const alternatives = useMemo(
-    () => (item && date && unavailable ? findNextAvailableDates(item, date, 3, 60) : []),
+    () => (item && date && unavailable ? findNextAvailableDates(item, date, 12, 90) : []),
     [item, date, unavailable]
   );
 
