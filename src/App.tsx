@@ -110,6 +110,7 @@ import LessorDashboard from "./pages/lessor/LessorDashboard";
 import LessorItems from "./pages/lessor/LessorItems";
 import LessorItemNew from "./pages/lessor/LessorItemNew";
 import LessorBookings from "./pages/lessor/LessorBookings";
+import BecomeLessorPage from "./pages/lessor/BecomeLessorPage";
 // Mobile Components
 import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
 import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";
