@@ -29,23 +29,50 @@ export interface QuoteInput {
 }
 
 export const DEFAULT_DELIVERY_FEE = 50_000;
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
+/** Normalise une date à minuit local (évite les biais d'heure). */
+function startOfDay(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+
+/**
+ * Compte de jours calendaires INCLUSIFS entre deux dates.
+ * start == end → 1 jour ; start, start+1j → 2 jours.
+ */
 export function diffInDays(start: Date, end: Date): number {
-  const ms = end.getTime() - start.getTime();
-  // inclusif : 1 jour minimum quand start == end
-  return Math.max(1, Math.ceil(ms / (1000 * 60 * 60 * 24)) + (ms === 0 ? 1 : 0));
+  const a = startOfDay(start).getTime();
+  const b = startOfDay(end).getTime();
+  return Math.max(1, Math.floor((b - a) / MS_PER_DAY) + 1);
+}
+
+/** Normalise et borne `minDays` (toujours >= 1). */
+export function normalizeMinDays(minDays?: number): number {
+  return Math.max(1, Math.floor(minDays ?? 1));
+}
+
+/**
+ * Date de fin minimale autorisée pour respecter la durée minimale.
+ * Source de vérité partagée entre la validation UI et le calcul du devis.
+ */
+export function getMinEndDate(start: Date, minDays?: number): Date {
+  const n = normalizeMinDays(minDays);
+  return new Date(startOfDay(start).getTime() + (n - 1) * MS_PER_DAY);
 }
 
 export function computeRentalQuote(input: QuoteInput): RentalQuote {
   const { startDate, endDate, pricePerDay, mode } = input;
   const deposit = Math.max(0, input.deposit ?? 0);
-  const minDays = Math.max(1, input.minDays ?? 1);
+  const minDays = normalizeMinDays(input.minDays);
   const deliveryFee =
     mode === "delivery" ? Math.max(0, input.deliveryFee ?? DEFAULT_DELIVERY_FEE) : 0;
 
   let days = 0;
   if (startDate) {
     const end = endDate ?? startDate;
+    // Même contrainte que la validation : on aligne au minimum sur minEndDate.
     days = Math.max(minDays, diffInDays(startDate, end));
   }
 
