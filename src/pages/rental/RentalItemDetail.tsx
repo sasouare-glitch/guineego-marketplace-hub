@@ -354,38 +354,62 @@ export default function RentalItemDetail() {
                     </div>
 
                     {/* Date de fin */}
-                    <div className="space-y-1.5">
-                      <p className="text-xs text-muted-foreground">
-                        Date de fin (optionnelle)
-                      </p>
-                      <Popover open={endPickerOpen} onOpenChange={setEndPickerOpen}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full justify-start"
-                          >
-                            <CalendarIcon className="w-4 h-4 mr-2" />
-                            {endDate
-                              ? format(endDate, "EEE d MMM yyyy", { locale: fr })
-                              : `Même jour (${item.minDays ?? 1} jour${(item.minDays ?? 1) > 1 ? "s" : ""} min.)`}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={endDate}
-                            onSelect={(d) => {
-                              setEndDate(d);
-                              setEndPickerOpen(false);
-                            }}
-                            disabled={(d) => !date || d < date}
-                            initialFocus
-                            className={cn("p-3 pointer-events-auto")}
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
+                    {(() => {
+                      const minDays = Math.max(1, item.minDays ?? 1);
+                      const minEnd = date
+                        ? new Date(date.getTime() + (minDays - 1) * 86400000)
+                        : null;
+                      const endInvalid =
+                        !!date && !!endDate && endDate < (minEnd ?? date);
+                      return (
+                        <div className="space-y-1.5">
+                          <p className="text-xs text-muted-foreground">
+                            Date de fin (optionnelle)
+                          </p>
+                          <Popover open={endPickerOpen} onOpenChange={setEndPickerOpen}>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className={cn(
+                                  "w-full justify-start",
+                                  endInvalid && "border-destructive text-destructive"
+                                )}
+                              >
+                                <CalendarIcon className="w-4 h-4 mr-2" />
+                                {endDate
+                                  ? format(endDate, "EEE d MMM yyyy", { locale: fr })
+                                  : `Même jour (${minDays} jour${minDays > 1 ? "s" : ""} min.)`}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={endDate}
+                                onSelect={(d) => {
+                                  setEndDate(d);
+                                  setEndPickerOpen(false);
+                                }}
+                                disabled={(d) => !minEnd || d < minEnd}
+                                initialFocus
+                                className={cn("p-3 pointer-events-auto")}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          {endInvalid && (
+                            <p
+                              role="alert"
+                              className="text-xs text-destructive flex items-start gap-1"
+                            >
+                              <Ban className="w-3 h-3 mt-0.5 shrink-0" />
+                              Durée minimale de {minDays} jour{minDays > 1 ? "s" : ""} requise.
+                              La fin doit être au plus tôt le{" "}
+                              {minEnd ? format(minEnd, "d MMM yyyy", { locale: fr }) : ""}.
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     {/* Mode : retrait ou livraison */}
                     <div className="space-y-1.5">
