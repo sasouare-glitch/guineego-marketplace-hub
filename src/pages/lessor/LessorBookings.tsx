@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { doc, updateDoc, serverTimestamp, addDoc, collection } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp, addDoc, collection, arrayUnion } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -27,6 +27,7 @@ import {
   Shield,
   ShieldCheck,
   ShieldAlert,
+  History,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLessorRentalBookings } from "@/hooks/useLessorRentalBookings";
@@ -34,7 +35,7 @@ import {
   DepositReturnDialog,
   type DepositReturnDecision,
 } from "@/components/rental/DepositReturnDialog";
-import type { BookingStatus, RentalBooking, DepositStatus } from "@/types/rental";
+import type { BookingStatus, RentalBooking, DepositStatus, DepositReturnAudit } from "@/types/rental";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -85,6 +86,8 @@ function BookingRow({
   const canReturn =
     (booking.status === "active" || booking.status === "confirmed") &&
     depStatus === "held";
+
+  const latestAudit = booking.depositReturnAudits?.[booking.depositReturnAudits.length - 1];
 
   return (
     <Card className="p-4 space-y-3">
@@ -147,6 +150,56 @@ function BookingRow({
         </p>
       )}
 
+      {/* Audit trail for completed bookings */}
+      {booking.depositReturnAudits && booking.depositReturnAudits.length > 0 && (
+        <div className="space-y-2 border rounded-lg p-3 bg-muted/30">
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+            <History className="w-3.5 h-3.5" />
+            Historique des retours de caution
+          </div>
+          <div className="space-y-2">
+            {booking.depositReturnAudits.map((audit, idx) => {
+              const auditDate = toDate(audit.processedAt);
+              return (
+                <div key={idx} className="text-xs space-y-1 border-l-2 pl-3 py-1" style={{ borderColor: audit.decision === "released" ? "#10b981" : audit.decision === "partial" ? "#f59e0b" : "#ef4444" }}>
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "font-medium",
+                      audit.decision === "released" && "text-emerald-600",
+                      audit.decision === "partial" && "text-amber-600",
+                      audit.decision === "withheld" && "text-red-600"
+                    )}>
+                      {audit.decision === "released" && "Caution restituée"}
+                      {audit.decision === "partial" && "Caution partiellement retenue"}
+                      {audit.decision === "withheld" && "Caution retenue"}
+                    </span>
+                    {auditDate && (
+                      <span className="text-muted-foreground">
+                        {format(auditDate, "dd/MM/yyyy HH:mm", { locale: fr })}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground">
+                    Par {audit.processedByName || audit.processedBy.slice(0, 8)} • Total : {formatGNF(audit.depositTotal)} • Restitué : {formatGNF(audit.amountReleased)} • Retenu : {formatGNF(audit.amountWithheld)}
+                  </p>
+                  {audit.reason && (
+                    <p className="text-muted-foreground italic">Motif : {audit.reason}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Show latest audit summary for active bookings */}
+      {latestAudit && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/20 rounded p-2">
+          <History className="w-3.5 h-3.5" />
+          Dernière action : {latestAudit.decision === "released" ? "Restituée" : latestAudit.decision === "partial" ? "Partiellement retenue" : "Retenue"} le {latestAudit.processedAt && toDate(latestAudit.processedAt) ? format(toDate(latestAudit.processedAt)!, "dd/MM/yyyy HH:mm", { locale: fr }) : ""}
+        </div>
+      )}
+
       {canReturn && (
         <div className="flex justify-end">
           <Button size="sm" onClick={() => onReturn(booking)}>
@@ -194,7 +247,7 @@ export default function LessorBookings() {
   );
 
   const handleReturn = async (decision: DepositReturnDecision) => {
-    if (!selected) return;
+    if (!selected || !user?.uid) return;
     setSubmitting(true);
     try {
       const ref = doc(db, "rental_bookings", selected.id);
@@ -203,7 +256,12 @@ export default function LessorBookings() {
         depositReleasedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
+
+      let withheld = 0;
+      let released = 0;
+
       if (decision.kind === "released") {
+        released = selected.deposit;
         Object.assign(base, {
           depositStatus: "released" as DepositStatus,
           depositAmountReleased: selected.deposit,
@@ -211,15 +269,31 @@ export default function LessorBookings() {
           depositWithheldReason: null,
         });
       } else {
-        const withheld = Math.min(selected.deposit, Math.max(0, decision.amountWithheld));
-        const released = Math.max(0, selected.deposit - withheld);
+        withheld = Math.min(selected.deposit, Math.max(0, decision.amountWithheld));
+        released = Math.max(0, selected.deposit - withheld);
         Object.assign(base, {
-          depositStatus: decision.kind as DepositStatus, // partial | withheld
+          depositStatus: decision.kind as DepositStatus,
           depositAmountWithheld: withheld,
           depositAmountReleased: released,
           depositWithheldReason: decision.reason,
         });
       }
+
+      // Build audit entry
+      const auditEntry: DepositReturnAudit = {
+        processedBy: user.uid,
+        processedByName: user.displayName || user.email || undefined,
+        processedAt: serverTimestamp() as any,
+        decision: decision.kind as "released" | "partial" | "withheld",
+        depositTotal: selected.deposit,
+        amountReleased: released,
+        amountWithheld: withheld,
+        reason: decision.kind === "released" ? undefined : decision.reason,
+      };
+      Object.assign(base, {
+        depositReturnAudits: arrayUnion(auditEntry),
+      });
+
       await updateDoc(ref, base);
 
       // Notify renter about the deposit decision

@@ -152,9 +152,26 @@ export interface RentalBooking {
   depositAmountWithheld?: number; // conservé par le loueur
   depositWithheldReason?: string;
 
+  /** Audit trail des retours de caution */
+  depositReturnAudits?: DepositReturnAudit[];
+
   pickupAddress?: string;
   returnAddress?: string;
   notes?: string;
   createdAt: Date | { seconds: number };
   updatedAt: Date | { seconds: number };
+}
+
+/**
+ * Entrée d'audit pour traçabilité du retour de caution.
+ */
+export interface DepositReturnAudit {
+  processedBy: string;          // UID du loueur/admin ayant fait l'action
+  processedByName?: string;     // Nom affichable
+  processedAt: Date | { seconds: number };
+  decision: "released" | "partial" | "withheld";
+  depositTotal: number;         // montant total de la caution
+  amountReleased: number;
+  amountWithheld: number;
+  reason?: string;              // motif si retenue/partial
 }
