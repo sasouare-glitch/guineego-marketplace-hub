@@ -193,7 +193,7 @@ export default function RentalMarketplace() {
                 </Card>
               ))}
             </div>
-          ) : filtered.length === 0 ? (
+          ) : visible.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <CalendarDays className="w-12 h-12 mx-auto mb-4 opacity-30" />
               <p className="mb-2">
