@@ -38,6 +38,7 @@ export default function RentalItemDetail() {
     dateParam ? new Date(dateParam) : undefined
   );
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [altPage, setAltPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,10 +75,33 @@ export default function RentalItemDetail() {
   );
   const unavailable = !!reason;
 
+  const ALT_PAGE_SIZE = 12;
+  const ALT_MAX = 60;
+  const ALT_LOOKAHEAD = 365;
+  const altLimit = Math.min(altPage * ALT_PAGE_SIZE, ALT_MAX);
+
   const alternatives = useMemo(
-    () => (item && date && unavailable ? findNextAvailableDates(item, date, 12, 90) : []),
-    [item, date, unavailable]
+    () =>
+      item && date && unavailable
+        ? findNextAvailableDates(item, date, altLimit, ALT_LOOKAHEAD)
+        : [],
+    [item, date, unavailable, altLimit]
   );
+
+  // Probe next page to know if more exist
+  const hasMore = useMemo(() => {
+    if (!item || !date || !unavailable) return false;
+    if (altLimit >= ALT_MAX) return false;
+    return (
+      findNextAvailableDates(item, date, altLimit + 1, ALT_LOOKAHEAD).length >
+      alternatives.length
+    );
+  }, [item, date, unavailable, altLimit, alternatives.length]);
+
+  // Reset pagination when date or item changes
+  useEffect(() => {
+    setAltPage(1);
+  }, [date, item?.id]);
 
   return (
     <>
@@ -264,6 +288,32 @@ export default function RentalItemDetail() {
                           );
                         })}
                       </div>
+                      {(hasMore || altPage > 1) && (
+                        <div className="mt-2 flex items-center gap-2">
+                          {hasMore && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs"
+                              onClick={() => setAltPage((p) => p + 1)}
+                            >
+                              Voir plus
+                            </Button>
+                          )}
+                          {altPage > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs text-muted-foreground"
+                              onClick={() => setAltPage(1)}
+                            >
+                              Réduire
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
