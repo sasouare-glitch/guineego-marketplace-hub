@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, ShoppingBag, Truck, Globe, Shield } from "lucide-react";
+import { ArrowRight, ShoppingBag, Truck, Globe, Shield, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-marketplace.jpg";
 import { useTranslation } from "@/hooks/useTranslation";
