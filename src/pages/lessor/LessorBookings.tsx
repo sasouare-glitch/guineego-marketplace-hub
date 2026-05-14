@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { doc, updateDoc, serverTimestamp, addDoc, collection } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp, addDoc, collection, arrayUnion } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -27,6 +27,7 @@ import {
   Shield,
   ShieldCheck,
   ShieldAlert,
+  History,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLessorRentalBookings } from "@/hooks/useLessorRentalBookings";
@@ -34,7 +35,7 @@ import {
   DepositReturnDialog,
   type DepositReturnDecision,
 } from "@/components/rental/DepositReturnDialog";
-import type { BookingStatus, RentalBooking, DepositStatus } from "@/types/rental";
+import type { BookingStatus, RentalBooking, DepositStatus, DepositReturnAudit } from "@/types/rental";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
