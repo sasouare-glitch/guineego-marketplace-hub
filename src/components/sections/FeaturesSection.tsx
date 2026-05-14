@@ -70,6 +70,15 @@ export function FeaturesSection() {
       gradient: "from-emerald-500/10 to-emerald-500/5",
       iconBg: "bg-emerald-500",
     },
+    {
+      icon: CalendarDays,
+      titleKey: "rental" as const,
+      descKey: "rentalDesc" as const,
+      href: "/rental",
+      ctaKey: "rentNow" as const,
+      gradient: "from-violet-500/10 to-violet-500/5",
+      iconBg: "bg-violet-500",
+    },
   ];
 
   return (
