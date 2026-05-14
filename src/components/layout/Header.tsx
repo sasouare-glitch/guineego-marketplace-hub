@@ -16,7 +16,8 @@ import {
   Shield,
   LogOut,
   Settings,
-  Search
+  Search,
+  CalendarDays
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -215,6 +216,12 @@ export function Header() {
                       </Link>
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link to="/my-rentals" className="flex items-center gap-2">
+                      <CalendarDays className="w-4 h-4" />
+                      Mes locations
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild className="cursor-pointer">
                     <Link to="/wishlist" className="flex items-center gap-2">
                       <Heart className="w-4 h-4" />
