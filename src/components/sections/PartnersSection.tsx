@@ -5,7 +5,8 @@ import avatarFatoumata from "@/assets/avatar-fatoumata.jpg";
 import { 
   Truck, 
   Users2, 
-  TrendingUp, 
+  TrendingUp,
+  CalendarDays,
   ChevronRight,
   Star,
   ArrowRight

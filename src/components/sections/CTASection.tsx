@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Smartphone, Store, Download } from "lucide-react";
+import { Smartphone, Store, Download, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/hooks/useTranslation";
 import { QRCodeSVG } from "qrcode.react";
