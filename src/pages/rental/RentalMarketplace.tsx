@@ -165,7 +165,11 @@ export default function RentalMarketplace() {
             )}
 
             <span className="ml-auto text-xs text-muted-foreground">
-              {loading ? "…" : `${filtered.length} équipement${filtered.length > 1 ? "s" : ""}`}
+              {loading
+                ? "…"
+                : date
+                ? `${availableCount} disponible${availableCount > 1 ? "s" : ""} sur ${visible.length}`
+                : `${visible.length} équipement${visible.length > 1 ? "s" : ""}`}
             </span>
           </div>
         </section>
