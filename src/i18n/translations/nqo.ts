@@ -173,6 +173,9 @@ export const nqo: TranslationKeys = {
     buyerProtection: "ߛߊ߲ ߓߊ ߕߌ߲ ߢߍ ߟߌ",
     buyerProtectionDesc: "ߌ ߟߊ ߛߊ߲ ߝߋ߲ ߠߎ ߕߌ߲ ߢߍ ߘߊ. ߥߊ ߙߌ ߛߊ ߦߌ ߟ ߟ ߝ .",
     ourGuarantee: "ߊ߲ ߠ .",
+    rental: "ߓߍ߯ ߙߊ ߞߍ߫ ߟߊ ߞߊ߬ ߛߊ߲߬",
+    rentalDesc: "ߓߍ߯ ߙߊ ߞߍ߫ ߟߊ ߞߊ߬ ߛߊ߲߬ ߌ ߟߊ ߛߊ߲ ߞߊ߲߬ ߘߐ߫ ߓߊ߫, ߞߊ߲߬ ߠߊ ߘߐ߫ ߣߌ߬ ߣߊ߬ ߞߏ ߦߊ߫ ߡߊ߬. ߞߊ߬ ߛߊ߲߬ ߢߍ߫ ߕߊ ߘߐ߫, ߞߊ߬ߙߊ߲߬ߘߐ ߟߎ߫ ߛߊ߲ ߠߊ߫.",
+    rentNow: "ߞߊ߬ ߛߊ߲߬ ߢߍ߫",
   },
 
   // ߞߊ߬ ߙߊ߲ ߘߊ — Academy Section

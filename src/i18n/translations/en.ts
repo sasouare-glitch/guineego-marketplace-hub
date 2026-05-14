@@ -164,6 +164,9 @@ export const en: TranslationKeys = {
     buyerProtection: "Buyer protection",
     buyerProtectionDesc: "Your purchases are protected. Refund guaranteed if the product doesn't match the description.",
     ourGuarantee: "Our guarantee",
+    rental: "Equipment rental",
+    rentalDesc: "Rent equipment for your events, construction sites or occasional needs. Simple booking, transparent prices.",
+    rentNow: "Rent now",
   },
 
   // Academy Section

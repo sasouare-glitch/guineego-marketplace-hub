@@ -6,6 +6,7 @@ import {
   GraduationCap, 
   CreditCard, 
   Shield,
+  CalendarDays,
   ArrowRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -68,6 +69,15 @@ export function FeaturesSection() {
       ctaKey: "ourGuarantee" as const,
       gradient: "from-emerald-500/10 to-emerald-500/5",
       iconBg: "bg-emerald-500",
+    },
+    {
+      icon: CalendarDays,
+      titleKey: "rental" as const,
+      descKey: "rentalDesc" as const,
+      href: "/rental",
+      ctaKey: "rentNow" as const,
+      gradient: "from-violet-500/10 to-violet-500/5",
+      iconBg: "bg-violet-500",
     },
   ];
 

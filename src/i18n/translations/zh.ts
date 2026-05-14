@@ -162,6 +162,9 @@ export const zh = {
     buyerProtection: "买家保护",
     buyerProtectionDesc: "您的购买受到保护。如商品与描述不符，保证退款。",
     ourGuarantee: "我们的保障",
+    rental: "设备租赁",
+    rentalDesc: "为您的活动、建筑工地或临时需求租赁设备。简单预订，价格透明。",
+    rentNow: "立即租赁",
   },
 
   // Academy Section
