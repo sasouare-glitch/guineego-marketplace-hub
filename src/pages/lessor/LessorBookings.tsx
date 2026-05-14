@@ -247,7 +247,7 @@ export default function LessorBookings() {
   );
 
   const handleReturn = async (decision: DepositReturnDecision) => {
-    if (!selected) return;
+    if (!selected || !user?.uid) return;
     setSubmitting(true);
     try {
       const ref = doc(db, "rental_bookings", selected.id);
@@ -256,7 +256,12 @@ export default function LessorBookings() {
         depositReleasedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
+
+      let withheld = 0;
+      let released = 0;
+
       if (decision.kind === "released") {
+        released = selected.deposit;
         Object.assign(base, {
           depositStatus: "released" as DepositStatus,
           depositAmountReleased: selected.deposit,
@@ -264,15 +269,31 @@ export default function LessorBookings() {
           depositWithheldReason: null,
         });
       } else {
-        const withheld = Math.min(selected.deposit, Math.max(0, decision.amountWithheld));
-        const released = Math.max(0, selected.deposit - withheld);
+        withheld = Math.min(selected.deposit, Math.max(0, decision.amountWithheld));
+        released = Math.max(0, selected.deposit - withheld);
         Object.assign(base, {
-          depositStatus: decision.kind as DepositStatus, // partial | withheld
+          depositStatus: decision.kind as DepositStatus,
           depositAmountWithheld: withheld,
           depositAmountReleased: released,
           depositWithheldReason: decision.reason,
         });
       }
+
+      // Build audit entry
+      const auditEntry: DepositReturnAudit = {
+        processedBy: user.uid,
+        processedByName: user.displayName || user.email || undefined,
+        processedAt: serverTimestamp() as any,
+        decision: decision.kind as "released" | "partial" | "withheld",
+        depositTotal: selected.deposit,
+        amountReleased: released,
+        amountWithheld: withheld,
+        reason: decision.kind === "released" ? undefined : decision.reason,
+      };
+      Object.assign(base, {
+        depositReturnAudits: arrayUnion(auditEntry),
+      });
+
       await updateDoc(ref, base);
 
       // Notify renter about the deposit decision
