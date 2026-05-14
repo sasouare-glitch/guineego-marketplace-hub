@@ -15,7 +15,8 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ImagePlus, X, Loader2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { RENTAL_CATEGORIES } from "@/constants/rentalCategories";
-import type { RentalCategoryId } from "@/types/rental";
+import { DEFAULT_AVAILABILITY, type RentalAvailability, type RentalCategoryId, type RentalItemStatus } from "@/types/rental";
+import { AvailabilityEditor } from "@/components/rental/AvailabilityEditor";
 
 const MAX_IMAGES = 5;
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB raw
