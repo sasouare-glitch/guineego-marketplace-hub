@@ -13,7 +13,52 @@ export type RentalCategoryId =
   | "camping"
   | "other";
 
-export type RentalItemStatus = "active" | "inactive" | "rented";
+export type RentalItemStatus = "active" | "inactive" | "rented" | "maintenance";
+
+export type WeekDay = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+
+export const WEEK_DAYS: { id: WeekDay; label: string }[] = [
+  { id: "mon", label: "Lundi" },
+  { id: "tue", label: "Mardi" },
+  { id: "wed", label: "Mercredi" },
+  { id: "thu", label: "Jeudi" },
+  { id: "fri", label: "Vendredi" },
+  { id: "sat", label: "Samedi" },
+  { id: "sun", label: "Dimanche" },
+];
+
+/**
+ * Plage horaire d'un jour donné (heures locales 0-24).
+ * `closed: true` = jour fermé, indépendamment des heures.
+ */
+export interface DayAvailability {
+  closed?: boolean;
+  startHour: number; // 0-23
+  endHour: number;   // 1-24, exclusif
+}
+
+export interface RentalAvailability {
+  /** Disponibilité hebdomadaire récurrente */
+  weekly: Record<WeekDay, DayAvailability>;
+  /** Dates spécifiques bloquées (format YYYY-MM-DD) */
+  blockedDates: string[];
+  /** Préavis minimum en heures avant la location */
+  noticeHours?: number;
+}
+
+export const DEFAULT_AVAILABILITY: RentalAvailability = {
+  weekly: {
+    mon: { startHour: 8, endHour: 18 },
+    tue: { startHour: 8, endHour: 18 },
+    wed: { startHour: 8, endHour: 18 },
+    thu: { startHour: 8, endHour: 18 },
+    fri: { startHour: 8, endHour: 18 },
+    sat: { startHour: 9, endHour: 16 },
+    sun: { closed: true, startHour: 0, endHour: 0 },
+  },
+  blockedDates: [],
+  noticeHours: 12,
+};
 
 export interface RentalLocation {
   commune: string;
@@ -39,6 +84,7 @@ export interface RentalItem {
   specs?: Record<string, string>;
   rules?: string;
   status: RentalItemStatus;
+  availability?: RentalAvailability;
   avgRating: number;
   totalRentals: number;
   createdAt: Date | { seconds: number };

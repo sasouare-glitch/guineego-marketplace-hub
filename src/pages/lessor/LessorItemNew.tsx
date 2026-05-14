@@ -15,7 +15,8 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ImagePlus, X, Loader2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { RENTAL_CATEGORIES } from "@/constants/rentalCategories";
-import type { RentalCategoryId } from "@/types/rental";
+import { DEFAULT_AVAILABILITY, type RentalAvailability, type RentalCategoryId, type RentalItemStatus } from "@/types/rental";
+import { AvailabilityEditor } from "@/components/rental/AvailabilityEditor";
 
 const MAX_IMAGES = 5;
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB raw
@@ -35,6 +36,8 @@ export default function LessorItemNew() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [availability, setAvailability] = useState<RentalAvailability>(DEFAULT_AVAILABILITY);
+  const [status, setStatus] = useState<RentalItemStatus>("active");
 
   const [form, setForm] = useState({
     title: "",
@@ -154,7 +157,8 @@ export default function LessorItemNew() {
           ...(form.address ? { address: form.address.trim() } : {}),
         },
         ...(form.rules ? { rules: form.rules.trim() } : {}),
-        status: "active",
+        status,
+        availability,
         avgRating: 0,
         totalRentals: 0,
         createdAt: serverTimestamp(),
@@ -340,6 +344,23 @@ export default function LessorItemNew() {
                   placeholder="Permis requis, kilométrage limité, interdiction de fumer…"
                   rows={3}
                 />
+              </div>
+
+              <AvailabilityEditor value={availability} onChange={setAvailability} />
+
+              <div className="space-y-2">
+                <Label htmlFor="status">Statut de l'équipement</Label>
+                <select
+                  id="status"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as RentalItemStatus)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="active">Actif — visible et louable</option>
+                  <option value="inactive">Inactif — masqué du catalogue</option>
+                  <option value="rented">Loué — déjà en cours de location</option>
+                  <option value="maintenance">Maintenance — temporairement indisponible</option>
+                </select>
               </div>
 
               <div className="space-y-2">
