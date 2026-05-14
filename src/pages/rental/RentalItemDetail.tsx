@@ -228,15 +228,44 @@ export default function RentalItemDetail() {
                 <p className="text-foreground/80 whitespace-pre-line">{item.description}</p>
 
                 {unavailable && alternatives.length > 0 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => updateDate(alternatives[0])}
-                  >
-                    <CalendarCheck className="w-4 h-4 mr-2" />
-                    Passer au {format(alternatives[0], "EEE d MMM", { locale: fr })}
-                  </Button>
+                  <div className="space-y-3 rounded-xl border border-border bg-card p-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => updateDate(alternatives[0])}
+                    >
+                      <CalendarCheck className="w-4 h-4 mr-2" />
+                      Passer au {format(alternatives[0], "EEE d MMM", { locale: fr })}
+                    </Button>
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2">
+                        Ou choisissez une autre date disponible :
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {alternatives.map((alt) => {
+                          const key = format(alt, "yyyy-MM-dd");
+                          const selectedKey = date ? format(date, "yyyy-MM-dd") : "";
+                          const isSelected = key === selectedKey;
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              onClick={() => updateDate(alt)}
+                              className={cn(
+                                "text-xs px-2.5 py-1.5 rounded-md border transition-colors",
+                                isSelected
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "bg-background hover:bg-accent text-foreground border-border"
+                              )}
+                            >
+                              {format(alt, "EEE d MMM", { locale: fr })}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
                 )}
 
                 <Button size="lg" className="w-full" disabled={unavailable}>
