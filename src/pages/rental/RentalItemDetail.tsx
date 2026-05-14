@@ -29,7 +29,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAvailabilityReason, findNextAvailableDates } from "@/lib/rental/availability";
-import { computeRentalQuote, DEFAULT_DELIVERY_FEE, type RentalMode } from "@/lib/rental/pricing";
+import {
+  computeRentalQuote,
+  DEFAULT_DELIVERY_FEE,
+  getMinEndDate,
+  normalizeMinDays,
+  type RentalMode,
+} from "@/lib/rental/pricing";
 import type { RentalItem } from "@/types/rental";
 
 const formatGNF = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " GNF";
