@@ -108,7 +108,7 @@ export function PartnersSection() {
         </motion.div>
 
         {/* Partner Cards */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
           {partnerTypes.map((partner, index) => (
             <motion.div
               key={partner.type}
@@ -146,7 +146,7 @@ export function PartnersSection() {
               </ul>
 
               <Button 
-                variant={index === 0 ? "default" : "accent"} 
+                variant={index === 0 ? "default" : index === 1 ? "accent" : "guinea"} 
                 size="lg" 
                 asChild
               >
