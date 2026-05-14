@@ -34,3 +34,24 @@ export function getAvailabilityReason(item: RentalItem, date: Date): string | nu
 
   return null;
 }
+
+/**
+ * Cherche les prochaines dates disponibles à partir de `from`.
+ * Scanne jusqu'à `lookaheadDays` jours et renvoie au plus `limit` dates.
+ */
+export function findNextAvailableDates(
+  item: RentalItem,
+  from: Date,
+  limit = 3,
+  lookaheadDays = 60
+): Date[] {
+  const results: Date[] = [];
+  const start = new Date(from);
+  start.setHours(0, 0, 0, 0);
+  for (let i = 1; i <= lookaheadDays && results.length < limit; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    if (isItemAvailableOn(item, d)) results.push(d);
+  }
+  return results;
+}
