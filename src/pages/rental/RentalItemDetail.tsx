@@ -36,8 +36,13 @@ const formatGNF = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " GN
 
 export default function RentalItemDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [params, setParams] = useSearchParams();
   const dateParam = params.get("date");
+
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const [item, setItem] = useState<RentalItem | null>(null);
   const [loading, setLoading] = useState(true);
