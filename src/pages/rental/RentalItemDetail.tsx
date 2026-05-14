@@ -20,9 +20,13 @@ import {
   Ban,
   X,
   CalendarCheck,
+  Truck,
+  Store,
+  Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAvailabilityReason, findNextAvailableDates } from "@/lib/rental/availability";
+import { computeRentalQuote, DEFAULT_DELIVERY_FEE, type RentalMode } from "@/lib/rental/pricing";
 import type { RentalItem } from "@/types/rental";
 
 const formatGNF = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " GNF";
@@ -38,6 +42,9 @@ export default function RentalItemDetail() {
     dateParam ? new Date(dateParam) : undefined
   );
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [endPickerOpen, setEndPickerOpen] = useState(false);
+  const [mode, setMode] = useState<RentalMode>("pickup");
   const [altPage, setAltPage] = useState(1);
 
   useEffect(() => {
@@ -102,6 +109,26 @@ export default function RentalItemDetail() {
   useEffect(() => {
     setAltPage(1);
   }, [date, item?.id]);
+
+  // Reset endDate when start changes / becomes invalid
+  useEffect(() => {
+    if (!date) setEndDate(undefined);
+    else if (endDate && endDate < date) setEndDate(undefined);
+  }, [date]);
+
+  const quote = useMemo(
+    () =>
+      computeRentalQuote({
+        startDate: date ?? null,
+        endDate: endDate ?? null,
+        pricePerDay: item?.pricePerDay ?? 0,
+        deposit: item?.deposit ?? 0,
+        minDays: item?.minDays ?? 1,
+        mode,
+        deliveryFee: DEFAULT_DELIVERY_FEE,
+      }),
+    [date, endDate, item?.pricePerDay, item?.deposit, item?.minDays, mode]
+  );
 
   return (
     <>
@@ -313,6 +340,133 @@ export default function RentalItemDetail() {
                             </Button>
                           )}
                         </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Récapitulatif tarifaire */}
+                {date && !unavailable && (
+                  <div className="rounded-xl border border-border bg-card p-4 space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Receipt className="w-4 h-4 text-primary" />
+                      <p className="text-sm font-semibold">Récapitulatif tarifaire</p>
+                    </div>
+
+                    {/* Date de fin */}
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-muted-foreground">
+                        Date de fin (optionnelle)
+                      </p>
+                      <Popover open={endPickerOpen} onOpenChange={setEndPickerOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-start"
+                          >
+                            <CalendarIcon className="w-4 h-4 mr-2" />
+                            {endDate
+                              ? format(endDate, "EEE d MMM yyyy", { locale: fr })
+                              : `Même jour (${item.minDays ?? 1} jour${(item.minDays ?? 1) > 1 ? "s" : ""} min.)`}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={endDate}
+                            onSelect={(d) => {
+                              setEndDate(d);
+                              setEndPickerOpen(false);
+                            }}
+                            disabled={(d) => !date || d < date}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    {/* Mode : retrait ou livraison */}
+                    <div className="space-y-1.5">
+                      <p className="text-xs text-muted-foreground">Récupération</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setMode("pickup")}
+                          className={cn(
+                            "rounded-lg border p-2.5 text-left transition-colors",
+                            mode === "pickup"
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:bg-accent"
+                          )}
+                        >
+                          <div className="flex items-center gap-1.5 text-sm font-medium">
+                            <Store className="w-4 h-4" /> Retrait
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            Gratuit · sur place
+                          </p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMode("delivery")}
+                          className={cn(
+                            "rounded-lg border p-2.5 text-left transition-colors",
+                            mode === "delivery"
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:bg-accent"
+                          )}
+                        >
+                          <div className="flex items-center gap-1.5 text-sm font-medium">
+                            <Truck className="w-4 h-4" /> Livraison
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {formatGNF(DEFAULT_DELIVERY_FEE)}
+                          </p>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Détail du calcul */}
+                    <div className="space-y-1.5 text-sm border-t pt-3">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">
+                          {formatGNF(item.pricePerDay)} × {quote.days} jour
+                          {quote.days > 1 ? "s" : ""}
+                        </span>
+                        <span className="font-medium">{formatGNF(quote.subtotal)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          {mode === "delivery" ? (
+                            <><Truck className="w-3.5 h-3.5" /> Livraison</>
+                          ) : (
+                            <><Store className="w-3.5 h-3.5" /> Retrait</>
+                          )}
+                        </span>
+                        <span className="font-medium">
+                          {quote.deliveryFee > 0 ? formatGNF(quote.deliveryFee) : "Gratuit"}
+                        </span>
+                      </div>
+                      {quote.deposit > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Shield className="w-3.5 h-3.5" /> Caution (remboursable)
+                          </span>
+                          <span className="font-medium">{formatGNF(quote.deposit)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between border-t pt-2 mt-1">
+                        <span className="font-semibold">Total à régler</span>
+                        <span className="font-bold text-primary text-lg">
+                          {formatGNF(quote.totalPayable)}
+                        </span>
+                      </div>
+                      {quote.deposit > 0 && (
+                        <p className="text-[11px] text-muted-foreground text-right">
+                          Dont {formatGNF(quote.deposit)} restitués au retour
+                        </p>
                       )}
                     </div>
                   </div>
