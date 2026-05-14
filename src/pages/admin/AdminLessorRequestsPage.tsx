@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
 
 interface UploadedDoc { url: string; path: string }
 interface ReviewEntry {
-  action: "approved" | "rejected" | "info_requested";
+  action: "approved" | "rejected" | "info_requested" | "revoked";
   by: string;
   byName: string | null;
   at: any;
@@ -42,7 +42,7 @@ interface LessorRequest {
   userId: string;
   userEmail: string;
   userName: string | null;
-  status: "pending" | "approved" | "rejected" | "info_requested";
+  status: "pending" | "approved" | "rejected" | "info_requested" | "revoked";
   motivation?: string | null;
   applicationData?: {
     fullName: string;
@@ -82,7 +82,7 @@ export default function AdminLessorRequestsPage() {
   const [requests, setRequests] = useState<LessorRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<LessorRequest | null>(null);
-  const [action, setAction] = useState<"approve" | "reject" | null>(null);
+  const [action, setAction] = useState<"approve" | "reject" | "revoke" | null>(null);
   const [comment, setComment] = useState("");
   const [processing, setProcessing] = useState(false);
 
@@ -109,7 +109,7 @@ export default function AdminLessorRequestsPage() {
   const approvedCount = requests.filter((r) => r.status === "approved").length;
   const rejectedCount = requests.filter((r) => r.status === "rejected").length;
 
-  const openAction = (req: LessorRequest, a: "approve" | "reject") => {
+  const openAction = (req: LessorRequest, a: "approve" | "reject" | "revoke") => {
     setSelected(req);
     setAction(a);
     setComment("");
@@ -117,23 +117,32 @@ export default function AdminLessorRequestsPage() {
 
   const handleSubmit = async () => {
     if (!selected || !action || !user) return;
-    if (action === "reject" && comment.trim().length < 5) {
-      toast.error("Merci de préciser le motif du refus.");
+    if ((action === "reject" || action === "revoke") && comment.trim().length < 5) {
+      toast.error(action === "revoke"
+        ? "Merci de préciser le motif de la révocation."
+        : "Merci de préciser le motif du refus.");
       return;
     }
     setProcessing(true);
     try {
+      const actionMap = { approve: "approved", reject: "rejected", revoke: "revoked" } as const;
       const reviewer: ReviewEntry = {
-        action: action === "approve" ? "approved" : "rejected",
+        action: actionMap[action],
         by: user.uid,
         byName: profile?.displayName || user.email || "Admin",
         at: new Date(),
-        comment: comment.trim() || (action === "approve" ? "Demande approuvée" : "Demande refusée"),
+        comment:
+          comment.trim() ||
+          (action === "approve"
+            ? "Demande approuvée"
+            : action === "revoke"
+            ? "Rôle loueur révoqué"
+            : "Demande refusée"),
       };
 
       // Update request
       await updateDoc(doc(db, "role_requests", selected.id), {
-        status: action === "approve" ? "approved" : "rejected",
+        status: actionMap[action],
         adminNote: comment.trim() || null,
         reviewedBy: user.uid,
         reviewedByName: reviewer.byName,
@@ -173,25 +182,61 @@ export default function AdminLessorRequestsPage() {
         }
       }
 
+      // Revoke → remove lessor role + désactiver le profil loueur
+      if (action === "revoke") {
+        const userRef = doc(db, "users", selected.userId);
+        const userSnap = await getDoc(userRef);
+        const data = userSnap.data() || {};
+        const existing: string[] = data.roles || [data.role || "customer"];
+        const next = existing.filter((r) => r !== "lessor");
+        await updateDoc(userRef, {
+          roles: next.length > 0 ? next : ["customer"],
+          updatedAt: serverTimestamp(),
+        });
+        const lessorRef = doc(db, "lessors", selected.userId);
+        const lessorSnap = await getDoc(lessorRef);
+        if (lessorSnap.exists()) {
+          await updateDoc(lessorRef, {
+            status: "revoked",
+            revokedAt: serverTimestamp(),
+            revokedBy: user.uid,
+            revokedReason: comment.trim() || null,
+            updatedAt: serverTimestamp(),
+          });
+        }
+      }
+
       // Notify the user
+      const titleMap: Record<string, string> = {
+        approve: "Demande Loueur approuvée ✅",
+        reject: "Demande Loueur refusée",
+        revoke: "Accès Loueur révoqué ⚠️",
+      };
+      const bodyMap: Record<string, string> = {
+        approve: "Bienvenue ! Vous pouvez à présent publier des équipements à louer.",
+        reject: comment.trim() || "Votre demande n'a pas été acceptée.",
+        revoke: comment.trim() || "Votre rôle loueur a été désactivé par l'administration.",
+      };
       await setDoc(
         doc(db, "notifications", `${selected.userId}_lessor_${Date.now()}`),
         {
           userId: selected.userId,
           type: "role_request",
-          title: action === "approve"
-            ? "Demande Loueur approuvée ✅"
-            : "Demande Loueur refusée",
-          body: action === "approve"
-            ? "Bienvenue ! Vous pouvez à présent publier des équipements à louer."
-            : (comment.trim() || "Votre demande n'a pas été acceptée."),
-          data: { requestId: selected.id, role: "lessor" },
+          title: titleMap[action],
+          body: bodyMap[action],
+          data: { requestId: selected.id, role: "lessor", action: actionMap[action] },
           read: false,
           createdAt: serverTimestamp(),
         },
       );
 
-      toast.success(action === "approve" ? "Loueur approuvé" : "Demande refusée");
+      toast.success(
+        action === "approve"
+          ? "Loueur approuvé"
+          : action === "revoke"
+          ? "Rôle loueur révoqué"
+          : "Demande refusée",
+      );
       setAction(null);
       setSelected(null);
       setComment("");
@@ -240,6 +285,11 @@ export default function AdminLessorRequestsPage() {
                   {req.status === "rejected" && (
                     <Badge variant="destructive" className="gap-1">
                       <X className="w-3 h-3" /> Refusé
+                    </Badge>
+                  )}
+                  {req.status === "revoked" && (
+                    <Badge variant="destructive" className="gap-1 bg-orange-500/10 text-orange-600 border-orange-300">
+                      <X className="w-3 h-3" /> Révoqué
                     </Badge>
                   )}
                 </div>
@@ -316,8 +366,15 @@ export default function AdminLessorRequestsPage() {
                         "font-medium",
                         h.action === "approved" && "text-emerald-600",
                         h.action === "rejected" && "text-destructive",
+                        h.action === "revoked" && "text-orange-600",
                       )}>
-                        {h.action === "approved" ? "Approuvé" : h.action === "rejected" ? "Refusé" : "Info demandée"}
+                        {h.action === "approved"
+                          ? "Approuvé"
+                          : h.action === "rejected"
+                          ? "Refusé"
+                          : h.action === "revoked"
+                          ? "Révoqué"
+                          : "Info demandée"}
                       </span>{" "}
                       par <strong>{h.byName || h.by}</strong> — {fmtDate(h.at)}
                       {h.comment && <p className="text-muted-foreground mt-0.5">« {h.comment} »</p>}
@@ -346,6 +403,16 @@ export default function AdminLessorRequestsPage() {
                       <Check className="w-3.5 h-3.5 mr-1" /> Approuver
                     </Button>
                   </div>
+                )}
+                {req.status === "approved" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                    onClick={() => openAction(req, "revoke")}
+                  >
+                    <X className="w-3.5 h-3.5 mr-1" /> Révoquer
+                  </Button>
                 )}
               </div>
             </div>
@@ -441,7 +508,11 @@ export default function AdminLessorRequestsPage() {
             <>
               <DialogHeader>
                 <DialogTitle>
-                  {action === "approve" ? "Approuver la demande Loueur" : "Refuser la demande Loueur"}
+                  {action === "approve"
+                    ? "Approuver la demande Loueur"
+                    : action === "revoke"
+                    ? "Révoquer le rôle Loueur"
+                    : "Refuser la demande Loueur"}
                 </DialogTitle>
                 <DialogDescription>
                   {selected.applicationData?.fullName || selected.userName || selected.userEmail}
@@ -449,15 +520,23 @@ export default function AdminLessorRequestsPage() {
               </DialogHeader>
               <div className="space-y-2">
                 <label className="text-sm font-medium">
-                  {action === "approve" ? "Commentaire (optionnel)" : "Motif du refus *"}
+                  {action === "approve"
+                    ? "Commentaire (optionnel)"
+                    : action === "revoke"
+                    ? "Motif de la révocation *"
+                    : "Motif du refus *"}
                 </label>
                 <Textarea
                   rows={4}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder={action === "approve"
-                    ? "Bienvenue ! Documents conformes."
-                    : "Document illisible / informations incomplètes…"}
+                  placeholder={
+                    action === "approve"
+                      ? "Bienvenue ! Documents conformes."
+                      : action === "revoke"
+                      ? "Non-respect des conditions / fraude détectée…"
+                      : "Document illisible / informations incomplètes…"
+                  }
                 />
                 <p className="text-xs text-muted-foreground">
                   Ce commentaire sera enregistré dans l'historique et envoyé à l'utilisateur.
@@ -473,7 +552,11 @@ export default function AdminLessorRequestsPage() {
                   disabled={processing}
                 >
                   {processing && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
-                  {action === "approve" ? "Confirmer l'approbation" : "Confirmer le refus"}
+                  {action === "approve"
+                    ? "Confirmer l'approbation"
+                    : action === "revoke"
+                    ? "Confirmer la révocation"
+                    : "Confirmer le refus"}
                 </Button>
               </DialogFooter>
             </>
