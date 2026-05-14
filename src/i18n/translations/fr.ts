@@ -109,6 +109,7 @@ export const fr = {
     description: "Makiity réunit vendeurs, acheteurs, livreurs et investisseurs sur une seule plateforme. Transit Vers Guinee, formation e-commerce, paiement mobile sécurisé.",
     exploreStore: "Explorer la boutique",
     becomeSeller: "Devenir vendeur",
+    rentEquipment: "Louer un équipement",
     products: "Produits",
     sellers: "Vendeurs",
     customers: "Clients",
