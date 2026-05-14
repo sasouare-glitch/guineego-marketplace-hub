@@ -196,55 +196,76 @@ export default function RentalMarketplace() {
           ) : visible.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <CalendarDays className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <p className="mb-2">
-                {date
-                  ? "Aucun équipement disponible à cette date."
-                  : "Aucun équipement en location pour le moment."}
-              </p>
+              <p className="mb-2">Aucun équipement en location pour le moment.</p>
               <p className="text-sm">
-                {date ? (
-                  <button onClick={() => setDateFilter(undefined)} className="text-primary underline">
-                    Voir tous les équipements
-                  </button>
-                ) : (
-                  <>
-                    Soyez le premier !{" "}
-                    <Link to="/lessor/items/new" className="text-primary underline">
-                      Ajouter un équipement
-                    </Link>
-                  </>
-                )}
+                Soyez le premier !{" "}
+                <Link to="/lessor/items/new" className="text-primary underline">
+                  Ajouter un équipement
+                </Link>
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {filtered.map((item) => (
-                <Link key={item.id} to={`/rental/item/${item.id}`}>
-                  <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="aspect-square bg-muted overflow-hidden">
-                      <img
-                        src={item.thumbnail || item.images?.[0] || "/placeholder.svg"}
-                        alt={item.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-3 space-y-1">
-                      <h3 className="font-medium text-sm line-clamp-1">{item.title}</h3>
-                      <p className="text-primary font-semibold text-sm">
-                        {formatGNF(item.pricePerDay)}
-                        <span className="text-xs text-muted-foreground">/jour</span>
-                      </p>
-                      {item.location?.commune && (
-                        <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <MapPin className="w-3 h-3" /> {item.location.commune}
-                        </p>
-                      )}
-                    </div>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+            <TooltipProvider delayDuration={150}>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {visible.map((item) => {
+                  const reason = date ? getAvailabilityReason(item, date) : null;
+                  const unavailable = !!reason;
+                  return (
+                    <Tooltip key={item.id}>
+                      <TooltipTrigger asChild>
+                        <Link to={`/rental/item/${item.id}`} className="block">
+                          <Card
+                            className={cn(
+                              "overflow-hidden hover:shadow-lg transition-shadow relative",
+                              unavailable && "opacity-60"
+                            )}
+                          >
+                            <div className="absolute top-2 left-2 z-10">
+                              {unavailable ? (
+                                <Badge variant="destructive" className="gap-1 shadow-sm">
+                                  <Ban className="w-3 h-3" /> Indisponible
+                                </Badge>
+                              ) : date ? (
+                                <Badge className="gap-1 bg-emerald-600 hover:bg-emerald-600 text-white shadow-sm">
+                                  <CheckCircle2 className="w-3 h-3" /> Disponible
+                                </Badge>
+                              ) : null}
+                            </div>
+                            <div className="aspect-square bg-muted overflow-hidden">
+                              <img
+                                src={item.thumbnail || item.images?.[0] || "/placeholder.svg"}
+                                alt={item.title}
+                                loading="lazy"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="p-3 space-y-1">
+                              <h3 className="font-medium text-sm line-clamp-1">{item.title}</h3>
+                              <p className="text-primary font-semibold text-sm">
+                                {formatGNF(item.pricePerDay)}
+                                <span className="text-xs text-muted-foreground">/jour</span>
+                              </p>
+                              {item.location?.commune && (
+                                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" /> {item.location.commune}
+                                </p>
+                              )}
+                            </div>
+                          </Card>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        {date
+                          ? unavailable
+                            ? `Indisponible le ${format(date, "d MMM", { locale: fr })} — ${reason}`
+                            : `Disponible le ${format(date, "d MMM yyyy", { locale: fr })}`
+                          : "Sélectionnez une date pour vérifier la disponibilité"}
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })}
+              </div>
+            </TooltipProvider>
           )}
         </section>
       </main>
