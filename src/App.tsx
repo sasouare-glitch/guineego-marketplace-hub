@@ -102,6 +102,12 @@ import AdminCommissionsPage from "./pages/admin/AdminCommissionsPage";
 import AdminPaymentsPage from "./pages/admin/AdminPaymentsPage";
 import AdminStripeDashboardPage from "./pages/admin/AdminStripeDashboardPage";
 import AdminWithdrawalsPage from "./pages/admin/AdminWithdrawalsPage";
+// Rental Module (lazy-friendly imports kept eager for now)
+import RentalMarketplace from "./pages/rental/RentalMarketplace";
+import RentalItemDetail from "./pages/rental/RentalItemDetail";
+import LessorDashboard from "./pages/lessor/LessorDashboard";
+import LessorItems from "./pages/lessor/LessorItems";
+import LessorItemNew from "./pages/lessor/LessorItemNew";
 // Mobile Components
 import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
 import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";
@@ -148,6 +154,27 @@ const App = () => (
                     <Route path="/protection" element={<ProtectionPage />} />
                     <Route path="/track" element={<TrackOrderPage />} />
                     <Route path="/track/:id" element={<PublicOrderTrackingPage />} />
+
+                    {/* Rental (Location) — public browse */}
+                    <Route path="/rental" element={<RentalMarketplace />} />
+                    <Route path="/rental/item/:id" element={<RentalItemDetail />} />
+
+                    {/* Lessor (Loueur) — protégé */}
+                    <Route path="/lessor" element={
+                      <ProtectedRoute requiredRoles={['lessor', 'admin']}>
+                        <LessorDashboard />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/lessor/items" element={
+                      <ProtectedRoute requiredRoles={['lessor', 'admin']}>
+                        <LessorItems />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/lessor/items/new" element={
+                      <ProtectedRoute requiredRoles={['lessor', 'admin']}>
+                        <LessorItemNew />
+                      </ProtectedRoute>
+                    } />
                     
                     {/* Protected Client Routes */}
                     <Route path="/cart" element={<CartPage />} />

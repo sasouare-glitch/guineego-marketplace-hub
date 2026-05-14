@@ -88,6 +88,16 @@ export function Header() {
         { name: t.header.finances, href: "/seller/finances" },
       ]
     },
+    {
+      name: "Louer",
+      href: "/rental",
+      icon: Package,
+      submenu: [
+        { name: "Voitures & équipements", href: "/rental" },
+        { name: "Mettre en location", href: "/lessor/items/new" },
+        { name: "Espace loueur", href: "/lessor" },
+      ]
+    },
     { 
       name: t.nav.delivery, 
       href: "/courier/dashboard",

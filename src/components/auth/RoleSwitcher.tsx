@@ -15,7 +15,8 @@ import {
   ShoppingBag, 
   Shield, 
   ArrowLeftRight,
-  Check
+  Check,
+  KeyRound
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +26,7 @@ const ROLE_CONFIG: Record<UserRole, { label: string; icon: React.ElementType; co
   courier: { label: 'Livreur', icon: Truck, color: 'text-orange-500', path: '/courier/dashboard' },
   closer: { label: 'Closer', icon: TrendingUp, color: 'text-purple-500', path: '/seller/dashboard' },
   investor: { label: 'Investisseur', icon: TrendingUp, color: 'text-amber-500', path: '/investor/dashboard' },
+  lessor: { label: 'Loueur', icon: KeyRound, color: 'text-indigo-500', path: '/lessor' },
   super_user: { label: 'Super User', icon: Shield, color: 'text-cyan-500', path: '/admin/dashboard' },
   admin: { label: 'Admin', icon: Shield, color: 'text-destructive', path: '/admin/dashboard' },
 };
