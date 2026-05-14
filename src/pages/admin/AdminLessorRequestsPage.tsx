@@ -31,7 +31,7 @@ import { cn } from "@/lib/utils";
 
 interface UploadedDoc { url: string; path: string }
 interface ReviewEntry {
-  action: "approved" | "rejected" | "info_requested";
+  action: "approved" | "rejected" | "info_requested" | "revoked";
   by: string;
   byName: string | null;
   at: any;
@@ -42,7 +42,7 @@ interface LessorRequest {
   userId: string;
   userEmail: string;
   userName: string | null;
-  status: "pending" | "approved" | "rejected" | "info_requested";
+  status: "pending" | "approved" | "rejected" | "info_requested" | "revoked";
   motivation?: string | null;
   applicationData?: {
     fullName: string;
