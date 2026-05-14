@@ -29,7 +29,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAvailabilityReason, findNextAvailableDates } from "@/lib/rental/availability";
-import { computeRentalQuote, DEFAULT_DELIVERY_FEE, type RentalMode } from "@/lib/rental/pricing";
+import {
+  computeRentalQuote,
+  DEFAULT_DELIVERY_FEE,
+  getMinEndDate,
+  normalizeMinDays,
+  type RentalMode,
+} from "@/lib/rental/pricing";
 import type { RentalItem } from "@/types/rental";
 
 const formatGNF = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " GNF";
@@ -363,10 +369,8 @@ export default function RentalItemDetail() {
 
                     {/* Date de fin */}
                     {(() => {
-                      const minDays = Math.max(1, item.minDays ?? 1);
-                      const minEnd = date
-                        ? new Date(date.getTime() + (minDays - 1) * 86400000)
-                        : null;
+                      const minDays = normalizeMinDays(item.minDays);
+                      const minEnd = date ? getMinEndDate(date, minDays) : null;
                       const endInvalid =
                         !!date && !!endDate && endDate < (minEnd ?? date);
                       return (
