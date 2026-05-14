@@ -54,6 +54,12 @@ export function CTASection() {
                   {t.cta.openShop}
                 </Link>
               </Button>
+              <Button variant="heroOutline" size="xl" asChild>
+                <Link to="/lessor/items/new">
+                  <CalendarDays className="w-5 h-5" />
+                  {t.cta.becomeLessor}
+                </Link>
+              </Button>
             </div>
 
             {/* QR Code du site */}
