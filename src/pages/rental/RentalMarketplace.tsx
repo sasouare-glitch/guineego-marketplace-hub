@@ -12,9 +12,10 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RENTAL_CATEGORIES } from "@/constants/rentalCategories";
 import { useRentalItems } from "@/hooks/useRentalItems";
-import { isItemAvailableOn } from "@/lib/rental/availability";
+import { getAvailabilityReason } from "@/lib/rental/availability";
 import type { RentalCategoryId } from "@/types/rental";
 
 const formatGNF = (n: number) =>
