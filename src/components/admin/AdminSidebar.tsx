@@ -81,6 +81,13 @@ const managementItems = [
     description: "Approbation des rôles"
   },
   { 
+    title: "Demandes Loueur", 
+    url: "/admin/lessor-requests", 
+    icon: CalendarDays,
+    badge: null,
+    description: "Validation des dossiers loueur"
+  },
+  { 
     title: "Commandes", 
     url: "/admin/orders", 
     icon: ShoppingCart,
