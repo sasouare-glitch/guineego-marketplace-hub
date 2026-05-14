@@ -36,10 +36,15 @@ export default function RentalMarketplace() {
     ...(categoryParam ? { category: categoryParam } : {}),
   });
 
-  const filtered = useMemo(() => {
-    if (!date) return items.filter((i) => i.status === "active");
-    return items.filter((i) => isItemAvailableOn(i, date));
-  }, [items, date]);
+  const visible = useMemo(
+    () => items.filter((i) => i.status !== "inactive"),
+    [items]
+  );
+
+  const availableCount = useMemo(() => {
+    if (!date) return visible.length;
+    return visible.filter((i) => getAvailabilityReason(i, date) === null).length;
+  }, [visible, date]);
 
   const setDateFilter = (d: Date | undefined) => {
     setDate(d);
