@@ -20,9 +20,13 @@ import {
   Ban,
   X,
   CalendarCheck,
+  Truck,
+  Store,
+  Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAvailabilityReason, findNextAvailableDates } from "@/lib/rental/availability";
+import { computeRentalQuote, DEFAULT_DELIVERY_FEE, type RentalMode } from "@/lib/rental/pricing";
 import type { RentalItem } from "@/types/rental";
 
 const formatGNF = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " GNF";
@@ -38,6 +42,9 @@ export default function RentalItemDetail() {
     dateParam ? new Date(dateParam) : undefined
   );
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [endPickerOpen, setEndPickerOpen] = useState(false);
+  const [mode, setMode] = useState<RentalMode>("pickup");
   const [altPage, setAltPage] = useState(1);
 
   useEffect(() => {
