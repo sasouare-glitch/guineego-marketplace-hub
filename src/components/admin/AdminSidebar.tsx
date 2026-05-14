@@ -24,6 +24,7 @@ import {
   MessageSquare,
   Percent,
   CreditCard,
+  CalendarDays,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -78,6 +79,13 @@ const managementItems = [
     icon: UserPlus,
     badge: null,
     description: "Approbation des rôles"
+  },
+  { 
+    title: "Demandes Loueur", 
+    url: "/admin/lessor-requests", 
+    icon: CalendarDays,
+    badge: null,
+    description: "Validation des dossiers loueur"
   },
   { 
     title: "Commandes", 
