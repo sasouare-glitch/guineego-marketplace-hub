@@ -138,9 +138,63 @@ function BookingCard({ booking }: { booking: RentalBooking }) {
               </p>
             </div>
           </div>
+
+          {booking.deposit > 0 && booking.depositStatus && booking.depositStatus !== "none" && (
+            <DepositStatusLine booking={booking} />
+          )}
         </div>
       </div>
     </Card>
+  );
+}
+
+function DepositStatusLine({ booking }: { booking: RentalBooking }) {
+  const map: Record<string, { label: string; className: string }> = {
+    held: {
+      label: "Caution bloquée",
+      className: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30",
+    },
+    released: {
+      label: "Caution restituée",
+      className:
+        "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30",
+    },
+    partial: {
+      label: "Caution partiellement restituée",
+      className: "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/30",
+    },
+    withheld: {
+      label: "Caution conservée",
+      className: "bg-destructive/10 text-destructive border-destructive/30",
+    },
+    refunded: {
+      label: "Caution remboursée",
+      className: "bg-muted text-muted-foreground border-border",
+    },
+  };
+  const meta = map[booking.depositStatus!] ?? map.held;
+  const released = booking.depositAmountReleased;
+  const withheld = booking.depositAmountWithheld;
+
+  return (
+    <div className={cn("mt-3 rounded-lg border px-3 py-2 text-xs flex items-start gap-2", meta.className)}>
+      <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+      <div className="flex-1">
+        <p className="font-medium">
+          {meta.label} · {formatGNF(booking.deposit)}
+        </p>
+        {(released != null || withheld != null) && (
+          <p className="opacity-90">
+            {released != null && <>Restitué : {formatGNF(released)}</>}
+            {released != null && withheld ? " · " : ""}
+            {withheld ? <>Retenu : {formatGNF(withheld)}</> : null}
+          </p>
+        )}
+        {booking.depositWithheldReason && (
+          <p className="opacity-90 italic">Motif : {booking.depositWithheldReason}</p>
+        )}
+      </div>
+    </div>
   );
 }
 
