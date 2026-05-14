@@ -36,6 +36,11 @@ export { cancelOrder } from './orders/cancelOrder';
 export { onOrderCreated, onOrderStatusChanged } from './orders/orderTriggers';
 
 // ============================================
+// RENTALS FUNCTIONS
+// ============================================
+export { createRentalItem } from './rentals/createRentalItem';
+
+// ============================================
 // CLOSING FUNCTIONS
 // ============================================
 export { assignCloser } from './closing/assignCloser';
