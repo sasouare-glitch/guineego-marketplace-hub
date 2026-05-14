@@ -110,6 +110,26 @@ export default function RentalItemDetail() {
     setAltPage(1);
   }, [date, item?.id]);
 
+  // Reset endDate when start changes / becomes invalid
+  useEffect(() => {
+    if (!date) setEndDate(undefined);
+    else if (endDate && endDate < date) setEndDate(undefined);
+  }, [date]);
+
+  const quote = useMemo(
+    () =>
+      computeRentalQuote({
+        startDate: date ?? null,
+        endDate: endDate ?? null,
+        pricePerDay: item?.pricePerDay ?? 0,
+        deposit: item?.deposit ?? 0,
+        minDays: item?.minDays ?? 1,
+        mode,
+        deliveryFee: DEFAULT_DELIVERY_FEE,
+      }),
+    [date, endDate, item?.pricePerDay, item?.deposit, item?.minDays, mode]
+  );
+
   return (
     <>
       <Header />
