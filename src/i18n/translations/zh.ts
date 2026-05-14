@@ -109,6 +109,7 @@ export const zh = {
     description: "Makiity 将卖家、买家、快递员和投资者汇聚在一个平台。中国-几内亚物流、电商培训、安全的移动支付。",
     exploreStore: "探索商店",
     becomeSeller: "成为卖家",
+    rentEquipment: "租赁设备",
     products: "商品",
     sellers: "卖家",
     customers: "客户",
