@@ -50,6 +50,22 @@ export function PartnersSection() {
       color: "guinea-yellow",
       gradient: "from-guinea-yellow/10 to-guinea-yellow/5",
     },
+    {
+      type: "lessor",
+      icon: CalendarDays,
+      title: t.partners.becomeLessor,
+      description: t.partners.lessorDesc,
+      benefits: [
+        t.partners.lessorBenefit1,
+        t.partners.lessorBenefit2,
+        t.partners.lessorBenefit3,
+        t.partners.lessorBenefit4,
+      ],
+      cta: t.partners.lessorCta,
+      href: "/lessor/items/new",
+      color: "violet-500",
+      gradient: "from-violet-500/10 to-violet-500/5",
+    },
   ];
 
   const testimonials = [
