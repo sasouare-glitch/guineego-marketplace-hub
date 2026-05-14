@@ -62,7 +62,7 @@ export function PartnersSection() {
         t.partners.lessorBenefit4,
       ],
       cta: t.partners.lessorCta,
-      href: "/lessor/items/new",
+      href: "/become-lessor",
       color: "violet-500",
       gradient: "from-violet-500/10 to-violet-500/5",
     },
