@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarDays, MapPin, Sparkles, CalendarIcon, X } from "lucide-react";
+import { CalendarDays, MapPin, Sparkles, CalendarIcon, X, CheckCircle2, Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
