@@ -288,6 +288,32 @@ export default function RentalItemDetail() {
                           );
                         })}
                       </div>
+                      {(hasMore || altPage > 1) && (
+                        <div className="mt-2 flex items-center gap-2">
+                          {hasMore && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs"
+                              onClick={() => setAltPage((p) => p + 1)}
+                            >
+                              Voir plus
+                            </Button>
+                          )}
+                          {altPage > 1 && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 px-2 text-xs text-muted-foreground"
+                              onClick={() => setAltPage(1)}
+                            >
+                              Réduire
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
