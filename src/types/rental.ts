@@ -99,6 +99,28 @@ export type BookingStatus =
   | "cancelled"
   | "disputed";
 
+/**
+ * Méthode de paiement supportée pour la caution.
+ */
+export type DepositPaymentMethod = "orange_money" | "mtn_money" | "card";
+
+/**
+ * Cycle de vie de la caution.
+ * - none      : pas encore versée
+ * - held      : versée et bloquée chez le loueur
+ * - released  : intégralement restituée au locataire (retour OK)
+ * - withheld  : conservée totalement par le loueur (dégâts/perte)
+ * - partial   : partiellement restituée (frais retenus)
+ * - refunded  : remboursée suite à annulation avant location
+ */
+export type DepositStatus =
+  | "none"
+  | "held"
+  | "released"
+  | "withheld"
+  | "partial"
+  | "refunded";
+
 export interface RentalBooking {
   id: string;
   itemId: string;
@@ -113,10 +135,23 @@ export interface RentalBooking {
   totalDays: number;
   pricePerDay: number;
   totalPrice: number;
+  deliveryFee?: number;
+  mode?: "pickup" | "delivery";
   deposit: number;
   status: BookingStatus;
   paymentId?: string;
   paymentStatus?: "pending" | "paid" | "refunded";
+
+  // ----- Caution -----
+  depositStatus?: DepositStatus;
+  depositPaymentMethod?: DepositPaymentMethod;
+  depositTransactionId?: string;
+  depositPaidAt?: Date | { seconds: number };
+  depositReleasedAt?: Date | { seconds: number };
+  depositAmountReleased?: number; // restitué au locataire
+  depositAmountWithheld?: number; // conservé par le loueur
+  depositWithheldReason?: string;
+
   pickupAddress?: string;
   returnAddress?: string;
   notes?: string;
