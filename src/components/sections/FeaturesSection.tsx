@@ -6,6 +6,7 @@ import {
   GraduationCap, 
   CreditCard, 
   Shield,
+  CalendarDays,
   ArrowRight
 } from "lucide-react";
 import { Link } from "react-router-dom";
