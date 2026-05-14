@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link, useSearchParams } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
+import { addDoc, collection, doc, getDoc, serverTimestamp } from "firebase/firestore";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { DepositPaymentDialog, type DepositPaymentResult } from "@/components/rental/DepositPaymentDialog";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { db } from "@/lib/firebase/config";
@@ -33,8 +36,13 @@ const formatGNF = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " GN
 
 export default function RentalItemDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [params, setParams] = useSearchParams();
   const dateParam = params.get("date");
+
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const [item, setItem] = useState<RentalItem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -496,16 +504,83 @@ export default function RentalItemDetail() {
                   </div>
                 )}
 
-                <Button size="lg" className="w-full" disabled={unavailable}>
+                <Button
+                  size="lg"
+                  className="w-full"
+                  disabled={unavailable || !date || creating}
+                  onClick={() => {
+                    if (!user) {
+                      toast.info("Connectez-vous pour réserver");
+                      navigate(`/login?redirect=/rental/item/${item.id}`);
+                      return;
+                    }
+                    setDepositOpen(true);
+                  }}
+                >
                   <CalendarDays className="w-4 h-4 mr-2" />
-                  {unavailable ? "Indisponible à cette date" : "Réserver (bientôt)"}
+                  {unavailable
+                    ? "Indisponible à cette date"
+                    : !date
+                    ? "Choisissez une date"
+                    : quote.deposit > 0
+                    ? `Réserver et régler la caution (${formatGNF(quote.deposit)})`
+                    : "Réserver"}
                 </Button>
-                {!unavailable && (
+                {!unavailable && date && (
                   <p className="text-xs text-muted-foreground text-center">
-                    La réservation en ligne sera activée à l'étape suivante (calendrier +
-                    paiement).
+                    La caution est bloquée jusqu'au retour, puis restituée si l'équipement
+                    est rendu en bon état.
                   </p>
                 )}
+
+                <DepositPaymentDialog
+                  open={depositOpen}
+                  onOpenChange={setDepositOpen}
+                  amount={quote.deposit}
+                  bookingRef={`${item.id}-${date ? format(date, "yyyyMMdd") : "na"}`}
+                  onPaid={async (res) => {
+                    if (!user || !date) return;
+                    setCreating(true);
+                    try {
+                      const startD = date;
+                      const endD = endDate ?? date;
+                      const docRef = await addDoc(collection(db, "rental_bookings"), {
+                        itemId: item.id,
+                        itemTitle: item.title,
+                        itemThumbnail: item.thumbnail || item.images?.[0] || "",
+                        ownerId: item.ownerId,
+                        renterId: user.uid,
+                        renterName: user.displayName || "",
+                        startDate: startD,
+                        endDate: endD,
+                        totalDays: quote.days,
+                        pricePerDay: item.pricePerDay,
+                        totalPrice: quote.totalRentalCost,
+                        deliveryFee: quote.deliveryFee,
+                        mode,
+                        deposit: quote.deposit,
+                        status: "pending",
+                        paymentStatus: "pending",
+                        // Caution
+                        depositStatus: "held",
+                        depositPaymentMethod: res.method,
+                        depositTransactionId: res.transactionId,
+                        depositPaidAt: serverTimestamp(),
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp(),
+                      });
+                      toast.success("Réservation enregistrée");
+                      navigate(`/my-rentals?highlight=${docRef.id}`);
+                    } catch (e: any) {
+                      console.error("[booking create]", e);
+                      toast.error("Échec de la réservation", {
+                        description: e?.message ?? "Réessayez.",
+                      });
+                    } finally {
+                      setCreating(false);
+                    }
+                  }}
+                />
               </div>
             </div>
           )}
