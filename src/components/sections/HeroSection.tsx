@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, ShoppingBag, Truck, Globe, Shield } from "lucide-react";
+import { ArrowRight, ShoppingBag, Truck, Globe, Shield, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-marketplace.jpg";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -103,6 +103,12 @@ export function HeroSection() {
                 <Link to="/sell/start">
                   {t.hero.becomeSeller}
                   <ArrowRight className="w-5 h-5" />
+                </Link>
+              </Button>
+              <Button variant="glass" size="xl" asChild>
+                <Link to="/rental">
+                  <CalendarDays className="w-5 h-5" />
+                  {t.hero.rentEquipment}
                 </Link>
               </Button>
             </motion.div>

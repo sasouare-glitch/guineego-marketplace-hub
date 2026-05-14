@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Smartphone, Store, Download } from "lucide-react";
+import { Smartphone, Store, Download, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/hooks/useTranslation";
 import { QRCodeSVG } from "qrcode.react";
@@ -52,6 +52,12 @@ export function CTASection() {
                 <Link to="/sell/start">
                   <Store className="w-5 h-5" />
                   {t.cta.openShop}
+                </Link>
+              </Button>
+              <Button variant="heroOutline" size="xl" asChild>
+                <Link to="/lessor/items/new">
+                  <CalendarDays className="w-5 h-5" />
+                  {t.cta.becomeLessor}
                 </Link>
               </Button>
             </div>

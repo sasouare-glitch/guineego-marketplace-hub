@@ -5,7 +5,8 @@ import avatarFatoumata from "@/assets/avatar-fatoumata.jpg";
 import { 
   Truck, 
   Users2, 
-  TrendingUp, 
+  TrendingUp,
+  CalendarDays,
   ChevronRight,
   Star,
   ArrowRight
@@ -49,6 +50,22 @@ export function PartnersSection() {
       color: "guinea-yellow",
       gradient: "from-guinea-yellow/10 to-guinea-yellow/5",
     },
+    {
+      type: "lessor",
+      icon: CalendarDays,
+      title: t.partners.becomeLessor,
+      description: t.partners.lessorDesc,
+      benefits: [
+        t.partners.lessorBenefit1,
+        t.partners.lessorBenefit2,
+        t.partners.lessorBenefit3,
+        t.partners.lessorBenefit4,
+      ],
+      cta: t.partners.lessorCta,
+      href: "/lessor/items/new",
+      color: "violet-500",
+      gradient: "from-violet-500/10 to-violet-500/5",
+    },
   ];
 
   const testimonials = [
@@ -91,7 +108,7 @@ export function PartnersSection() {
         </motion.div>
 
         {/* Partner Cards */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
           {partnerTypes.map((partner, index) => (
             <motion.div
               key={partner.type}
@@ -129,7 +146,7 @@ export function PartnersSection() {
               </ul>
 
               <Button 
-                variant={index === 0 ? "default" : "accent"} 
+                variant={index === 0 ? "default" : index === 1 ? "accent" : "guinea"} 
                 size="lg" 
                 asChild
               >
