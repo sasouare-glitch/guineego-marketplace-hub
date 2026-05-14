@@ -366,8 +366,15 @@ export default function AdminLessorRequestsPage() {
                         "font-medium",
                         h.action === "approved" && "text-emerald-600",
                         h.action === "rejected" && "text-destructive",
+                        h.action === "revoked" && "text-orange-600",
                       )}>
-                        {h.action === "approved" ? "Approuvé" : h.action === "rejected" ? "Refusé" : "Info demandée"}
+                        {h.action === "approved"
+                          ? "Approuvé"
+                          : h.action === "rejected"
+                          ? "Refusé"
+                          : h.action === "revoked"
+                          ? "Révoqué"
+                          : "Info demandée"}
                       </span>{" "}
                       par <strong>{h.byName || h.by}</strong> — {fmtDate(h.at)}
                       {h.comment && <p className="text-muted-foreground mt-0.5">« {h.comment} »</p>}
@@ -396,6 +403,16 @@ export default function AdminLessorRequestsPage() {
                       <Check className="w-3.5 h-3.5 mr-1" /> Approuver
                     </Button>
                   </div>
+                )}
+                {req.status === "approved" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                    onClick={() => openAction(req, "revoke")}
+                  >
+                    <X className="w-3.5 h-3.5 mr-1" /> Révoquer
+                  </Button>
                 )}
               </div>
             </div>
