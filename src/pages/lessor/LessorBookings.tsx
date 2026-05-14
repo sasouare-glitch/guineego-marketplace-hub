@@ -238,7 +238,7 @@ export default function LessorBookings() {
           ? `Le retour de "${selected.itemTitle}" a été validé. Votre caution de ${formatGNF(selected.deposit)} sera restituée.`
           : `Sur "${selected.itemTitle}" : ${formatGNF(withheld)} retenus${
               released > 0 ? `, ${formatGNF(released)} restitués` : ""
-            }. Motif : ${decision.kind === "released" ? "" : decision.reason}`;
+            }. Motif : ${isReleased ? "" : decision.reason}`;
 
         await addDoc(collection(db, "notifications"), {
           userId: selected.renterId,
