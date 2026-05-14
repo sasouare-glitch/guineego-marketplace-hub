@@ -109,6 +109,7 @@ import MyRentals from "./pages/rental/MyRentals";
 import LessorDashboard from "./pages/lessor/LessorDashboard";
 import LessorItems from "./pages/lessor/LessorItems";
 import LessorItemNew from "./pages/lessor/LessorItemNew";
+import LessorBookings from "./pages/lessor/LessorBookings";
 // Mobile Components
 import MobileBottomNav, { MobileFAB } from "./components/mobile/MobileBottomNav";
 import InstallPrompt, { UpdateBanner } from "./components/mobile/InstallPrompt";
@@ -179,6 +180,11 @@ const App = () => (
                     <Route path="/lessor/items/new" element={
                       <ProtectedRoute requiredRoles={['lessor', 'admin']}>
                         <LessorItemNew />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/lessor/bookings" element={
+                      <ProtectedRoute requiredRoles={['lessor', 'admin']}>
+                        <LessorBookings />
                       </ProtectedRoute>
                     } />
                     
