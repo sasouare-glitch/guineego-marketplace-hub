@@ -29,6 +29,24 @@ interface RentalLocationInput {
   coordinates?: { lat: number; lng: number };
 }
 
+type RentalItemStatus = 'active' | 'inactive' | 'rented' | 'maintenance';
+const ALLOWED_STATUSES: RentalItemStatus[] = ['active', 'inactive', 'rented', 'maintenance'];
+
+type WeekDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+const WEEK_DAYS: WeekDay[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+interface DayAvailabilityInput {
+  closed?: boolean;
+  startHour?: number;
+  endHour?: number;
+}
+
+interface RentalAvailabilityInput {
+  weekly?: Partial<Record<WeekDay, DayAvailabilityInput>>;
+  blockedDates?: string[];
+  noticeHours?: number;
+}
+
 interface CreateRentalItemData {
   title?: string;
   description?: string;
@@ -42,6 +60,8 @@ interface CreateRentalItemData {
   location?: RentalLocationInput;
   specs?: Record<string, string>;
   rules?: string;
+  status?: string;
+  availability?: RentalAvailabilityInput;
 }
 
 const MAX_IMAGES = 5;
