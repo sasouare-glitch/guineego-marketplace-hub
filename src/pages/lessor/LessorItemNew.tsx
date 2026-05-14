@@ -36,6 +36,8 @@ export default function LessorItemNew() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [availability, setAvailability] = useState<RentalAvailability>(DEFAULT_AVAILABILITY);
+  const [status, setStatus] = useState<RentalItemStatus>("active");
 
   const [form, setForm] = useState({
     title: "",
