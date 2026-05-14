@@ -120,6 +120,7 @@ export const nqo: TranslationKeys = {
     description: "Makiity ߦߋ߫ ߝߋ߬ߙߋ߬ߓߊ ߠߎ߬ ߣߌ߬ ߛߊ߲ߓߊ ߠߎ߬ ߣߌ߬ ߟߊ߬ߛߋ߬ߙߌ ߠߎ߬ ߣߌ߬ ߡߊ߬ߞߍ߬ߟߊ ߠߎ߬ ߟߊ߲ߓߍ ߞߍ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬. ߛ߭ߌ߲ ߕߊ߬ߡߌ߲, ߥߍ߫ߓ ߞߏ ߞߊ߬ߙߊ߲, ߡߏ߬ߓߊ߬ߦߌ ߛߊ߬ߙߊ ߕߌ߲ߢߍ.",
     exploreStore: "ߝߋ߲ ߠߎ߬ ߞߐ߬ߟߐ߲ ߞߍ߫",
     becomeSeller: "ߝߋ߬ߙߋ߬ߓߊ߬ߟߊ ߞߍ߫",
+    rentEquipment: "ߢߊ߲߭ ߓߊߟߊ߬",
     products: "ߝߋ߲ ߠߎ߬",
     sellers: "ߝߋ߬ߙߋ߬ߓߊ ߠߎ߬",
     customers: "ߛߊ߲ߓߊ ߠߎ߬",
