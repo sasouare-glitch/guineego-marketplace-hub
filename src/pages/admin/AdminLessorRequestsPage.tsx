@@ -109,7 +109,7 @@ export default function AdminLessorRequestsPage() {
   const approvedCount = requests.filter((r) => r.status === "approved").length;
   const rejectedCount = requests.filter((r) => r.status === "rejected").length;
 
-  const openAction = (req: LessorRequest, a: "approve" | "reject") => {
+  const openAction = (req: LessorRequest, a: "approve" | "reject" | "revoke") => {
     setSelected(req);
     setAction(a);
     setComment("");
@@ -117,23 +117,32 @@ export default function AdminLessorRequestsPage() {
 
   const handleSubmit = async () => {
     if (!selected || !action || !user) return;
-    if (action === "reject" && comment.trim().length < 5) {
-      toast.error("Merci de préciser le motif du refus.");
+    if ((action === "reject" || action === "revoke") && comment.trim().length < 5) {
+      toast.error(action === "revoke"
+        ? "Merci de préciser le motif de la révocation."
+        : "Merci de préciser le motif du refus.");
       return;
     }
     setProcessing(true);
     try {
+      const actionMap = { approve: "approved", reject: "rejected", revoke: "revoked" } as const;
       const reviewer: ReviewEntry = {
-        action: action === "approve" ? "approved" : "rejected",
+        action: actionMap[action],
         by: user.uid,
         byName: profile?.displayName || user.email || "Admin",
         at: new Date(),
-        comment: comment.trim() || (action === "approve" ? "Demande approuvée" : "Demande refusée"),
+        comment:
+          comment.trim() ||
+          (action === "approve"
+            ? "Demande approuvée"
+            : action === "revoke"
+            ? "Rôle loueur révoqué"
+            : "Demande refusée"),
       };
 
       // Update request
       await updateDoc(doc(db, "role_requests", selected.id), {
-        status: action === "approve" ? "approved" : "rejected",
+        status: actionMap[action],
         adminNote: comment.trim() || null,
         reviewedBy: user.uid,
         reviewedByName: reviewer.byName,
@@ -173,25 +182,61 @@ export default function AdminLessorRequestsPage() {
         }
       }
 
+      // Revoke → remove lessor role + désactiver le profil loueur
+      if (action === "revoke") {
+        const userRef = doc(db, "users", selected.userId);
+        const userSnap = await getDoc(userRef);
+        const data = userSnap.data() || {};
+        const existing: string[] = data.roles || [data.role || "customer"];
+        const next = existing.filter((r) => r !== "lessor");
+        await updateDoc(userRef, {
+          roles: next.length > 0 ? next : ["customer"],
+          updatedAt: serverTimestamp(),
+        });
+        const lessorRef = doc(db, "lessors", selected.userId);
+        const lessorSnap = await getDoc(lessorRef);
+        if (lessorSnap.exists()) {
+          await updateDoc(lessorRef, {
+            status: "revoked",
+            revokedAt: serverTimestamp(),
+            revokedBy: user.uid,
+            revokedReason: comment.trim() || null,
+            updatedAt: serverTimestamp(),
+          });
+        }
+      }
+
       // Notify the user
+      const titleMap: Record<string, string> = {
+        approve: "Demande Loueur approuvée ✅",
+        reject: "Demande Loueur refusée",
+        revoke: "Accès Loueur révoqué ⚠️",
+      };
+      const bodyMap: Record<string, string> = {
+        approve: "Bienvenue ! Vous pouvez à présent publier des équipements à louer.",
+        reject: comment.trim() || "Votre demande n'a pas été acceptée.",
+        revoke: comment.trim() || "Votre rôle loueur a été désactivé par l'administration.",
+      };
       await setDoc(
         doc(db, "notifications", `${selected.userId}_lessor_${Date.now()}`),
         {
           userId: selected.userId,
           type: "role_request",
-          title: action === "approve"
-            ? "Demande Loueur approuvée ✅"
-            : "Demande Loueur refusée",
-          body: action === "approve"
-            ? "Bienvenue ! Vous pouvez à présent publier des équipements à louer."
-            : (comment.trim() || "Votre demande n'a pas été acceptée."),
-          data: { requestId: selected.id, role: "lessor" },
+          title: titleMap[action],
+          body: bodyMap[action],
+          data: { requestId: selected.id, role: "lessor", action: actionMap[action] },
           read: false,
           createdAt: serverTimestamp(),
         },
       );
 
-      toast.success(action === "approve" ? "Loueur approuvé" : "Demande refusée");
+      toast.success(
+        action === "approve"
+          ? "Loueur approuvé"
+          : action === "revoke"
+          ? "Rôle loueur révoqué"
+          : "Demande refusée",
+      );
       setAction(null);
       setSelected(null);
       setComment("");
