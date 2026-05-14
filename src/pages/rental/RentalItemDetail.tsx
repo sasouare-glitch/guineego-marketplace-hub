@@ -1,20 +1,42 @@
-import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { db } from "@/lib/firebase/config";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, MapPin, Shield, CalendarDays } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  ArrowLeft,
+  MapPin,
+  Shield,
+  CalendarDays,
+  CalendarIcon,
+  CheckCircle2,
+  Ban,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { getAvailabilityReason } from "@/lib/rental/availability";
 import type { RentalItem } from "@/types/rental";
 
 const formatGNF = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " GNF";
 
 export default function RentalItemDetail() {
   const { id } = useParams();
+  const [params, setParams] = useSearchParams();
+  const dateParam = params.get("date");
+
   const [item, setItem] = useState<RentalItem | null>(null);
   const [loading, setLoading] = useState(true);
+  const [date, setDate] = useState<Date | undefined>(
+    dateParam ? new Date(dateParam) : undefined
+  );
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -31,15 +53,35 @@ export default function RentalItemDetail() {
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
+
+  const updateDate = (d: Date | undefined) => {
+    setDate(d);
+    const next = new URLSearchParams(params);
+    if (d) next.set("date", format(d, "yyyy-MM-dd"));
+    else next.delete("date");
+    setParams(next, { replace: true });
+    setPickerOpen(false);
+  };
+
+  const reason = useMemo(
+    () => (item && date ? getAvailabilityReason(item, date) : null),
+    [item, date]
+  );
+  const unavailable = !!reason;
 
   return (
     <>
       <Header />
       <main className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6">
-          <Link to="/rental" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
+          <Link
+            to="/rental"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+          >
             <ArrowLeft className="w-4 h-4" /> Retour aux locations
           </Link>
 
@@ -53,7 +95,9 @@ export default function RentalItemDetail() {
               </div>
             </div>
           ) : !item ? (
-            <div className="text-center py-16 text-muted-foreground">Équipement introuvable.</div>
+            <div className="text-center py-16 text-muted-foreground">
+              Équipement introuvable.
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-6">
               <div className="aspect-square rounded-xl overflow-hidden bg-muted">
@@ -70,21 +114,104 @@ export default function RentalItemDetail() {
                     <MapPin className="w-4 h-4" /> {item.location.commune}
                   </p>
                 )}
+
                 <div className="bg-card border rounded-xl p-4 space-y-2">
                   <p className="text-2xl font-bold text-primary">
-                    {formatGNF(item.pricePerDay)}<span className="text-sm text-muted-foreground"> / jour</span>
+                    {formatGNF(item.pricePerDay)}
+                    <span className="text-sm text-muted-foreground"> / jour</span>
                   </p>
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
                     <Shield className="w-4 h-4" /> Caution : {formatGNF(item.deposit)}
                   </p>
                 </div>
+
+                {/* Vérification de disponibilité */}
+                <div className="bg-card border rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-semibold">Vérifier la disponibilité</p>
+                    {date && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => updateDate(undefined)}
+                      >
+                        <X className="w-3 h-3 mr-1" /> Effacer
+                      </Button>
+                    )}
+                  </div>
+
+                  <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        <CalendarIcon className="w-4 h-4 mr-2" />
+                        {date
+                          ? format(date, "EEEE d MMMM yyyy", { locale: fr })
+                          : "Choisir une date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={updateDate}
+                        disabled={(d) => d < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  {date && (
+                    <div
+                      role="status"
+                      className={cn(
+                        "rounded-lg px-3 py-2.5 text-sm flex items-start gap-2",
+                        unavailable
+                          ? "bg-destructive/10 text-destructive border border-destructive/30"
+                          : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
+                      )}
+                    >
+                      {unavailable ? (
+                        <>
+                          <Ban className="w-4 h-4 mt-0.5 shrink-0" />
+                          <div>
+                            <p className="font-medium">
+                              Indisponible le{" "}
+                              {format(date, "d MMMM yyyy", { locale: fr })}
+                            </p>
+                            <p className="text-xs opacity-90">{reason}</p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" />
+                          <div>
+                            <p className="font-medium">
+                              Disponible le{" "}
+                              {format(date, "d MMMM yyyy", { locale: fr })}
+                            </p>
+                            <p className="text-xs opacity-90">
+                              Vous pouvez réserver cet équipement à cette date.
+                            </p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <p className="text-foreground/80 whitespace-pre-line">{item.description}</p>
-                <Button size="lg" className="w-full" disabled>
-                  <CalendarDays className="w-4 h-4 mr-2" /> Réserver (bientôt)
+
+                <Button size="lg" className="w-full" disabled={unavailable}>
+                  <CalendarDays className="w-4 h-4 mr-2" />
+                  {unavailable ? "Indisponible à cette date" : "Réserver (bientôt)"}
                 </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  La réservation en ligne sera activée à l'étape suivante (calendrier + paiement).
-                </p>
+                {!unavailable && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    La réservation en ligne sera activée à l'étape suivante (calendrier +
+                    paiement).
+                  </p>
+                )}
               </div>
             </div>
           )}
