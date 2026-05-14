@@ -7,6 +7,7 @@ export type UserRole =
   | 'courier'       // Coursier / Livreur
   | 'closer'        // Closer (finalisation ventes)
   | 'investor'      // Investisseur
+  | 'lessor'        // Loueur / Propriétaire de matériel à louer
   | 'super_user'    // Super utilisateur (tout voir/modifier, sauf changer rôle admin)
   | 'admin';        // Administrateur
 
