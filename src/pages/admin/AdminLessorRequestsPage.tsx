@@ -82,7 +82,7 @@ export default function AdminLessorRequestsPage() {
   const [requests, setRequests] = useState<LessorRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<LessorRequest | null>(null);
-  const [action, setAction] = useState<"approve" | "reject" | null>(null);
+  const [action, setAction] = useState<"approve" | "reject" | "revoke" | null>(null);
   const [comment, setComment] = useState("");
   const [processing, setProcessing] = useState(false);
 
