@@ -18,7 +18,10 @@ import {
   TrendingUp,
   Briefcase,
   GraduationCap,
-  Truck
+  Truck,
+  KeyRound,
+  CalendarDays,
+  Plus
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/hooks/useCart';
@@ -70,6 +73,12 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { path: '/admin/users', icon: User, label: 'Utilisateurs' },
     { path: '/admin/orders', icon: ClipboardList, label: 'Commandes' },
     { path: '/admin/analytics', icon: TrendingUp, label: 'Analytics' },
+    { path: '/profile', icon: User, label: 'Profil' }
+  ],
+  lessor: [
+    { path: '/lessor', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/lessor/items', icon: KeyRound, label: 'Équipements' },
+    { path: '/lessor/bookings', icon: CalendarDays, label: 'Réservations' },
     { path: '/profile', icon: User, label: 'Profil' }
   ],
   admin: [
@@ -177,6 +186,7 @@ export function MobileFAB() {
     courier: { icon: MapPin, path: '/courier/scan', label: 'Scanner colis' },
     closer: null,
     investor: null,
+    lessor: { icon: Plus, path: '/lessor/items/new', label: 'Nouvel équipement' },
     super_user: null,
     admin: null
   };
