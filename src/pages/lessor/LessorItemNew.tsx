@@ -363,6 +363,8 @@ export default function LessorItemNew() {
                 </select>
               </div>
 
+              <div className="space-y-2">
+                <Label>Photos * (max {MAX_IMAGES})</Label>
                 <div className="grid grid-cols-5 gap-2">
                   {images.map((img, idx) => (
                     <div
