@@ -21,7 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getAvailabilityReason } from "@/lib/rental/availability";
+import { getAvailabilityReason, findNextAvailableDates } from "@/lib/rental/availability";
 import type { RentalItem } from "@/types/rental";
 
 const formatGNF = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " GNF";
@@ -72,6 +72,11 @@ export default function RentalItemDetail() {
     [item, date]
   );
   const unavailable = !!reason;
+
+  const alternatives = useMemo(
+    () => (item && date && unavailable ? findNextAvailableDates(item, date, 3, 60) : []),
+    [item, date, unavailable]
+  );
 
   return (
     <>
@@ -174,12 +179,31 @@ export default function RentalItemDetail() {
                       {unavailable ? (
                         <>
                           <Ban className="w-4 h-4 mt-0.5 shrink-0" />
-                          <div>
+                          <div className="flex-1">
                             <p className="font-medium">
                               Indisponible le{" "}
                               {format(date, "d MMMM yyyy", { locale: fr })}
                             </p>
                             <p className="text-xs opacity-90">{reason}</p>
+                            {alternatives.length > 0 && (
+                              <div className="mt-2 pt-2 border-t border-destructive/20">
+                                <p className="text-xs font-medium mb-1.5">
+                                  Prochaines dates disponibles :
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {alternatives.map((alt) => (
+                                    <button
+                                      key={alt.toISOString()}
+                                      type="button"
+                                      onClick={() => updateDate(alt)}
+                                      className="text-xs px-2 py-1 rounded-md bg-background hover:bg-accent text-foreground border border-border transition-colors"
+                                    >
+                                      {format(alt, "EEE d MMM", { locale: fr })}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </>
                       ) : (
