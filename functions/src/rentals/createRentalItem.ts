@@ -209,6 +209,44 @@ export const createRentalItem = functions
           : undefined,
     });
 
+    // ---- Status ----
+    const status: RentalItemStatus = ALLOWED_STATUSES.includes(data.status as RentalItemStatus)
+      ? (data.status as RentalItemStatus)
+      : 'active';
+
+    // ---- Availability normalization ----
+    const weeklyIn = data.availability?.weekly || {};
+    const weekly: Record<WeekDay, { closed: boolean; startHour: number; endHour: number }> =
+      {} as any;
+    for (const day of WEEK_DAYS) {
+      const d = weeklyIn[day] || {};
+      const closed = !!d.closed;
+      let startHour = Math.max(0, Math.min(23, Math.floor(Number(d.startHour ?? 8))));
+      let endHour = Math.max(1, Math.min(24, Math.floor(Number(d.endHour ?? 18))));
+      if (!Number.isFinite(startHour)) startHour = 8;
+      if (!Number.isFinite(endHour)) endHour = 18;
+      if (endHour <= startHour) endHour = Math.min(24, startHour + 1);
+      weekly[day] = { closed, startHour, endHour };
+    }
+
+    const blockedDates = Array.isArray(data.availability?.blockedDates)
+      ? Array.from(
+          new Set(
+            data.availability!.blockedDates!.filter(
+              (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s)
+            )
+          )
+        ).sort()
+      : [];
+
+    const noticeHoursRaw = Number(data.availability?.noticeHours ?? 0);
+    const noticeHours =
+      Number.isFinite(noticeHoursRaw) && noticeHoursRaw >= 0
+        ? Math.min(168, Math.floor(noticeHoursRaw))
+        : 0;
+
+    const availability = { weekly, blockedDates, noticeHours };
+
     // ---- Persistence ----
     try {
       const itemRef = db.collection('rental_items').doc();
@@ -231,7 +269,8 @@ export const createRentalItem = functions
         location,
         specs: data.specs && typeof data.specs === 'object' ? data.specs : {},
         rules,
-        status: 'active',
+        status,
+        availability,
         avgRating: 0,
         totalRentals: 0,
         createdAt: now,
