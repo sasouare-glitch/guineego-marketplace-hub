@@ -105,6 +105,12 @@ export function HeroSection() {
                   <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
+              <Button variant="glass" size="xl" asChild>
+                <Link to="/rental">
+                  <CalendarDays className="w-5 h-5" />
+                  {t.hero.rentEquipment}
+                </Link>
+              </Button>
             </motion.div>
 
             {/* Stats */}
