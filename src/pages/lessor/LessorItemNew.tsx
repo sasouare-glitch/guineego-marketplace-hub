@@ -346,8 +346,23 @@ export default function LessorItemNew() {
                 />
               </div>
 
+              <AvailabilityEditor value={availability} onChange={setAvailability} />
+
               <div className="space-y-2">
-                <Label>Photos * (max {MAX_IMAGES})</Label>
+                <Label htmlFor="status">Statut de l'équipement</Label>
+                <select
+                  id="status"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as RentalItemStatus)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="active">Actif — visible et louable</option>
+                  <option value="inactive">Inactif — masqué du catalogue</option>
+                  <option value="rented">Loué — déjà en cours de location</option>
+                  <option value="maintenance">Maintenance — temporairement indisponible</option>
+                </select>
+              </div>
+
                 <div className="grid grid-cols-5 gap-2">
                   {images.map((img, idx) => (
                     <div
