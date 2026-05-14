@@ -221,12 +221,52 @@ export default function LessorBookings() {
         });
       }
       await updateDoc(ref, base);
+
+      // Notify renter about the deposit decision
+      try {
+        const isReleased = decision.kind === "released";
+        const withheld = isReleased
+          ? 0
+          : Math.min(selected.deposit, Math.max(0, decision.amountWithheld));
+        const released = Math.max(0, selected.deposit - withheld);
+        const title = isReleased
+          ? "Caution restituée ✅"
+          : decision.kind === "withheld"
+          ? "Caution retenue intégralement"
+          : "Caution partiellement retenue";
+        const message = isReleased
+          ? `Le retour de "${selected.itemTitle}" a été validé. Votre caution de ${formatGNF(selected.deposit)} sera restituée.`
+          : `Sur "${selected.itemTitle}" : ${formatGNF(withheld)} retenus${
+              released > 0 ? `, ${formatGNF(released)} restitués` : ""
+            }. Motif : ${decision.kind === "released" ? "" : decision.reason}`;
+
+        await addDoc(collection(db, "notifications"), {
+          userId: selected.renterId,
+          type: isReleased ? "deposit_released" : "deposit_withheld",
+          title,
+          message,
+          body: message,
+          data: {
+            bookingId: selected.id,
+            itemId: selected.itemId,
+            depositStatus: isReleased ? "released" : decision.kind,
+            depositAmountWithheld: withheld,
+            depositAmountReleased: released,
+            ...(isReleased ? {} : { reason: decision.reason }),
+          },
+          read: false,
+          createdAt: serverTimestamp(),
+        });
+      } catch (notifErr) {
+        console.warn("[LessorBookings] notify renter failed", notifErr);
+      }
+
       toast({
         title: "Retour enregistré",
         description:
           decision.kind === "released"
-            ? "La caution a été marquée comme restituée."
-            : "La retenue de caution a été enregistrée.",
+            ? "La caution a été marquée comme restituée. Le locataire a été notifié."
+            : "La retenue de caution a été enregistrée. Le locataire a été notifié.",
       });
       setSelected(null);
     } catch (e: any) {
