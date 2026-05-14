@@ -105,6 +105,7 @@ import AdminWithdrawalsPage from "./pages/admin/AdminWithdrawalsPage";
 // Rental Module (lazy-friendly imports kept eager for now)
 import RentalMarketplace from "./pages/rental/RentalMarketplace";
 import RentalItemDetail from "./pages/rental/RentalItemDetail";
+import MyRentals from "./pages/rental/MyRentals";
 import LessorDashboard from "./pages/lessor/LessorDashboard";
 import LessorItems from "./pages/lessor/LessorItems";
 import LessorItemNew from "./pages/lessor/LessorItemNew";
@@ -158,6 +159,11 @@ const App = () => (
                     {/* Rental (Location) — public browse */}
                     <Route path="/rental" element={<RentalMarketplace />} />
                     <Route path="/rental/item/:id" element={<RentalItemDetail />} />
+                    <Route path="/my-rentals" element={
+                      <ProtectedRoute>
+                        <MyRentals />
+                      </ProtectedRoute>
+                    } />
 
                     {/* Lessor (Loueur) — protégé */}
                     <Route path="/lessor" element={
