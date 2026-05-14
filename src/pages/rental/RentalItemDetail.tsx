@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   Ban,
   X,
+  CalendarCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAvailabilityReason, findNextAvailableDates } from "@/lib/rental/availability";
@@ -225,6 +226,18 @@ export default function RentalItemDetail() {
                 </div>
 
                 <p className="text-foreground/80 whitespace-pre-line">{item.description}</p>
+
+                {unavailable && alternatives.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => updateDate(alternatives[0])}
+                  >
+                    <CalendarCheck className="w-4 h-4 mr-2" />
+                    Passer au {format(alternatives[0], "EEE d MMM", { locale: fr })}
+                  </Button>
+                )}
 
                 <Button size="lg" className="w-full" disabled={unavailable}>
                   <CalendarDays className="w-4 h-4 mr-2" />
