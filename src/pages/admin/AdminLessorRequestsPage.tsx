@@ -508,7 +508,11 @@ export default function AdminLessorRequestsPage() {
             <>
               <DialogHeader>
                 <DialogTitle>
-                  {action === "approve" ? "Approuver la demande Loueur" : "Refuser la demande Loueur"}
+                  {action === "approve"
+                    ? "Approuver la demande Loueur"
+                    : action === "revoke"
+                    ? "Révoquer le rôle Loueur"
+                    : "Refuser la demande Loueur"}
                 </DialogTitle>
                 <DialogDescription>
                   {selected.applicationData?.fullName || selected.userName || selected.userEmail}
@@ -516,15 +520,23 @@ export default function AdminLessorRequestsPage() {
               </DialogHeader>
               <div className="space-y-2">
                 <label className="text-sm font-medium">
-                  {action === "approve" ? "Commentaire (optionnel)" : "Motif du refus *"}
+                  {action === "approve"
+                    ? "Commentaire (optionnel)"
+                    : action === "revoke"
+                    ? "Motif de la révocation *"
+                    : "Motif du refus *"}
                 </label>
                 <Textarea
                   rows={4}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder={action === "approve"
-                    ? "Bienvenue ! Documents conformes."
-                    : "Document illisible / informations incomplètes…"}
+                  placeholder={
+                    action === "approve"
+                      ? "Bienvenue ! Documents conformes."
+                      : action === "revoke"
+                      ? "Non-respect des conditions / fraude détectée…"
+                      : "Document illisible / informations incomplètes…"
+                  }
                 />
                 <p className="text-xs text-muted-foreground">
                   Ce commentaire sera enregistré dans l'historique et envoyé à l'utilisateur.
@@ -540,7 +552,11 @@ export default function AdminLessorRequestsPage() {
                   disabled={processing}
                 >
                   {processing && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
-                  {action === "approve" ? "Confirmer l'approbation" : "Confirmer le refus"}
+                  {action === "approve"
+                    ? "Confirmer l'approbation"
+                    : action === "revoke"
+                    ? "Confirmer la révocation"
+                    : "Confirmer le refus"}
                 </Button>
               </DialogFooter>
             </>
