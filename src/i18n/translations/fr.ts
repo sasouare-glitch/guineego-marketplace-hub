@@ -162,6 +162,9 @@ export const fr = {
     buyerProtection: "Protection acheteur",
     buyerProtectionDesc: "Vos achats sont protégés. Remboursement garanti si le produit n'est pas conforme à la description.",
     ourGuarantee: "Notre garantie",
+    rental: "Location d'équipements",
+    rentalDesc: "Louez du matériel pour vos événements, chantiers ou besoins ponctuels. Réservation simple, prix transparents.",
+    rentNow: "Louer maintenant",
   },
 
   // Academy Section
