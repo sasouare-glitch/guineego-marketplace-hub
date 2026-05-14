@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp, addDoc, collection } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
