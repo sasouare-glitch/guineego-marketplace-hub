@@ -14,9 +14,7 @@ import {
   doc,
   query,
   where,
-  orderBy,
   limit,
-  onSnapshot,
   addDoc,
   serverTimestamp,
   Timestamp,
@@ -24,6 +22,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
