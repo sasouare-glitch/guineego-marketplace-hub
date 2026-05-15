@@ -97,12 +97,13 @@ export function useSecurity() {
       limit(50)
     );
 
-    const unsub = safeOnSnapshot(q, (snap) => {
+    const unsub = safeOnSnapshot(q, (snapshot) => {
+      const snap = snapshot as any;
       // Comptage par rôle
       const roleCounts: Record<string, number> = {};
-      const totalSnap = snap.docs.length;
+      const totalSnap = snap.docs?.length ?? 0;
 
-      const mapped: ActiveSession[] = snap.docs.map(d => {
+      const mapped: ActiveSession[] = snap.docs?.map((d: any) => {
         const data = d.data();
         const role = data.role ?? 'customer';
         roleCounts[role] = (roleCounts[role] ?? 0) + 1;
@@ -117,10 +118,10 @@ export function useSecurity() {
           lastIp: data.metadata?.lastIp ?? undefined,
           current: d.id === user?.uid,
         };
-      });
+      }) ?? [];
 
       // Sort client-side by last active time descending
-      mapped.sort((a, b) => {
+      mapped.sort((a: ActiveSession, b: ActiveSession) => {
         const aTime = a.lastActive?.toMillis?.() || 0;
         const bTime = b.lastActive?.toMillis?.() || 0;
         return bTime - aTime;
