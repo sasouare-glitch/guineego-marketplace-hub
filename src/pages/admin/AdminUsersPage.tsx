@@ -91,30 +91,28 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const usersQuery = query(
-        collection(db, 'users'),
-        orderBy('metadata.createdAt', 'desc'),
-        limit(200)
-      );
+      // Use simple query without orderBy to avoid composite-index crashes (Firestore b815/ca9 bug)
+      const usersQuery = query(collection(db, 'users'), limit(200));
       const snap = await getDocs(usersQuery);
       const usersData = snap.docs.map((d) => ({
         id: d.id,
         ...d.data()
       })) as FirestoreUser[];
+      // Sort client-side to avoid composite index requirements
+      usersData.sort((a, b) => {
+        const aTime = a.metadata?.createdAt?.toMillis?.() || 0;
+        const bTime = b.metadata?.createdAt?.toMillis?.() || 0;
+        return bTime - aTime;
+      });
       setUsers(usersData);
     } catch (error: any) {
       console.error('Error fetching users:', error);
-      // Fallback without orderBy in case some docs miss metadata.createdAt
-      try {
-        const fallback = await getDocs(query(collection(db, 'users'), limit(200)));
-        const usersData = fallback.docs.map((d) => ({
-          id: d.id,
-          ...d.data()
-        })) as FirestoreUser[];
-        setUsers(usersData);
-      } catch (e: any) {
-        console.error('Fallback users fetch failed:', e);
-        toast.error(e?.message || 'Erreur lors du chargement des utilisateurs');
+      // Catch the specific Firestore internal assertion errors
+      const isInternalAssertion = error?.message?.includes('INTERNAL ASSERTION FAILED');
+      if (isInternalAssertion) {
+        toast.error('Erreur interne Firestore. Essayez de vider le cache du navigateur et rafraîchir.');
+      } else {
+        toast.error(error?.message || 'Erreur lors du chargement des utilisateurs');
       }
     } finally {
       setLoading(false);

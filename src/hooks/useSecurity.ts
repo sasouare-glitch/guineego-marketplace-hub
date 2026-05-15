@@ -14,9 +14,7 @@ import {
   doc,
   query,
   where,
-  orderBy,
   limit,
-  onSnapshot,
   addDoc,
   serverTimestamp,
   Timestamp,
@@ -24,6 +22,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
+import { safeOnSnapshot } from '@/lib/firebase/safeSnapshot';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -90,21 +89,21 @@ export function useSecurity() {
   useEffect(() => {
     const cutoff = Timestamp.fromMillis(Date.now() - ACTIVE_THRESHOLD_MS);
 
+    // Simplified query: avoid composite orderBy to prevent Firestore b815/ca9 crashes.
+    // We filter client-side and sort manually.
     const q = query(
       collection(db, 'users'),
       where('metadata.lastLoginAt', '>=', cutoff),
-      orderBy('metadata.lastLoginAt', 'desc'),
       limit(50)
     );
 
-    let unsub: (() => void) | undefined;
-    try {
-      unsub = onSnapshot(q, (snap) => {
+    const unsub = safeOnSnapshot(q, (snapshot) => {
+      const snap = snapshot as any;
       // Comptage par rôle
       const roleCounts: Record<string, number> = {};
-      const totalSnap = snap.docs.length;
+      const totalSnap = snap.docs?.length ?? 0;
 
-      const mapped: ActiveSession[] = snap.docs.map(d => {
+      const mapped: ActiveSession[] = snap.docs?.map((d: any) => {
         const data = d.data();
         const role = data.role ?? 'customer';
         roleCounts[role] = (roleCounts[role] ?? 0) + 1;
@@ -119,6 +118,13 @@ export function useSecurity() {
           lastIp: data.metadata?.lastIp ?? undefined,
           current: d.id === user?.uid,
         };
+      }) ?? [];
+
+      // Sort client-side by last active time descending
+      mapped.sort((a: ActiveSession, b: ActiveSession) => {
+        const aTime = a.lastActive?.toMillis?.() || 0;
+        const bTime = b.lastActive?.toMillis?.() || 0;
+        return bTime - aTime;
       });
 
       setSessions(mapped);
@@ -155,49 +161,47 @@ export function useSecurity() {
     }, (err) => {
       console.error('useSecurity sessions error:', err);
       setLoadingSessions(false);
-    });
-    } catch (e) {
-      console.error('useSecurity: Failed to attach sessions listener:', e);
-      setLoadingSessions(false);
-    }
+    }, 'security-sessions');
 
-    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
+    return () => { try { unsub(); } catch (e) { /* ignore */ } };
   }, [user?.uid]);
 
   // ── Journal d'audit ───────────────────────────────────────────────────────
   useEffect(() => {
+    // Simplified query: avoid orderBy to prevent Firestore b815/ca9 crashes.
+    // Sort client-side.
     const q = query(
       collection(db, 'audit_logs'),
-      orderBy('createdAt', 'desc'),
       limit(100)
     );
 
-    let unsub: (() => void) | undefined;
-    try {
-      unsub = onSnapshot(q, (snap) => {
-        const logs: AuditLog[] = snap.docs.map(d => ({
-          id: d.id,
-          action: d.data().action ?? 'unknown',
-          uid: d.data().uid,
-          user: d.data().user ?? d.data().email ?? 'inconnu',
-          role: d.data().role ?? '—',
-          ip: d.data().ip,
-          details: d.data().details ?? '',
-          severity: d.data().severity ?? 'info',
-          createdAt: d.data().createdAt ?? null,
-        }));
-        setAuditLogs(logs);
-        setLoadingAudit(false);
-      }, (err) => {
-        console.error('useSecurity audit error:', err);
-        setLoadingAudit(false);
+    const unsub = safeOnSnapshot(q, (snapshot) => {
+      const snap = snapshot as any;
+      const logs: AuditLog[] = (snap.docs ?? []).map((d: any) => ({
+        id: d.id,
+        action: d.data().action ?? 'unknown',
+        uid: d.data().uid,
+        user: d.data().user ?? d.data().email ?? 'inconnu',
+        role: d.data().role ?? '—',
+        ip: d.data().ip,
+        details: d.data().details ?? '',
+        severity: d.data().severity ?? 'info',
+        createdAt: d.data().createdAt ?? null,
+      }));
+      // Sort client-side by createdAt descending
+      logs.sort((a: AuditLog, b: AuditLog) => {
+        const aTime = a.createdAt?.toMillis?.() || 0;
+        const bTime = b.createdAt?.toMillis?.() || 0;
+        return bTime - aTime;
       });
-    } catch (e) {
-      console.error('useSecurity: Failed to attach audit listener:', e);
+      setAuditLogs(logs);
       setLoadingAudit(false);
-    }
+    }, (err) => {
+      console.error('useSecurity audit error:', err);
+      setLoadingAudit(false);
+    }, 'security-audit');
 
-    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
+    return () => { try { unsub(); } catch (e) { /* ignore */ } };
   }, []);
 
   // ── Écriture d'un événement d'audit ──────────────────────────────────────
