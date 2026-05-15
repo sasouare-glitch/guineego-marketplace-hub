@@ -63,6 +63,13 @@ service cloud.firestore {
     function isCloser() {
       return hasRole('closer') || isAdmin();
     }
+
+    function isActiveLessor() {
+      return isLessor() && (
+        !exists(/databases/$(database)/documents/lessors/$(request.auth.uid)) ||
+        get(/databases/$(database)/documents/lessors/$(request.auth.uid)).data.status != 'revoked'
+      );
+    }
     
     // Check if target user document has admin role (for super_user restriction)
     function isTargetAdmin(userId) {
@@ -349,6 +356,16 @@ service cloud.firestore {
       allow create: if isOwner(courierId) && isCourier();
       allow delete: if false;
     }
+
+    // ============================================
+    // LESSORS COLLECTION
+    // ============================================
+    match /lessors/{lessorId} {
+      allow read: if isOwner(lessorId) || isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isStrictAdmin();
+    }
     
     // ============================================
     // SMS LOGS (Admin only)
@@ -557,19 +574,19 @@ service cloud.firestore {
       return hasRole('lessor') || hasRoleInDoc('lessor') || isAdmin();
     }
 
-    // Rental items: lecture publique des actifs ; création/maj par le propriétaire ; suppression admin/proprio
+    // Rental items: public read; create/update by active owner only; delete by active owner or strict admin
     match /rental_items/{itemId} {
       allow read: if true;
-      allow create: if isLessor() && request.resource.data.ownerId == request.auth.uid;
-      allow update: if isAuthenticated() && (resource.data.ownerId == request.auth.uid || isAdmin());
-      allow delete: if isAuthenticated() && (resource.data.ownerId == request.auth.uid || isStrictAdmin());
+      allow create: if isActiveLessor() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isAuthenticated() && ((isActiveLessor() && resource.data.ownerId == request.auth.uid) || isAdmin());
+      allow delete: if isAuthenticated() && ((isActiveLessor() && resource.data.ownerId == request.auth.uid) || isStrictAdmin());
     }
 
     // Rental bookings: créées strictement par Cloud Functions (cohérent orders/payments)
     match /rental_bookings/{bookingId} {
       allow read: if isAuthenticated() && (
         resource.data.renterId == request.auth.uid ||
-        resource.data.ownerId == request.auth.uid ||
+        (resource.data.ownerId == request.auth.uid && isActiveLessor()) ||
         isAdmin()
       );
       allow create: if false;
@@ -588,7 +605,7 @@ service cloud.firestore {
     match /rental_disputes/{disputeId} {
       allow read: if isAuthenticated() && (
         resource.data.renterId == request.auth.uid ||
-        resource.data.ownerId == request.auth.uid ||
+        (resource.data.ownerId == request.auth.uid && isActiveLessor()) ||
         isAdmin()
       );
       allow create: if isAuthenticated();
