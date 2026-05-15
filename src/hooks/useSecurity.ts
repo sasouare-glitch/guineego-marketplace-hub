@@ -89,16 +89,15 @@ export function useSecurity() {
   useEffect(() => {
     const cutoff = Timestamp.fromMillis(Date.now() - ACTIVE_THRESHOLD_MS);
 
+    // Simplified query: avoid composite orderBy to prevent Firestore b815/ca9 crashes.
+    // We filter client-side and sort manually.
     const q = query(
       collection(db, 'users'),
       where('metadata.lastLoginAt', '>=', cutoff),
-      orderBy('metadata.lastLoginAt', 'desc'),
       limit(50)
     );
 
-    let unsub: (() => void) | undefined;
-    try {
-      unsub = onSnapshot(q, (snap) => {
+    const unsub = safeOnSnapshot(q, (snap) => {
       // Comptage par rôle
       const roleCounts: Record<string, number> = {};
       const totalSnap = snap.docs.length;
@@ -118,6 +117,13 @@ export function useSecurity() {
           lastIp: data.metadata?.lastIp ?? undefined,
           current: d.id === user?.uid,
         };
+      });
+
+      // Sort client-side by last active time descending
+      mapped.sort((a, b) => {
+        const aTime = a.lastActive?.toMillis?.() || 0;
+        const bTime = b.lastActive?.toMillis?.() || 0;
+        return bTime - aTime;
       });
 
       setSessions(mapped);
@@ -154,13 +160,9 @@ export function useSecurity() {
     }, (err) => {
       console.error('useSecurity sessions error:', err);
       setLoadingSessions(false);
-    });
-    } catch (e) {
-      console.error('useSecurity: Failed to attach sessions listener:', e);
-      setLoadingSessions(false);
-    }
+    }, 'security-sessions');
 
-    return () => { try { unsub?.(); } catch (e) { /* ignore */ } };
+    return () => { try { unsub(); } catch (e) { /* ignore */ } };
   }, [user?.uid]);
 
   // ── Journal d'audit ───────────────────────────────────────────────────────
