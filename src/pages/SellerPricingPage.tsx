@@ -23,6 +23,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SELLER_PLANS } from "@/constants/sellerPlans";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const planIcons = {
   free: <Package className="h-8 w-8 text-muted-foreground" />,
@@ -30,34 +31,29 @@ const planIcons = {
   business: <Crown className="h-8 w-8 text-accent" />,
 };
 
-const faqs = [
-  {
-    q: "Puis-je changer de plan à tout moment ?",
-    a: "Oui, vous pouvez passer à un plan supérieur ou inférieur à tout moment. Le changement prend effet immédiatement.",
-  },
-  {
-    q: "Comment puis-je payer mon abonnement ?",
-    a: "Vous pouvez payer via Orange Money, MTN MoMo ou carte bancaire. Le paiement est sécurisé et immédiat.",
-  },
-  {
-    q: "Y a-t-il des frais cachés ?",
-    a: "Non, il n'y a aucun frais caché. Le prix affiché est le seul coût mensuel de votre abonnement, en plus de la commission standard sur les ventes.",
-  },
-  {
-    q: "Que se passe-t-il si je dépasse la limite de produits ?",
-    a: "Vous recevrez une alerte lorsque vous approcherez de la limite. Pour ajouter plus de produits, vous devrez passer à un plan supérieur.",
-  },
-  {
-    q: "Puis-je annuler mon abonnement ?",
-    a: "Oui, vous pouvez annuler à tout moment depuis votre tableau de bord. Vous conservez l'accès jusqu'à la fin de la période payée.",
-  },
-];
-
 export default function SellerPricingPage() {
+  const { t, language } = useTranslation();
+  const p = t.pages.sellerPricing;
+
   const formatPrice = (price: number) => {
-    if (price === 0) return "Gratuit";
-    return `${price.toLocaleString("fr-GN")} GNF`;
+    if (price === 0) return p.free;
+    const locale = language === "fr" ? "fr-GN" : language === "zh" ? "zh-CN" : language === "nqo" ? "fr-GN" : "en-US";
+    return `${price.toLocaleString(locale)} GNF`;
   };
+
+  const faqs = [
+    { q: p.faq1Q, a: p.faq1A },
+    { q: p.faq2Q, a: p.faq2A },
+    { q: p.faq3Q, a: p.faq3A },
+    { q: p.faq4Q, a: p.faq4A },
+    { q: p.faq5Q, a: p.faq5A },
+  ];
+
+  const commissionItems = [
+    { label: p.planFree, value: "5%" },
+    { label: p.planPro, value: "4%" },
+    { label: p.planBusiness, value: "3%" },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,26 +70,26 @@ export default function SellerPricingPage() {
             >
               <Badge variant="secondary" className="mb-4">
                 <TrendingUp className="mr-1 h-3 w-3" />
-                Tarification vendeur
+                {p.badge}
               </Badge>
               <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-                Choisissez le plan{" "}
+                {p.heroTitle1}{" "}
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  adapté à votre business
+                  {p.heroTitle2}
                 </span>
               </h1>
               <p className="mb-8 text-lg text-muted-foreground md:text-xl">
-                Des solutions flexibles pour les vendeurs de toutes tailles. Commencez gratuitement et évoluez selon vos besoins.
+                {p.heroDescription}
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <Button asChild size="lg">
                   <Link to="/sell/start">
-                    Commencer gratuitement
+                    {p.ctaStartFree}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline">
-                  <Link to="/seller/guide">Guide du vendeur</Link>
+                  <Link to="/seller/guide">{p.ctaGuide}</Link>
                 </Button>
               </div>
             </motion.div>
@@ -104,12 +100,8 @@ export default function SellerPricingPage() {
         <section className="py-16 lg:py-24">
           <div className="container mx-auto px-4">
             <div className="mx-auto mb-12 max-w-2xl text-center">
-              <h2 className="mb-3 text-3xl font-bold md:text-4xl">
-                Nos forfaits vendeur
-              </h2>
-              <p className="text-muted-foreground">
-                De la boutique en ligne gratuite à la solution entreprise, trouvez celui qui vous convient.
-              </p>
+              <h2 className="mb-3 text-3xl font-bold md:text-4xl">{p.plansTitle}</h2>
+              <p className="text-muted-foreground">{p.plansSubtitle}</p>
             </div>
             <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
               {SELLER_PLANS.map((plan, i) => (
@@ -129,7 +121,7 @@ export default function SellerPricingPage() {
                     {plan.recommended && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                         <Badge className="bg-primary text-primary-foreground shadow-md">
-                          Recommandé
+                          {p.recommended}
                         </Badge>
                       </div>
                     )}
@@ -142,7 +134,7 @@ export default function SellerPricingPage() {
                           {formatPrice(plan.price)}
                         </span>
                         {plan.price > 0 && (
-                          <span className="text-muted-foreground text-sm"> /mois</span>
+                          <span className="text-muted-foreground text-sm"> {p.perMonth}</span>
                         )}
                       </CardDescription>
                     </CardHeader>
@@ -165,7 +157,7 @@ export default function SellerPricingPage() {
                         variant={plan.recommended ? "default" : "secondary"}
                       >
                         <Link to="/register">
-                          {plan.price === 0 ? "Commencer gratuitement" : "Choisir ce plan"}
+                          {plan.price === 0 ? p.ctaStartFree : p.choosePlan}
                         </Link>
                       </Button>
                     </CardFooter>
@@ -187,20 +179,12 @@ export default function SellerPricingPage() {
             >
               <Badge variant="secondary" className="mb-4">
                 <ShieldCheck className="mr-1 h-3 w-3" />
-                Commissions transparentes
+                {p.commissionBadge}
               </Badge>
-              <h2 className="mb-4 text-3xl font-bold md:text-4xl">
-                Une commission simple et claire
-              </h2>
-              <p className="mb-8 text-muted-foreground">
-                Sarematy prélève une commission sur chaque vente pour couvrir les frais de paiement, de livraison et de plateforme. Le reste est à vous.
-              </p>
+              <h2 className="mb-4 text-3xl font-bold md:text-4xl">{p.commissionTitle}</h2>
+              <p className="mb-8 text-muted-foreground">{p.commissionDesc}</p>
               <div className="grid gap-4 md:grid-cols-3">
-                {[
-                  { label: "Plan Gratuit", value: "5%" },
-                  { label: "Plan Pro", value: "4%" },
-                  { label: "Plan Business", value: "3%" },
-                ].map((item, i) => (
+                {commissionItems.map((item, i) => (
                   <motion.div
                     key={item.label}
                     initial={{ opacity: 0, y: 20 }}
@@ -211,7 +195,7 @@ export default function SellerPricingPage() {
                   >
                     <p className="text-sm text-muted-foreground mb-1">{item.label}</p>
                     <p className="text-3xl font-bold text-foreground">{item.value}</p>
-                    <p className="text-xs text-muted-foreground mt-1">de commission par vente</p>
+                    <p className="text-xs text-muted-foreground mt-1">{p.commissionPerSale}</p>
                   </motion.div>
                 ))}
               </div>
@@ -226,21 +210,15 @@ export default function SellerPricingPage() {
               <div className="mb-10 text-center">
                 <Badge variant="secondary" className="mb-3">
                   <HelpCircle className="mr-1 h-3 w-3" />
-                  Questions fréquentes
+                  {p.faqBadge}
                 </Badge>
-                <h2 className="mb-3 text-3xl font-bold md:text-4xl">
-                  Tout savoir sur nos forfaits
-                </h2>
+                <h2 className="mb-3 text-3xl font-bold md:text-4xl">{p.faqTitle}</h2>
               </div>
               <Accordion type="single" collapsible className="w-full">
                 {faqs.map((faq, i) => (
                   <AccordionItem key={i} value={`item-${i}`}>
-                    <AccordionTrigger className="text-left">
-                      {faq.q}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground">
-                      {faq.a}
-                    </AccordionContent>
+                    <AccordionTrigger className="text-left">{faq.q}</AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground">{faq.a}</AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>
@@ -253,15 +231,11 @@ export default function SellerPricingPage() {
           <div className="container mx-auto px-4">
             <Card className="overflow-hidden border-0 bg-gradient-to-br from-primary to-accent text-primary-foreground">
               <CardContent className="p-10 text-center md:p-14">
-                <h2 className="mb-3 text-3xl font-bold md:text-4xl">
-                  Prêt à lancer votre boutique ?
-                </h2>
-                <p className="mx-auto mb-6 max-w-xl opacity-90">
-                  Rejoignez des centaines de vendeurs qui développent leur activité grâce à Sarematy.
-                </p>
+                <h2 className="mb-3 text-3xl font-bold md:text-4xl">{t.pages.sellerGuide.ctaTitle}</h2>
+                <p className="mx-auto mb-6 max-w-xl opacity-90">{t.pages.sellerGuide.ctaDesc}</p>
                 <Button asChild size="lg" variant="secondary">
                   <Link to="/sell/start">
-                    Ouvrir ma boutique
+                    {t.pages.sellerGuide.ctaButton}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
