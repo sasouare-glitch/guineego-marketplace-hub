@@ -138,7 +138,7 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container-tight py-6">
+      <main className="container-tight pt-20 lg:pt-32 py-6">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/marketplace" className="hover:text-foreground">{t.nav.home}</Link>
