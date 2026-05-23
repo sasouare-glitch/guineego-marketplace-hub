@@ -320,7 +320,7 @@ export default function AdminUsersPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="icon" onClick={fetchUsers} disabled={loading} title="Actualiser">
+                <Button variant="outline" size="icon" onClick={() => fetchUsers()} disabled={loading} title="Actualiser">
                   <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 </Button>
               </div>
