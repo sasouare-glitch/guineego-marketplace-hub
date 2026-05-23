@@ -38,6 +38,7 @@ import CourierSettingsPage from "./pages/courier/CourierSettingsPage";
 import CourierHelpPage from "./pages/courier/CourierHelpPage";
 import CourierScanPage from "./pages/courier/CourierScanPage";
 import Marketplace from "./pages/Marketplace";
+import CategoriesPage from "./pages/CategoriesPage";
 import SearchPage from "./pages/SearchPage";
 import ProductDetail from "./pages/ProductDetail";
 import CartPage from "./pages/CartPage";
@@ -147,7 +148,8 @@ const App = () => (
                     <Route path="/auth/forgot-password" element={<Navigate to="/forgot-password" replace />} />
                     
                     {/* Client Marketplace Routes (Public) */}
-                    <Route path="/marketplace" element={<Marketplace />} />
+                   <Route path="/marketplace" element={<Marketplace />} />
+                   <Route path="/categories" element={<CategoriesPage />} />
                     <Route path="/search" element={<SearchPage />} />
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/academy" element={<Academy />} />
