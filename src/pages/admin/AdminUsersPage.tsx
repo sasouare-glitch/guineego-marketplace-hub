@@ -336,10 +336,17 @@ export default function AdminUsersPage() {
                 <AlertTriangle className="h-10 w-10 text-destructive" />
                 <p className="font-medium text-foreground">Impossible de charger les utilisateurs</p>
                 <p className="max-w-md text-sm text-muted-foreground">{error}</p>
-                <Button onClick={fetchUsers} disabled={loading} className="mt-2">
-                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-                  Réessayer
-                </Button>
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                  <Button onClick={() => fetchUsers()} disabled={loading}>
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                    Réessayer
+                  </Button>
+                  {error?.toLowerCase().includes('cache') && (
+                    <Button variant="outline" onClick={recoverFirestoreCache} disabled={loading}>
+                      Réparer le cache
+                    </Button>
+                  )}
+                </div>
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
