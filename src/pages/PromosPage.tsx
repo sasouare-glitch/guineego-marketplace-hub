@@ -42,14 +42,14 @@ export default function PromosPage() {
               <Flame className="w-8 h-8" />
             </motion.div>
             <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-              Promotions & Ventes Flash
+              {t.pages.promos.title}
             </h1>
             <p className="text-white/90 max-w-2xl mx-auto text-lg">
-              Profitez des meilleures réductions sur une sélection de produits.
+              {t.pages.promos.description}
             </p>
             <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur rounded-full text-sm font-semibold">
               <Tag className="w-4 h-4" />
-              {promos.length} {promos.length > 1 ? "offres disponibles" : "offre disponible"}
+              {promos.length} {promos.length > 1 ? t.pages.promos.offersAvailable : t.pages.promos.offerAvailable}
             </div>
           </div>
         </section>
@@ -65,8 +65,8 @@ export default function PromosPage() {
           ) : promos.length === 0 ? (
             <div className="text-center py-16">
               <Tag className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h2 className="font-display text-xl font-bold mb-2">Aucune promotion en cours</h2>
-              <p className="text-muted-foreground">Revenez bientôt pour découvrir nos prochaines offres.</p>
+              <h2 className="font-display text-xl font-bold mb-2">{t.pages.promos.empty}</h2>
+              <p className="text-muted-foreground">{t.pages.promos.emptyHint}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
