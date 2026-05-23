@@ -11,7 +11,7 @@ import { setUserClaims, UserRole } from '../utils/auth';
 
 const db = admin.firestore();
 
-const BOOTSTRAP_SECRET = 'makiity-admin-setup-2024';
+const BOOTSTRAP_SECRET = 'sarematy-admin-setup-2024';
 const VALID_ROLES: UserRole[] = ['customer', 'ecommerce', 'courier', 'closer', 'investor', 'admin'];
 
 export const bootstrapRole = functions

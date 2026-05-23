@@ -14,7 +14,7 @@ interface Props {
   buttonLabel?: string;
 }
 
-const RECENT_KEY = "makiity_recent_searches";
+const RECENT_KEY = "sarematy_recent_searches";
 const MAX_RECENT = 6;
 
 function loadRecent(): string[] {

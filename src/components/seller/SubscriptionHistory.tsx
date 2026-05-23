@@ -66,7 +66,7 @@ async function generateInvoicePDF(payment: SubscriptionPayment) {
   }
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('Makiity', 46, 25);
+  doc.text('Sarematy', 46, 25);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(120, 120, 120);
@@ -135,11 +135,11 @@ async function generateInvoicePDF(payment: SubscriptionPayment) {
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(150, 150, 150);
-  doc.text('Makiity SAS — Conakry, Guinée', 20, 270);
-  doc.text('support@makiity.com | www.makiity.com', 20, 275);
+  doc.text('Sarematy SAS — Conakry, Guinée', 20, 270);
+  doc.text('support@sarematy.com | www.sarematy.com', 20, 275);
   doc.text('Ce document est généré automatiquement et fait office de justificatif de paiement.', 20, 280);
 
-  doc.save(`facture-makiity-${invoiceNum}.pdf`);
+  doc.save(`facture-sarematy-${invoiceNum}.pdf`);
   toast.success('Facture téléchargée');
 }
 

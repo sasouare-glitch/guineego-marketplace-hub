@@ -13,7 +13,7 @@ const db = admin.firestore();
 
 // Commission rates
 const COMMISSION_RATES = {
-  makiity: 0.05,      // 5% commission Makiity
+  sarematy: 0.05,      // 5% commission Sarematy
   deliveryBase: 10000, // Frais de livraison de base (GNF)
   deliveryPerKm: 1000, // Par km additionnel
 };
@@ -119,7 +119,7 @@ export const transferToEcommercant = functions
             amount: payout.netAmount,
             grossAmount: payout.amount,
             commission: payout.commission,
-            commissionRate: COMMISSION_RATES.makiity,
+            commissionRate: COMMISSION_RATES.sarematy,
             balanceBefore: currentBalance,
             balanceAfter: newBalance,
             description: `Vente commande ${orderId}`,
@@ -269,7 +269,7 @@ async function calculateSellerPayouts(
 
   // Calculate commissions
   for (const payout of sellerItems.values()) {
-    payout.commission = Math.round(payout.amount * COMMISSION_RATES.makiity);
+    payout.commission = Math.round(payout.amount * COMMISSION_RATES.sarematy);
     payout.netAmount = payout.amount - payout.commission;
   }
 

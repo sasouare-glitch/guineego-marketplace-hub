@@ -110,7 +110,7 @@ export default function PublicOrderTrackingPage() {
             <Link to="/marketplace">
               <Button className="mt-2">
                 <ShoppingBag className="w-4 h-4 mr-2" />
-                Visiter Makiity
+                Visiter Sarematy
               </Button>
             </Link>
           </CardContent>
@@ -153,7 +153,7 @@ export default function PublicOrderTrackingPage() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">G</span>
             </div>
-            <span className="font-display font-bold text-foreground">Makiity</span>
+            <span className="font-display font-bold text-foreground">Sarematy</span>
           </Link>
           <Badge variant="outline" className="text-xs">
             Suivi public
@@ -296,7 +296,7 @@ export default function PublicOrderTrackingPage() {
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-display font-bold text-foreground">
-                    Créez votre compte Makiity
+                    Créez votre compte Sarematy
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     Retrouvez facilement toutes vos commandes, enregistrez vos adresses et profitez d'offres exclusives.
@@ -353,7 +353,7 @@ export default function PublicOrderTrackingPage() {
 
       {/* Minimal footer */}
       <footer className="border-t mt-8 py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Makiity — Tous droits réservés
+        © {new Date().getFullYear()} Sarematy — Tous droits réservés
       </footer>
     </div>
   );

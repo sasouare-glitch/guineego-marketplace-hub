@@ -8,7 +8,7 @@ import logoGuineego from "@/assets/logo-guineego.png";
 
 export function CTASection() {
   const { t } = useTranslation();
-  const siteUrl = typeof window !== "undefined" ? window.location.origin : "https://makiity.com";
+  const siteUrl = typeof window !== "undefined" ? window.location.origin : "https://sarematy.com";
 
   return (
     <section className="section-padding bg-hero-gradient relative overflow-hidden">

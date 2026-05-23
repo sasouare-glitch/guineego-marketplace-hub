@@ -1,5 +1,5 @@
 /**
- * Makiity - Cloud Functions Entry Point
+ * Sarematy - Cloud Functions Entry Point
  * Architecture 100% Firebase-native
  */
 

@@ -75,7 +75,7 @@ export async function sendNotification(payload: NotificationPayload): Promise<vo
           android: {
             priority: 'high',
             notification: {
-              channelId: 'makiity_notifications',
+              channelId: 'sarematy_notifications',
               sound: 'default'
             }
           },

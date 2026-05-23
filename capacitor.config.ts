@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.lovable.604177a7390446d8a552a5c8498bae13',
-  appName: 'Makiity',
+  appName: 'Sarematy',
   webDir: 'dist',
   
   // Hot reload from Lovable preview during development

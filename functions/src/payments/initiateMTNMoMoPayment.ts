@@ -141,7 +141,7 @@ export const initiateMTNMoMoPayment = functions
           partyIdType: 'MSISDN',
           partyId: formatMSISDN(phone),
         },
-        payerMessage: `Abonnement ${planName} - Makiity`,
+        payerMessage: `Abonnement ${planName} - Sarematy`,
         payeeNote: `sub_${sellerId}_${paymentDocId}`,
       };
 

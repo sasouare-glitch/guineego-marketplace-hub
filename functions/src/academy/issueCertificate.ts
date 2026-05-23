@@ -97,7 +97,7 @@ export const issueCertificate = functions
         issuedAt: admin.firestore.FieldValue.serverTimestamp(),
         completedAt: enrollment.completedAt,
         averageQuizScore: calculateAverageScore(enrollment.quizScores),
-        verificationUrl: `https://makiity.com/verify/${certId}`
+        verificationUrl: `https://sarematy.com/verify/${certId}`
       });
 
       // Update enrollment
@@ -122,7 +122,7 @@ export const issueCertificate = functions
       return {
         success: true,
         certificateId: certId,
-        verificationUrl: `https://makiity.com/verify/${certId}`,
+        verificationUrl: `https://sarematy.com/verify/${certId}`,
         message: 'Certificat émis avec succès'
       };
 

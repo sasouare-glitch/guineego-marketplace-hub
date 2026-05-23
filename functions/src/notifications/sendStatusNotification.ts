@@ -144,7 +144,7 @@ async function sendStatusSMS(
   msg: { sms: string }
 ): Promise<void> {
   const formattedPhone = formatGuineaPhone(phone);
-  const smsMessage = `Makiity: ${msg.sms} Commande ${orderId}. Suivi: ${APP_URL}/order/${orderId}`;
+  const smsMessage = `Sarematy: ${msg.sms} Commande ${orderId}. Suivi: ${APP_URL}/order/${orderId}`;
   const logRef = db.collection('sms_logs').doc();
   const logBase = {
     type: `status_${status}`,

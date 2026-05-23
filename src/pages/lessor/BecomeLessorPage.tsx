@@ -161,7 +161,7 @@ export default function BecomeLessorPage() {
           <div className="container-tight text-center">
             <Badge variant="secondary" className="mb-4">Programme Loueur</Badge>
             <h1 className="text-4xl md:text-5xl font-display font-bold mb-4">
-              Devenir loueur sur Makiity
+              Devenir loueur sur Sarematy
             </h1>
             <p className="text-lg text-primary-foreground/85 max-w-2xl mx-auto">
               Mettez votre matériel en location et générez un revenu complémentaire en toute sécurité.

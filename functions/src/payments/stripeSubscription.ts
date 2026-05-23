@@ -69,15 +69,15 @@ export const createStripeSubscriptionCheckout = functions
               currency: 'gnf',
               unit_amount: Math.round(payment.amount),
               product_data: {
-                name: `Abonnement Makiity - ${planId}`,
+                name: `Abonnement Sarematy - ${planId}`,
                 description: `Plan ${planId} pour 30 jours`,
               },
             },
             quantity: 1,
           },
         ],
-        success_url: successUrl || `https://makiity.web.app/seller/subscription?payment=success`,
-        cancel_url: cancelUrl || `https://makiity.web.app/seller/subscription?payment=cancelled`,
+        success_url: successUrl || `https://sarematy.web.app/seller/subscription?payment=success`,
+        cancel_url: cancelUrl || `https://sarematy.web.app/seller/subscription?payment=cancelled`,
       });
 
       await paymentRef.update({

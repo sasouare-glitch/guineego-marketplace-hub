@@ -46,7 +46,7 @@ export default function TrackOrderPage() {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">G</span>
             </div>
-            <span className="font-display font-bold text-foreground">Makiity</span>
+            <span className="font-display font-bold text-foreground">Sarematy</span>
           </Link>
           <Link to="/marketplace">
             <Button variant="ghost" size="sm">
@@ -149,7 +149,7 @@ export default function TrackOrderPage() {
       </main>
 
       <footer className="border-t mt-auto py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Makiity — Tous droits réservés
+        © {new Date().getFullYear()} Sarematy — Tous droits réservés
       </footer>
     </div>
   );

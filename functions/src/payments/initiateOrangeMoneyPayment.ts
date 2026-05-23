@@ -148,8 +148,8 @@ export const initiateOrangeMoneyPayment = functions
         currency: 'GNF',
         order_id: orderId,
         amount: amount,
-        return_url: omConfig.return_url || 'https://makiity.web.app/seller/subscription',
-        cancel_url: omConfig.cancel_url || 'https://makiity.web.app/seller/subscription',
+        return_url: omConfig.return_url || 'https://sarematy.web.app/seller/subscription',
+        cancel_url: omConfig.cancel_url || 'https://sarematy.web.app/seller/subscription',
         notif_url: notifyUrl, // Webhook callback URL
         lang: 'fr',
         reference: `sub_${sellerId}_${orderId}`,

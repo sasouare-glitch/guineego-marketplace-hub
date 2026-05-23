@@ -15,7 +15,7 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent/20 hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        // Makiity Custom Variants
+        // Sarematy Custom Variants
         hero: "bg-primary-gradient text-primary-foreground shadow-primary hover:shadow-lg hover:-translate-y-1 transition-all duration-300",
         heroOutline: "border-2 border-primary-foreground bg-transparent text-primary-foreground hover:bg-primary-foreground/10 backdrop-blur-sm",
         accent: "bg-accent-gradient text-accent-foreground shadow-accent hover:shadow-lg hover:-translate-y-0.5",

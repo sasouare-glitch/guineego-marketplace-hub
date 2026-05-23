@@ -224,7 +224,7 @@ const InvestPage = () => {
             custom={0}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Pourquoi investir avec Makiity ?
+              Pourquoi investir avec Sarematy ?
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
               Une plateforme conçue pour maximiser vos rendements en toute sécurité
@@ -425,7 +425,7 @@ const InvestPage = () => {
               {
                 name: "Fatoumata C.",
                 role: "Investisseuse depuis 2023",
-                quote: "La transparence de Makiity m'a convaincue. Je reçois des rapports détaillés chaque trimestre et mon conseiller est toujours disponible.",
+                quote: "La transparence de Sarematy m'a convaincue. Je reçois des rapports détaillés chaque trimestre et mon conseiller est toujours disponible.",
               },
               {
                 name: "Mohamed D.",
@@ -479,7 +479,7 @@ const InvestPage = () => {
               Faites fructifier votre capital
             </h2>
             <p className="text-lg opacity-80 mb-8 max-w-xl mx-auto">
-              Rejoignez +150 investisseurs qui font confiance à Makiity.
+              Rejoignez +150 investisseurs qui font confiance à Sarematy.
               Investissement minimum : 500 000 GNF.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
