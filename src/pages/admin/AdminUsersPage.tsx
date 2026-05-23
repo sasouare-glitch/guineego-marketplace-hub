@@ -91,6 +91,7 @@ export default function AdminUsersPage() {
   // Fetch users (one-shot, resilient against SDK listener crashes)
   const fetchUsers = async () => {
     setLoading(true);
+    setError(null);
     try {
       // Use simple query without orderBy to avoid composite-index crashes (Firestore b815/ca9 bug)
       const usersQuery = query(collection(db, 'users'), limit(200));
@@ -110,11 +111,11 @@ export default function AdminUsersPage() {
       console.error('Error fetching users:', error);
       // Catch the specific Firestore internal assertion errors
       const isInternalAssertion = error?.message?.includes('INTERNAL ASSERTION FAILED');
-      if (isInternalAssertion) {
-        toast.error('Erreur interne Firestore. Essayez de vider le cache du navigateur et rafraîchir.');
-      } else {
-        toast.error(error?.message || 'Erreur lors du chargement des utilisateurs');
-      }
+      const friendlyMessage = isInternalAssertion
+        ? 'Erreur interne Firestore. Veuillez vider le cache du navigateur et rafraîchir la page.'
+        : (error?.message || 'Impossible de charger les utilisateurs. Vérifiez votre connexion et réessayez.');
+      setError(friendlyMessage);
+      toast.error(friendlyMessage);
     } finally {
       setLoading(false);
     }
