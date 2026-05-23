@@ -13,6 +13,7 @@ import React from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SellStartPage from "./pages/SellStartPage";
+import SellerGuidePage from "./pages/SellerGuidePage";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerProducts from "./pages/seller/SellerProducts";
 import SellerOrders from "./pages/seller/SellerOrders";
@@ -158,6 +159,7 @@ const App = () => (
                     <Route path="/academy" element={<Academy />} />
                     <Route path="/academy/course/:id" element={<CourseDetail />} />
                     <Route path="/sell/start" element={<SellStartPage />} />
+                    <Route path="/seller/guide" element={<SellerGuidePage />} />
                     <Route path="/delivery" element={<DeliveryPage />} />
                     <Route path="/payment" element={<PaymentPage />} />
                     <Route path="/protection" element={<ProtectionPage />} />
