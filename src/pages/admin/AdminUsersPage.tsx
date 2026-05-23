@@ -79,6 +79,7 @@ export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<FirestoreUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<FirestoreUser | null>(null);
