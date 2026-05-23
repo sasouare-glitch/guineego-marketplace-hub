@@ -141,7 +141,7 @@ const allCourses: Course[] = [
   },
 ];
 
-const categories = [
+const categoriesRaw = [
   "Tous",
   "E-commerce",
   "Marketing",
@@ -153,8 +153,15 @@ const categories = [
 ];
 
 const Academy = () => {
+  const { t } = useTranslation();
+  const a = t.pages.academy;
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("Tous");
+
+  const categories = categoriesRaw.map((c) => ({
+    raw: c,
+    label: c === "Tous" ? a.categoryAll : c,
+  }));
 
   const filteredCourses = allCourses.filter((course) => {
     const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
