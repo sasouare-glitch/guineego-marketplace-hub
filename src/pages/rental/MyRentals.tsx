@@ -229,7 +229,7 @@ export default function MyRentals() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background pt-20 lg:pt-32">
         <section className="container mx-auto px-4 py-6 md:py-10">
           <div className="flex items-center justify-between gap-3 mb-6">
             <div>
