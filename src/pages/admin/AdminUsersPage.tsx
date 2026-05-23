@@ -310,6 +310,16 @@ export default function AdminUsersPage() {
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
               </div>
+            ) : error && users.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                <AlertTriangle className="h-10 w-10 text-destructive" />
+                <p className="font-medium text-foreground">Impossible de charger les utilisateurs</p>
+                <p className="max-w-md text-sm text-muted-foreground">{error}</p>
+                <Button onClick={fetchUsers} disabled={loading} className="mt-2">
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                  Réessayer
+                </Button>
+              </div>
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 Aucun utilisateur trouvé
