@@ -155,7 +155,7 @@ export default function BecomeLessorPage() {
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 pt-20">
         {/* Hero */}
         <section className="bg-hero-gradient text-primary-foreground py-16">
           <div className="container-tight text-center">
