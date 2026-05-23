@@ -107,14 +107,24 @@ export default function AdminUsersPage() {
         return bTime - aTime;
       });
       setUsers(usersData);
-    } catch (error: any) {
-      console.error('Error fetching users:', error);
-      // Catch the specific Firestore internal assertion errors
-      const isInternalAssertion = error?.message?.includes('INTERNAL ASSERTION FAILED');
-      const friendlyMessage = isInternalAssertion
-        ? 'Erreur interne Firestore. Veuillez vider le cache du navigateur et rafraîchir la page.'
-        : (error?.message || 'Impossible de charger les utilisateurs. Vérifiez votre connexion et réessayez.');
+    } catch (err: any) {
+      console.error('Error fetching users:', err);
+      const code = err?.code || '';
+      const msg = err?.message || '';
+      let friendlyMessage = 'Impossible de charger les utilisateurs. Vérifiez votre connexion et réessayez.';
+      if (msg.includes('INTERNAL ASSERTION FAILED')) {
+        friendlyMessage = 'Erreur interne du cache de la base de données. Videz le cache du navigateur et rafraîchissez la page.';
+      } else if (code === 'permission-denied' || msg.toLowerCase().includes('permission')) {
+        friendlyMessage = "Accès refusé : votre compte n'a pas les droits administrateur pour lister les utilisateurs.";
+      } else if (code === 'unavailable' || msg.toLowerCase().includes('offline') || msg.toLowerCase().includes('network')) {
+        friendlyMessage = 'Service indisponible ou hors ligne. Vérifiez votre connexion Internet et réessayez.';
+      } else if (code === 'failed-precondition') {
+        friendlyMessage = 'Requête invalide (index manquant). Contactez le support technique.';
+      } else if (msg) {
+        friendlyMessage = `Erreur : ${msg}`;
+      }
       setError(friendlyMessage);
+      setUsers([]);
       toast.error(friendlyMessage);
     } finally {
       setLoading(false);
@@ -299,6 +309,16 @@ export default function AdminUsersPage() {
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : error && users.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+                <AlertTriangle className="h-10 w-10 text-destructive" />
+                <p className="font-medium text-foreground">Impossible de charger les utilisateurs</p>
+                <p className="max-w-md text-sm text-muted-foreground">{error}</p>
+                <Button onClick={fetchUsers} disabled={loading} className="mt-2">
+                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                  Réessayer
+                </Button>
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
