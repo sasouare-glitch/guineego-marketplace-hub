@@ -120,6 +120,8 @@ const courseResources: Resource[] = [
 ];
 
 const CourseDetail = () => {
+  const { t } = useTranslation();
+  const cd = t.pages.courseDetail;
   const { id } = useParams();
   const [currentLessonId, setCurrentLessonId] = useState("l5");
   const [isEnrolled, setIsEnrolled] = useState(true);
