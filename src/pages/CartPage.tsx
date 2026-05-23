@@ -59,7 +59,7 @@ const CartPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container-tight py-6">
+      <main className="container-tight pt-20 lg:pt-32 py-6">
         <h1 className="font-display text-2xl font-bold mb-6">
           {t.cart.title} ({itemCount} {itemCount > 1 ? t.cart.articles : t.cart.article})
         </h1>
