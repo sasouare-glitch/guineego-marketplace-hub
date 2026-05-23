@@ -242,6 +242,21 @@ export default function AdminUsersPage() {
           </Card>
         </div>
 
+        {/* Error Banner */}
+        {error && (
+          <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-destructive">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium">Erreur de chargement</p>
+              <p className="text-sm opacity-90">{error}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={fetchUsers} disabled={loading}>
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+              Réessayer
+            </Button>
+          </div>
+        )}
+
         {/* Users Table */}
         <Card>
           <CardHeader>
