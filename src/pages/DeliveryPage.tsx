@@ -41,7 +41,7 @@ const features = [
 ];
 
 const steps = [
-  { step: "01", title: "Commandez", description: "Passez votre commande sur le marketplace Makiity" },
+  { step: "01", title: "Commandez", description: "Passez votre commande sur le marketplace Sarematy" },
   { step: "02", title: "Préparation", description: "Le vendeur prépare et emballe votre commande" },
   { step: "03", title: "Collecte", description: "Un coursier récupère le colis chez le vendeur" },
   { step: "04", title: "Livraison", description: "Votre commande arrive à votre porte" },
@@ -74,7 +74,7 @@ const DeliveryPage = () => {
                   <span className="text-primary">partout en Guinée</span>
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  Makiity connecte vendeurs et acheteurs grâce à un réseau de coursiers professionnels. 
+                  Sarematy connecte vendeurs et acheteurs grâce à un réseau de coursiers professionnels. 
                   Suivez vos colis en temps réel, du vendeur jusqu'à votre porte.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -219,7 +219,7 @@ const DeliveryPage = () => {
             <div className="max-w-3xl mx-auto text-center">
               <Truck className="w-12 h-12 mx-auto mb-6 opacity-80" />
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Devenez coursier Makiity
+                Devenez coursier Sarematy
               </h2>
               <p className="text-lg opacity-90 mb-6 max-w-xl mx-auto">
                 Gagnez un revenu flexible en livrant des colis dans votre ville. 

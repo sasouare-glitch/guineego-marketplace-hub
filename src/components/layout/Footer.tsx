@@ -17,10 +17,10 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useHasOrders } from "@/hooks/useHasOrders";
 
 const socialLinks = [
-  { icon: Facebook, href: "https://facebook.com/makiity", label: "Facebook" },
-  { icon: Instagram, href: "https://instagram.com/makiity", label: "Instagram" },
-  { icon: Twitter, href: "https://twitter.com/makiity", label: "Twitter" },
-  { icon: Youtube, href: "https://youtube.com/makiity", label: "Youtube" },
+  { icon: Facebook, href: "https://facebook.com/sarematy", label: "Facebook" },
+  { icon: Instagram, href: "https://instagram.com/sarematy", label: "Instagram" },
+  { icon: Twitter, href: "https://twitter.com/sarematy", label: "Twitter" },
+  { icon: Youtube, href: "https://youtube.com/sarematy", label: "Youtube" },
 ];
 
 export function Footer() {
@@ -68,7 +68,7 @@ export function Footer() {
                 <Package className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="font-display text-xl font-bold">
-                Makiity<span className="text-guinea-yellow"></span>
+                Sarematy<span className="text-guinea-yellow"></span>
               </span>
             </Link>
             <p className="text-white/70 mb-6 max-w-xs">
@@ -81,9 +81,9 @@ export function Footer() {
                 <Phone className="w-4 h-4" />
                 <span>+224 623 456 789</span>
               </a>
-              <a href="mailto:contact@makiity.com" className="flex items-center gap-3 text-white/70 hover:text-guinea-yellow transition-colors">
+              <a href="mailto:contact@sarematy.com" className="flex items-center gap-3 text-white/70 hover:text-guinea-yellow transition-colors">
                 <Mail className="w-4 h-4" />
-                <span>contact@makiity.com</span>
+                <span>contact@sarematy.com</span>
               </a>
               <div className="flex items-start gap-3 text-white/70">
                 <MapPin className="w-4 h-4 mt-1" />
@@ -167,7 +167,7 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="container-tight py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/50 text-sm">
-            © 2024 Makiity. {t.footer.copyright}. 
+            © 2024 Sarematy. {t.footer.copyright}. 
             <span className="ml-2 text-white/30 font-mono text-xs">v1.0.0-{BUILD_DATE}</span>
           </p>
           <div className="flex gap-6 text-sm">

@@ -192,13 +192,13 @@ export default function RegisterPage() {
                   <span className="text-white font-black text-lg">G</span>
                 </div>
                 <span className="text-2xl font-black bg-gradient-to-r from-guinea-red to-guinea-green bg-clip-text text-transparent">
-                  Makiity
+                  Sarematy
                 </span>
               </motion.div>
             </Link>
             <CardTitle className="text-2xl font-bold">{t.auth?.register || 'Créer un compte'}</CardTitle>
             <CardDescription>
-              {t.auth?.registerDescription || 'Rejoignez la marketplace Makiity'}
+              {t.auth?.registerDescription || 'Rejoignez la marketplace Sarematy'}
             </CardDescription>
           </CardHeader>
           

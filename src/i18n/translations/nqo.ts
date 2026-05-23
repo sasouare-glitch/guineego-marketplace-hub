@@ -1,7 +1,7 @@
 import type { TranslationKeys } from "./fr";
 
 /**
- * ߒߞߏ (N'Ko) Translations for Makiity
+ * ߒߞߏ (N'Ko) Translations for Sarematy
  * Script: N'Ko (U+07C0 – U+07FF) — RTL
  * Language: Manding (Maninka/Bambara variant spoken in Guinea)
  * Font: Noto Sans NKo (Google Fonts)
@@ -61,9 +61,9 @@ export const nqo: TranslationKeys = {
   // ߘߏ߲߬ߠߊ — Authentication
   auth: {
     login: "ߘߏ߲߬",
-    loginDescription: "ߌ ߘߏ߲߬ ߌ ߟߊ Makiity ߖߊ߬ߓߌ ߘߐ߫",
+    loginDescription: "ߌ ߘߏ߲߬ ߌ ߟߊ Sarematy ߖߊ߬ߓߌ ߘߐ߫",
     register: "ߕߐ߯ ߛߓߍ߫",
-    registerDescription: "ߌ ߝߊ߬ߙߊ Makiity ߝߋ߬ߙߋ ߦߙߐ ߡߊ߬",
+    registerDescription: "ߌ ߝߊ߬ߙߊ Sarematy ߝߋ߬ߙߋ ߦߙߐ ߡߊ߬",
     logout: "ߓߐ߫",
     password: "ߘߊ߲ߕߊ߯ ߞߎ߲߬ߕߐ߲",
     confirmPassword: "ߘߊ߲ߕߊ߯ ߞߎ߲߬ߕߐ߲ ߟߊ߬ߛߋ߲߬",
@@ -117,7 +117,7 @@ export const nqo: TranslationKeys = {
     badge: "ߜߋ߬ߣߍ ߝߟߐ ߝߋ߬ߙߋ ߦߙߐ",
     title1: "ߛߊ߲߬, ߝߋ߬ߙߋ߬, ߓߊߟߊ߬,",
     title2: "ߜߋ߬ߣߍ ߣߌ߬ ߓߊ߲߬ߓߏ߫ ߟߊߞߍ ߞߋ߲",
-    description: "Makiity ߦߋ߫ ߝߋ߬ߙߋ߬ߓߊ ߠߎ߬ ߣߌ߬ ߛߊ߲ߓߊ ߠߎ߬ ߣߌ߬ ߟߊ߬ߛߋ߬ߙߌ ߠߎ߬ ߣߌ߬ ߡߊ߬ߞߍ߬ߟߊ ߠߎ߬ ߟߊ߲ߓߍ ߞߍ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬. ߛ߭ߌ߲ ߕߊ߬ߡߌ߲, ߥߍ߫ߓ ߞߏ ߞߊ߬ߙߊ߲, ߡߏ߬ߓߊ߬ߦߌ ߛߊ߬ߙߊ ߕߌ߲ߢߍ.",
+    description: "Sarematy ߦߋ߫ ߝߋ߬ߙߋ߬ߓߊ ߠߎ߬ ߣߌ߬ ߛߊ߲ߓߊ ߠߎ߬ ߣߌ߬ ߟߊ߬ߛߋ߬ߙߌ ߠߎ߬ ߣߌ߬ ߡߊ߬ߞߍ߬ߟߊ ߠߎ߬ ߟߊ߲ߓߍ ߞߍ ߟߊ ߞߋ߲ ߘߏ߫ ߞߊ߲ ߡߊ߬. ߛ߭ߌ߲ ߕߊ߬ߡߌ߲, ߥߍ߫ߓ ߞߏ ߞߊ߬ߙߊ߲, ߡߏ߬ߓߊ߬ߦߌ ߛߊ߬ߙߊ ߕߌ߲ߢߍ.",
     exploreStore: "ߝߋ߲ ߠߎ߬ ߞߐ߬ߟߐ߲ ߞߍ߫",
     becomeSeller: "ߝߋ߬ߙߋ߬ߓߊ߬ߟߊ ߞߍ߫",
     rentEquipment: "ߢߊ߲߭ ߓߊߟߊ߬",
@@ -165,7 +165,7 @@ export const nqo: TranslationKeys = {
     expressDelivery: "ߟߊ߬ ߛߋ ߟߌ ߕߟߋ ߦߊ",
     expressDeliveryDesc: "ߟߊ߬ ߛߋ ߙߌ ߟߊ ߠߎ߬ ߟߊ߲ ߓߍ ߢߐ ߦߋ ߟߊ ߞߐ߬ ߣߊ߬ ߞߙߌ ߣߌ ߡߊ ߙߊ ߘߐ ߓߍ ߘߐ. GPS ߟߊ߬ ߕߎ߲ ߠߌ ߕߎ ߕߊ ߟߊ.",
     trackPackage: "ߓߏ ߟߏ ߟߊ ߕߎ߲ ߠߌ ߞߍ",
-    academy: "Makiity ߞߊ߬ ߙߊ߲ ߘߊ",
+    academy: "Sarematy ߞߊ߬ ߙߊ߲ ߘߊ",
     academyDesc: "ߞߊ߬ ߙߊ߲ ߞߍ ߥߍ߫ ߓ ߝߋ ߙߋ, ߡߊ߬ ߙߊ ߞߋ ߕߌ߲ ߘߌ߬ ߖߌ ߕߊ ߟߌ, ߟߊ ߘߊ ߟߌ. ߝߌ ߘߋ ߦߏ ߠߎ, PDF ߠߎ, ߛߙ ߕߌ ߝߌ ߞߊ ߠߎ.",
     viewCourses: "ߞߊ߬ ߙߊ߲ ߠߎ ߦߋ",
     mobilePayment: "ߡߏ߬ ߓߊ߬ ߦߌ ߛߊ߬ ߙߊ ߟߌ",
@@ -181,7 +181,7 @@ export const nqo: TranslationKeys = {
 
   // ߞߊ߬ ߙߊ߲ ߘߊ — Academy Section
   academy: {
-    title: "Makiity ߞߊ߬ ߙߊ߲ ߘߊ",
+    title: "Sarematy ߞߊ߬ ߙߊ߲ ߘߊ",
     subtitle: "ߞߊ߬ ߙߊ߲ ߞߍ߫ ߥߍ߫ ߓ ߝߋ ߙߋ ߘߐ",
     description: "ߞߊ߬ ߙߊ߲ ߞߍ߫ ߝߋ߬ ߙߋ ߟߊ ߢߊ ߊ߲ ߠߊ ߞߊ߬ ߙߊ߲ ߝߎ߯ ߠߎ ߣߌ ߛ .",
     viewCourses: "ߞߊ߬ ߙߊ߲ ߠߎ ߦߋ߫",
@@ -207,8 +207,8 @@ export const nqo: TranslationKeys = {
     title: "ߊ߬ ߠ ߊ . .",
     subtitle: "ߊ߲ .",
     badge: "Partenariats",
-    mainTitle: "Rejoignez l'aventure Makiity",
-    mainDescription: "Que vous souhaitiez devenir coursier, investisseur ou loueur, Makiity vous offre des opportunités uniques pour prospérer.",
+    mainTitle: "Rejoignez l'aventure Sarematy",
+    mainDescription: "Que vous souhaitiez devenir coursier, investisseur ou loueur, Sarematy vous offre des opportunités uniques pour prospérer.",
     becomeCourier: "Devenir Coursier",
     courierDesc: "Rejoignez notre réseau de livreurs et gagnez de l'argent en livrant des colis à Conakry et dans tout le pays.",
     courierBenefit1: "Revenus flexibles selon vos horaires",
@@ -230,9 +230,9 @@ export const nqo: TranslationKeys = {
     lessorBenefit3: "Gestion simplifiée via l'app",
     lessorBenefit4: "Paiement sécurisé garanti",
     lessorCta: "Mettre en location",
-    testimonial1Quote: "Makiity m'a permis de travailler à mon rythme et de bien gagner ma vie. Le système est transparent et les paiements sont toujours à temps.",
+    testimonial1Quote: "Sarematy m'a permis de travailler à mon rythme et de bien gagner ma vie. Le système est transparent et les paiements sont toujours à temps.",
     testimonial1Role: "Coursier, Conakry",
-    testimonial2Quote: "J'ai diversifié mes investissements avec Makiity. Les rendements sont bons et le suivi est excellent. Je recommande !",
+    testimonial2Quote: "J'ai diversifié mes investissements avec Sarematy. Les rendements sont bons et le suivi est excellent. Je recommande !",
     testimonial2Role: "Investisseuse",
   },
 
@@ -544,7 +544,7 @@ export const nqo: TranslationKeys = {
     pricing: "ߛ .",
     servicesTitle: "ߓ .",
     transitChina: "ߛ .",
-    academy: "Makiity ߞ",
+    academy: "Sarematy ߞ",
     expressDelivery: "ߟ .",
     invest: "ߡ .",
     helpTitle: "ߘ .",

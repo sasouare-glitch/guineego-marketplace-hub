@@ -29,8 +29,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Makiity - Marketplace',
-        short_name: 'Makiity',
+        name: 'Sarematy - Marketplace',
+        short_name: 'Sarematy',
         description: 'Marketplace e-commerce Guinée - Achetez, vendez, livrez',
         theme_color: '#E63946',
         background_color: '#ffffff',

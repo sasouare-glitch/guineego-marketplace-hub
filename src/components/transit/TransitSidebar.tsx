@@ -40,7 +40,7 @@ export const TransitSidebar = () => {
             <Globe className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-display font-bold text-foreground">Makiity</h1>
+            <h1 className="font-display font-bold text-foreground">Sarematy</h1>
             <p className="text-xs text-muted-foreground">Transit Vers Guinee</p>
           </div>
         </Link>

@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 const course = {
   id: "1",
   title: "Lancer sa boutique e-commerce de A à Z",
-  description: "Cette formation complète vous guide pas à pas dans la création et la gestion de votre boutique en ligne sur Makiity. Apprenez les stratégies éprouvées pour réussir dans le e-commerce en Afrique de l'Ouest.",
+  description: "Cette formation complète vous guide pas à pas dans la création et la gestion de votre boutique en ligne sur Sarematy. Apprenez les stratégies éprouvées pour réussir dans le e-commerce en Afrique de l'Ouest.",
   thumbnail: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200",
   instructor: {
     name: "Mamadou Diallo",
@@ -62,7 +62,7 @@ const course = {
     "Support communautaire",
   ],
   whatYouWillLearn: [
-    "Créer et configurer votre boutique sur Makiity",
+    "Créer et configurer votre boutique sur Sarematy",
     "Photographier et présenter vos produits de manière professionnelle",
     "Fixer vos prix et gérer vos marges",
     "Gérer vos stocks et votre logistique",
@@ -84,7 +84,7 @@ const courseModules: Module[] = [
   },
   {
     id: "m2",
-    title: "Créer votre boutique Makiity",
+    title: "Créer votre boutique Sarematy",
     lessons: [
       { id: "l4", title: "Créer votre compte vendeur", duration: "8:00", type: "video", isCompleted: true },
       { id: "l5", title: "Configurer votre profil boutique", duration: "15:00", type: "video", isCurrent: true },

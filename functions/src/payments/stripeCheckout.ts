@@ -88,17 +88,17 @@ export const createStripeCheckout = functions
               currency: 'gnf',
               unit_amount: amountInSmallestUnit,
               product_data: {
-                name: `Commande Makiity #${orderId.slice(0, 8).toUpperCase()}`,
+                name: `Commande Sarematy #${orderId.slice(0, 8).toUpperCase()}`,
                 description: order?.items
                   ? `${order.items.length} article(s)`
-                  : 'Commande Makiity',
+                  : 'Commande Sarematy',
               },
             },
             quantity: 1,
           },
         ],
-        success_url: successUrl || `https://makiity.web.app/orders/${orderId}?payment=success`,
-        cancel_url: cancelUrl || `https://makiity.web.app/orders/${orderId}?payment=cancelled`,
+        success_url: successUrl || `https://sarematy.web.app/orders/${orderId}?payment=success`,
+        cancel_url: cancelUrl || `https://sarematy.web.app/orders/${orderId}?payment=cancelled`,
       });
 
       // Update payment record with Stripe session ID

@@ -4,7 +4,7 @@
  * 
  * Configuration: Store your SendGrid API key in Firestore:
  *   collection: config / document: sendgrid
- *   fields: { apiKey: "SG.xxxxx", fromEmail: "noreply@makiity.app", fromName: "Makiity" }
+ *   fields: { apiKey: "SG.xxxxx", fromEmail: "noreply@sarematy.app", fromName: "Sarematy" }
  */
 
 import * as admin from 'firebase-admin';
@@ -41,8 +41,8 @@ async function getConfig(): Promise<SendGridConfig | null> {
     }
     cachedConfig = {
       apiKey: data.apiKey,
-      fromEmail: data.fromEmail || 'noreply@makiity.app',
-      fromName: data.fromName || 'Makiity',
+      fromEmail: data.fromEmail || 'noreply@sarematy.app',
+      fromName: data.fromName || 'Sarematy',
     };
     configExpiry = Date.now() + 5 * 60 * 1000;
     return cachedConfig;

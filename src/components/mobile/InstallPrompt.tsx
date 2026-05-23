@@ -77,7 +77,7 @@ export default function InstallPrompt() {
             
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-sm mb-1">
-                Installer Makiity
+                Installer Sarematy
               </h3>
               <p className="text-xs text-muted-foreground mb-3">
                 Ajoutez l'app sur votre écran d'accueil pour un accès rapide

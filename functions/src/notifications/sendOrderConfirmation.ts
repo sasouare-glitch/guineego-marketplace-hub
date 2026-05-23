@@ -121,7 +121,7 @@ async function sendConfirmationEmail(email: string, order: OrderData): Promise<v
       ${ctaButton('📍 Suivre ma commande', `${APP_URL}/order/${order.id}`)}
     `;
 
-    const subject = `✅ Commande ${order.id} confirmée — Makiity`;
+    const subject = `✅ Commande ${order.id} confirmée — Sarematy`;
     const html = wrapInTemplate(bodyContent);
 
     // Dual strategy: Firestore 'mail' collection + SendGrid fallback
@@ -139,7 +139,7 @@ async function sendConfirmationSMS(phone: string, order: OrderData): Promise<voi
   const formattedPhone = formatGuineaPhone(phone);
   const trackingLink = `${APP_URL}/track/${order.id}?phone=${encodeURIComponent(formattedPhone)}`;
   const smsMessage = 
-    `Makiity: Commande ${order.id} confirmée! ` +
+    `Sarematy: Commande ${order.id} confirmée! ` +
     `Total: ${order.pricing.total.toLocaleString()} GNF. ` +
     `Suivi: ${trackingLink}`;
 
@@ -248,7 +248,7 @@ function formatPaymentMethod(method: string): string {
     'orange_money': 'Orange Money',
     'mtn_money': 'MTN Mobile Money',
     'card': 'Carte bancaire',
-    'wallet': 'Portefeuille Makiity',
+    'wallet': 'Portefeuille Sarematy',
     'cash': 'Paiement à la livraison',
   };
   return methods[method] || method;

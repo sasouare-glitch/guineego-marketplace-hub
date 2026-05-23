@@ -34,7 +34,7 @@ interface ProductChatAgentProps {
 }
 
 const MOCK_RESPONSES: Record<string, string> = {
-  default: "Bonjour ! 👋 Je suis l'assistant Makiity. Je peux vous aider avec les détails de ce produit, discuter du prix, ou passer commande directement. Que souhaitez-vous savoir ?",
+  default: "Bonjour ! 👋 Je suis l'assistant Sarematy. Je peux vous aider avec les détails de ce produit, discuter du prix, ou passer commande directement. Que souhaitez-vous savoir ?",
   prix: "Le prix affiché est de **2 500 000 GNF**. Je peux vous proposer une réduction de **5%** si vous commandez maintenant, soit **2 375 000 GNF**. Ça vous intéresse ? 🎉",
   details: "Voici les caractéristiques principales :\n\n📱 **Écran** : 6.7\" AMOLED 120Hz\n⚡ **Processeur** : Snapdragon 8 Gen 2\n📸 **Caméra** : 200MP principale\n🔋 **Batterie** : 5000mAh\n\nVoulez-vous en savoir plus ou passer commande ?",
   commande: "Parfait ! Pour finaliser votre commande, j'ai besoin de quelques informations :\n\n1️⃣ **Votre nom complet**\n2️⃣ **Numéro de téléphone**\n3️⃣ **Adresse de livraison**\n\nCommençons par votre nom ?",
