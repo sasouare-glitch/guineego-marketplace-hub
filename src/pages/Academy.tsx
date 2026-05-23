@@ -184,21 +184,19 @@ const Academy = () => {
             <div className="max-w-2xl">
               <Badge className="bg-guinea-yellow text-foreground mb-4">
                 <GraduationCap className="w-3 h-3 mr-1" />
-                Sarematy Academy
+                {a.badge}
               </Badge>
               <h1 className="font-display text-3xl md:text-4xl font-bold mb-4">
-                Formez-vous au e-commerce et développez votre business
+                {a.heroTitle}
               </h1>
-              <p className="text-white/80 text-lg mb-6">
-                Des formations pratiques créées par des experts africains pour réussir dans le commerce en ligne.
-              </p>
-              
+              <p className="text-white/80 text-lg mb-6">{a.heroDesc}</p>
+
               {/* Search */}
               <div className="relative max-w-lg">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Rechercher une formation..."
+                  placeholder={a.searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-12 h-12 bg-white text-foreground"
@@ -209,10 +207,10 @@ const Academy = () => {
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
               {[
-                { icon: GraduationCap, value: "50+", label: "Formations" },
-                { icon: Users, value: "15K+", label: "Étudiants" },
-                { icon: Award, value: "98%", label: "Satisfaction" },
-                { icon: TrendingUp, value: "85%", label: "Réussite" },
+                { icon: GraduationCap, value: "50+", label: a.stats.courses },
+                { icon: Users, value: "15K+", label: a.stats.students },
+                { icon: Award, value: "98%", label: a.stats.satisfaction },
+                { icon: TrendingUp, value: "85%", label: a.stats.success },
               ].map((stat, index) => (
                 <div key={index} className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
                   <stat.icon className="w-6 h-6 mb-2 text-guinea-yellow" />
@@ -230,13 +228,13 @@ const Academy = () => {
             <div className="flex items-center gap-2 py-4 overflow-x-auto scrollbar-hide">
               {categories.map((category) => (
                 <Button
-                  key={category}
-                  variant={activeCategory === category ? "default" : "outline"}
+                  key={category.raw}
+                  variant={activeCategory === category.raw ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setActiveCategory(category)}
+                  onClick={() => setActiveCategory(category.raw)}
                   className="flex-shrink-0"
                 >
-                  {category}
+                  {category.label}
                 </Button>
               ))}
             </div>
@@ -247,10 +245,11 @@ const Academy = () => {
         <section className="container-tight py-10">
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="mb-6">
-              <TabsTrigger value="all">Toutes les formations</TabsTrigger>
-              <TabsTrigger value="free">Gratuites</TabsTrigger>
-              <TabsTrigger value="bestseller">Populaires</TabsTrigger>
+              <TabsTrigger value="all">{a.tabsAll}</TabsTrigger>
+              <TabsTrigger value="free">{a.tabsFree}</TabsTrigger>
+              <TabsTrigger value="bestseller">{a.tabsBest}</TabsTrigger>
             </TabsList>
+
 
             <TabsContent value="all">
               {filteredCourses.length > 0 ? (
