@@ -10,20 +10,20 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Star, 
-  Clock, 
-  Users, 
-  BookOpen, 
-  Award, 
+import {
+  Star,
+  Clock,
+  Users,
+  BookOpen,
+  Award,
   Play,
   CheckCircle2,
   Globe,
   Smartphone,
   FileText,
-  MessageCircle
+  MessageCircle,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // Mock course data
 const course = {
