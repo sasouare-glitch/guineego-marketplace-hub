@@ -138,7 +138,7 @@ const InvestPage = () => {
       <Header />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-foreground via-foreground/95 to-foreground/85 text-primary-foreground py-20 lg:py-28">
+      <section className="relative overflow-hidden bg-gradient-to-br from-foreground via-foreground/95 to-foreground/85 text-primary-foreground pt-32 lg:pt-40 pb-20 lg:pb-28">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-72 h-72 bg-accent rounded-full blur-[120px]" />
           <div className="absolute bottom-10 right-20 w-96 h-96 bg-primary rounded-full blur-[150px]" />
