@@ -108,7 +108,7 @@ export default function OrderTrackingPage() {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container-tight pt-24 pb-16 flex items-center justify-center">
+        <main className="container-tight pt-20 lg:pt-32 pb-16 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </main>
       </div>
@@ -119,7 +119,7 @@ export default function OrderTrackingPage() {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container-tight pt-24 pb-16 text-center">
+        <main className="container-tight pt-20 lg:pt-32 pb-16 text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Commande introuvable</h1>
           <p className="text-muted-foreground mb-6">La commande {orderId} n'existe pas.</p>
           <Link to="/marketplace">
@@ -134,7 +134,7 @@ export default function OrderTrackingPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container-tight pt-24 pb-16">
+      <main className="container-tight pt-20 lg:pt-32 pb-16">
         {/* Back Link */}
         <Link
           to="/orders"

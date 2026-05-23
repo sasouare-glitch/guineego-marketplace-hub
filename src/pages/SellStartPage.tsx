@@ -114,7 +114,7 @@ export default function SellStartPage() {
       <Header />
 
       {/* Hero */}
-      <section className="relative pt-28 pb-20 overflow-hidden">
+      <section className="relative pt-28 lg:pt-36 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-background to-accent/10" />
         <div className="absolute top-20 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-accent/10 rounded-full blur-3xl" />

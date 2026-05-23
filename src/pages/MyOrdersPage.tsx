@@ -116,7 +116,7 @@ export default function MyOrdersPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container-tight pt-24 pb-16">
+      <main className="container-tight pt-20 lg:pt-32 pb-16">
         {/* Back Link */}
         <Link
           to="/marketplace"
