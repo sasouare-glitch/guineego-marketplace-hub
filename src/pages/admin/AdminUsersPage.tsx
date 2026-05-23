@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, MoreHorizontal, UserPlus, Filter, Loader2, RefreshCw, ShieldCheck, Truck, Store, TrendingUp, Users } from 'lucide-react';
+import { Search, MoreHorizontal, UserPlus, Filter, Loader2, RefreshCw, ShieldCheck, Truck, Store, TrendingUp, Users, AlertTriangle } from 'lucide-react';
 import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
@@ -79,6 +79,7 @@ export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<FirestoreUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<FirestoreUser | null>(null);
@@ -90,6 +91,7 @@ export default function AdminUsersPage() {
   // Fetch users (one-shot, resilient against SDK listener crashes)
   const fetchUsers = async () => {
     setLoading(true);
+    setError(null);
     try {
       // Use simple query without orderBy to avoid composite-index crashes (Firestore b815/ca9 bug)
       const usersQuery = query(collection(db, 'users'), limit(200));
@@ -109,11 +111,11 @@ export default function AdminUsersPage() {
       console.error('Error fetching users:', error);
       // Catch the specific Firestore internal assertion errors
       const isInternalAssertion = error?.message?.includes('INTERNAL ASSERTION FAILED');
-      if (isInternalAssertion) {
-        toast.error('Erreur interne Firestore. Essayez de vider le cache du navigateur et rafraîchir.');
-      } else {
-        toast.error(error?.message || 'Erreur lors du chargement des utilisateurs');
-      }
+      const friendlyMessage = isInternalAssertion
+        ? 'Erreur interne Firestore. Veuillez vider le cache du navigateur et rafraîchir la page.'
+        : (error?.message || 'Impossible de charger les utilisateurs. Vérifiez votre connexion et réessayez.');
+      setError(friendlyMessage);
+      toast.error(friendlyMessage);
     } finally {
       setLoading(false);
     }
@@ -239,6 +241,21 @@ export default function AdminUsersPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-destructive">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium">Erreur de chargement</p>
+              <p className="text-sm opacity-90">{error}</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={fetchUsers} disabled={loading}>
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+              Réessayer
+            </Button>
+          </div>
+        )}
 
         {/* Users Table */}
         <Card>
