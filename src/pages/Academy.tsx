@@ -260,8 +260,8 @@ const Academy = () => {
                 </div>
               ) : (
                 <div className="text-center py-16">
-                  <p className="text-lg font-medium mb-2">Aucune formation trouvée</p>
-                  <p className="text-muted-foreground">Essayez avec d'autres critères</p>
+                  <p className="text-lg font-medium mb-2">{a.emptyTitle}</p>
+                  <p className="text-muted-foreground">{a.emptyDesc}</p>
                 </div>
               )}
             </TabsContent>
@@ -288,17 +288,15 @@ const Academy = () => {
         <section className="bg-muted py-16">
           <div className="container-tight text-center">
             <h2 className="font-display text-2xl md:text-3xl font-bold mb-4">
-              Prêt à développer vos compétences ?
+              {a.ctaTitle}
             </h2>
-            <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-              Inscrivez-vous gratuitement et accédez à des formations de qualité pour booster votre business.
-            </p>
+            <p className="text-muted-foreground mb-6 max-w-lg mx-auto">{a.ctaDesc}</p>
             <div className="flex justify-center gap-4">
               <Button size="lg" asChild>
-                <Link to="/register">Créer un compte gratuit</Link>
+                <Link to="/register">{a.ctaCreate}</Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link to="/academy/course/5">Essayer une formation gratuite</Link>
+                <Link to="/academy/course/5">{a.ctaTryFree}</Link>
               </Button>
             </div>
           </div>
