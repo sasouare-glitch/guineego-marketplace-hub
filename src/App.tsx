@@ -72,6 +72,7 @@ import InstallApp from "./pages/InstallApp";
 import DeliveryPage from "./pages/DeliveryPage";
 import PaymentPage from "./pages/PaymentPage";
 import ProtectionPage from "./pages/ProtectionPage";
+import HelpPage from "./pages/HelpPage";
 import CourierJoinPage from "./pages/courier/CourierJoinPage";
 import InvestPage from "./pages/InvestPage";
 // Auth Pages
