@@ -88,8 +88,20 @@ export default function AdminUsersPage() {
   const [updating, setUpdating] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
 
+  // Attempt to recover from Firestore INTERNAL ASSERTION FAILED (b815/ca9)
+  // by terminating the client, clearing IndexedDB cache, then reloading.
+  const recoverFirestoreCache = async () => {
+    try {
+      try { await terminate(db); } catch (_) { /* ignore */ }
+      try { await clearIndexedDbPersistence(db); } catch (_) { /* ignore */ }
+    } finally {
+      // Hard reload to reinitialize Firestore SDK cleanly
+      window.location.reload();
+    }
+  };
+
   // Fetch users (one-shot, resilient against SDK listener crashes)
-  const fetchUsers = async () => {
+  const fetchUsers = async (isRetry = false) => {
     setLoading(true);
     setError(null);
     try {
@@ -111,9 +123,18 @@ export default function AdminUsersPage() {
       console.error('Error fetching users:', err);
       const code = err?.code || '';
       const msg = err?.message || '';
+      const isInternalAssertion = msg.includes('INTERNAL ASSERTION FAILED');
+
+      // Auto-recover once on internal assertion errors (cache corruption)
+      if (isInternalAssertion && !isRetry) {
+        toast.info('Réparation du cache en cours...');
+        await recoverFirestoreCache();
+        return;
+      }
+
       let friendlyMessage = 'Impossible de charger les utilisateurs. Vérifiez votre connexion et réessayez.';
-      if (msg.includes('INTERNAL ASSERTION FAILED')) {
-        friendlyMessage = 'Erreur interne du cache de la base de données. Videz le cache du navigateur et rafraîchissez la page.';
+      if (isInternalAssertion) {
+        friendlyMessage = 'Erreur interne du cache de la base de données. Cliquez sur "Réparer le cache" ci-dessous.';
       } else if (code === 'permission-denied' || msg.toLowerCase().includes('permission')) {
         friendlyMessage = "Accès refusé : votre compte n'a pas les droits administrateur pour lister les utilisateurs.";
       } else if (code === 'unavailable' || msg.toLowerCase().includes('offline') || msg.toLowerCase().includes('network')) {
