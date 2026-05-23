@@ -31,7 +31,7 @@ const CartPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container-tight py-16 text-center">
+        <main className="container-tight pt-20 lg:pt-32 py-16 text-center">
           <div className="max-w-md mx-auto">
             <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="w-12 h-12 text-muted-foreground" />
