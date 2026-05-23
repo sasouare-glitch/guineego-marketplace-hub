@@ -120,7 +120,7 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container-tight py-20 text-center">
+        <main className="container-tight pt-20 lg:pt-32 py-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Produit introuvable</h1>
           <Link to="/marketplace">
             <Button>Retour au marketplace</Button>
