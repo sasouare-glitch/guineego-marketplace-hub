@@ -150,6 +150,8 @@ const App = () => (
                     {/* Client Marketplace Routes (Public) */}
                    <Route path="/marketplace" element={<Marketplace />} />
                    <Route path="/categories" element={<CategoriesPage />} />
+                   <Route path="/marketplace/promos" element={<PromosPage />} />
+                   <Route path="/marketplace/bestsellers" element={<Navigate to="/search?bestseller=true" replace />} />
                     <Route path="/search" element={<SearchPage />} />
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/academy" element={<Academy />} />
