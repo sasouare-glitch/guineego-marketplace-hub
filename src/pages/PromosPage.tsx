@@ -8,8 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAllProducts } from "@/hooks/useAllProducts";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function PromosPage() {
+  const { t } = useTranslation();
   const { products, loading } = useAllProducts();
   const { addItem } = useCart();
   const { toggleItem, isInWishlist } = useWishlist();
