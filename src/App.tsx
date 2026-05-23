@@ -14,6 +14,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SellStartPage from "./pages/SellStartPage";
 import SellerGuidePage from "./pages/SellerGuidePage";
+import SellerPricingPage from "./pages/SellerPricingPage";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerProducts from "./pages/seller/SellerProducts";
 import SellerOrders from "./pages/seller/SellerOrders";
@@ -160,6 +161,7 @@ const App = () => (
                     <Route path="/academy/course/:id" element={<CourseDetail />} />
                     <Route path="/sell/start" element={<SellStartPage />} />
                     <Route path="/seller/guide" element={<SellerGuidePage />} />
+                    <Route path="/seller/pricing" element={<SellerPricingPage />} />
                     <Route path="/delivery" element={<DeliveryPage />} />
                     <Route path="/payment" element={<PaymentPage />} />
                     <Route path="/protection" element={<ProtectionPage />} />
