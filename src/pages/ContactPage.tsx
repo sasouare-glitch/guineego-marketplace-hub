@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -30,87 +30,70 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-
-const contactFaqs = [
-  {
-    q: "Quel est le délai de réponse du support ?",
-    a: "Notre équipe répond aux demandes par email sous 24h ouvrables. Sur WhatsApp, le délai moyen est de moins de 30 minutes pendant les heures d'ouverture (8h – 22h, 7j/7).",
-  },
-  {
-    q: "Comment signaler un problème avec une commande ?",
-    a: "Rendez-vous dans « Mes commandes », ouvrez la commande concernée et cliquez sur « Signaler un problème ». Vous pouvez aussi nous contacter directement via WhatsApp ou ce formulaire en précisant votre numéro de commande.",
-  },
-  {
-    q: "Puis-je modifier ou annuler ma commande ?",
-    a: "Une commande peut être modifiée ou annulée tant qu'elle n'a pas été confirmée par le vendeur. Contactez-nous rapidement avec votre numéro de commande pour que nous interessions auprès du vendeur.",
-  },
-  {
-    q: "Comment devenir vendeur ou coursier sur Sarematy ?",
-    a: "Créez un compte, puis depuis votre profil demandez le rôle « Vendeur » ou « Coursier ». Notre équipe examine chaque demande sous 48h. Vous pouvez aussi consulter notre guide vendeur via le lien ci-dessous.",
-  },
-  {
-    q: "Où puis-je consulter les conditions générales ?",
-    a: "Les CGU, CGV et politique de confidentialité sont accessibles depuis le pied de page de chaque page. Nous vous invitons à les consulter régulièrement car elles peuvent évoluer.",
-  },
-  {
-    q: "Comment réinitialiser mon mot de passe ?",
-    a: "Sur la page de connexion, cliquez sur « Mot de passe oublié ». Un lien de réinitialisation vous sera envoyé par email. Si vous ne recevez rien, vérifiez vos spams ou contactez-nous.",
-  },
-];
-
-const contactMethods = [
-  {
-    icon: MessageCircle,
-    title: "WhatsApp",
-    description: "Réponse rapide en moins de 30 min",
-    value: "+224 621 00 00 00",
-    action: "Ouvrir WhatsApp",
-    href: "https://wa.me/224621000000",
-    color: "bg-green-500/10 text-green-600",
-  },
-  {
-    icon: Phone,
-    title: "Téléphone",
-    description: "Lun – Dim, 8h – 22h",
-    value: "+224 621 00 00 00",
-    action: "Appeler",
-    href: "tel:+224621000000",
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    icon: Mail,
-    title: "Email",
-    description: "Réponse sous 24h ouvrables",
-    value: "support@sarematy.com",
-    action: "Nous écrire",
-    href: "mailto:support@sarematy.com",
-    color: "bg-blue-500/10 text-blue-600",
-  },
-  {
-    icon: MapPin,
-    title: "Adresse",
-    description: "Siège social & support",
-    value: "Kaloum, Conakry, Guinée",
-    action: "Voir sur la carte",
-    href: "https://www.google.com/maps/search/?api=1&query=Kaloum,Conakry,Guinée",
-    color: "bg-amber-500/10 text-amber-600",
-  },
-];
-
-const subjects = [
-  { value: "order", label: "Problème de commande" },
-  { value: "delivery", label: "Livraison & Suivi" },
-  { value: "return", label: "Retour & Remboursement" },
-  { value: "seller", label: "Devenir vendeur" },
-  { value: "courier", label: "Devenir coursier" },
-  { value: "account", label: "Mon compte & Sécurité" },
-  { value: "payment", label: "Paiement & Facturation" },
-  { value: "bug", label: "Bug technique" },
-  { value: "suggestion", label: "Suggestion" },
-  { value: "other", label: "Autre" },
-];
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function ContactPage() {
+  const { t } = useTranslation();
+  const c = t.pages.contact;
+
+  const contactMethods = useMemo(
+    () => [
+      {
+        icon: MessageCircle,
+        title: c.methods.whatsapp.title,
+        description: c.methods.whatsapp.description,
+        value: "+224 621 00 00 00",
+        action: c.methods.whatsapp.action,
+        href: "https://wa.me/224621000000",
+        color: "bg-green-500/10 text-green-600",
+      },
+      {
+        icon: Phone,
+        title: c.methods.phone.title,
+        description: c.methods.phone.description,
+        value: "+224 621 00 00 00",
+        action: c.methods.phone.action,
+        href: "tel:+224621000000",
+        color: "bg-primary/10 text-primary",
+      },
+      {
+        icon: Mail,
+        title: c.methods.email.title,
+        description: c.methods.email.description,
+        value: "support@sarematy.com",
+        action: c.methods.email.action,
+        href: "mailto:support@sarematy.com",
+        color: "bg-blue-500/10 text-blue-600",
+      },
+      {
+        icon: MapPin,
+        title: c.methods.address.title,
+        description: c.methods.address.description,
+        value: c.methods.address.value,
+        action: c.methods.address.action,
+        href: "https://www.google.com/maps/search/?api=1&query=Kaloum,Conakry,Guinée",
+        color: "bg-amber-500/10 text-amber-600",
+      },
+    ],
+    [c]
+  );
+
+  const subjects = useMemo(
+    () => [
+      { value: "order", label: c.subjects.order },
+      { value: "delivery", label: c.subjects.delivery },
+      { value: "return", label: c.subjects.return },
+      { value: "seller", label: c.subjects.seller },
+      { value: "courier", label: c.subjects.courier },
+      { value: "account", label: c.subjects.account },
+      { value: "payment", label: c.subjects.payment },
+      { value: "bug", label: c.subjects.bug },
+      { value: "suggestion", label: c.subjects.suggestion },
+      { value: "other", label: c.subjects.other },
+    ],
+    [c]
+  );
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -123,21 +106,21 @@ export default function ContactPage() {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = "Le nom est requis.";
+    if (!formData.name.trim()) newErrors.name = c.errors.nameRequired;
     if (!formData.email.trim()) {
-      newErrors.email = "L'email est requis.";
+      newErrors.email = c.errors.emailRequired;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Adresse email invalide.";
+      newErrors.email = c.errors.emailInvalid;
     }
     if (!formData.phone.trim()) {
-      newErrors.phone = "Le téléphone est requis.";
+      newErrors.phone = c.errors.phoneRequired;
     } else if (!/^\d{9}$/.test(formData.phone.replace(/\s/g, ""))) {
-      newErrors.phone = "Numéro invalide (9 chiffres requis).";
+      newErrors.phone = c.errors.phoneInvalid;
     }
-    if (!formData.subject) newErrors.subject = "Veuillez choisir un sujet.";
-    if (!formData.message.trim()) newErrors.message = "Le message est requis.";
+    if (!formData.subject) newErrors.subject = c.errors.subjectRequired;
+    if (!formData.message.trim()) newErrors.message = c.errors.messageRequired;
     else if (formData.message.trim().length < 10)
-      newErrors.message = "Le message doit contenir au moins 10 caractères.";
+      newErrors.message = c.errors.messageTooShort;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -147,11 +130,15 @@ export default function ContactPage() {
     e.preventDefault();
     if (!validate()) return;
 
-    // For now, open email client with pre-filled content
+    const subjectLabel =
+      subjects.find((s) => s.value === formData.subject)?.label || formData.subject;
     const body = encodeURIComponent(
-      `Nom : ${formData.name}\nTéléphone : ${formData.phone}\nSujet : ${subjects.find((s) => s.value === formData.subject)?.label || formData.subject}\n\nMessage :\n${formData.message}`
+      `${c.mailLabels.name} : ${formData.name}\n${c.mailLabels.phone} : ${formData.phone}\n${c.mailLabels.subject} : ${subjectLabel}\n\n${c.mailLabels.message} :\n${formData.message}`
     );
-    window.open(`mailto:support@sarematy.com?subject=[Contact Sarematy] ${formData.subject}&body=${body}`, "_blank");
+    window.open(
+      `mailto:support@sarematy.com?subject=[Contact Sarematy] ${formData.subject}&body=${body}`,
+      "_blank"
+    );
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 5000);
   };
@@ -171,15 +158,12 @@ export default function ContactPage() {
           >
             <Badge variant="secondary" className="mb-4">
               <Headphones className="mr-1 h-3 w-3" />
-              Contact
+              {c.badge}
             </Badge>
             <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-              Restons en contact
+              {c.heroTitle}
             </h1>
-            <p className="text-lg text-muted-foreground">
-              Une question, un problème ou une suggestion ? Notre équipe est là pour vous aider,
-              7 jours sur 7.
-            </p>
+            <p className="text-lg text-muted-foreground">{c.heroDescription}</p>
           </motion.div>
         </div>
       </section>
@@ -195,11 +179,14 @@ export default function ContactPage() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
             >
-              <Card className="h-full transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+              <Card
+                className="h-full transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer"
                 onClick={() => window.open(method.href, "_blank")}
               >
                 <CardContent className="p-6 text-center">
-                  <div className={`mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full ${method.color}`}>
+                  <div
+                    className={`mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full ${method.color}`}
+                  >
                     <method.icon className="h-6 w-6" />
                   </div>
                   <h3 className="mb-1 font-semibold">{method.title}</h3>
@@ -235,7 +222,7 @@ export default function ContactPage() {
           >
             <Card>
               <CardContent className="p-6 md:p-8">
-                <h2 className="mb-6 text-2xl font-bold">Envoyez-nous un message</h2>
+                <h2 className="mb-6 text-2xl font-bold">{c.formTitle}</h2>
 
                 {submitted ? (
                   <motion.div
@@ -246,19 +233,17 @@ export default function ContactPage() {
                     <div className="mb-4 rounded-full bg-green-500/10 p-4">
                       <CheckCircle2 className="h-10 w-10 text-green-600" />
                     </div>
-                    <h3 className="mb-2 text-xl font-semibold">Message envoyé !</h3>
-                    <p className="text-muted-foreground">
-                      Votre client email a été ouvert avec le message pré-rempli. Notre équipe vous répondra dans les plus brefs délais.
-                    </p>
+                    <h3 className="mb-2 text-xl font-semibold">{c.sentTitle}</h3>
+                    <p className="text-muted-foreground">{c.sentDesc}</p>
                   </motion.div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid gap-5 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="name">Nom complet *</Label>
+                        <Label htmlFor="name">{c.fields.name}</Label>
                         <Input
                           id="name"
-                          placeholder="Votre nom"
+                          placeholder={c.fields.namePlaceholder}
                           value={formData.name}
                           onChange={(e) =>
                             setFormData({ ...formData, name: e.target.value })
@@ -270,11 +255,11 @@ export default function ContactPage() {
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email *</Label>
+                        <Label htmlFor="email">{c.fields.email}</Label>
                         <Input
                           id="email"
                           type="email"
-                          placeholder="votre@email.com"
+                          placeholder={c.fields.emailPlaceholder}
                           value={formData.email}
                           onChange={(e) =>
                             setFormData({ ...formData, email: e.target.value })
@@ -289,11 +274,11 @@ export default function ContactPage() {
 
                     <div className="grid gap-5 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="phone">Téléphone *</Label>
+                        <Label htmlFor="phone">{c.fields.phone}</Label>
                         <Input
                           id="phone"
                           type="tel"
-                          placeholder="621000000"
+                          placeholder={c.fields.phonePlaceholder}
                           value={formData.phone}
                           onChange={(e) =>
                             setFormData({ ...formData, phone: e.target.value })
@@ -305,7 +290,7 @@ export default function ContactPage() {
                         )}
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="subject">Sujet *</Label>
+                        <Label htmlFor="subject">{c.fields.subject}</Label>
                         <select
                           id="subject"
                           value={formData.subject}
@@ -316,7 +301,7 @@ export default function ContactPage() {
                             errors.subject ? "border-destructive" : "border-input"
                           }`}
                         >
-                          <option value="">Choisir un sujet…</option>
+                          <option value="">{c.fields.subjectPlaceholder}</option>
                           {subjects.map((s) => (
                             <option key={s.value} value={s.value}>
                               {s.label}
@@ -330,10 +315,10 @@ export default function ContactPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="message">Message *</Label>
+                      <Label htmlFor="message">{c.fields.message}</Label>
                       <Textarea
                         id="message"
-                        placeholder="Décrivez votre demande en détail…"
+                        placeholder={c.fields.messagePlaceholder}
                         rows={5}
                         value={formData.message}
                         onChange={(e) =>
@@ -348,7 +333,7 @@ export default function ContactPage() {
 
                     <Button type="submit" className="w-full" size="lg">
                       <Send className="mr-2 h-4 w-4" />
-                      Envoyer le message
+                      {c.submit}
                     </Button>
                   </form>
                 )}
@@ -367,20 +352,20 @@ export default function ContactPage() {
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center gap-2">
                   <Clock className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Heures d'ouverture</h3>
+                  <h3 className="font-semibold">{c.hoursTitle}</h3>
                 </div>
                 <ul className="space-y-3 text-sm">
                   <li className="flex justify-between">
-                    <span className="text-muted-foreground">Lundi – Vendredi</span>
-                    <span className="font-medium">8h – 22h</span>
+                    <span className="text-muted-foreground">{c.hoursWeekdays}</span>
+                    <span className="font-medium">{c.hoursWeekdaysValue}</span>
                   </li>
                   <li className="flex justify-between">
-                    <span className="text-muted-foreground">Samedi – Dimanche</span>
-                    <span className="font-medium">9h – 20h</span>
+                    <span className="text-muted-foreground">{c.hoursWeekend}</span>
+                    <span className="font-medium">{c.hoursWeekendValue}</span>
                   </li>
                   <li className="flex justify-between">
-                    <span className="text-muted-foreground">Jours fériés</span>
-                    <span className="font-medium">10h – 16h</span>
+                    <span className="text-muted-foreground">{c.hoursHolidays}</span>
+                    <span className="font-medium">{c.hoursHolidaysValue}</span>
                   </li>
                 </ul>
               </CardContent>
@@ -390,20 +375,18 @@ export default function ContactPage() {
               <CardContent className="p-6">
                 <div className="mb-3 flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Protection acheteur</h3>
+                  <h3 className="font-semibold">{c.protectionTitle}</h3>
                 </div>
-                <p className="mb-4 text-sm text-muted-foreground">
-                  Vos paiements sont sécurisés et conservés jusqu'à validation de la livraison.
-                </p>
+                <p className="mb-4 text-sm text-muted-foreground">{c.protectionDesc}</p>
                 <Button asChild variant="outline" size="sm" className="w-full">
-                  <Link to="/protection">En savoir plus</Link>
+                  <Link to="/protection">{c.protectionCta}</Link>
                 </Button>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="p-6">
-                <h3 className="mb-3 font-semibold">Raccourcis rapides</h3>
+                <h3 className="mb-3 font-semibold">{c.shortcutsTitle}</h3>
                 <div className="space-y-2">
                   <Link
                     to="/help"
@@ -411,8 +394,8 @@ export default function ContactPage() {
                   >
                     <HelpCircle className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm font-medium">Centre d'aide</p>
-                      <p className="text-xs text-muted-foreground">FAQ et guides</p>
+                      <p className="text-sm font-medium">{c.shortcutHelp}</p>
+                      <p className="text-xs text-muted-foreground">{c.shortcutHelpDesc}</p>
                     </div>
                     <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
                   </Link>
@@ -422,8 +405,8 @@ export default function ContactPage() {
                   >
                     <Truck className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm font-medium">Retours & Remboursements</p>
-                      <p className="text-xs text-muted-foreground">Politique et démarches</p>
+                      <p className="text-sm font-medium">{c.shortcutReturns}</p>
+                      <p className="text-xs text-muted-foreground">{c.shortcutReturnsDesc}</p>
                     </div>
                     <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
                   </Link>
@@ -433,8 +416,8 @@ export default function ContactPage() {
                   >
                     <Store className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm font-medium">Devenir vendeur</p>
-                      <p className="text-xs text-muted-foreground">Lancer votre boutique</p>
+                      <p className="text-sm font-medium">{c.shortcutSell}</p>
+                      <p className="text-xs text-muted-foreground">{c.shortcutSellDesc}</p>
                     </div>
                     <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
                   </Link>
@@ -450,13 +433,11 @@ export default function ContactPage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl">
             <div className="mb-8 text-center">
-              <h2 className="text-3xl font-bold">Questions fréquentes</h2>
-              <p className="mt-2 text-muted-foreground">
-                Réponses rapides avant de nous écrire.
-              </p>
+              <h2 className="text-3xl font-bold">{c.faqTitle}</h2>
+              <p className="mt-2 text-muted-foreground">{c.faqSubtitle}</p>
             </div>
             <Accordion type="single" collapsible className="w-full space-y-2">
-              {contactFaqs.map((faq, i) => (
+              {c.faqs.map((faq, i) => (
                 <AccordionItem
                   key={i}
                   value={`faq-${i}`}
