@@ -37,7 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import logoMakiity from "@/assets/logo-makiity.png";
+import logoSarematy from "@/assets/logo-sarematy.png";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function Header() {
@@ -118,7 +118,7 @@ export function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center flex-shrink-0 mr-2 sm:mr-4" aria-label="Makiity - Le marché digital de Guinée">
             <div className="h-10 sm:h-11 md:h-12 flex items-center justify-center">
-              <img src={logoMakiity} alt="Makiity" className="h-8 sm:h-9 md:h-10 w-auto max-w-[160px] sm:max-w-[200px] object-contain" />
+              <img src={logoSarematy} alt="Sarematy" className="h-8 sm:h-9 md:h-10 w-auto max-w-[160px] sm:max-w-[200px] object-contain" />
             </div>
           </Link>
 
@@ -366,7 +366,7 @@ export function Header() {
                 <div className="px-4 pb-3 mb-2 border-b border-border">
                   <Link to="/" onClick={() => setMobileMenuOpen(false)} className="inline-flex">
                     <div className="h-11 flex items-center justify-center">
-                      <img src={logoMakiity} alt="Makiity" className="h-8 w-auto max-w-[200px] object-contain" />
+                      <img src={logoSarematy} alt="Sarematy" className="h-8 w-auto max-w-[200px] object-contain" />
                     </div>
                   </Link>
                 </div>
