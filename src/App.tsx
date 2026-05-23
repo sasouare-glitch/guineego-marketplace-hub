@@ -148,7 +148,8 @@ const App = () => (
                     <Route path="/auth/forgot-password" element={<Navigate to="/forgot-password" replace />} />
                     
                     {/* Client Marketplace Routes (Public) */}
-                    <Route path="/marketplace" element={<Marketplace />} />
+                   <Route path="/marketplace" element={<Marketplace />} />
+                   <Route path="/categories" element={<CategoriesPage />} />
                     <Route path="/search" element={<SearchPage />} />
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/academy" element={<Academy />} />
