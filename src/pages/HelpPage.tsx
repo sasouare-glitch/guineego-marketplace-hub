@@ -68,7 +68,7 @@ const faqs = [
   {
     id: "commander",
     category: "Commander",
-    question: "Comment passer une commande sur GuineeGo ?",
+    question: "Comment passer une commande sur Sarematy ?",
     answer: "Parcourez la marketplace, ajoutez vos articles au panier, puis cliquez sur « Commander ». Renseignez votre adresse de livraison, choisissez un mode de paiement (Orange Money, MTN MoMo, Stripe ou paiement à la livraison) et confirmez. Vous recevrez un SMS et une notification dès la confirmation.",
   },
   {
@@ -110,7 +110,7 @@ const faqs = [
   {
     id: "vendre",
     category: "Vendre",
-    question: "Comment devenir vendeur sur GuineeGo ?",
+    question: "Comment devenir vendeur sur Sarematy ?",
     answer: "Créez un compte, puis demandez le rôle « Vendeur » depuis votre profil. Une fois validé, accédez à votre tableau de bord pour ajouter produits, suivre commandes et gérer vos finances. Consultez notre guide vendeur pour les bonnes pratiques.",
   },
   {
@@ -176,7 +176,7 @@ export default function HelpPage() {
               Comment pouvons-nous vous aider ?
             </h1>
             <p className="mb-8 text-lg text-muted-foreground">
-              Trouvez des réponses, contactez notre équipe, ou consultez nos guides pour tirer le meilleur de GuineeGo.
+              Trouvez des réponses, contactez notre équipe, ou consultez nos guides pour tirer le meilleur de Sarematy.
             </p>
 
             {/* Search */}
@@ -324,7 +324,7 @@ export default function HelpPage() {
                     variant="outline"
                     size="sm"
                     className="w-full"
-                    onClick={() => window.open("mailto:support@guineego.com", "_blank")}
+                    onClick={() => window.open("mailto:support@sarematy.com", "_blank")}
                   >
                     Nous écrire
                   </Button>
