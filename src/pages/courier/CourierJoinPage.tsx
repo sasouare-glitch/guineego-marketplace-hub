@@ -106,7 +106,7 @@ const CourierJoinPage = () => {
       <Header />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground py-20 lg:py-28">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-primary-foreground pt-32 lg:pt-40 pb-20 lg:pb-28">
         <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-5" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center">

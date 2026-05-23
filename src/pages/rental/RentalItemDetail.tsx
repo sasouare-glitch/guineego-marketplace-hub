@@ -147,7 +147,7 @@ export default function RentalItemDetail() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background pt-20 lg:pt-32">
         <div className="container mx-auto px-4 py-6">
           <Link
             to="/rental"

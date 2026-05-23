@@ -100,7 +100,7 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container-tight py-6">
+        <main className="container-tight pt-20 lg:pt-32 py-6">
           <div className="grid lg:grid-cols-2 gap-8">
             <Skeleton className="aspect-square rounded-2xl" />
             <div className="space-y-4">
@@ -120,7 +120,7 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container-tight py-20 text-center">
+        <main className="container-tight pt-20 lg:pt-32 py-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Produit introuvable</h1>
           <Link to="/marketplace">
             <Button>Retour au marketplace</Button>
@@ -138,7 +138,7 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container-tight py-6">
+      <main className="container-tight pt-20 lg:pt-32 py-6">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link to="/marketplace" className="hover:text-foreground">{t.nav.home}</Link>

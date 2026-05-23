@@ -229,7 +229,7 @@ export default function CheckoutPage() {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container-tight pt-24 pb-16">
+        <main className="container-tight pt-20 lg:pt-32 pb-16">
           <div className="text-center py-16">
             <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="w-10 h-10 text-muted-foreground" />
@@ -257,7 +257,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container-tight pt-24 pb-16">
+      <main className="container-tight pt-20 lg:pt-32 pb-16">
         {/* Back Link */}
         {currentStep < 3 && (
           <Link 

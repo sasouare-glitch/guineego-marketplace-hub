@@ -77,7 +77,7 @@ export default function InstallApp() {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container mx-auto px-4 py-16 text-center">
+        <main className="container mx-auto px-4 pt-20 lg:pt-32 py-16 text-center">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -102,7 +102,7 @@ export default function InstallApp() {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-20 lg:pt-32 py-8">
         {/* Hero Section */}
         <section className="text-center mb-12">
           <motion.div

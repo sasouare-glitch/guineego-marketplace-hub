@@ -120,7 +120,8 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <CategoryBar activeCategory={filters.categories[0]} />
+      <div className="pt-20 lg:pt-32">
+        <CategoryBar activeCategory={filters.categories[0]} />
 
       <main className="container-tight py-6">
         {/* Search Bar */}
@@ -273,6 +274,7 @@ const SearchPage = () => {
           </div>
         </div>
       </main>
+      </div>
 
       <Footer />
     </div>

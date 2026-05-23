@@ -56,7 +56,7 @@ const DeliveryPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main>
+      <main className="pt-20 lg:pt-32">
         {/* Hero */}
         <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20 lg:py-28">
           <div className="container mx-auto px-4">

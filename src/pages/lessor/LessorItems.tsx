@@ -16,7 +16,7 @@ export default function LessorItems() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background pt-20 lg:pt-32">
         <div className="container mx-auto px-4 py-6 space-y-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">Mes équipements</h1>

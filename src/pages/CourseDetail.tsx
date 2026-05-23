@@ -138,7 +138,7 @@ const CourseDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="mt-16">
+      <main className="pt-20 lg:pt-32">
         {/* Course Header */}
         <section className="bg-gradient-to-br from-guinea-green to-guinea-green/80 text-white py-10">
           <div className="container-tight">

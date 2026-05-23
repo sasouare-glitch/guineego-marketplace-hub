@@ -169,9 +169,9 @@ const Academy = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main>
+      <main className="pt-20 lg:pt-32">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-guinea-green to-guinea-green/80 text-white py-16 mt-16">
+        <section className="bg-gradient-to-br from-guinea-green to-guinea-green/80 text-white py-16">
           <div className="container-tight">
             <div className="max-w-2xl">
               <Badge className="bg-guinea-yellow text-foreground mb-4">
