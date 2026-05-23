@@ -38,6 +38,7 @@ import CourierSettingsPage from "./pages/courier/CourierSettingsPage";
 import CourierHelpPage from "./pages/courier/CourierHelpPage";
 import CourierScanPage from "./pages/courier/CourierScanPage";
 import Marketplace from "./pages/Marketplace";
+import CategoriesPage from "./pages/CategoriesPage";
 import SearchPage from "./pages/SearchPage";
 import ProductDetail from "./pages/ProductDetail";
 import CartPage from "./pages/CartPage";
