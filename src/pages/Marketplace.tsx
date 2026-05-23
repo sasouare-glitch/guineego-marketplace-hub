@@ -306,6 +306,7 @@ const Marketplace = () => {
         </section>
       </main>
       )}
+      </div>
 
       <Footer />
     </div>
