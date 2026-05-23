@@ -100,7 +100,7 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <main className="container-tight py-6">
+        <main className="container-tight pt-20 lg:pt-32 py-6">
           <div className="grid lg:grid-cols-2 gap-8">
             <Skeleton className="aspect-square rounded-2xl" />
             <div className="space-y-4">
