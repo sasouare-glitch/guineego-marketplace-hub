@@ -79,6 +79,7 @@ const Marketplace = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <div className="pt-20 lg:pt-32">
       <CategoryBar />
 
       {sellerFilter ? (
