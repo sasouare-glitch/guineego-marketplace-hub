@@ -14,6 +14,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import SellStartPage from "./pages/SellStartPage";
 import SellerGuidePage from "./pages/SellerGuidePage";
+import SellerPricingPage from "./pages/SellerPricingPage";
 import SellerDashboard from "./pages/seller/SellerDashboard";
 import SellerProducts from "./pages/seller/SellerProducts";
 import SellerOrders from "./pages/seller/SellerOrders";
