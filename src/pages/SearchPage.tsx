@@ -274,6 +274,7 @@ const SearchPage = () => {
           </div>
         </div>
       </main>
+      </div>
 
       <Footer />
     </div>
