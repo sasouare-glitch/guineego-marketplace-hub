@@ -42,7 +42,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Search, MoreHorizontal, UserPlus, Filter, Loader2, RefreshCw, ShieldCheck, Truck, Store, TrendingUp, Users, AlertTriangle } from 'lucide-react';
-import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp, getDocs, terminate, clearIndexedDbPersistence } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -88,8 +88,20 @@ export default function AdminUsersPage() {
   const [updating, setUpdating] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
 
+  // Attempt to recover from Firestore INTERNAL ASSERTION FAILED (b815/ca9)
+  // by terminating the client, clearing IndexedDB cache, then reloading.
+  const recoverFirestoreCache = async () => {
+    try {
+      try { await terminate(db); } catch (_) { /* ignore */ }
+      try { await clearIndexedDbPersistence(db); } catch (_) { /* ignore */ }
+    } finally {
+      // Hard reload to reinitialize Firestore SDK cleanly
+      window.location.reload();
+    }
+  };
+
   // Fetch users (one-shot, resilient against SDK listener crashes)
-  const fetchUsers = async () => {
+  const fetchUsers = async (isRetry = false) => {
     setLoading(true);
     setError(null);
     try {
@@ -111,9 +123,18 @@ export default function AdminUsersPage() {
       console.error('Error fetching users:', err);
       const code = err?.code || '';
       const msg = err?.message || '';
+      const isInternalAssertion = msg.includes('INTERNAL ASSERTION FAILED');
+
+      // Auto-recover once on internal assertion errors (cache corruption)
+      if (isInternalAssertion && !isRetry) {
+        toast.info('Réparation du cache en cours...');
+        await recoverFirestoreCache();
+        return;
+      }
+
       let friendlyMessage = 'Impossible de charger les utilisateurs. Vérifiez votre connexion et réessayez.';
-      if (msg.includes('INTERNAL ASSERTION FAILED')) {
-        friendlyMessage = 'Erreur interne du cache de la base de données. Videz le cache du navigateur et rafraîchissez la page.';
+      if (isInternalAssertion) {
+        friendlyMessage = 'Erreur interne du cache de la base de données. Cliquez sur "Réparer le cache" ci-dessous.';
       } else if (code === 'permission-denied' || msg.toLowerCase().includes('permission')) {
         friendlyMessage = "Accès refusé : votre compte n'a pas les droits administrateur pour lister les utilisateurs.";
       } else if (code === 'unavailable' || msg.toLowerCase().includes('offline') || msg.toLowerCase().includes('network')) {
@@ -260,7 +281,7 @@ export default function AdminUsersPage() {
               <p className="font-medium">Erreur de chargement</p>
               <p className="text-sm opacity-90">{error}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={fetchUsers} disabled={loading}>
+            <Button variant="outline" size="sm" onClick={() => fetchUsers()} disabled={loading}>
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
               Réessayer
             </Button>
@@ -299,7 +320,7 @@ export default function AdminUsersPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="icon" onClick={fetchUsers} disabled={loading} title="Actualiser">
+                <Button variant="outline" size="icon" onClick={() => fetchUsers()} disabled={loading} title="Actualiser">
                   <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 </Button>
               </div>
@@ -315,10 +336,17 @@ export default function AdminUsersPage() {
                 <AlertTriangle className="h-10 w-10 text-destructive" />
                 <p className="font-medium text-foreground">Impossible de charger les utilisateurs</p>
                 <p className="max-w-md text-sm text-muted-foreground">{error}</p>
-                <Button onClick={fetchUsers} disabled={loading} className="mt-2">
-                  {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-                  Réessayer
-                </Button>
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                  <Button onClick={() => fetchUsers()} disabled={loading}>
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                    Réessayer
+                  </Button>
+                  {error?.toLowerCase().includes('cache') && (
+                    <Button variant="outline" onClick={recoverFirestoreCache} disabled={loading}>
+                      Réparer le cache
+                    </Button>
+                  )}
+                </div>
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
