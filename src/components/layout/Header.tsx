@@ -117,8 +117,8 @@ export function Header() {
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center flex-shrink-0 mr-2 sm:mr-4" aria-label="Sarematy - Le marché digital de Guinée">
-            <div className="h-14 sm:h-16 md:h-18 flex items-center justify-center">
-              <img src={logoSarematy} alt="Sarematy" className="h-12 sm:h-14 md:h-16 w-auto max-w-[240px] sm:max-w-[300px] md:max-w-[340px] object-contain" />
+            <div className="h-16 sm:h-20 md:h-22 flex items-center justify-center">
+              <img src={logoSarematy} alt="Sarematy" className="h-14 sm:h-18 md:h-20 w-auto max-w-[280px] sm:max-w-[360px] md:max-w-[420px] object-contain drop-shadow-lg" />
             </div>
           </Link>
 
@@ -365,8 +365,8 @@ export function Header() {
                 {/* Logo in mobile menu */}
                 <div className="px-4 pb-3 mb-2 border-b border-border">
                   <Link to="/" onClick={() => setMobileMenuOpen(false)} className="inline-flex">
-                    <div className="h-11 flex items-center justify-center">
-                      <img src={logoSarematy} alt="Sarematy" className="h-12 w-auto max-w-[280px] object-contain" />
+                    <div className="h-16 flex items-center justify-center">
+                      <img src={logoSarematy} alt="Sarematy" className="h-16 w-auto max-w-[320px] object-contain drop-shadow-md" />
                     </div>
                   </Link>
                 </div>
