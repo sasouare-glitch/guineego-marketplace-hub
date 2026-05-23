@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -24,73 +25,35 @@ import {
   Mail,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const steps = [
-  {
-    icon: MessageCircle,
-    title: "1. Contactez-nous",
-    desc: "Ouvrez une demande de retour depuis « Mes commandes » ou contactez le support sous 48h après réception.",
-  },
-  {
-    icon: PackageCheck,
-    title: "2. Préparez le colis",
-    desc: "Replacez l'article dans son emballage d'origine avec tous les accessoires, étiquettes et la facture.",
-  },
-  {
-    icon: RotateCcw,
-    title: "3. Remise au coursier",
-    desc: "Notre coursier Sarematy passe récupérer le colis à l'adresse de livraison initiale.",
-  },
-  {
-    icon: Wallet,
-    title: "4. Remboursement",
-    desc: "Une fois l'article vérifié par le vendeur, le remboursement est crédité sous 3 à 7 jours ouvrés.",
-  },
-];
-
-const eligible = [
-  "Article défectueux ou endommagé à la livraison",
-  "Produit non conforme à la description",
-  "Mauvaise taille, couleur ou modèle reçu",
-  "Colis incomplet (accessoires manquants)",
-];
-
-const notEligible = [
-  "Produits d'hygiène, alimentaires ou périssables",
-  "Articles personnalisés ou sur-mesure",
-  "Sous-vêtements, maillots de bain (pour raisons d'hygiène)",
-  "Articles utilisés, lavés ou abîmés par le client",
-  "Demandes faites au-delà de 48h après réception",
-];
-
-const faqs = [
-  {
-    q: "Quel est le délai pour demander un retour ?",
-    a: "Vous disposez de 48 heures après la réception du colis pour signaler un problème et ouvrir une demande de retour depuis votre espace « Mes commandes ».",
-  },
-  {
-    q: "Le retour est-il payant ?",
-    a: "Le retour est gratuit si le problème vient du vendeur (article défectueux, non conforme, erreur). Dans les autres cas, des frais de livraison retour peuvent s'appliquer.",
-  },
-  {
-    q: "Comment suivre le statut de ma demande ?",
-    a: "Rendez-vous dans « Mes commandes » > détail de la commande. Le statut de la demande de retour s'affiche en temps réel jusqu'au remboursement final.",
-  },
-  {
-    q: "Quand serai-je remboursé ?",
-    a: "Le remboursement est traité dans un délai de 3 à 7 jours ouvrés après réception et validation du colis par le vendeur. Le crédit est renvoyé sur le moyen de paiement initial (Orange Money, MTN MoMo, carte ou portefeuille Sarematy).",
-  },
-  {
-    q: "Puis-je échanger au lieu d'être remboursé ?",
-    a: "Oui, dans la limite des stocks disponibles chez le vendeur. Indiquez l'option « Échange » lors de l'ouverture de votre demande.",
-  },
-  {
-    q: "Que faire si le vendeur refuse mon retour ?",
-    a: "Notre équipe Sarematy intervient en médiation. Contactez le support via WhatsApp ou l'adresse support@sarematy.com pour ouvrir un litige.",
-  },
-];
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function ReturnsPage() {
+  const { t } = useTranslation();
+  const r = t.pages.returns;
+
+  const quickInfo = useMemo(
+    () => [
+      { icon: Clock, title: r.quickInfo[0].title, desc: r.quickInfo[0].desc },
+      { icon: PackageCheck, title: r.quickInfo[1].title, desc: r.quickInfo[1].desc },
+      { icon: Wallet, title: r.quickInfo[2].title, desc: r.quickInfo[2].desc },
+    ],
+    [r]
+  );
+
+  const steps = useMemo(
+    () => [
+      { icon: MessageCircle, title: r.steps[0].title, desc: r.steps[0].desc },
+      { icon: PackageCheck, title: r.steps[1].title, desc: r.steps[1].desc },
+      { icon: RotateCcw, title: r.steps[2].title, desc: r.steps[2].desc },
+      { icon: Wallet, title: r.steps[3].title, desc: r.steps[3].desc },
+    ],
+    [r]
+  );
+
+  const eligible = r.eligible;
+  const notEligible = r.notEligible;
+  const faqs = r.faqs;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -106,14 +69,13 @@ export default function ReturnsPage() {
           >
             <Badge variant="secondary" className="mb-4">
               <RotateCcw className="mr-1 h-3 w-3" />
-              Retours & Remboursements
+              {r.badge}
             </Badge>
             <h1 className="mb-4 text-4xl font-bold tracking-tight md:text-5xl">
-              Une politique de retour simple et transparente
+              {r.heroTitle}
             </h1>
             <p className="text-lg text-muted-foreground">
-              Sur Sarematy, votre satisfaction est notre priorité. Découvrez comment retourner un article et obtenir
-              votre remboursement en toute sérénité.
+              {r.heroDesc}
             </p>
           </motion.div>
         </div>
@@ -122,11 +84,7 @@ export default function ReturnsPage() {
       {/* Quick info */}
       <section className="container mx-auto px-4 py-12">
         <div className="grid gap-4 md:grid-cols-3">
-          {[
-            { icon: Clock, title: "48h", desc: "Délai pour signaler un problème" },
-            { icon: PackageCheck, title: "Gratuit", desc: "Si l'erreur vient du vendeur" },
-            { icon: Wallet, title: "3-7 jours", desc: "Pour recevoir votre remboursement" },
-          ].map((item, i) => (
+          {quickInfo.map((item, i) => (
             <motion.div
               key={item.title}
               initial={{ opacity: 0, y: 20 }}
@@ -153,8 +111,8 @@ export default function ReturnsPage() {
       {/* Steps */}
       <section className="container mx-auto px-4 py-12">
         <div className="mb-10 text-center">
-          <h2 className="text-3xl font-bold">Comment effectuer un retour ?</h2>
-          <p className="mt-2 text-muted-foreground">4 étapes simples pour retourner un article.</p>
+          <h2 className="text-3xl font-bold">{r.stepsTitle}</h2>
+          <p className="mt-2 text-muted-foreground">{r.stepsSubtitle}</p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
@@ -186,7 +144,7 @@ export default function ReturnsPage() {
             <CardContent className="p-6">
               <div className="mb-4 flex items-center gap-2">
                 <CheckCircle2 className="h-6 w-6 text-green-600" />
-                <h3 className="text-xl font-semibold">Articles éligibles au retour</h3>
+                <h3 className="text-xl font-semibold">{r.eligibleTitle}</h3>
               </div>
               <ul className="space-y-2">
                 {eligible.map((item) => (
@@ -203,7 +161,7 @@ export default function ReturnsPage() {
             <CardContent className="p-6">
               <div className="mb-4 flex items-center gap-2">
                 <XCircle className="h-6 w-6 text-destructive" />
-                <h3 className="text-xl font-semibold">Articles non retournables</h3>
+                <h3 className="text-xl font-semibold">{r.notEligibleTitle}</h3>
               </div>
               <ul className="space-y-2">
                 {notEligible.map((item) => (
@@ -226,14 +184,13 @@ export default function ReturnsPage() {
               <ShieldCheck className="h-8 w-8" />
             </div>
             <div className="flex-1">
-              <h3 className="mb-1 text-lg font-semibold">Protection acheteur Sarematy</h3>
+              <h3 className="mb-1 text-lg font-semibold">{r.protectionTitle}</h3>
               <p className="text-sm text-muted-foreground">
-                Vos paiements sont sécurisés et conservés jusqu'à validation de la livraison. En cas de litige, nous
-                garantissons un remboursement intégral.
+                {r.protectionDesc}
               </p>
             </div>
             <Button asChild variant="outline">
-              <Link to="/protection">En savoir plus</Link>
+              <Link to="/protection">{r.protectionCta}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -243,8 +200,8 @@ export default function ReturnsPage() {
       <section className="container mx-auto px-4 py-12">
         <div className="mx-auto max-w-3xl">
           <div className="mb-8 text-center">
-            <h2 className="text-3xl font-bold">Questions fréquentes</h2>
-            <p className="mt-2 text-muted-foreground">Tout ce que vous devez savoir sur les retours.</p>
+            <h2 className="text-3xl font-bold">{r.faqTitle}</h2>
+            <p className="mt-2 text-muted-foreground">{r.faqSubtitle}</p>
           </div>
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq, i) => (
@@ -263,10 +220,9 @@ export default function ReturnsPage() {
           <CardContent className="flex items-start gap-3 p-6">
             <AlertTriangle className="mt-1 h-5 w-5 shrink-0 text-amber-600" />
             <div className="text-sm">
-              <p className="mb-1 font-semibold">Important</p>
+              <p className="mb-1 font-semibold">{r.importantTitle}</p>
               <p className="text-muted-foreground">
-                Toute demande de retour doit être faite dans les 48 heures suivant la réception. Pensez à filmer
-                l'ouverture du colis (unboxing) en cas de produit endommagé : cela facilite la prise en charge.
+                {r.importantDesc}
               </p>
             </div>
           </CardContent>
@@ -276,28 +232,28 @@ export default function ReturnsPage() {
       {/* Contact */}
       <section className="container mx-auto px-4 py-12">
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold">Besoin d'aide ?</h2>
-          <p className="mt-2 text-muted-foreground">Notre équipe support est disponible 7j/7.</p>
+          <h2 className="text-3xl font-bold">{r.helpTitle}</h2>
+          <p className="mt-2 text-muted-foreground">{r.helpSubtitle}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="cursor-pointer transition-shadow hover:shadow-lg" onClick={() => window.open("https://wa.me/224620000000", "_blank")}>
             <CardContent className="p-6 text-center">
               <MessageCircle className="mx-auto mb-3 h-8 w-8 text-green-600" />
-              <h3 className="font-semibold">WhatsApp</h3>
+              <h3 className="font-semibold">{r.whatsapp}</h3>
               <p className="text-sm text-muted-foreground">+224 620 000 000</p>
             </CardContent>
           </Card>
           <Card className="cursor-pointer transition-shadow hover:shadow-lg" onClick={() => window.open("tel:+224620000000", "_blank")}>
             <CardContent className="p-6 text-center">
               <Phone className="mx-auto mb-3 h-8 w-8 text-primary" />
-              <h3 className="font-semibold">Téléphone</h3>
+              <h3 className="font-semibold">{r.phone}</h3>
               <p className="text-sm text-muted-foreground">+224 620 000 000</p>
             </CardContent>
           </Card>
           <Card className="cursor-pointer transition-shadow hover:shadow-lg" onClick={() => window.open("mailto:support@sarematy.com", "_blank")}>
             <CardContent className="p-6 text-center">
               <Mail className="mx-auto mb-3 h-8 w-8 text-primary" />
-              <h3 className="font-semibold">Email</h3>
+              <h3 className="font-semibold">{r.email}</h3>
               <p className="text-sm text-muted-foreground">support@sarematy.com</p>
             </CardContent>
           </Card>
