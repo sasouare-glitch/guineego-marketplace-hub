@@ -72,26 +72,8 @@ export default function PromosPage() {
                 <ProductCard
                   key={p.id}
                   product={p}
-                  onAddToCart={() =>
-                    addItem({
-                      id: p.id,
-                      name: p.name,
-                      price: p.price,
-                      image: p.image,
-                      seller: p.seller,
-                    })
-                  }
-                  onToggleWishlist={() =>
-                    toggleItem({
-                      id: p.id,
-                      name: p.name,
-                      price: p.price,
-                      image: p.image,
-                      seller: p.seller,
-                      category: p.category,
-                      rating: p.rating,
-                    })
-                  }
+                  onAddToCart={() => addItem(p as any)}
+                  onToggleWishlist={() => toggleItem(p as any)}
                   isInWishlist={isInWishlist(p.id)}
                 />
               ))}
