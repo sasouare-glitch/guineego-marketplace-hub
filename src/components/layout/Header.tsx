@@ -365,8 +365,8 @@ export function Header() {
                 {/* Logo in mobile menu */}
                 <div className="px-4 pb-3 mb-2 border-b border-border">
                   <Link to="/" onClick={() => setMobileMenuOpen(false)} className="inline-flex">
-                    <div className="h-11 flex items-center justify-center">
-                      <img src={logoSarematy} alt="Sarematy" className="h-12 w-auto max-w-[280px] object-contain" />
+                    <div className="h-16 flex items-center justify-center">
+                      <img src={logoSarematy} alt="Sarematy" className="h-16 w-auto max-w-[320px] object-contain drop-shadow-md" />
                     </div>
                   </Link>
                 </div>
