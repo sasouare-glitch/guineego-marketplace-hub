@@ -3,49 +3,13 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Truck, Clock, MapPin, Shield, Smartphone, Package, 
-  ArrowRight, CheckCircle2, Zap, Users, Star
+import {
+  Truck, Clock, MapPin, Shield, Smartphone, Package,
+  ArrowRight, CheckCircle2, Zap, Users, Star,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-
-const stats = [
-  { value: "30 min", label: "Délai moyen", icon: Clock },
-  { value: "5000+", label: "Livraisons", icon: Package },
-  { value: "50+", label: "Coursiers actifs", icon: Users },
-  { value: "4.8/5", label: "Satisfaction", icon: Star },
-];
-
-const features = [
-  {
-    icon: Zap,
-    title: "Livraison express",
-    description: "Recevez vos commandes en moins de 30 minutes dans toute la ville de Conakry.",
-  },
-  {
-    icon: MapPin,
-    title: "Suivi en temps réel",
-    description: "Suivez votre coursier en direct sur la carte avec des mises à jour GPS précises.",
-  },
-  {
-    icon: Shield,
-    title: "Colis sécurisé",
-    description: "Chaque colis est scanné et vérifié à chaque étape pour garantir son intégrité.",
-  },
-  {
-    icon: Smartphone,
-    title: "Notifications instantanées",
-    description: "Soyez alerté à chaque changement de statut de votre livraison.",
-  },
-];
-
-const steps = [
-  { step: "01", title: "Commandez", description: "Passez votre commande sur le marketplace Sarematy" },
-  { step: "02", title: "Préparation", description: "Le vendeur prépare et emballe votre commande" },
-  { step: "03", title: "Collecte", description: "Un coursier récupère le colis chez le vendeur" },
-  { step: "04", title: "Livraison", description: "Votre commande arrive à votre porte" },
-];
+import { useTranslation } from "@/hooks/useTranslation";
 
 const zones = [
   "Kaloum", "Dixinn", "Matam", "Ratoma", "Matoto",
@@ -53,11 +17,34 @@ const zones = [
 ];
 
 const DeliveryPage = () => {
+  const { t } = useTranslation();
+  const d = t.pages.delivery;
+
+  const stats = [
+    { value: "30 min", label: d.stats.time, icon: Clock },
+    { value: "5000+", label: d.stats.deliveries, icon: Package },
+    { value: "50+", label: d.stats.couriers, icon: Users },
+    { value: "4.8/5", label: d.stats.rating, icon: Star },
+  ];
+
+  const features = [
+    { icon: Zap, title: d.f1Title, description: d.f1Desc },
+    { icon: MapPin, title: d.f2Title, description: d.f2Desc },
+    { icon: Shield, title: d.f3Title, description: d.f3Desc },
+    { icon: Smartphone, title: d.f4Title, description: d.f4Desc },
+  ];
+
+  const steps = [
+    { step: "01", title: d.s1Title, description: d.s1Desc },
+    { step: "02", title: d.s2Title, description: d.s2Desc },
+    { step: "03", title: d.s3Title, description: d.s3Desc },
+    { step: "04", title: d.s4Title, description: d.s4Desc },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-20 lg:pt-32">
-        {/* Hero */}
         <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20 lg:py-28">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
@@ -67,36 +54,33 @@ const DeliveryPage = () => {
                 transition={{ duration: 0.6 }}
               >
                 <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 px-4 py-1.5 text-sm font-semibold">
-                  🚀 Service de livraison
+                  {d.badge}
                 </Badge>
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-                  Livraison rapide & fiable{" "}
-                  <span className="text-primary">partout en Guinée</span>
+                  {d.heroTitle1}{" "}
+                  <span className="text-primary">{d.heroTitle2}</span>
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  Sarematy connecte vendeurs et acheteurs grâce à un réseau de coursiers professionnels. 
-                  Suivez vos colis en temps réel, du vendeur jusqu'à votre porte.
+                  {d.heroDesc}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link to="/marketplace">
                     <Button size="lg" className="text-base px-8 gap-2">
-                      Commander maintenant <ArrowRight className="w-4 h-4" />
+                      {d.ctaOrder} <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>
                   <Link to="/register">
                     <Button size="lg" variant="outline" className="text-base px-8 gap-2">
-                      <Truck className="w-4 h-4" /> Devenir coursier
+                      <Truck className="w-4 h-4" /> {d.ctaBecomeCourier}
                     </Button>
                   </Link>
                 </div>
               </motion.div>
             </div>
           </div>
-          {/* Decorative */}
           <div className="absolute -bottom-1 left-0 right-0 h-16 bg-gradient-to-t from-background to-transparent" />
         </section>
 
-        {/* Stats */}
         <section className="py-12 border-b border-border">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -119,16 +103,13 @@ const DeliveryPage = () => {
           </div>
         </section>
 
-        {/* Features */}
         <section className="py-16 lg:py-24">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                Pourquoi choisir notre livraison ?
+                {d.featuresTitle}
               </h2>
-              <p className="text-muted-foreground max-w-xl mx-auto">
-                Un service pensé pour la réalité guinéenne, fiable et accessible.
-              </p>
+              <p className="text-muted-foreground max-w-xl mx-auto">{d.featuresSubtitle}</p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {features.map((feature, i) => (
@@ -154,14 +135,13 @@ const DeliveryPage = () => {
           </div>
         </section>
 
-        {/* How it works */}
         <section className="py-16 lg:py-24 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                Comment ça marche ?
+                {d.howTitle}
               </h2>
-              <p className="text-muted-foreground">4 étapes simples pour recevoir votre commande</p>
+              <p className="text-muted-foreground">{d.howSubtitle}</p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto">
               {steps.map((step, i) => (
@@ -184,16 +164,13 @@ const DeliveryPage = () => {
           </div>
         </section>
 
-        {/* Zones */}
         <section className="py-16 lg:py-24">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                Zones de livraison
+                {d.zonesTitle}
               </h2>
-              <p className="text-muted-foreground mb-8">
-                Nous couvrons les principales communes de Conakry et ses environs.
-              </p>
+              <p className="text-muted-foreground mb-8">{d.zonesSubtitle}</p>
               <div className="flex flex-wrap justify-center gap-3 mb-8">
                 {zones.map((zone) => (
                   <Badge
@@ -206,27 +183,19 @@ const DeliveryPage = () => {
                   </Badge>
                 ))}
               </div>
-              <p className="text-sm text-muted-foreground">
-                D'autres zones seront bientôt disponibles. Restez connecté !
-              </p>
+              <p className="text-sm text-muted-foreground">{d.zonesMore}</p>
             </div>
           </div>
         </section>
 
-        {/* CTA Coursier */}
         <section className="py-16 lg:py-24 bg-primary text-primary-foreground">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               <Truck className="w-12 h-12 mx-auto mb-6 opacity-80" />
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Devenez coursier Sarematy
-              </h2>
-              <p className="text-lg opacity-90 mb-6 max-w-xl mx-auto">
-                Gagnez un revenu flexible en livrant des colis dans votre ville. 
-                Rejoignez notre réseau de coursiers professionnels.
-              </p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">{d.courierCtaTitle}</h2>
+              <p className="text-lg opacity-90 mb-6 max-w-xl mx-auto">{d.courierCtaDesc}</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                {["Revenus attractifs", "Horaires flexibles", "Application dédiée"].map((item) => (
+                {d.courierPerks.map((item) => (
                   <div key={item} className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="w-4 h-4" />
                     <span>{item}</span>
@@ -235,7 +204,7 @@ const DeliveryPage = () => {
               </div>
               <Link to="/register" className="inline-block mt-8">
                 <Button size="lg" variant="secondary" className="text-base px-8 gap-2">
-                  S'inscrire comme coursier <ArrowRight className="w-4 h-4" />
+                  {d.courierSignUp} <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>
