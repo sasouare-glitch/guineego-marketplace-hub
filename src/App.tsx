@@ -73,6 +73,7 @@ import DeliveryPage from "./pages/DeliveryPage";
 import PaymentPage from "./pages/PaymentPage";
 import ProtectionPage from "./pages/ProtectionPage";
 import HelpPage from "./pages/HelpPage";
+import ReturnsPage from "./pages/ReturnsPage";
 import CourierJoinPage from "./pages/courier/CourierJoinPage";
 import InvestPage from "./pages/InvestPage";
 // Auth Pages
@@ -167,6 +168,7 @@ const App = () => (
                     <Route path="/payment" element={<PaymentPage />} />
                    <Route path="/protection" element={<ProtectionPage />} />
                    <Route path="/help" element={<HelpPage />} />
+                   <Route path="/returns" element={<ReturnsPage />} />
                     <Route path="/track" element={<TrackOrderPage />} />
                     <Route path="/track/:id" element={<PublicOrderTrackingPage />} />
 
