@@ -67,7 +67,7 @@ export default function RentalMarketplace() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-background">
+      <main className="min-h-screen bg-background pt-20 lg:pt-32">
         {/* Hero */}
         <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 border-b">
           <div className="container mx-auto px-4 py-10">
