@@ -112,7 +112,7 @@ export default function RegisterPage() {
       const dashboardRoutes: Record<string, string> = {
         ecommerce: '/seller',
         courier: '/courier',
-        investor: '/investor',
+        lessor: '/lessor',
         customer: '/',
       };
       const destination = dashboardRoutes[data.role] || '/';
