@@ -115,6 +115,7 @@ export default function RegisterPage() {
         ecommerce: '/seller',
         courier: '/courier',
         lessor: '/lessor',
+        investor: '/investor',
         customer: '/',
       };
       const destination = dashboardRoutes[data.role] || '/';
