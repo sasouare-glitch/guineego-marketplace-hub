@@ -14,18 +14,23 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, TrendingUp, UserCircle, Phone, Store, MapPin, Bike } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, KeyRound, UserCircle, Phone, Store, MapPin, Bike } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const roleOptions = [
+const featuredRoles = [
   { value: 'customer', label: 'Client / Acheteur', description: 'Acheter des produits sur la marketplace', icon: UserCircle },
   { value: 'ecommerce', label: 'Vendeur / E-commerçant', description: 'Vendre vos produits en ligne', icon: ShoppingBag },
   { value: 'courier', label: 'Livreur / Coursier', description: 'Effectuer des livraisons', icon: Truck },
-  { value: 'investor', label: 'Investisseur', description: 'Investir dans des opportunités', icon: TrendingUp },
 ] as const;
 
+const secondaryRoles = [
+  { value: 'lessor', label: 'Loueur', description: 'Louer votre matériel ou équipement', icon: KeyRound },
+] as const;
+
+const roleOptions = [...featuredRoles, ...secondaryRoles] as const;
+
 const registerSchema = z.object({
-  role: z.enum(['customer', 'ecommerce', 'courier', 'investor'], { required_error: 'Veuillez choisir votre profil' }),
+  role: z.enum(['customer', 'ecommerce', 'courier', 'lessor'], { required_error: 'Veuillez choisir votre profil' }),
   displayName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Email invalide'),
   phone: z.string().optional(),
@@ -65,7 +70,7 @@ export default function RegisterPage() {
       const roleRoutes: Record<string, string> = {
         ecommerce: '/seller/dashboard',
         courier: '/courier',
-        investor: '/investor/dashboard',
+        lessor: '/lessor',
         admin: '/admin/dashboard',
       };
       const role = claims.role || 'customer';
@@ -107,7 +112,7 @@ export default function RegisterPage() {
       const dashboardRoutes: Record<string, string> = {
         ecommerce: '/seller',
         courier: '/courier',
-        investor: '/investor',
+        lessor: '/lessor',
         customer: '/',
       };
       const destination = dashboardRoutes[data.role] || '/';
@@ -137,7 +142,7 @@ export default function RegisterPage() {
         const roleRoutes: Record<string, string> = {
           ecommerce: '/seller',
           courier: '/courier',
-          investor: '/investor',
+          lessor: '/lessor',
           admin: '/admin',
         };
         navigate(roleRoutes[role] || '/', { replace: true });
@@ -217,28 +222,61 @@ export default function RegisterPage() {
                 <RadioGroup
                   value={watch('role') || ''}
                   onValueChange={(val) => setValue('role', val as any, { shouldValidate: true })}
-                  className="grid grid-cols-2 gap-3"
+                  className="space-y-3"
                 >
-                  {roleOptions.map((option) => {
-                    const Icon = option.icon;
-                    const isSelected = watch('role') === option.value;
-                    return (
-                      <Label
-                        key={option.value}
-                        htmlFor={`role-${option.value}`}
-                        className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 cursor-pointer transition-all text-center ${
-                          isSelected
-                            ? 'border-primary bg-primary/5 shadow-sm'
-                            : 'border-muted hover:border-primary/40'
-                        }`}
-                      >
-                        <RadioGroupItem value={option.value} id={`role-${option.value}`} className="sr-only" />
-                        <Icon className={`w-6 h-6 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
-                        <span className={`text-sm font-medium leading-tight ${isSelected ? 'text-primary' : ''}`}>{option.label}</span>
-                        <span className="text-[10px] text-muted-foreground leading-tight">{option.description}</span>
-                      </Label>
-                    );
-                  })}
+                  <div className="grid grid-cols-3 gap-2.5">
+                    {featuredRoles.map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = watch('role') === option.value;
+                      return (
+                        <Label
+                          key={option.value}
+                          htmlFor={`role-${option.value}`}
+                          className={`relative flex flex-col items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all text-center ${
+                            isSelected
+                              ? 'border-primary bg-primary/10 shadow-md scale-[1.02]'
+                              : 'border-muted hover:border-primary/50 hover:bg-primary/5'
+                          }`}
+                        >
+                          <RadioGroupItem value={option.value} id={`role-${option.value}`} className="sr-only" />
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <span className={`text-xs font-semibold leading-tight ${isSelected ? 'text-primary' : ''}`}>{option.label}</span>
+                          <span className="text-[10px] text-muted-foreground leading-tight">{option.description}</span>
+                        </Label>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                    <span className="h-px flex-1 bg-border" />
+                    <span>Autre profil</span>
+                    <span className="h-px flex-1 bg-border" />
+                  </div>
+                  <div className="grid grid-cols-1 gap-2">
+                    {secondaryRoles.map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = watch('role') === option.value;
+                      return (
+                        <Label
+                          key={option.value}
+                          htmlFor={`role-${option.value}`}
+                          className={`flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-all ${
+                            isSelected
+                              ? 'border-primary bg-primary/5'
+                              : 'border-muted hover:border-primary/40'
+                          }`}
+                        >
+                          <RadioGroupItem value={option.value} id={`role-${option.value}`} className="sr-only" />
+                          <Icon className={`w-4 h-4 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
+                          <div className="flex-1 min-w-0">
+                            <div className={`text-sm font-medium leading-tight ${isSelected ? 'text-primary' : ''}`}>{option.label}</div>
+                            <div className="text-[10px] text-muted-foreground leading-tight">{option.description}</div>
+                          </div>
+                        </Label>
+                      );
+                    })}
+                  </div>
                 </RadioGroup>
                 {errors.role && (
                   <p className="text-sm text-destructive">{errors.role.message}</p>
