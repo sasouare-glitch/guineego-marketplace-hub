@@ -14,15 +14,20 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, TrendingUp, UserCircle, Phone, Store, MapPin, Bike } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, KeyRound, UserCircle, Phone, Store, MapPin, Bike } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const roleOptions = [
+const featuredRoles = [
   { value: 'customer', label: 'Client / Acheteur', description: 'Acheter des produits sur la marketplace', icon: UserCircle },
   { value: 'ecommerce', label: 'Vendeur / E-commerçant', description: 'Vendre vos produits en ligne', icon: ShoppingBag },
   { value: 'courier', label: 'Livreur / Coursier', description: 'Effectuer des livraisons', icon: Truck },
-  { value: 'investor', label: 'Investisseur', description: 'Investir dans des opportunités', icon: TrendingUp },
 ] as const;
+
+const secondaryRoles = [
+  { value: 'lessor', label: 'Loueur', description: 'Louer votre matériel ou équipement', icon: KeyRound },
+] as const;
+
+const roleOptions = [...featuredRoles, ...secondaryRoles] as const;
 
 const registerSchema = z.object({
   role: z.enum(['customer', 'ecommerce', 'courier', 'investor'], { required_error: 'Veuillez choisir votre profil' }),
