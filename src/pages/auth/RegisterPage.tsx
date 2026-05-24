@@ -70,7 +70,7 @@ export default function RegisterPage() {
       const roleRoutes: Record<string, string> = {
         ecommerce: '/seller/dashboard',
         courier: '/courier',
-        investor: '/investor/dashboard',
+        lessor: '/lessor',
         admin: '/admin/dashboard',
       };
       const role = claims.role || 'customer';
