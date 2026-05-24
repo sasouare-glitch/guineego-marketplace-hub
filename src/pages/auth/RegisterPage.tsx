@@ -31,7 +31,7 @@ const secondaryRoles = [
 const roleOptions = [...featuredRoles, ...secondaryRoles] as const;
 
 const registerSchema = z.object({
-  role: z.enum(['customer', 'ecommerce', 'courier', 'lessor'], { required_error: 'Veuillez choisir votre profil' }),
+  role: z.enum(['customer', 'ecommerce', 'courier', 'lessor', 'investor'], { required_error: 'Veuillez choisir votre profil' }),
   displayName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Email invalide'),
   phone: z.string().optional(),
