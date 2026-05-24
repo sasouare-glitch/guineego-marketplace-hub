@@ -142,7 +142,7 @@ export default function RegisterPage() {
         const roleRoutes: Record<string, string> = {
           ecommerce: '/seller',
           courier: '/courier',
-          investor: '/investor',
+          lessor: '/lessor',
           admin: '/admin',
         };
         navigate(roleRoutes[role] || '/', { replace: true });
