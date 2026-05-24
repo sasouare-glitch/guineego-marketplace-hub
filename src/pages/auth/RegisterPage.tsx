@@ -25,6 +25,7 @@ const featuredRoles = [
 
 const secondaryRoles = [
   { value: 'lessor', label: 'Loueur', description: 'Louer votre matériel ou équipement', icon: KeyRound },
+  { value: 'investor', label: 'Investisseur', description: 'Investir et soutenir les vendeurs', icon: TrendingUp },
 ] as const;
 
 const roleOptions = [...featuredRoles, ...secondaryRoles] as const;
