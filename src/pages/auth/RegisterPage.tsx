@@ -146,6 +146,7 @@ export default function RegisterPage() {
           ecommerce: '/seller',
           courier: '/courier',
           lessor: '/lessor',
+          investor: '/investor',
           admin: '/admin',
         };
         navigate(roleRoutes[role] || '/', { replace: true });
