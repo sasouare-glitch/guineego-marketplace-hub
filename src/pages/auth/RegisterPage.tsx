@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, KeyRound, UserCircle, Phone, Store, MapPin, Bike } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Loader2, AlertCircle, CheckCircle2, ShoppingBag, Truck, KeyRound, UserCircle, Phone, Store, MapPin, Bike, TrendingUp } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const featuredRoles = [
@@ -25,12 +25,13 @@ const featuredRoles = [
 
 const secondaryRoles = [
   { value: 'lessor', label: 'Loueur', description: 'Louer votre matériel ou équipement', icon: KeyRound },
+  { value: 'investor', label: 'Investisseur', description: 'Investir et soutenir les vendeurs', icon: TrendingUp },
 ] as const;
 
 const roleOptions = [...featuredRoles, ...secondaryRoles] as const;
 
 const registerSchema = z.object({
-  role: z.enum(['customer', 'ecommerce', 'courier', 'lessor'], { required_error: 'Veuillez choisir votre profil' }),
+  role: z.enum(['customer', 'ecommerce', 'courier', 'lessor', 'investor'], { required_error: 'Veuillez choisir votre profil' }),
   displayName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Email invalide'),
   phone: z.string().optional(),
@@ -71,6 +72,7 @@ export default function RegisterPage() {
         ecommerce: '/seller/dashboard',
         courier: '/courier',
         lessor: '/lessor',
+        investor: '/investor',
         admin: '/admin/dashboard',
       };
       const role = claims.role || 'customer';
@@ -113,6 +115,7 @@ export default function RegisterPage() {
         ecommerce: '/seller',
         courier: '/courier',
         lessor: '/lessor',
+        investor: '/investor',
         customer: '/',
       };
       const destination = dashboardRoutes[data.role] || '/';
@@ -143,6 +146,7 @@ export default function RegisterPage() {
           ecommerce: '/seller',
           courier: '/courier',
           lessor: '/lessor',
+          investor: '/investor',
           admin: '/admin',
         };
         navigate(roleRoutes[role] || '/', { replace: true });
