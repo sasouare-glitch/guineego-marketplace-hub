@@ -33,21 +33,48 @@ export default function RentalMarketplace() {
     dateParam ? new Date(dateParam) : undefined
   );
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [search, setSearch] = useState(params.get("q") ?? "");
+  const [commune, setCommune] = useState<string>(params.get("commune") ?? "");
+  const [sort, setSort] = useState<SortKey>((params.get("sort") as SortKey) || "recent");
 
   const { items, loading } = useRentalItems({
     max: 48,
     ...(categoryParam ? { category: categoryParam } : {}),
   });
 
-  const visible = useMemo(
-    () => items.filter((i) => i.status !== "inactive"),
-    [items]
-  );
+  const communes = useMemo(() => {
+    const s = new Set<string>();
+    items.forEach((i) => i.location?.commune && s.add(i.location.commune));
+    return Array.from(s).sort();
+  }, [items]);
+
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let list = items.filter((i) => i.status !== "inactive");
+    if (q.length >= 2) {
+      list = list.filter(
+        (i) =>
+          i.title?.toLowerCase().includes(q) ||
+          i.description?.toLowerCase().includes(q)
+      );
+    }
+    if (commune) list = list.filter((i) => i.location?.commune === commune);
+    if (sort === "price_asc") list = [...list].sort((a, b) => a.pricePerDay - b.pricePerDay);
+    else if (sort === "price_desc") list = [...list].sort((a, b) => b.pricePerDay - a.pricePerDay);
+    return list;
+  }, [items, search, commune, sort]);
 
   const availableCount = useMemo(() => {
     if (!date) return visible.length;
     return visible.filter((i) => getAvailabilityReason(i, date) === null).length;
   }, [visible, date]);
+
+  const updateParam = (key: string, value: string) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: true });
+  };
 
   const setDateFilter = (d: Date | undefined) => {
     setDate(d);
