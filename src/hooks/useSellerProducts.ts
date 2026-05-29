@@ -253,10 +253,63 @@ export function useSellerProducts() {
     }
   };
 
-  // Delete product
+  // Delete product + cascade cleanup of related Firestore data
   const deleteProduct = async (productId: string) => {
     try {
-      await deleteDoc(doc(db, 'products', productId));
+      // Read product to know its category before deletion
+      const productRef = doc(db, 'products', productId);
+      const productSnap = await getDoc(productRef);
+      const productData = productSnap.exists() ? productSnap.data() : null;
+      const category = productData?.category as string | undefined;
+
+      const batch = writeBatch(db);
+
+      // 1. Delete the product itself
+      batch.delete(productRef);
+
+      // 2. Delete the search index entry
+      batch.delete(doc(db, 'product_index', productId));
+
+      // 3. Decrement category counter
+      if (category) {
+        batch.set(
+          doc(db, 'categories', category),
+          { productCount: increment(-1) },
+          { merge: true }
+        );
+      }
+
+      // 4. Delete product reviews
+      try {
+        const reviewsSnap = await getDocs(
+          query(collection(db, 'reviews'), where('productId', '==', productId))
+        );
+        reviewsSnap.forEach((d) => batch.delete(d.ref));
+      } catch (e) {
+        console.warn('Reviews cleanup skipped:', e);
+      }
+
+      // 5. Remove from wishlists
+      try {
+        const wishlistSnap = await getDocs(
+          query(collection(db, 'wishlists'), where('productId', '==', productId))
+        );
+        wishlistSnap.forEach((d) => batch.delete(d.ref));
+      } catch (e) {
+        console.warn('Wishlist cleanup skipped:', e);
+      }
+
+      // 6. Remove related alerts (low stock, etc.)
+      try {
+        const alertsSnap = await getDocs(
+          query(collection(db, 'alerts'), where('productId', '==', productId))
+        );
+        alertsSnap.forEach((d) => batch.delete(d.ref));
+      } catch (e) {
+        console.warn('Alerts cleanup skipped:', e);
+      }
+
+      await batch.commit();
       toast.success('Produit supprimé');
     } catch (err) {
       console.error('Error deleting product:', err);
