@@ -284,7 +284,7 @@ export default function RentalMarketplace() {
               <p className="mb-2">Aucun équipement en location pour le moment.</p>
               <p className="text-sm">
                 Soyez le premier !{" "}
-                <Link to="/lessor/items/new" className="text-primary underline">
+                <Link to={lessorCtaHref} className="text-primary underline">
                   Ajouter un équipement
                 </Link>
               </p>
