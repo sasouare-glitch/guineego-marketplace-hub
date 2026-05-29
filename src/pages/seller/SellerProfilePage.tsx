@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SellerLayout } from "@/components/seller/SellerLayout";
 import { PersonalInfoCard } from "@/components/profile/PersonalInfoCard";
 import { SavedAddressesCard, type Address } from "@/components/profile/SavedAddressesCard";
+import { ShopInfoCard } from "@/components/seller/ShopInfoCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -22,6 +23,7 @@ const SellerProfilePage = () => {
     <SellerLayout>
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-foreground">{t.pages.seller.profile.title}</h1>
+        {firebaseUser?.uid && <ShopInfoCard sellerId={firebaseUser.uid} />}
         <div className="grid gap-6 md:grid-cols-2">
           <PersonalInfoCard user={userInfo} />
           <SavedAddressesCard addresses={addresses} onAddressesChange={setAddresses} />
@@ -32,3 +34,4 @@ const SellerProfilePage = () => {
 };
 
 export default SellerProfilePage;
+
