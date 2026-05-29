@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   Store,
   Crown,
+  QrCode,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export function SellerSidebar({ collapsed = false, onToggle, onNavigate }: Selle
     { name: n.products, href: "/seller/products", icon: Package },
     { name: n.orders, href: "/seller/orders", icon: ShoppingBag },
     { name: n.finances, href: "/seller/finances", icon: Wallet },
+    { name: "QR Paiement", href: "/seller/qr-code", icon: QrCode },
     { name: n.analytics, href: "/seller/analytics", icon: BarChart3 },
     { name: n.customers, href: "/seller/customers", icon: Users },
     { name: n.messages, href: "/seller/messages", icon: MessageSquare },
