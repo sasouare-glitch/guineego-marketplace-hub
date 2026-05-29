@@ -67,6 +67,19 @@ export function ProtectedRoute({
       return <>{fallback}</>;
     }
 
+    // Cas spécial : si l'accès investor est requis et manquant,
+    // on envoie l'utilisateur compléter son profil au lieu de
+    // simplement bloquer avec /access-denied.
+    if (requiredRoles.includes('investor')) {
+      const target = `${location.pathname}${location.search}`;
+      return (
+        <Navigate
+          to={`/investor/complete-profile?from=${encodeURIComponent(target)}`}
+          replace
+        />
+      );
+    }
+
     return <Navigate to="/access-denied" replace />;
   }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase/config';
 import { motion } from 'framer-motion';
@@ -28,6 +28,7 @@ export default function LoginPage() {
   const { signIn, signInWithGoogle, loading, user, claims } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [params] = useSearchParams();
   
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,8 +99,32 @@ export default function LoginPage() {
       setError(null);
       setIsRedirecting(true);
       await signInWithGoogle();
-      const dest = from || await getRedirectByRole(auth.currentUser?.uid || '');
-      console.log('[LoginPage] Google redirect to:', dest);
+      const uid = auth.currentUser?.uid || '';
+      // Charger le doc utilisateur pour connaître son rôle effectif
+      let role: string = 'customer';
+      try {
+        const snap = await getDoc(doc(db, 'users', uid));
+        role = (snap.data()?.role as string) || 'customer';
+      } catch {
+        // ignore — rôle par défaut customer
+      }
+
+      const wantsInvestor =
+        (from && from.startsWith('/investor')) ||
+        params.get('role') === 'investor';
+
+      // Erreur métier : Google n'a pas renvoyé / le compte ne porte pas le rôle investor
+      if (wantsInvestor && role !== 'investor' && role !== 'admin') {
+        const target = from || '/investor/dashboard';
+        setError(
+          "Votre compte Google n'a pas le rôle investisseur. Complétez votre profil pour demander l'accès."
+        );
+        window.location.href = `/investor/complete-profile?from=${encodeURIComponent(target)}`;
+        return;
+      }
+
+      const dest = from || getRoleRoute(role);
+      console.log('[LoginPage] Google redirect to:', dest, 'role:', role);
       window.location.href = dest;
     } catch (err: any) {
       setIsRedirecting(false);

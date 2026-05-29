@@ -60,6 +60,7 @@ import InvestorOpportunities from "./pages/investor/InvestorOpportunities";
 import InvestorInvestments from "./pages/investor/InvestorInvestments";
 import OpportunityDetail from "./pages/investor/OpportunityDetail";
 import InvestmentDetail from "./pages/investor/InvestmentDetail";
+import CompleteInvestorProfile from "./pages/investor/CompleteInvestorProfile";
 import TransitDashboard from "./pages/transit/TransitDashboard";
 import TransitQuote from "./pages/transit/TransitQuote";
 import TransitTracking from "./pages/transit/TransitTracking";
@@ -252,8 +253,15 @@ const App = () => (
                     } />
                     
                     {/* Investor Routes (Protected - investor role) */}
+                    {/* Investor onboarding (any authenticated user) */}
+                    <Route path="/investor/complete-profile" element={
+                      <ProtectedRoute>
+                        <CompleteInvestorProfile />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/investor/dashboard" element={
                       <ProtectedRoute requiredRoles={['investor', 'admin']}>
+
                         <InvestorDashboard />
                       </ProtectedRoute>
                     } />
