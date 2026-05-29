@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RENTAL_CATEGORIES } from "@/constants/rentalCategories";
 import { useRentalItems } from "@/hooks/useRentalItems";
+import { useAuth } from "@/contexts/AuthContext";
 import { getAvailabilityReason } from "@/lib/rental/availability";
 import type { RentalCategoryId } from "@/types/rental";
 
