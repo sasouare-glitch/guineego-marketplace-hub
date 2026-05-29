@@ -160,27 +160,51 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Écouter les changements d'authentification
   useEffect(() => {
+    let unsubProfile: (() => void) | null = null;
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // Nettoyer l'ancien listener de profil
+      if (unsubProfile) { unsubProfile(); unsubProfile = null; }
+
       if (user) {
         try {
           const [profile, claims] = await Promise.all([
             loadUserProfile(user),
             loadUserClaims(user)
           ]);
-          
+
           // Mettre à jour lastLoginAt seulement si le profil existe
           if (profile) {
             updateDoc(doc(db, 'users', user.uid), {
               'metadata.lastLoginAt': serverTimestamp()
             }).catch(() => {});
           }
-          
+
           setState({
             user,
             profile,
             claims,
             loading: false,
             error: null
+          });
+
+          // Écouter en temps réel les changements du profil (téléphone, avatar, etc.)
+          unsubProfile = onSnapshot(doc(db, 'users', user.uid), (snap) => {
+            if (snap.exists()) {
+              const data = snap.data();
+              setState(prev => ({
+                ...prev,
+                profile: {
+                  uid: user.uid,
+                  email: user.email,
+                  phone: user.phoneNumber,
+                  displayName: user.displayName,
+                  photoURL: user.photoURL,
+                  emailVerified: user.emailVerified,
+                  ...data,
+                } as UserProfile,
+              }));
+            }
           });
         } catch (error) {
           console.error('Error loading user data:', error);
@@ -203,7 +227,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      if (unsubProfile) unsubProfile();
+      unsubscribe();
+    };
   }, [loadUserProfile, loadUserClaims]);
 
   // Inscription par email
