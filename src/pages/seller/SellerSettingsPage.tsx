@@ -174,7 +174,15 @@ const SellerSettingsPage = () => {
   return (
     <SellerLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-foreground">Paramètres Boutique</h1>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h1 className="text-2xl font-bold text-foreground">Paramètres Boutique</h1>
+          {lastSync && (
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+              Synchronisé · {lastSync.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          )}
+        </div>
 
         <div className="grid gap-6">
           {/* Store Info */}
