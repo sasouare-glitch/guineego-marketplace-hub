@@ -125,7 +125,7 @@ export default function RentalMarketplace() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/lessor/items/new">Mettre un équipement en location</Link>
+                <Link to={lessorCtaHref}>Mettre un équipement en location</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link to="/marketplace">Aller à la boutique</Link>
