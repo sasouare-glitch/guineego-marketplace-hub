@@ -95,6 +95,17 @@ export default function RentalMarketplace() {
 
   const activeCategory = RENTAL_CATEGORIES.find((c) => c.id === categoryParam);
 
+  // Décide où envoyer l'utilisateur quand il clique sur "Mettre un équipement en location" :
+  //  - non connecté → /login (puis retour vers l'onboarding loueur)
+  //  - connecté sans rôle lessor → page d'onboarding /become-lessor
+  //  - déjà loueur ou admin → directement le formulaire de création
+  const { user, hasAnyRole } = useAuth();
+  const lessorCtaHref = !user
+    ? "/login?from=/become-lessor"
+    : hasAnyRole(["lessor", "admin"])
+    ? "/lessor/items/new"
+    : "/become-lessor";
+
   return (
     <>
       <Header />
