@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { formatCurrency } from "@/lib/currency";
 
 interface SellerPublicDoc {
+  id: string;
   shopName?: string;
   name?: string;
   logo?: string;
@@ -24,6 +25,7 @@ interface SellerPublicDoc {
 }
 
 interface SellerSettingsPublic {
+  id: string;
   storeInfo?: { name?: string; phone?: string };
 }
 

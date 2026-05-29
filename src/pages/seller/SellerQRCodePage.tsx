@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { fetchDocument } from "@/lib/firebase/queries";
 
 interface SellerSettingsDoc {
+  id: string;
   storeInfo?: { name?: string; phone?: string };
 }
 
