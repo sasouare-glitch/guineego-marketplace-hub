@@ -6,12 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Store, Bell, CreditCard, Globe, Loader2 } from "lucide-react";
+import { Store, Bell, CreditCard, Globe, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { setDocument } from "@/lib/firebase/mutations";
-import { fetchDocument } from "@/lib/firebase/queries";
+import { safeOnSnapshot } from "@/lib/firebase/safeSnapshot";
+import { doc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase/config";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface SellerSettings {
@@ -45,6 +46,10 @@ const defaultSettings: Omit<SellerSettings, "id"> = {
   preferences: { language: "fr", currency: "GNF" },
 };
 
+/** Keep last 9 digits, validate Guinea format (9 chars starting with 6 or 3). */
+const normalizePhone = (raw: string) => raw.replace(/\D/g, "").slice(-9);
+const isValidGNPhone = (raw: string) => /^[63]\d{8}$/.test(normalizePhone(raw));
+
 const SellerSettingsPage = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -53,26 +58,32 @@ const SellerSettingsPage = () => {
   const [notifications, setNotifications] = useState(defaultSettings.notifications);
   const [preferences, setPreferences] = useState(defaultSettings.preferences);
   const [saving, setSaving] = useState<string | null>(null);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
 
-  // Load settings from Firestore
+  // Real-time sync with Firestore (seller_settings/{uid})
   useEffect(() => {
     if (!user) return;
-    const load = async () => {
-      try {
-        const data = await fetchDocument<SellerSettings>("seller_settings", user.uid);
-        if (data) {
-          if (data.storeInfo) setStoreInfo(data.storeInfo);
-          if (data.payment) setPayment(data.payment);
-          if (data.notifications) setNotifications(data.notifications);
-          if (data.preferences) setPreferences(data.preferences);
+    const ref = doc(db, "seller_settings", user.uid);
+    const unsub = safeOnSnapshot(
+      ref,
+      (snap: any) => {
+        if (snap.exists()) {
+          const data = snap.data() as Partial<SellerSettings>;
+          if (data.storeInfo) setStoreInfo((s) => ({ ...s, ...data.storeInfo }));
+          if (data.payment) setPayment((s) => ({ ...s, ...data.payment }));
+          if (data.notifications) setNotifications((s) => ({ ...s, ...data.notifications }));
+          if (data.preferences) setPreferences((s) => ({ ...s, ...data.preferences }));
+          setLastSync(new Date());
         }
-      } catch (e) {
-        console.error("Error loading seller settings:", e);
-      } finally {
         setLoading(false);
-      }
-    };
-    load();
+      },
+      (err) => {
+        console.error("[SellerSettings] snapshot error", err);
+        setLoading(false);
+      },
+      "seller_settings"
+    );
+    return () => unsub();
   }, [user]);
 
   const saveSection = async (section: string, data: Record<string, any>) => {
@@ -82,32 +93,69 @@ const SellerSettingsPage = () => {
     }
     setSaving(section);
     try {
-      await setDocument("seller_settings", user.uid, data, true);
+      await setDocument(
+        "seller_settings",
+        user.uid,
+        { ...data, updatedAt: serverTimestamp() },
+        true
+      );
+
+      // Mirror public-facing fields to sellers/{uid} so storefront,
+      // QR payment page and marketplace pick up the changes in real time.
+      if (section === "store") {
+        await setDocument(
+          "sellers",
+          user.uid,
+          {
+            shopName: storeInfo.name,
+            phone: normalizePhone(storeInfo.phone),
+            description: storeInfo.description,
+            address: storeInfo.address,
+            updatedAt: serverTimestamp(),
+          },
+          true
+        );
+      }
+
       toast.success(
         section === "store"
-          ? "Informations de la boutique enregistrées !"
+          ? "Boutique synchronisée avec Firebase"
           : section === "notifications"
-          ? "Préférences de notification mises à jour !"
+          ? "Notifications synchronisées"
           : section === "payment"
-          ? "Méthode de paiement mise à jour !"
-          : "Préférences enregistrées !"
+          ? "Méthode de paiement synchronisée"
+          : "Préférences synchronisées"
       );
-    } catch (e) {
+    } catch (e: any) {
       console.error("Save error:", e);
-      toast.error("Erreur lors de l'enregistrement");
+      toast.error(e?.message || "Erreur lors de la synchronisation");
     } finally {
       setSaving(null);
     }
   };
 
-  const handleSaveStoreInfo = () => saveSection("store", { storeInfo });
-  const handleSaveNotifications = () => saveSection("notifications", { notifications });
-  const handleUpdatePayment = () => {
-    if (!payment.phone.trim()) {
-      toast.error("Veuillez saisir un numéro de retrait");
+  const handleSaveStoreInfo = () => {
+    if (!storeInfo.name.trim()) {
+      toast.error("Le nom de la boutique est requis");
       return;
     }
-    saveSection("payment", { payment });
+    if (storeInfo.phone && !isValidGNPhone(storeInfo.phone)) {
+      toast.error("Téléphone invalide (9 chiffres commençant par 6 ou 3)");
+      return;
+    }
+    saveSection("store", {
+      storeInfo: { ...storeInfo, phone: normalizePhone(storeInfo.phone) },
+    });
+  };
+  const handleSaveNotifications = () => saveSection("notifications", { notifications });
+  const handleUpdatePayment = () => {
+    if (!isValidGNPhone(payment.phone)) {
+      toast.error("Numéro de retrait invalide (9 chiffres, commence par 6 ou 3)");
+      return;
+    }
+    saveSection("payment", {
+      payment: { ...payment, phone: normalizePhone(payment.phone) },
+    });
   };
   const handleSavePreferences = () => saveSection("preferences", { preferences });
 
@@ -126,7 +174,15 @@ const SellerSettingsPage = () => {
   return (
     <SellerLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-foreground">Paramètres Boutique</h1>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h1 className="text-2xl font-bold text-foreground">Paramètres Boutique</h1>
+          {lastSync && (
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+              Synchronisé · {lastSync.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          )}
+        </div>
 
         <div className="grid gap-6">
           {/* Store Info */}
