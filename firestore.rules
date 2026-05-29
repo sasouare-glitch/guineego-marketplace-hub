@@ -515,6 +515,27 @@ service cloud.firestore {
       allow read: if isAdmin() || isSellerScopeId(resource.data.sellerId);
       allow create, update, delete: if false;
     }
+
+    // ============================================
+    // MERCHANT QR PAYMENTS (Alipay-like static QR)
+    // ============================================
+    match /merchant_qr_payments/{paymentId} {
+      // Buyer (auth or guest) creates a pending payment request via the public /pay/:sellerId page.
+      // Reads are restricted to the seller (recipient), the buyer (if logged in) and admin.
+      allow read: if isAdmin()
+                  || isSellerScopeId(resource.data.sellerId)
+                  || (request.auth != null && resource.data.buyerUid == request.auth.uid);
+      allow create: if request.resource.data.status == 'pending'
+                    && request.resource.data.sellerId is string
+                    && request.resource.data.amount is number
+                    && request.resource.data.amount >= 100
+                    && request.resource.data.amount <= 50000000
+                    && request.resource.data.method in ['orange', 'mtn', 'wallet']
+                    && (request.auth == null || request.resource.data.buyerUid == request.auth.uid || request.resource.data.buyerUid == null);
+      // Status transitions handled by Cloud Functions only
+      allow update, delete: if false;
+    }
+
     
     // ============================================
     // DAILY STATS (analytics, Cloud Functions only)
