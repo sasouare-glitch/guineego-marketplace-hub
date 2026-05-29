@@ -58,7 +58,7 @@ export default function CompleteInvestorProfile() {
     setForm((f) => ({
       ...f,
       displayName: f.displayName || user.displayName || profile?.displayName || "",
-      phone: f.phone || (profile?.phoneNumber ?? "").replace(/^\+?224/, ""),
+      phone: f.phone || (profile?.phone ?? "").replace(/^\+?224/, ""),
     }));
   }, [user, profile]);
 
