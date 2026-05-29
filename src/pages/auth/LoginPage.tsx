@@ -28,6 +28,7 @@ export default function LoginPage() {
   const { signIn, signInWithGoogle, loading, user, claims } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [params] = useSearchParams();
   
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
