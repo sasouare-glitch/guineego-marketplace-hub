@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { RENTAL_CATEGORIES } from "@/constants/rentalCategories";
 import { useRentalItems } from "@/hooks/useRentalItems";
+import { useAuth } from "@/contexts/AuthContext";
 import { getAvailabilityReason } from "@/lib/rental/availability";
 import type { RentalCategoryId } from "@/types/rental";
 
@@ -94,6 +95,17 @@ export default function RentalMarketplace() {
 
   const activeCategory = RENTAL_CATEGORIES.find((c) => c.id === categoryParam);
 
+  // Décide où envoyer l'utilisateur quand il clique sur "Mettre un équipement en location" :
+  //  - non connecté → /login (puis retour vers l'onboarding loueur)
+  //  - connecté sans rôle lessor → page d'onboarding /become-lessor
+  //  - déjà loueur ou admin → directement le formulaire de création
+  const { user, hasAnyRole } = useAuth();
+  const lessorCtaHref = !user
+    ? "/login?from=/become-lessor"
+    : hasAnyRole(["lessor", "admin"])
+    ? "/lessor/items/new"
+    : "/become-lessor";
+
   return (
     <>
       <Header />
@@ -113,7 +125,7 @@ export default function RentalMarketplace() {
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/lessor/items/new">Mettre un équipement en location</Link>
+                <Link to={lessorCtaHref}>Mettre un équipement en location</Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link to="/marketplace">Aller à la boutique</Link>
@@ -272,7 +284,7 @@ export default function RentalMarketplace() {
               <p className="mb-2">Aucun équipement en location pour le moment.</p>
               <p className="text-sm">
                 Soyez le premier !{" "}
-                <Link to="/lessor/items/new" className="text-primary underline">
+                <Link to={lessorCtaHref} className="text-primary underline">
                   Ajouter un équipement
                 </Link>
               </p>
