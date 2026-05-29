@@ -80,6 +80,18 @@ export function ProtectedRoute({
       );
     }
 
+    // Même logique pour le rôle loueur : on dirige vers l'onboarding
+    // /become-lessor au lieu de bloquer brutalement.
+    if (requiredRoles.includes('lessor')) {
+      const target = `${location.pathname}${location.search}`;
+      return (
+        <Navigate
+          to={`/become-lessor?from=${encodeURIComponent(target)}`}
+          replace
+        />
+      );
+    }
+
     return <Navigate to="/access-denied" replace />;
   }
 
