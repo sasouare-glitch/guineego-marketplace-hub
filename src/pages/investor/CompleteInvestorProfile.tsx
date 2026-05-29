@@ -137,7 +137,7 @@ export default function CompleteInvestorProfile() {
             displayName: form.displayName.trim(),
             phoneNumber: `+224${form.phone}`,
             country: form.country,
-            role: profile?.role ?? "customer",
+            role: claims?.role ?? "customer",
             investorProfile: {
               country: form.country,
               investmentCapacity: capacityNum,
