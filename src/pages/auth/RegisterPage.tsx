@@ -72,7 +72,7 @@ export default function RegisterPage() {
         ecommerce: '/seller/dashboard',
         courier: '/courier',
         lessor: '/lessor',
-        investor: '/investor',
+        investor: '/investor/dashboard',
         admin: '/admin/dashboard',
       };
       const role = claims.role || 'customer';
