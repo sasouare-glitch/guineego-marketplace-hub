@@ -152,7 +152,50 @@ export default function RentalMarketplace() {
         </section>
 
         {/* Filtres */}
-        <section className="container mx-auto px-4">
+        <section className="container mx-auto px-4 space-y-3">
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card/50 p-3">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  updateParam("q", e.target.value);
+                }}
+                placeholder="Rechercher un équipement…"
+                className="pl-9 h-9"
+              />
+            </div>
+
+            <select
+              value={commune}
+              onChange={(e) => {
+                setCommune(e.target.value);
+                updateParam("commune", e.target.value);
+              }}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">Toutes communes</option>
+              {communes.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+
+            <select
+              value={sort}
+              onChange={(e) => {
+                const v = e.target.value as SortKey;
+                setSort(v);
+                updateParam("sort", v === "recent" ? "" : v);
+              }}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="recent">Plus récents</option>
+              <option value="price_asc">Prix croissant</option>
+              <option value="price_desc">Prix décroissant</option>
+            </select>
+          </div>
+
           <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card/50 p-3">
             <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
               <PopoverTrigger asChild>
