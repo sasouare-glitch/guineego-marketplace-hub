@@ -253,8 +253,15 @@ const App = () => (
                     } />
                     
                     {/* Investor Routes (Protected - investor role) */}
+                    {/* Investor onboarding (any authenticated user) */}
+                    <Route path="/investor/complete-profile" element={
+                      <ProtectedRoute>
+                        <CompleteInvestorProfile />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/investor/dashboard" element={
                       <ProtectedRoute requiredRoles={['investor', 'admin']}>
+
                         <InvestorDashboard />
                       </ProtectedRoute>
                     } />
