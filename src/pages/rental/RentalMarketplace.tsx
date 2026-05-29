@@ -2,13 +2,14 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarDays, MapPin, Sparkles, CalendarIcon, X, CheckCircle2, Ban } from "lucide-react";
+import { CalendarDays, MapPin, Sparkles, CalendarIcon, X, CheckCircle2, Ban, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,6 +18,8 @@ import { RENTAL_CATEGORIES } from "@/constants/rentalCategories";
 import { useRentalItems } from "@/hooks/useRentalItems";
 import { getAvailabilityReason } from "@/lib/rental/availability";
 import type { RentalCategoryId } from "@/types/rental";
+
+type SortKey = "recent" | "price_asc" | "price_desc";
 
 const formatGNF = (n: number) =>
   new Intl.NumberFormat("fr-FR").format(n) + " GNF";
@@ -30,21 +33,48 @@ export default function RentalMarketplace() {
     dateParam ? new Date(dateParam) : undefined
   );
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [search, setSearch] = useState(params.get("q") ?? "");
+  const [commune, setCommune] = useState<string>(params.get("commune") ?? "");
+  const [sort, setSort] = useState<SortKey>((params.get("sort") as SortKey) || "recent");
 
   const { items, loading } = useRentalItems({
     max: 48,
     ...(categoryParam ? { category: categoryParam } : {}),
   });
 
-  const visible = useMemo(
-    () => items.filter((i) => i.status !== "inactive"),
-    [items]
-  );
+  const communes = useMemo(() => {
+    const s = new Set<string>();
+    items.forEach((i) => i.location?.commune && s.add(i.location.commune));
+    return Array.from(s).sort();
+  }, [items]);
+
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    let list = items.filter((i) => i.status !== "inactive");
+    if (q.length >= 2) {
+      list = list.filter(
+        (i) =>
+          i.title?.toLowerCase().includes(q) ||
+          i.description?.toLowerCase().includes(q)
+      );
+    }
+    if (commune) list = list.filter((i) => i.location?.commune === commune);
+    if (sort === "price_asc") list = [...list].sort((a, b) => a.pricePerDay - b.pricePerDay);
+    else if (sort === "price_desc") list = [...list].sort((a, b) => b.pricePerDay - a.pricePerDay);
+    return list;
+  }, [items, search, commune, sort]);
 
   const availableCount = useMemo(() => {
     if (!date) return visible.length;
     return visible.filter((i) => getAvailabilityReason(i, date) === null).length;
   }, [visible, date]);
+
+  const updateParam = (key: string, value: string) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: true });
+  };
 
   const setDateFilter = (d: Date | undefined) => {
     setDate(d);
@@ -122,7 +152,50 @@ export default function RentalMarketplace() {
         </section>
 
         {/* Filtres */}
-        <section className="container mx-auto px-4">
+        <section className="container mx-auto px-4 space-y-3">
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card/50 p-3">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  updateParam("q", e.target.value);
+                }}
+                placeholder="Rechercher un équipement…"
+                className="pl-9 h-9"
+              />
+            </div>
+
+            <select
+              value={commune}
+              onChange={(e) => {
+                setCommune(e.target.value);
+                updateParam("commune", e.target.value);
+              }}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="">Toutes communes</option>
+              {communes.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+
+            <select
+              value={sort}
+              onChange={(e) => {
+                const v = e.target.value as SortKey;
+                setSort(v);
+                updateParam("sort", v === "recent" ? "" : v);
+              }}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="recent">Plus récents</option>
+              <option value="price_asc">Prix croissant</option>
+              <option value="price_desc">Prix décroissant</option>
+            </select>
+          </div>
+
           <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card/50 p-3">
             <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
               <PopoverTrigger asChild>
