@@ -165,3 +165,4 @@ export { confirmSubscriptionPayment } from './payments/subscriptionWebhooks';
 export { initiateOrangeMoneyPayment } from './payments/initiateOrangeMoneyPayment';
 export { initiateMTNMoMoPayment, checkMTNPaymentStatus } from './payments/initiateMTNMoMoPayment';
 export { cancelExpiredPayments } from './payments/cancelExpiredPayments';
+export { processMerchantQRPayment } from './payments/processMerchantQRPayment';
