@@ -2,13 +2,14 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarDays, MapPin, Sparkles, CalendarIcon, X, CheckCircle2, Ban } from "lucide-react";
+import { CalendarDays, MapPin, Sparkles, CalendarIcon, X, CheckCircle2, Ban, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,6 +18,8 @@ import { RENTAL_CATEGORIES } from "@/constants/rentalCategories";
 import { useRentalItems } from "@/hooks/useRentalItems";
 import { getAvailabilityReason } from "@/lib/rental/availability";
 import type { RentalCategoryId } from "@/types/rental";
+
+type SortKey = "recent" | "price_asc" | "price_desc";
 
 const formatGNF = (n: number) =>
   new Intl.NumberFormat("fr-FR").format(n) + " GNF";
