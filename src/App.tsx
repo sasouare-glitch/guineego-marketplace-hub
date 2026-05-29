@@ -25,6 +25,8 @@ import SellerCustomers from "./pages/seller/SellerCustomers";
 import SellerProfilePage from "./pages/seller/SellerProfilePage";
 import SellerSettingsPage from "./pages/seller/SellerSettingsPage";
 import SellerSubscriptionPage from "./pages/seller/SellerSubscriptionPage";
+import SellerQRCodePage from "./pages/seller/SellerQRCodePage";
+import PayMerchantPage from "./pages/PayMerchantPage";
 import SellerNotificationsPage from "./pages/seller/SellerNotificationsPage";
 import SellerMessagesPage from "./pages/seller/SellerMessagesPage";
 import CourierDashboard from "./pages/courier/CourierDashboard";
@@ -173,6 +175,7 @@ const App = () => (
                    <Route path="/contact" element={<ContactPage />} />
                     <Route path="/track" element={<TrackOrderPage />} />
                     <Route path="/track/:id" element={<PublicOrderTrackingPage />} />
+                    <Route path="/pay/:sellerId" element={<PayMerchantPage />} />
 
                     {/* Rental (Location) — public browse */}
                     <Route path="/rental" element={<RentalMarketplace />} />
@@ -367,6 +370,11 @@ const App = () => (
                     <Route path="/seller/subscription" element={
                       <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
                         <SellerSubscriptionPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/seller/qr-code" element={
+                      <ProtectedRoute requiredRoles={['ecommerce', 'admin']}>
+                        <SellerQRCodePage />
                       </ProtectedRoute>
                     } />
                     
