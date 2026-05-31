@@ -51,7 +51,9 @@ export function ProtectedRoute({
   // Vérifier les rôles si spécifiés (seulement si l'utilisateur est connecté)
   if (requiredRoles && requiredRoles.length > 0) {
     // Un vendeur (ecommerce) peut aussi agir en tant que loueur.
-    const mappedRoles = requiredRoles.map((r) => (r === 'lessor' ? ['lessor', 'ecommerce'] : [r])).flat();
+    const mappedRoles: UserRole[] = requiredRoles
+      .map((r) => (r === 'lessor' ? ['lessor', 'ecommerce'] as UserRole[] : [r]))
+      .flat();
     const effectiveRoles = [...new Set([...mappedRoles, ...SUPER_ROLES])];
 
     // Important: wait for auth-derived permission state before mounting
