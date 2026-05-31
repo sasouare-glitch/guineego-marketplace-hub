@@ -106,6 +106,12 @@ const managementItems = [
     icon: Store,
     description: "E-commerçants"
   },
+  { 
+    title: "Locations", 
+    url: "/admin/rentals", 
+    icon: CalendarDays,
+    description: "Équipements de location"
+  },
 ];
 
 const operationsItems = [
