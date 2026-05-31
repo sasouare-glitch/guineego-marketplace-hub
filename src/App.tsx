@@ -104,6 +104,7 @@ import AdminSecurityPage from "./pages/admin/AdminSecurityPage";
 import AdminEmailsPage from "./pages/admin/AdminEmailsPage";
 import AdminRoleRequestsPage from "./pages/admin/AdminRoleRequestsPage";
 import AdminLessorRequestsPage from "./pages/admin/AdminLessorRequestsPage";
+import AdminRentalsPage from "./pages/admin/AdminRentalsPage";
 import AdminSuperUsersPage from "./pages/admin/AdminSuperUsersPage";
 import AdminSmsConfigPage from "./pages/admin/AdminSmsConfigPage";
 import AdminSmsLogsPage from "./pages/admin/AdminSmsLogsPage";
