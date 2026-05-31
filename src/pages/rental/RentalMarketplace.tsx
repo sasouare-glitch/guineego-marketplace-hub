@@ -61,10 +61,13 @@ export default function RentalMarketplace() {
       );
     }
     if (commune) list = list.filter((i) => i.location?.commune === commune);
+    if (date && onlyAvailable) {
+      list = list.filter((i) => getAvailabilityReason(i, date) === null);
+    }
     if (sort === "price_asc") list = [...list].sort((a, b) => a.pricePerDay - b.pricePerDay);
     else if (sort === "price_desc") list = [...list].sort((a, b) => b.pricePerDay - a.pricePerDay);
     return list;
-  }, [items, search, commune, sort]);
+  }, [items, search, commune, sort, date, onlyAvailable]);
 
   const availableCount = useMemo(() => {
     if (!date) return visible.length;
