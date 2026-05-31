@@ -82,6 +82,7 @@ export function ProtectedRoute({
 
     // Même logique pour le rôle loueur : on dirige vers l'onboarding
     // /become-lessor au lieu de bloquer brutalement.
+    // Un vendeur (ecommerce) peut aussi louer ses équipements.
     if (requiredRoles.includes('lessor')) {
       const target = `${location.pathname}${location.search}`;
       return (
