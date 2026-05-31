@@ -240,6 +240,21 @@ export default function RentalMarketplace() {
               </Button>
             )}
 
+            {date && (
+              <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={onlyAvailable}
+                  onChange={(e) => {
+                    setOnlyAvailable(e.target.checked);
+                    updateParam("available", e.target.checked ? "1" : "");
+                  }}
+                  className="h-4 w-4 rounded border-input accent-primary"
+                />
+                Uniquement disponibles
+              </label>
+            )}
+
             {activeCategory && (
               <Badge variant="secondary" className="gap-1">
                 {activeCategory.label}
