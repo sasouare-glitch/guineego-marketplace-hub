@@ -37,6 +37,7 @@ export default function RentalMarketplace() {
   const [search, setSearch] = useState(params.get("q") ?? "");
   const [commune, setCommune] = useState<string>(params.get("commune") ?? "");
   const [sort, setSort] = useState<SortKey>((params.get("sort") as SortKey) || "recent");
+  const [onlyAvailable, setOnlyAvailable] = useState<boolean>(params.get("available") === "1");
 
   const { items, loading } = useRentalItems({
     max: 48,
@@ -60,10 +61,13 @@ export default function RentalMarketplace() {
       );
     }
     if (commune) list = list.filter((i) => i.location?.commune === commune);
+    if (date && onlyAvailable) {
+      list = list.filter((i) => getAvailabilityReason(i, date) === null);
+    }
     if (sort === "price_asc") list = [...list].sort((a, b) => a.pricePerDay - b.pricePerDay);
     else if (sort === "price_desc") list = [...list].sort((a, b) => b.pricePerDay - a.pricePerDay);
     return list;
-  }, [items, search, commune, sort]);
+  }, [items, search, commune, sort, date, onlyAvailable]);
 
   const availableCount = useMemo(() => {
     if (!date) return visible.length;
@@ -234,6 +238,21 @@ export default function RentalMarketplace() {
               <Button variant="ghost" size="sm" onClick={() => setDateFilter(undefined)}>
                 <X className="w-3 h-3 mr-1" /> Réinitialiser la date
               </Button>
+            )}
+
+            {date && (
+              <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={onlyAvailable}
+                  onChange={(e) => {
+                    setOnlyAvailable(e.target.checked);
+                    updateParam("available", e.target.checked ? "1" : "");
+                  }}
+                  className="h-4 w-4 rounded border-input accent-primary"
+                />
+                Uniquement disponibles
+              </label>
             )}
 
             {activeCategory && (
