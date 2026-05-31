@@ -37,6 +37,7 @@ export default function RentalMarketplace() {
   const [search, setSearch] = useState(params.get("q") ?? "");
   const [commune, setCommune] = useState<string>(params.get("commune") ?? "");
   const [sort, setSort] = useState<SortKey>((params.get("sort") as SortKey) || "recent");
+  const [onlyAvailable, setOnlyAvailable] = useState<boolean>(params.get("available") === "1");
 
   const { items, loading } = useRentalItems({
     max: 48,
