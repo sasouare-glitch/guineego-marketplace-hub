@@ -106,7 +106,7 @@ export default function RentalMarketplace() {
   const { user, hasAnyRole } = useAuth();
   const lessorCtaHref = !user
     ? "/login?from=/become-lessor"
-    : hasAnyRole(["lessor", "admin"])
+    : hasAnyRole(["lessor", "ecommerce", "admin"])
     ? "/lessor/items/new"
     : "/become-lessor";
 

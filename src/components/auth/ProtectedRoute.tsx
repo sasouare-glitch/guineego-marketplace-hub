@@ -50,7 +50,11 @@ export function ProtectedRoute({
 
   // Vérifier les rôles si spécifiés (seulement si l'utilisateur est connecté)
   if (requiredRoles && requiredRoles.length > 0) {
-    const effectiveRoles = [...new Set([...requiredRoles, ...SUPER_ROLES])];
+    // Un vendeur (ecommerce) peut aussi agir en tant que loueur.
+    const mappedRoles: UserRole[] = requiredRoles
+      .map((r) => (r === 'lessor' ? ['lessor', 'ecommerce'] as UserRole[] : [r]))
+      .flat();
+    const effectiveRoles = [...new Set([...mappedRoles, ...SUPER_ROLES])];
 
     // Important: wait for auth-derived permission state before mounting
     // privileged routes, otherwise Firestore listeners can attach too early
@@ -82,6 +86,7 @@ export function ProtectedRoute({
 
     // Même logique pour le rôle loueur : on dirige vers l'onboarding
     // /become-lessor au lieu de bloquer brutalement.
+    // Un vendeur (ecommerce) peut aussi louer ses équipements.
     if (requiredRoles.includes('lessor')) {
       const target = `${location.pathname}${location.search}`;
       return (
