@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import {
   CalendarDays,
