@@ -181,6 +181,8 @@ const App = () => (
 
                     {/* Rental (Location) — public browse */}
                     <Route path="/rental" element={<RentalMarketplace />} />
+                    <Route path="/location" element={<RentalMarketplace />} />
+                    <Route path="/location/item/:id" element={<RentalItemDetail />} />
                     <Route path="/rental/item/:id" element={<RentalItemDetail />} />
                     <Route path="/become-lessor" element={<BecomeLessorPage />} />
                     <Route path="/my-rentals" element={
