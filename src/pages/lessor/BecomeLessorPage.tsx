@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import {
   CalendarDays,
@@ -140,6 +140,29 @@ export default function BecomeLessorPage() {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      // Notifie les administrateurs (in-app)
+      try {
+        await addDoc(collection(db, "notifications"), {
+          title: "Nouvelle demande de loueur",
+          message: `${form.fullName} (${form.email}) souhaite devenir loueur.`,
+          body: `${form.fullName} (${form.email}) souhaite devenir loueur.`,
+          type: "role_request",
+          audience: "admin",
+          status: "sent",
+          read: false,
+          link: "/admin/lessor-requests",
+          metadata: {
+            userId: user.uid,
+            requestedRole: "lessor",
+            phone: form.phone,
+            city: form.city,
+          },
+          createdAt: serverTimestamp(),
+        });
+      } catch (notifErr) {
+        console.warn("Notification admin non envoyée:", notifErr);
+      }
 
       toast.success("Demande envoyée ! Notre équipe vous répondra sous 48h.");
       navigate("/profile");
