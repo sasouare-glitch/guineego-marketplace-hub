@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { callFunction } from "@/lib/firebase/config";
 import { useAuth } from "@/contexts/AuthContext";
 import { compressImage, uploadFile } from "@/lib/firebase/storage";
 import { Header } from "@/components/layout/Header";
@@ -140,13 +139,14 @@ export default function LessorItemNew() {
         return;
       }
 
-      await addDoc(collection(db, "rental_items"), {
-        ownerId: user.uid,
+      const createRentalItemFn = callFunction<any, { success: boolean; itemId: string }>(
+        "createRentalItem"
+      );
+      await createRentalItemFn({
         title: form.title.trim(),
         description: form.description.trim(),
         category: form.category,
         images: urls,
-        thumbnail: urls[0],
         pricePerDay: Number(form.pricePerDay),
         ...(form.pricePerHour ? { pricePerHour: Number(form.pricePerHour) } : {}),
         deposit: Number(form.deposit) || 0,
@@ -159,10 +159,6 @@ export default function LessorItemNew() {
         ...(form.rules ? { rules: form.rules.trim() } : {}),
         status,
         availability,
-        avgRating: 0,
-        totalRentals: 0,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
       });
 
       images.forEach((i) => URL.revokeObjectURL(i.preview));
