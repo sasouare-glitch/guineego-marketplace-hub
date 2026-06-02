@@ -139,13 +139,14 @@ export default function LessorItemNew() {
         return;
       }
 
-      await addDoc(collection(db, "rental_items"), {
-        ownerId: user.uid,
+      const createRentalItemFn = callFunction<any, { success: boolean; itemId: string }>(
+        "createRentalItem"
+      );
+      await createRentalItemFn({
         title: form.title.trim(),
         description: form.description.trim(),
         category: form.category,
         images: urls,
-        thumbnail: urls[0],
         pricePerDay: Number(form.pricePerDay),
         ...(form.pricePerHour ? { pricePerHour: Number(form.pricePerHour) } : {}),
         deposit: Number(form.deposit) || 0,
@@ -158,10 +159,6 @@ export default function LessorItemNew() {
         ...(form.rules ? { rules: form.rules.trim() } : {}),
         status,
         availability,
-        avgRating: 0,
-        totalRentals: 0,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
       });
 
       images.forEach((i) => URL.revokeObjectURL(i.preview));
