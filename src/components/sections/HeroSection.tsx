@@ -91,26 +91,30 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.6 }}
-              className="flex flex-wrap gap-4 mb-12"
+              className="flex flex-col gap-4 mb-12"
             >
-              <Button variant="hero" size="xl" asChild>
-                <Link to="/marketplace">
-                  <ShoppingBag className="w-5 h-5" />
-                  {t.hero.exploreStore}
-                </Link>
-              </Button>
-              <Button variant="heroOutline" size="xl" asChild>
-                <Link to="/sell/start">
-                  {t.hero.becomeSeller}
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-              <Button variant="glass" size="xl" asChild>
-                <Link to="/rental">
-                  <CalendarDays className="w-5 h-5" />
-                  {t.hero.rentEquipment}
-                </Link>
-              </Button>
+              <div className="flex flex-wrap gap-4">
+                <Button variant="hero" size="xl" asChild>
+                  <Link to="/marketplace">
+                    <ShoppingBag className="w-5 h-5" />
+                    {t.hero.exploreStore}
+                  </Link>
+                </Button>
+                <Button variant="glass" size="xl" asChild>
+                  <Link to="/rental">
+                    <CalendarDays className="w-5 h-5" />
+                    {t.hero.rentEquipment}
+                  </Link>
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                <Button variant="heroOutline" size="xl" asChild>
+                  <Link to="/sell/start">
+                    {t.hero.becomeSeller}
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </Button>
+              </div>
             </motion.div>
 
             {/* Stats */}
