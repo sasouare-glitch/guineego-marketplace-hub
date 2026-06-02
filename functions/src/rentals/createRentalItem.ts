@@ -284,11 +284,11 @@ export const createRentalItem = functions
         itemId: itemRef.id,
         message: 'Équipement publié avec succès',
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('[createRentalItem] error:', error);
       throw new functions.https.HttpsError(
         'internal',
-        "Erreur lors de la création de l'équipement"
+        `Erreur création équipement: ${error?.message || error?.code || 'inconnu'}`
       );
     }
   });
