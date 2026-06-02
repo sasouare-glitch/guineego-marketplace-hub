@@ -592,7 +592,9 @@ service cloud.firestore {
     // RENTAL MODULE — Items, Bookings, Reviews, Disputes
     // ============================================
     function isLessor() {
-      return hasRole('lessor') || hasRoleInDoc('lessor') || isAdmin();
+      return hasRole('lessor') || hasRoleInDoc('lessor')
+        || hasRole('ecommerce') || hasRoleInDoc('ecommerce')
+        || isAdmin();
     }
 
     // Rental items: public read; create/update by active owner only; delete by active owner or strict admin
