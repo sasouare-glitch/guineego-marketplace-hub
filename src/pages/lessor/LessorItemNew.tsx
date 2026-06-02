@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { callFunction } from "@/lib/firebase/config";
 import { useAuth } from "@/contexts/AuthContext";
 import { compressImage, uploadFile } from "@/lib/firebase/storage";
 import { Header } from "@/components/layout/Header";
