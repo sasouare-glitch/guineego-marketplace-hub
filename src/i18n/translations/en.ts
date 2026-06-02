@@ -111,6 +111,7 @@ export const en: TranslationKeys = {
     description: "Sarematy brings together sellers, buyers, couriers and investors on a single platform. China-Guinea transit, e-commerce training, secure mobile payment.",
     exploreStore: "Explore the store",
     becomeSeller: "Become a seller",
+    becomeLessor: "Become a lessor",
     rentEquipment: "Rent equipment",
     products: "Products",
     sellers: "Sellers",
