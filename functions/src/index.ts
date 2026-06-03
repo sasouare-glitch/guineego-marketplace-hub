@@ -41,6 +41,11 @@ export { onOrderCreated, onOrderStatusChanged } from './orders/orderTriggers';
 export { createRentalItem } from './rentals/createRentalItem';
 
 // ============================================
+// REVIEWS FUNCTIONS
+// ============================================
+export { onReviewWritten } from './reviews/reviewTriggers';
+
+// ============================================
 // CLOSING FUNCTIONS
 // ============================================
 export { assignCloser } from './closing/assignCloser';
