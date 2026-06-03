@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, MoreHorizontal, UserPlus, Filter, Loader2, RefreshCw, ShieldCheck, Truck, Store, TrendingUp, Users, AlertTriangle } from 'lucide-react';
+import { Search, MoreHorizontal, UserPlus, Filter, Loader2, RefreshCw, ShieldCheck, Truck, Store, TrendingUp, Users, AlertTriangle, KeyRound } from 'lucide-react';
 import { collection, query, orderBy, limit, doc, updateDoc, serverTimestamp, getDocs, terminate, clearIndexedDbPersistence } from 'firebase/firestore';
 import { db, callFunction } from '@/lib/firebase/config';
 import { useAuth } from '@/contexts/AuthContext';
@@ -69,11 +69,12 @@ const roleLabels: Record<string, { label: string; variant: 'default' | 'secondar
   courier: { label: 'Coursier', variant: 'outline', icon: <Truck className="w-3 h-3" /> },
   closer: { label: 'Closer', variant: 'outline', icon: <ShieldCheck className="w-3 h-3" /> },
   investor: { label: 'Investisseur', variant: 'default', icon: <TrendingUp className="w-3 h-3" /> },
+  lessor: { label: 'Loueur', variant: 'outline', icon: <KeyRound className="w-3 h-3" /> },
   super_user: { label: 'Super User', variant: 'default', icon: <ShieldCheck className="w-3 h-3" /> },
   admin: { label: 'Admin', variant: 'destructive', icon: <ShieldCheck className="w-3 h-3" /> },
 };
 
-const allRoles: UserRole[] = ['customer', 'ecommerce', 'courier', 'closer', 'investor', 'super_user', 'admin'];
+const allRoles: UserRole[] = ['customer', 'ecommerce', 'courier', 'closer', 'investor', 'lessor', 'super_user', 'admin'];
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
